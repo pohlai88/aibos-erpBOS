@@ -1,0 +1,23 @@
+---
+type: auto-attached
+description: Version management and configuration consistency
+pattern: "**/*.{json,js,cjs,ts,yml,yaml}"
+---
+
+# Version Management Rules
+
+## Configuration Consistency
+- **ALWAYS** maintain consistent versions across config files
+- **ALWAYS** use international (ISO 8601) date format
+- **NEVER** allow version drift between related files
+- **ALWAYS** update .nvmrc, package.json, and .pnpmrc together
+
+## Prohibited Actions
+- Creating files without verification
+- Leaving legacy files behind
+- Using deprecated configuration formats
+- Bypassing architectural boundaries
+- Compromising test quality
+- Creating documentation without request
+- Using hardcoded styles
+- Making assumptions about codebase structure

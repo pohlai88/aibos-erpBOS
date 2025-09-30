@@ -1,0 +1,19 @@
+---
+type: auto-attached
+description: UI/UX standards and styling rules
+pattern: "**/*.{tsx,ts,jsx,js,css,scss}"
+---
+
+# UI/UX Standards
+
+## Design Principles
+- **ALWAYS** use dark-theme first approach
+- **ALWAYS** enforce WCAG 2.2 AAA accessibility
+- **ALWAYS** use enhanced-token or index.css for styling
+- **NEVER** use hardcoded styles
+
+## Documentation Standards
+- **ALWAYS** consolidate documentation to reduce drift
+- **NEVER** create overlapping README files
+- **ALWAYS** maintain single source of truth (SSOT)
+- **NEVER** create documentation without explicit request

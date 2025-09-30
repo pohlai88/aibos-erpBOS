@@ -1,0 +1,24 @@
+---
+type: always-apply
+description: PowerShell compatibility and command standards
+---
+
+# PowerShell Compatibility Rules
+
+## Command Standards
+- **ALWAYS** use PowerShell-friendly commands
+- **NEVER** use '&&' operator for command chaining
+- **ALWAYS** use ';' or separate commands instead
+- **ALWAYS** run commands in background when appropriate
+
+## Error Handling
+- **ALWAYS** provide honest, factual reports
+- **NEVER** make assumptions or guess
+- **ALWAYS** ask clarifying questions when unclear
+- **NEVER** skip studying the actual codebase
+
+## Performance Standards
+- **ALWAYS** optimize for speed and efficiency
+- **NEVER** over-engineer solutions
+- **ALWAYS** prefer simple, straightforward implementations
+- **NEVER** compromise on performance metrics

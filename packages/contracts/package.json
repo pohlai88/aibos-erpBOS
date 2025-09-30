@@ -1,0 +1,10 @@
+{
+  "name": "@aibos/contracts",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "gen:openapi": "tsx ./scripts/build-openapi.ts",
+    "check": "pnpm gen:openapi && git diff --exit-code openapi/openapi.json || (echo 'Commit OpenAPI changes' && exit 1)",
+    "build": "pnpm gen:openapi"
+  }
+}

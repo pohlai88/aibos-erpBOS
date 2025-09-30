@@ -1,0 +1,63 @@
+{
+  "name": "aibos",
+  "version": "1.0.0",
+  "description": "AI-powered ERP Business Operating System",
+  "private": true,
+  "packageManager": "pnpm@10.17.1",
+  "engines": {
+    "node": "22.18.0",
+    "pnpm": "10.17.1"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean",
+    "verify": "pnpm -w contracts:check && pnpm -w client:gen && pnpm -w depcruise",
+    "depcruise": "depcruise --config .dependency-cruiser.cjs . || exit 1",
+    "changeset": "changeset"
+  },
+  "keywords": [
+    "erp",
+    "business",
+    "ai",
+    "monorepo",
+    "typescript"
+  ],
+  "author": "",
+  "license": "ISC",
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "@types/react",
+        "@types/react-dom"
+      ],
+      "allowedVersions": {
+        "react": "19.1.1",
+        "react-dom": "19.1.1"
+      }
+    }
+  },
+  "devDependencies": {
+    "@types/node": "24.6.0",
+    "@typescript-eslint/eslint-plugin": "8.45.0",
+    "@typescript-eslint/parser": "8.45.0",
+    "depcheck": "^1.4.7",
+    "dependency-cruiser": "17.0.1",
+    "eslint": "9.36.0",
+    "eslint-plugin-boundaries": "5.0.1",
+    "ts-node": "10.9.2",
+    "tsx": "4.20.6",
+    "turbo": "2.5.8",
+    "typescript": "5.9.2"
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^7.3.4",
+    "next": "15.5.4",
+    "openapi-typescript": "^7.9.1",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "zod": "3.25.76"
+  }
+}

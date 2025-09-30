@@ -1,0 +1,24 @@
+---
+type: always-apply
+description: Code quality and architecture enforcement
+---
+
+# Code Quality & Architecture Rules
+
+## Code Quality Standards
+- **ALWAYS** run lint and TypeScript checks after making changes
+- **ALWAYS** check for diagnostics and errors before proceeding
+- **NEVER** compromise tests - fix the root cause, not the symptoms
+- **ALWAYS** maintain 95% test coverage across all features
+
+## Architecture Enforcement
+- **ALWAYS** follow clean architecture patterns
+- **NEVER** allow packages to depend on apps
+- **ALWAYS** enforce domain boundaries
+- **NEVER** create circular dependencies
+
+## Monorepo Management
+- **ALWAYS** use pnpm for all package management
+- **ALWAYS** use Turborepo for task orchestration
+- **ALWAYS** follow workspace conventions
+- **NEVER** bypass the BFF layer for direct kernel calls

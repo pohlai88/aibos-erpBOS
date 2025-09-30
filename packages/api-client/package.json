@@ -1,0 +1,12 @@
+{
+  "name": "@aibos/api-client",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "gen:types": "openapi-typescript ../contracts/openapi/openapi.json -o src/types.gen.ts",
+    "build": "tsc -b",
+    "dev": "tsx src/dev.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

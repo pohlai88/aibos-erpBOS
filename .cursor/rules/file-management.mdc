@@ -1,0 +1,18 @@
+---
+type: always-apply
+description: Core file management and cleanup standards
+---
+
+# File Management Rules
+
+## MANDATORY File Cleanup
+- **ALWAYS** remove legacy files when creating new ones
+- **NEVER** leave duplicate or orphaned files behind  
+- **ALWAYS** verify file cleanup after refactoring
+- **NEVER** create files without prior verification and approval
+
+## Enforcement Actions
+- Before creating any new file, check for existing similar files
+- After refactoring, remove all legacy/old files immediately
+- Verify workspace cleanliness after each operation
+- Ask for explicit approval before creating new files
