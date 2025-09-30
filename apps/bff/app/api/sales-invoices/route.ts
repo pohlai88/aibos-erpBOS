@@ -1,13 +1,12 @@
-import { NextRequest } from "next/server";
 import { SalesInvoice } from "@aibos/contracts/http/sales/sales-invoice.schema";
 import { postSalesInvoice } from "@aibos/services/src/posting";
+import { repo, tx } from "../../lib/db";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const json = await req.json();
-    const input = SalesInvoice.parse(json);
-    const journal = await postSalesInvoice(input);
-    return Response.json({ journal_id: journal.id }, { 
+    const input = SalesInvoice.parse(await req.json());
+    const journal = await postSalesInvoice(input, { repo, tx });
+    return Response.json({ journal_id: journal.id }, {
       status: 201,
       headers: {
         'Access-Control-Allow-Origin': '*',
@@ -17,8 +16,8 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("Sales invoice error:", error);
-    return Response.json({ error: "Internal server error" }, { 
-      status: 500,
+    return Response.json({ error: "Invalid request data" }, {
+      status: 400,
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -28,7 +27,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function OPTIONS(req: NextRequest) {
+export async function OPTIONS(req: Request) {
   return new Response(null, {
     status: 204,
     headers: {

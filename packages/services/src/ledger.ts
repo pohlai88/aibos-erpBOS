@@ -1,4 +1,6 @@
-// Minimal in-memory ledger + trial balance for demo
+import type { LedgerRepo, RepoJournal, RepoJournalLine, Tx, TxManager } from "@aibos/ports";
+
+// Minimal in-memory ledger + trial balance for demo (fallback implementation)
 type Money = { amount: string; currency: string };
 
 export type JournalLine = {
@@ -24,7 +26,7 @@ const journals = new Map<string, Journal>();          // key = idempotency key O
 const byId = new Map<string, Journal>();              // quick lookup by journal_id
 
 export function genId(prefix = "JRN"): string {
-  return `${prefix}-${Math.random().toString(36).slice(2,10)}`;
+  return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 export async function insertJournal(j: Omit<Journal, "id"> & { id?: string }, idempotencyKey: string): Promise<Journal> {
@@ -72,6 +74,118 @@ export async function trialBalance(company_id: string, currency: string): Promis
     });
   }
   // sort for stable UI
-  rows.sort((a,b) => a.account_code.localeCompare(b.account_code));
+  rows.sort((a, b) => a.account_code.localeCompare(b.account_code));
   return rows;
+}
+
+// Service class that can use either database or in-memory implementation
+export class LedgerService {
+  constructor(
+    private ledgerRepo?: LedgerRepo,
+    private txManager?: TxManager
+  ) { }
+
+  async insertJournal(journal: Omit<RepoJournal, "id">): Promise<{ id: string; lines: RepoJournalLine[] }> {
+    if (this.ledgerRepo && this.txManager) {
+      // Use database implementation
+      return await this.txManager.run(async (tx) => {
+        // Check for existing journal by idempotency key
+        const exists = await this.ledgerRepo!.existsByKey(journal.idempotency_key, tx);
+        if (exists) {
+          throw new Error(`Journal with idempotency key ${journal.idempotency_key} already exists`);
+        }
+
+        // Insert journal and lines
+        const result = await this.ledgerRepo!.insertJournal(journal, tx);
+
+        // Enqueue outbox event
+        await this.ledgerRepo!.enqueueOutbox({
+          type: "JournalCreated",
+          payload: { journalId: result.id, companyId: journal.company_id },
+          timestamp: new Date(),
+          aggregateId: journal.company_id
+        }, tx);
+
+        return result;
+      });
+    } else {
+      // Fallback to in-memory implementation
+      const idempotencyKey = journal.idempotency_key;
+      const existing = journals.get(idempotencyKey);
+      if (existing) {
+        return {
+          id: existing.id,
+          lines: existing.lines.map(l => ({
+            id: l.id,
+            account_code: l.account_code,
+            dc: l.dc,
+            amount: l.amount,
+            currency: l.currency,
+            party_type: l.party_type,
+            party_id: l.party_id
+          }))
+        };
+      }
+
+      const id = genId();
+      const journalWithId: Journal = {
+        id,
+        company_id: journal.company_id,
+        posting_date: journal.posting_date,
+        currency: journal.currency,
+        source: { doctype: journal.source_doctype, id: journal.source_id },
+        lines: journal.lines.map(l => ({
+          id: genId("JRL"),
+          account_code: l.account_code,
+          dc: l.dc,
+          amount: l.amount,
+          currency: l.currency,
+          party_type: l.party_type,
+          party_id: l.party_id
+        }))
+      };
+
+      journals.set(idempotencyKey, journalWithId);
+      byId.set(id, journalWithId);
+
+      return {
+        id,
+        lines: journalWithId.lines.map(l => ({
+          id: l.id,
+          account_code: l.account_code,
+          dc: l.dc,
+          amount: l.amount,
+          currency: l.currency,
+          party_type: l.party_type,
+          party_id: l.party_id
+        }))
+      };
+    }
+  }
+
+  async getJournal(journalId: string): Promise<Journal | null> {
+    if (this.ledgerRepo) {
+      // Database implementation would go here
+      // For now, fallback to in-memory
+    }
+    return byId.get(journalId) ?? null;
+  }
+
+  async trialBalance(companyId: string, currency: string): Promise<TrialBalanceRow[]> {
+    if (this.ledgerRepo && this.txManager) {
+      // Database implementation
+      return await this.txManager.run(async (tx) => {
+        const rows = await (this.ledgerRepo as any).trialBalance(companyId, currency, tx);
+        return rows.map((r: any) => ({
+          account_code: r.account_code,
+          debit: r.debit,
+          credit: r.credit,
+          currency: r.currency
+        }));
+      });
+    } else {
+      // Fallback to in-memory implementation
+      return trialBalance(companyId, currency);
+    }
+  }
 }

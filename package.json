@@ -1,43 +1,16 @@
 {
   "name": "aibos",
-  "version": "1.0.0",
   "description": "AI-powered ERP Business Operating System",
-  "private": true,
-  "packageManager": "pnpm@10.17.1",
-  "engines": {
-    "node": "22.18.0",
-    "pnpm": "10.17.1"
-  },
-  "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev --parallel",
-    "lint": "turbo run lint",
-    "type-check": "turbo run type-check",
-    "clean": "turbo run clean",
-    "verify": "pnpm -w contracts:check && pnpm -w client:gen && pnpm -w depcruise",
-    "depcruise": "depcruise --config .dependency-cruiser.cjs . || exit 1",
-    "changeset": "changeset"
-  },
-  "keywords": [
-    "erp",
-    "business",
-    "ai",
-    "monorepo",
-    "typescript"
-  ],
+  "version": "1.0.0",
   "author": "",
-  "license": "ISC",
-  "pnpm": {
-    "peerDependencyRules": {
-      "ignoreMissing": [
-        "@types/react",
-        "@types/react-dom"
-      ],
-      "allowedVersions": {
-        "react": "19.1.1",
-        "react-dom": "19.1.1"
-      }
-    }
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^7.3.4",
+    "next": "15.5.4",
+    "openapi-typescript": "^7.9.1",
+    "pg": "^8.16.3",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "@types/node": "24.6.0",
@@ -50,18 +23,52 @@
     "drizzle-orm": "^0.44.5",
     "eslint": "9.36.0",
     "eslint-plugin-boundaries": "5.0.1",
+    "syncpack": "^13.0.4",
     "ts-node": "10.9.2",
     "tsx": "4.20.6",
     "turbo": "2.5.8",
     "typescript": "5.9.2"
   },
-  "dependencies": {
-    "@asteasolutions/zod-to-openapi": "^7.3.4",
-    "next": "15.5.4",
-    "openapi-typescript": "^7.9.1",
-    "pg": "^8.16.3",
-    "react": "19.1.1",
-    "react-dom": "19.1.1",
-    "zod": "3.25.76"
+  "engines": {
+    "node": "22.18.0",
+    "pnpm": "10.17.1"
+  },
+  "keywords": [
+    "ai",
+    "business",
+    "erp",
+    "monorepo",
+    "typescript"
+  ],
+  "license": "ISC",
+  "packageManager": "pnpm@10.17.1",
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "@types/react",
+        "@types/react-dom"
+      ],
+      "allowedVersions": {
+        "react": "19.1.1",
+        "react-dom": "19.1.1"
+      }
+    }
+  },
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "changeset": "changeset",
+    "clean": "turbo run clean",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "depcruise": "depcruise --config .dependency-cruiser.cjs . || exit 1",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "syncpack:check": "syncpack lint",
+    "syncpack:fix": "syncpack fix-mismatches",
+    "syncpack:list": "syncpack list-mismatches",
+    "type-check": "turbo run type-check",
+    "verify": "pnpm -w contracts:check && pnpm -w client:gen && pnpm -w depcruise"
   }
 }

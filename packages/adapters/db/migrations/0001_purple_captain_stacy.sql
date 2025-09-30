@@ -1,0 +1,1 @@
+ALTER TABLE "account" DROP CONSTRAINT "account_id_pk";
