@@ -1,0 +1,15 @@
+{
+  doctype: "PurchaseInvoice",
+  idempotencyKey: ["doctype", "id", "version"],
+  debits: [
+    { account: "Input Tax", amountField: "totals.tax_total" },
+    { account: "Expense", amountField: "totals.total" }, // simple: all lines → Expense
+  ],
+  credits: [
+    {
+      account: "Trade Payables",
+      amountField: "totals.grand_total",
+      party: { type: "Supplier", field: "supplier_id" },
+    },
+  ],
+}

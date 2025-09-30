@@ -16,6 +16,15 @@ async function main() {
         { id: "ACC-TAX", companyId: "COMP-1", code: "Output Tax", name: "Output Tax", type: "Liability", normalBalance: "C" }
     ]).onConflictDoNothing();
 
+    await db.insert(schema.account).values([
+        { id: "ACC-AP", companyId: "COMP-1", code: "Trade Payables", name: "Trade Payables", type: "Liability", normalBalance: "C" },
+        { id: "ACC-ITAX", companyId: "COMP-1", code: "Input Tax", name: "Input Tax", type: "Asset", normalBalance: "D" }
+    ]).onConflictDoNothing();
+
+    await db.insert(schema.account).values([
+        { id: "ACC-EXP", companyId: "COMP-1", code: "Expense", name: "Expense", type: "Expense", normalBalance: "D" }
+    ]).onConflictDoNothing();
+
     console.log("Seeded company + accounts");
     await pool.end();
 }

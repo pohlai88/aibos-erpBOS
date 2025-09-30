@@ -1,94 +1,20 @@
+// packages/contracts/scripts/build-openapi.ts
+import { OpenApiGeneratorV3, extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
+import { z } from "zod";
+extendZodWithOpenApi(z); // <-- add this line
+
+import { registry as si } from "../http/sales/sales-invoice.routes.js";
+import { registryPI } from "../http/purchase/purchase-invoice.routes.js";
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Simple OpenAPI generation without zod-to-openapi
-const doc = {
+const gen = new OpenApiGeneratorV3([si, registryPI].flatMap(r => r.definitions));
+const doc = gen.generateDocument({
   openapi: "3.0.3",
   info: { title: "AIBOS API", version: "0.0.1" },
-  servers: [{ url: "/api" }],
-  paths: {
-    "/sales-invoices": {
-      post: {
-        summary: "Post a Sales Invoice",
-        requestBody: {
-          content: {
-            "application/json": {
-              schema: { $ref: "#/components/schemas/SalesInvoice" }
-            }
-          }
-        },
-        responses: {
-          "201": {
-            description: "Journal created",
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/PostSIResponse" }
-              }
-            }
-          },
-          "400": { description: "Validation error" }
-        }
-      }
-    }
-  },
-  components: {
-    schemas: {
-      SalesInvoice: {
-        type: "object",
-        properties: {
-          id: { type: "string" },
-          company_id: { type: "string" },
-          customer_id: { type: "string" },
-          doc_date: { type: "string", format: "date-time" },
-          currency: { type: "string", minLength: 3, maxLength: 3 },
-          lines: {
-            type: "array",
-            items: { $ref: "#/components/schemas/SalesInvoiceLine" },
-            minItems: 1
-          },
-          totals: { $ref: "#/components/schemas/SalesInvoiceTotals" }
-        },
-        required: ["id", "company_id", "customer_id", "doc_date", "currency", "lines", "totals"]
-      },
-      SalesInvoiceLine: {
-        type: "object",
-        properties: {
-          description: { type: "string", minLength: 1 },
-          qty: { type: "number", minimum: 0, exclusiveMinimum: true },
-          unit_price: { $ref: "#/components/schemas/Money" },
-          tax_code: { type: "string" }
-        },
-        required: ["description", "qty", "unit_price"]
-      },
-      SalesInvoiceTotals: {
-        type: "object",
-        properties: {
-          total: { $ref: "#/components/schemas/Money" },
-          tax_total: { $ref: "#/components/schemas/Money" },
-          grand_total: { $ref: "#/components/schemas/Money" }
-        },
-        required: ["total", "tax_total", "grand_total"]
-      },
-      Money: {
-        type: "object",
-        properties: {
-          amount: { type: "string", pattern: "^-?\\\\d+(\\\\.\\\\d+)?$" },
-          currency: { type: "string", minLength: 3, maxLength: 3 }
-        },
-        required: ["amount", "currency"]
-      },
-      PostSIResponse: {
-        type: "object",
-        properties: {
-          journal_id: { type: "string" }
-        },
-        required: ["journal_id"]
-      }
-    }
-  }
-};
-
+  servers: [{ url: "/api" }]
+});
 const outDir = dirname(fileURLToPath(import.meta.url)) + "/../openapi";
 mkdirSync(outDir, { recursive: true });
 writeFileSync(outDir + "/openapi.json", JSON.stringify(doc, null, 2));

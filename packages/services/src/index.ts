@@ -1,6 +1,7 @@
 // Services with port-based architecture
 export { LedgerService, genId, type Journal, type JournalLine, type TrialBalanceRow } from "./ledger.js";
 export { postSalesInvoice } from "./posting.js";
+export { postPurchaseInvoice } from "./posting-pi.js";
 export { pingService } from "./ping.js";
 
 // Re-export port types for convenience

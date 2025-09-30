@@ -1,7 +1,9 @@
 import "dotenv/config";
 import { Pool } from "pg";
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL || "postgresql://aibos:aibos@localhost:5432/aibos"
+});
 
 async function runOnce() {
     const client = await pool.connect();

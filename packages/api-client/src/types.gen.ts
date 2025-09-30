@@ -23,7 +23,37 @@ export interface paths {
             };
             requestBody?: {
                 content: {
-                    "application/json": components["schemas"]["SalesInvoice"];
+                    "application/json": {
+                        id: string;
+                        company_id: string;
+                        customer_id: string;
+                        /** Format: date-time */
+                        doc_date: string;
+                        currency: string;
+                        lines: {
+                            description: string;
+                            qty: number;
+                            unit_price: {
+                                amount: string;
+                                currency: string;
+                            };
+                            tax_code?: string;
+                        }[];
+                        totals: {
+                            total: {
+                                amount: string;
+                                currency: string;
+                            };
+                            tax_total: {
+                                amount: string;
+                                currency: string;
+                            };
+                            grand_total: {
+                                amount: string;
+                                currency: string;
+                            };
+                        };
+                    };
                 };
             };
             responses: {
@@ -33,7 +63,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PostSIResponse"];
+                        "application/json": {
+                            journal_id: string;
+                        };
                     };
                 };
                 /** @description Validation error */
@@ -51,39 +83,82 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/purchase-invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post a Purchase Invoice */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        id: string;
+                        company_id: string;
+                        supplier_id: string;
+                        /** Format: date-time */
+                        doc_date: string;
+                        currency: string;
+                        lines: {
+                            description: string;
+                            qty: number;
+                            unit_price: {
+                                amount: string;
+                                currency: string;
+                            };
+                            tax_code?: string;
+                        }[];
+                        totals: {
+                            total: {
+                                amount: string;
+                                currency: string;
+                            };
+                            tax_total: {
+                                amount: string;
+                                currency: string;
+                            };
+                            grand_total: {
+                                amount: string;
+                                currency: string;
+                            };
+                        };
+                    };
+                };
+            };
+            responses: {
+                /** @description Journal created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            journal_id: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        SalesInvoice: {
-            id: string;
-            company_id: string;
-            customer_id: string;
-            /** Format: date-time */
-            doc_date: string;
-            currency: string;
-            lines: components["schemas"]["SalesInvoiceLine"][];
-            totals: components["schemas"]["SalesInvoiceTotals"];
-        };
-        SalesInvoiceLine: {
-            description: string;
-            qty: number;
-            unit_price: components["schemas"]["Money"];
-            tax_code?: string;
-        };
-        SalesInvoiceTotals: {
-            total: components["schemas"]["Money"];
-            tax_total: components["schemas"]["Money"];
-            grand_total: components["schemas"]["Money"];
-        };
-        Money: {
-            amount: string;
-            currency: string;
-        };
-        PostSIResponse: {
-            journal_id: string;
-        };
-    };
+    schemas: never;
     responses: never;
     parameters: never;
     requestBodies: never;

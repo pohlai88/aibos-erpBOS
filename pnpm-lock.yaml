@@ -87,6 +87,9 @@ importers:
       '@aibos/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@aibos/policies':
+        specifier: workspace:*
+        version: link:../../packages/policies
       '@aibos/services':
         specifier: workspace:*
         version: link:../../packages/services
@@ -121,6 +124,9 @@ importers:
 
   apps/worker:
     dependencies:
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.6.1
       drizzle-orm:
         specifier: ^0.32.0
         version: 0.32.2(@types/pg@8.15.5)(@types/react@19.1.16)(pg@8.16.3)(react@19.1.1)
@@ -131,6 +137,8 @@ importers:
   packages/api-client: {}
 
   packages/contracts: {}
+
+  packages/policies: {}
 
   packages/ports: {}
 
@@ -1104,6 +1112,10 @@ packages:
   diff@4.0.2:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
     engines: {node: '>=0.3.1'}
+
+  dotenv@16.6.1:
+    resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
+    engines: {node: '>=12'}
 
   drizzle-kit@0.31.5:
     resolution: {integrity: sha512-+CHgPFzuoTQTt7cOYCV6MOw2w8vqEn/ap1yv4bpZOWL03u7rlVRQhUY0WYT3rHsgVTXwYQDZaSUJSQrMBUKuWg==}
@@ -3138,6 +3150,8 @@ snapshots:
     optional: true
 
   diff@4.0.2: {}
+
+  dotenv@16.6.1: {}
 
   drizzle-kit@0.31.5:
     dependencies:
