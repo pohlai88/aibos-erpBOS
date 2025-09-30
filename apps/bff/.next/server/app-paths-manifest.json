@@ -1,5 +1,4 @@
 {
-  "/api/sales-invoices/route": "app/api/sales-invoices/route.js",
-  "/api/trial-balance/route": "app/api/trial-balance/route.js",
-  "/api/journals/route": "app/api/journals/route.js"
+  "/api/journals/[id]/route": "app/api/journals/[id]/route.js",
+  "/_not-found/page": "app/_not-found/page.js"
 }

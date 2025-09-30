@@ -1,19 +1,32 @@
 import { NextRequest } from "next/server";
 import { getJournal } from "@aibos/services/src/ledger";
 
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const url = new URL(req.url);
-    const journalId = url.searchParams.get("id");
+    const journalId = params.id;
     
     if (!journalId) {
-      return Response.json({ error: "Journal ID required" }, { status: 400 });
+      return Response.json({ error: "Journal ID required" }, { 
+        status: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        }
+      });
     }
     
     const journal = await getJournal(journalId);
     
     if (!journal) {
-      return Response.json({ error: "Journal not found" }, { status: 404 });
+      return Response.json({ error: "Journal not found" }, { 
+        status: 404,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        }
+      });
     }
     
     return Response.json({ journal }, {

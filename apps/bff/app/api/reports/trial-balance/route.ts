@@ -4,12 +4,29 @@ import { trialBalance } from "@aibos/services/src/ledger";
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
-    const company_id = url.searchParams.get("company_id") || "COMP-1";
-    const currency = url.searchParams.get("currency") || "MYR";
-    
-    const tb = await trialBalance(company_id, currency);
-    
-    return Response.json({ trial_balance: tb }, {
+    const company_id = url.searchParams.get("company_id") ?? "COMP-1";
+    const currency = url.searchParams.get("currency") ?? "MYR";
+    const rows = await trialBalance(company_id, currency);
+
+    // add control totals
+    const totals = rows.reduce(
+      (acc, r) => {
+        acc.debit += Number(r.debit);
+        acc.credit += Number(r.credit);
+        return acc;
+      },
+      { debit: 0, credit: 0 }
+    );
+
+    return Response.json({
+      company_id, 
+      currency, 
+      rows,
+      control: { 
+        debit: totals.debit.toFixed(2), 
+        credit: totals.credit.toFixed(2) 
+      }
+    }, {
       status: 200,
       headers: {
         'Access-Control-Allow-Origin': '*',

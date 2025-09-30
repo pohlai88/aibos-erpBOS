@@ -23,12 +23,12 @@ export default function Home() {
     setOut(JSON.stringify(res));
     
     // Fetch trial balance after posting
-    const tbRes = await fetch("http://localhost:3000/api/trial-balance?company_id=COMP-1&currency=MYR");
+    const tbRes = await fetch("http://localhost:3000/api/reports/trial-balance?company_id=COMP-1&currency=MYR");
     const tb = await tbRes.json();
     setTrialBalance(tb);
     
     // Fetch journal details
-    const journalRes = await fetch(`http://localhost:3000/api/journals?id=${res.journal_id}`);
+    const journalRes = await fetch(`http://localhost:3000/api/journals/${res.journal_id}`);
     const journalData = await journalRes.json();
     setJournal(journalData);
   };
