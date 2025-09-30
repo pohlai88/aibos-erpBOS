@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { getJournal } from "@aibos/services/src/ledger";
 
+// Complex version for audit compliance and production monitoring
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const journalId = params.id;
