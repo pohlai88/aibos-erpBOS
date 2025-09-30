@@ -35,14 +35,20 @@ export class DrizzleLedgerRepo implements LedgerRepo {
 
   async existsByKey(key: string, tx?: DbTx): Promise<boolean> {
     const db = this.dbFrom(tx);
-    const rows = await db.select().from(schema.journal).where(eq(schema.journal.idempotencyKey, key)).limit(1);
+    const rows = await db.select({ id: schema.journal.id })
+      .from(schema.journal)
+      .where(eq(schema.journal.idempotencyKey, key))
+      .limit(1);
     return rows.length > 0;
   }
 
   async getIdByKey(key: string, tx?: DbTx): Promise<string | null> {
     const db = this.dbFrom(tx);
-    const rows = await db.select({ id: schema.journal.id }).from(schema.journal).where(eq(schema.journal.idempotencyKey, key)).limit(1);
-    return rows.length > 0 ? rows[0].id : null;
+    const rows = await db.select({ id: schema.journal.id })
+      .from(schema.journal)
+      .where(eq(schema.journal.idempotencyKey, key))
+      .limit(1);
+    return rows[0]?.id ?? null;
   }
 
   async insertJournal(j: Omit<RepoJournal, "id">, tx?: DbTx) {

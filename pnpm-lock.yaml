@@ -136,6 +136,9 @@ importers:
       '@aibos/ports':
         specifier: workspace:*
         version: link:../ports
+      '@aibos/posting-rules':
+        specifier: workspace:*
+        version: link:../posting-rules
 
 packages:
 

@@ -1,22 +1,52 @@
 import type { SalesInvoice } from "@aibos/contracts/http/sales/sales-invoice.schema";
 import type { LedgerRepo, TxManager } from "@aibos/ports";
-import { genId, insertJournal, type JournalLine } from "./ledger";
+import { genId, type JournalLine, insertJournal } from "./ledger";
+import { loadRule, get } from "@aibos/posting-rules";
+
+// map rule lines → JournalLine using SI doc
+function mapLines(si: SalesInvoice, kind: "debits"|"credits"): JournalLine[] {
+  const rule = loadRule("sales-invoice");
+  const lines = rule[kind].map(l => {
+    const money = get(si, l.amountField);
+    if (!money) throw new Error(`Missing amountField ${l.amountField}`);
+    const jl: JournalLine = {
+      id: genId("JRL"),
+      account_code: l.account,
+      dc: kind === "debits" ? "D" : "C",
+      amount: money,
+      currency: si.currency,
+    };
+    if (l.party?.type && l.party.field) {
+      const partyId = get(si, l.party.field);
+      if (partyId) {
+        jl.party_type = l.party.type as any;
+        jl.party_id = partyId;
+      }
+    }
+    return jl;
+  });
+  return lines;
+}
 
 type Deps = { repo?: LedgerRepo; tx?: TxManager };
 
 export async function postSalesInvoice(si: SalesInvoice, deps: Deps = {}) {
-  const key = `SalesInvoice:${si.id}:v1`;
+  // derive idempotency key per rule
+  const rule = loadRule("sales-invoice");
+  const idParts = rule.idempotencyKey.map(k =>
+    k === "doctype" ? "SalesInvoice" :
+    k === "id" ? si.id :
+    k === "version" ? "v1" :
+    (get(si, k) ?? String(get(si as any, k)))
+  );
+  const key = idParts.join(":");
 
-  const lines: JournalLine[] = [
-    { id: genId("JRL"), account_code: "Trade Receivables", dc: "D", amount: si.totals.grand_total, currency: si.currency, party_type: "Customer", party_id: si.customer_id },
-    { id: genId("JRL"), account_code: "Sales", dc: "C", amount: si.totals.total, currency: si.currency },
-    { id: genId("JRL"), account_code: "Output Tax", dc: "C", amount: si.totals.tax_total, currency: si.currency }
-  ];
+  const lines = [...mapLines(si, "debits"), ...mapLines(si, "credits")];
 
-  // If repo+tx provided → use Postgres; else fall back to in-memory
   if (deps.repo && deps.tx) {
-    const j = await deps.tx.run(async (t) => {
-      if (await deps.repo!.existsByKey(key, t as any)) return { id: key }; // simplistic
+    const id = await deps.tx.run(async (t) => {
+      const existing = await deps.repo!.getIdByKey(key, t as any);
+      if (existing) return existing;
       const res = await deps.repo!.insertJournal({
         company_id: si.company_id,
         posting_date: si.doc_date,
@@ -26,12 +56,21 @@ export async function postSalesInvoice(si: SalesInvoice, deps: Deps = {}) {
         idempotency_key: key,
         lines
       }, t as any);
-      await deps.repo!.enqueueOutbox({ _meta: { name: "JournalPosted", version: 1, occurredAt: new Date().toISOString() }, journal_id: res.id }, t as any);
-      return { id: res.id };
+      await deps.repo!.enqueueOutbox({
+        _meta:{ name:"JournalPosted", version:1, occurredAt:new Date().toISOString() },
+        journal_id: res.id
+      }, t as any);
+      return res.id;
     });
-    return j;
+    return { id };
   } else {
-    const j = await insertJournal({ company_id: si.company_id, posting_date: si.doc_date, currency: si.currency, source: { doctype: "SalesInvoice", id: si.id }, lines }, key);
+    const j = await insertJournal({
+      company_id: si.company_id,
+      posting_date: si.doc_date,
+      currency: si.currency,
+      source: { doctype:"SalesInvoice", id: si.id },
+      lines
+    }, key);
     return { id: j.id };
   }
 }

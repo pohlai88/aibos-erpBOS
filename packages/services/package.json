@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "type": "module",
   "dependencies": {
-    "@aibos/ports": "workspace:*"
+    "@aibos/ports": "workspace:*",
+    "@aibos/posting-rules": "workspace:*"
   }
 }
