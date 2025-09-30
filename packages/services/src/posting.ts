@@ -4,7 +4,7 @@ import { genId, type JournalLine, insertJournal } from "./ledger";
 import { loadRule, get } from "@aibos/posting-rules";
 
 // map rule lines → JournalLine using SI doc
-function mapLines(si: SalesInvoice, kind: "debits"|"credits"): JournalLine[] {
+function mapLines(si: SalesInvoice, kind: "debits" | "credits"): JournalLine[] {
   const rule = loadRule("sales-invoice");
   const lines = rule[kind].map(l => {
     const money = get(si, l.amountField);
@@ -35,9 +35,9 @@ export async function postSalesInvoice(si: SalesInvoice, deps: Deps = {}) {
   const rule = loadRule("sales-invoice");
   const idParts = rule.idempotencyKey.map(k =>
     k === "doctype" ? "SalesInvoice" :
-    k === "id" ? si.id :
-    k === "version" ? "v1" :
-    (get(si, k) ?? String(get(si as any, k)))
+      k === "id" ? si.id :
+        k === "version" ? "v1" :
+          (get(si, k) ?? String(get(si as any, k)))
   );
   const key = idParts.join(":");
 
@@ -57,7 +57,7 @@ export async function postSalesInvoice(si: SalesInvoice, deps: Deps = {}) {
         lines
       }, t as any);
       await deps.repo!.enqueueOutbox({
-        _meta:{ name:"JournalPosted", version:1, occurredAt:new Date().toISOString() },
+        _meta: { name: "JournalPosted", version: 1, occurredAt: new Date().toISOString() },
         journal_id: res.id
       }, t as any);
       return res.id;
@@ -68,7 +68,7 @@ export async function postSalesInvoice(si: SalesInvoice, deps: Deps = {}) {
       company_id: si.company_id,
       posting_date: si.doc_date,
       currency: si.currency,
-      source: { doctype:"SalesInvoice", id: si.id },
+      source: { doctype: "SalesInvoice", id: si.id },
       lines
     }, key);
     return { id: j.id };
