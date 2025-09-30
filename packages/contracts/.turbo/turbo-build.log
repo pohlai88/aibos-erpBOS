@@ -1,0 +1,4 @@
+
+> @aibos/contracts@0.0.0 build C:\AI-BOS\aibos-erpBOS\packages\contracts
+> pnpm gen:openapi
+

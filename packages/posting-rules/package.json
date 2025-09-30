@@ -1,8 +1,14 @@
 {
-  "name": "@aibos/posting-rules",
-  "version": "0.0.0",
-  "type": "module",
-  "exports": { ".": "./src/index.ts" },
-  "scripts": { "build": "echo 'No build needed - TypeScript files exported directly'" },
-  "dependencies": { "json5": "^2.2.3" }
+    "name": "@aibos/posting-rules",
+    "version": "0.0.0",
+    "type": "module",
+    "exports": {
+        ".": "./src/index.ts"
+    },
+    "scripts": {
+        "build": "echo 'No build needed - TypeScript files exported directly'"
+    },
+    "dependencies": {
+        "json5": "^2.2.3"
+    }
 }
