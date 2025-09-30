@@ -1,5 +1,5 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/ping/route": "app/api/ping/route.js",
-  "/api/sales-invoices/route": "app/api/sales-invoices/route.js"
+  "/api/sales-invoices/route": "app/api/sales-invoices/route.js",
+  "/api/trial-balance/route": "app/api/trial-balance/route.js",
+  "/api/journals/route": "app/api/journals/route.js"
 }
