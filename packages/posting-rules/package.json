@@ -1,0 +1,11 @@
+{
+    "name": "@aibos/posting-rules",
+    "version": "0.0.0",
+    "type": "module",
+    "exports": {
+        ".": "./src/index.ts"
+    },
+    "dependencies": {
+        "json5": "^2.2.3"
+    }
+}

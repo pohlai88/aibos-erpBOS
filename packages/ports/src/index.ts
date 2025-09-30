@@ -30,6 +30,7 @@ export interface TxManager {
 
 export interface LedgerRepo {
     existsByKey(key: string, tx?: Tx): Promise<boolean>;
+    getIdByKey(key: string, tx?: Tx): Promise<string | null>;
     insertJournal(j: Omit<RepoJournal, "id">, tx?: Tx): Promise<{ id: string; lines: RepoJournalLine[] }>;
     enqueueOutbox(event: unknown, tx?: Tx): Promise<void>;
     trialBalance?(companyId: string, currency: string, tx?: Tx): Promise<Array<{account_code: string, debit: string, credit: string, currency: string}>>;
