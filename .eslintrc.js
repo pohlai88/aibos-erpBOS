@@ -23,14 +23,14 @@ module.exports = [
       "boundaries/element-types": ["error", {
         default: "disallow",
         rules: [
-          { from: ["apps/web"], allow: ["packages/api-client","packages/contracts"] },
-          { from: ["apps/bff"], allow: ["packages/services","packages/contracts"] },
+          { from: ["apps/web"], allow: ["packages/api-client", "packages/contracts"] },
+          { from: ["apps/bff"], allow: ["packages/services", "packages/contracts"] },
           { from: ["packages/services"], allow: ["packages/contracts"] }
         ]
       }]
     },
   },
   {
-    ignores: ["**/dist/**","**/.next/**","**/types.gen.ts"]
+    ignores: ["**/dist/**", "**/.next/**", "**/types.gen.ts", "**/node_modules/**", "**/.turbo/**"]
   }
 ];
