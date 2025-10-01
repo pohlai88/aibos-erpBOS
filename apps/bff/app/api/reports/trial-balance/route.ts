@@ -1,8 +1,9 @@
 import { pool } from "../../../lib/db";
+import { requireAuth } from "../../../lib/auth";
 
 export async function GET(req: Request) {
+  const auth = await requireAuth(req);
   const url = new URL(req.url);
-  const company_id = url.searchParams.get("company_id") ?? "COMP-1";
   const currency = url.searchParams.get("currency") ?? "MYR";
 
   const sql = `
@@ -18,7 +19,7 @@ export async function GET(req: Request) {
     ORDER BY jl.account_code;
   `;
 
-  const { rows } = await pool.query(sql, [company_id, currency]);
+  const { rows } = await pool.query(sql, [auth.company_id, currency]);
 
   // control totals
   let debit = 0, credit = 0;
@@ -35,7 +36,7 @@ export async function GET(req: Request) {
   });
 
   return Response.json({
-    company_id,
+    company_id: auth.company_id,
     currency,
     rows: mapped,
     control: { debit: debit.toFixed(2), credit: credit.toFixed(2) }

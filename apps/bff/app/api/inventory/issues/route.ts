@@ -1,24 +1,31 @@
 import { pool } from "../../../lib/db";
 import { postByRule } from "../../../lib/posting";
 import { created, ok, unprocessable } from "../../../lib/http";
+import { ensurePostingAllowed } from "../../../lib/policy";
+import { requireAuth, enforceCompanyMatch } from "../../../lib/auth";
 
 type Body = { id?: string; company_id: string; item_id: string; qty: number; currency: string };
 
 export async function GET(req: Request) {
+  const auth = await requireAuth(req);
   const url = new URL(req.url);
-  const company_id = url.searchParams.get("company_id")!;
   const id = url.searchParams.get("id")!;
   const { rows } = await pool.query(
     `select * from stock_ledger where company_id=$1 and move_id=$2 and kind='out' limit 1`,
-    [company_id, id]
+    [auth.company_id, id]
   );
   if (!rows.length) return new Response("Not found", { status: 404 });
   return ok({ ok: true, data: rows[0] });
 }
 
 export async function POST(req: Request) {
+  const auth = await requireAuth(req);
   const b = await req.json() as Body;
   const id = b.id ?? crypto.randomUUID();
+
+  enforceCompanyMatch(auth, b.company_id);
+  const postingISO = new Date().toISOString();
+  await ensurePostingAllowed(auth.company_id, postingISO);
 
   const client = await pool.connect();
   try {
@@ -27,18 +34,18 @@ export async function POST(req: Request) {
     // replay?
     const exist = await client.query(
       `select id, total_cost from stock_ledger where company_id=$1 and move_id=$2 and kind='out' limit 1`,
-      [b.company_id, id]
+      [auth.company_id, id]
     );
     if (exist.rows.length) {
       await client.query("COMMIT");
-      return ok({ ok: true, data: { move_id: id }, replay: true }, { "X-Idempotent-Replay": "true", "Location": `/api/inventory/issues?company_id=${b.company_id}&id=${id}` });
+      return ok({ ok: true, data: { move_id: id }, replay: true }, { "X-Idempotent-Replay": "true", "Location": `/api/inventory/issues?company_id=${auth.company_id}&id=${id}` });
     }
 
     // load cost state
     const s = await client.query(
       `select on_hand_qty::numeric as q, moving_avg_cost::numeric as mac, total_value::numeric as tv
        from item_costs where company_id=$1 and item_id=$2`,
-      [b.company_id, b.item_id]
+      [auth.company_id, b.item_id]
     );
     const q0 = Number(s.rows[0]?.q ?? 0);
     const mac0 = Number(s.rows[0]?.mac ?? 0);
@@ -61,25 +68,25 @@ export async function POST(req: Request) {
     await client.query(
       `insert into stock_ledger(id, company_id, item_id, move_id, kind, qty, unit_cost, total_cost)
        values ($1,$2,$3,$4,'out',$5,$6,$7)`,
-      [ledgerId, b.company_id, b.item_id, id, b.qty, mac0.toFixed(6), out_total.toFixed(2)]
+      [ledgerId, auth.company_id, b.item_id, id, b.qty, mac0.toFixed(6), out_total.toFixed(2)]
     );
 
     // 2) update item_costs
     await client.query(
       `update item_costs set on_hand_qty=$3, moving_avg_cost=$4, total_value=$5, updated_at=now()
        where company_id=$1 and item_id=$2`,
-      [b.company_id, b.item_id, q1.toFixed(6), mac1.toFixed(6), tv1.toFixed(2)]
+      [auth.company_id, b.item_id, q1.toFixed(6), mac1.toFixed(6), tv1.toFixed(2)]
     );
 
     // 3) GL posting (DR COGS / CR Inventory)
-    const jid = await postByRule("StockIssue", id, b.currency, b.company_id, {
+    const jid = await postByRule("StockIssue", id, b.currency, auth.company_id, {
       cost: { amount: out_total.toFixed(2), currency: b.currency }
     });
 
     await client.query("COMMIT");
     return created(
       { ok: true, data: { move_id: id, journal_id: jid, qty: b.qty, unit_cost: mac0.toFixed(6), total_cost: out_total.toFixed(2), on_hand_after: q1.toFixed(6), mac_after: mac1.toFixed(6) } },
-      `/api/inventory/issues?company_id=${b.company_id}&id=${id}`
+      `/api/inventory/issues?company_id=${auth.company_id}&id=${id}`
     );
   } catch (e) {
     await client.query("ROLLBACK");

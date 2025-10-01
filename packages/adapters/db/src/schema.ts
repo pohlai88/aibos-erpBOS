@@ -18,6 +18,17 @@ export const account = pgTable("account", {
     parentCode: text("parent_code"),
 });
 
+export const accountingPeriod = pgTable("accounting_period", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").references(() => company.id).notNull(),
+    code: text("code").notNull(),
+    startDate: timestamp("start_date", { withTimezone: true }).notNull(),
+    endDate: timestamp("end_date", { withTimezone: true }).notNull(),
+    status: text("status").notNull(),
+}, (t) => ({
+    uniq: primaryKey({ columns: [t.id] })
+}));
+
 export const journal = pgTable("journal", {
     id: text("id").primaryKey(),
     companyId: text("company_id").references(() => company.id).notNull(),
@@ -26,6 +37,9 @@ export const journal = pgTable("journal", {
     sourceDoctype: text("source_doctype").notNull(),
     sourceId: text("source_id").notNull(),
     idempotencyKey: text("idempotency_key").notNull().unique(),
+    isReversal: text("is_reversal").default("false").notNull(),
+    reversesJournalId: text("reverses_journal_id"),
+    autoReverseOn: timestamp("auto_reverse_on", { withTimezone: true })
 });
 
 export const journalLine = pgTable("journal_line", {
@@ -94,4 +108,30 @@ export const paymentAllocation = pgTable("payment_allocation", {
     applyDoctype: text("apply_doctype").notNull(), // 'SalesInvoice' | 'PurchaseInvoice'
     applyId: text("apply_id").notNull(),
     amount: numeric("amount", { precision: 20, scale: 2 }).notNull()
+});
+
+// --- Auth & Multi-Company --------------------------------------------------
+export const appUser = pgTable("app_user", {
+    id: text("id").primaryKey(),
+    email: text("email").notNull().unique(),
+    name: text("name").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+});
+
+export const membership = pgTable("membership", {
+    userId: text("user_id").references(() => appUser.id).notNull(),
+    companyId: text("company_id").references(() => company.id).notNull(),
+    role: text("role").notNull().default("admin") // 'admin' | 'member'
+}, t => ({
+    pk: primaryKey({ columns: [t.userId, t.companyId] })
+}));
+
+export const apiKey = pgTable("api_key", {
+    id: text("id").primaryKey(),              // public id (prefix 'ak_...')
+    userId: text("user_id").references(() => appUser.id).notNull(),
+    companyId: text("company_id").references(() => company.id).notNull(),
+    name: text("name").notNull(),
+    hash: text("hash").notNull(),             // SHA256 of secret
+    enabled: text("enabled").notNull().default("true"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
 });

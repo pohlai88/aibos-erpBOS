@@ -2,6 +2,3 @@
 > @aibos/api-client@0.0.0 build C:\AI-BOS\aibos-erpBOS\packages\api-client
 > tsc -b
 
-error TS5083: Cannot read file 'C:/AI-BOS/aibos-erpBOS/packages/api-client/tsconfig.json'.
- ELIFECYCLE  Command failed with exit code 1.
- WARN   Local package.json exists, but node_modules missing, did you mean to install?

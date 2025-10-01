@@ -2,3 +2,8 @@
 > @aibos/contracts@0.0.0 build C:\AI-BOS\aibos-erpBOS\packages\contracts
 > pnpm gen:openapi
 
+
+> @aibos/contracts@0.0.0 gen:openapi C:\AI-BOS\aibos-erpBOS\packages\contracts
+> tsx ./scripts/build-openapi.ts
+
+OpenAPI written: C:\AI-BOS\aibos-erpBOS\packages\contracts\scripts/../openapi/openapi.json

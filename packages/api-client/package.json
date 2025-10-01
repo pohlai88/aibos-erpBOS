@@ -8,5 +8,10 @@
     "dev": "echo 'API client - no dev server needed'",
     "gen:types": "openapi-typescript ../contracts/openapi/openapi.json -o src/types.gen.ts"
   },
+  "turbo": {
+    "pipeline": {
+      "build": "build#lib"
+    }
+  },
   "type": "module"
 }

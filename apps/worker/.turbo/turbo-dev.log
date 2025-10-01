@@ -1,0 +1,7 @@
+
+> worker@ dev C:\AI-BOS\aibos-erpBOS\apps\worker
+> tsx src/worker.ts
+
+Worker started
+[OUTBOX] JournalPosted 86bf4cdb-b327-4413-8e3c-daf95d12cebf {"_meta":{"name":"JournalPosted","version":1,"occurredAt":"2025-09-30T19:34:25.400Z"},"journal_id":"00c86c09-6d4d-4e20-a840-a3759f9b735a"}
+[OUTBOX] JournalPosted 26c6a81a-1fda-4de2-98bd-e142d442a0e6 {"_meta":{"name":"JournalPosted","version":1,"occurredAt":"2025-09-30T19:39:14.096Z"},"journal_id":"c1bca0fa-8bf4-49e2-9502-b3710ba3f906"}

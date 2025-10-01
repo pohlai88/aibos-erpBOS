@@ -2,12 +2,12 @@ import { NextRequest } from "next/server";
 import { getJournal } from "@aibos/services/src/ledger";
 
 // Complex version for audit compliance and production monitoring
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const journalId = params.id;
-    
+    const { id: journalId } = await params;
+
     if (!journalId) {
-      return Response.json({ error: "Journal ID required" }, { 
+      return Response.json({ error: "Journal ID required" }, {
         status: 400,
         headers: {
           'Access-Control-Allow-Origin': '*',
@@ -16,11 +16,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         }
       });
     }
-    
+
     const journal = await getJournal(journalId);
-    
+
     if (!journal) {
-      return Response.json({ error: "Journal not found" }, { 
+      return Response.json({ error: "Journal not found" }, {
         status: 404,
         headers: {
           'Access-Control-Allow-Origin': '*',
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         }
       });
     }
-    
+
     return Response.json({ journal }, {
       status: 200,
       headers: {

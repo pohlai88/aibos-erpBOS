@@ -1,0 +1,54 @@
+
+> bff@ build C:\AI-BOS\aibos-erpBOS\apps\bff
+> next build
+
+   ▲ Next.js 15.5.4
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 8.6s
+   Linting and checking validity of types ...
+ ⨯ ESLint: Converting circular structure to JSON     --> starting at object with constructor 'Object'     |     property 'configs' -> object with constructor 'Object'     |     property 'flat/all' -> object with constructor 'Array'     |     ...     |     property 'plugins' -> object with constructor 'Object'     --- property '@typescript-eslint' closes the circle
+   Collecting page data ...
+   Generating static pages (0/18) ...
+   Generating static pages (4/18) 
+   Generating static pages (8/18) 
+   Generating static pages (13/18) 
+ ✓ Generating static pages (18/18)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                  Size  First Load JS
+┌ ƒ /api/auth/keys                          166 B         101 kB
+├ ƒ /api/auth/keys/[id]                     166 B         101 kB
+├ ƒ /api/auth/switch-company                166 B         101 kB
+├ ƒ /api/auth/whoami                        166 B         101 kB
+├ ƒ /api/inventory/issues                   166 B         101 kB
+├ ƒ /api/inventory/receipts                 166 B         101 kB
+├ ƒ /api/inventory/summary                  166 B         101 kB
+├ ƒ /api/journals/[id]                      166 B         101 kB
+├ ƒ /api/journals/[id]/reverse              166 B         101 kB
+├ ƒ /api/payments/receive                   166 B         101 kB
+├ ƒ /api/payments/supplier                  166 B         101 kB
+├ ƒ /api/periods                            166 B         101 kB
+├ ƒ /api/ping                               166 B         101 kB
+├ ƒ /api/purchase-invoices                  166 B         101 kB
+├ ƒ /api/reports/aging                      166 B         101 kB
+├ ƒ /api/reports/bs                         166 B         101 kB
+├ ƒ /api/reports/pl                         166 B         101 kB
+├ ƒ /api/reports/trial-balance              166 B         101 kB
+└ ƒ /api/sales-invoices                     166 B         101 kB
++ First Load JS shared by all              100 kB
+  ├ chunks/688-1230125f9665709e.js        44.4 kB
+  ├ chunks/8dd80cee-9676efcf037caaaa.js   54.2 kB
+  └ other shared chunks (total)           1.84 kB
+
+Route (pages)                                Size  First Load JS
+─ ○ /404                                  2.28 kB        97.3 kB
++ First Load JS shared by all               95 kB
+  ├ chunks/framework-0ae7aae1117a2003.js  57.8 kB
+  ├ chunks/main-83f66f25bab8ca20.js         35 kB
+  └ other shared chunks (total)           2.23 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

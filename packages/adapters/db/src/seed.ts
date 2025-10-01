@@ -41,7 +41,23 @@ async function main() {
         id: "ITEM-1", code: "ITEM-1", name: "Demo Item", uom: "EA"
     }).onConflictDoNothing();
 
-    console.log("Seeded company + accounts");
+    // Open the current month by default (idempotent)
+    const start = new Date(); start.setDate(1); start.setHours(0, 0, 0, 0);
+    const end = new Date(start); end.setMonth(end.getMonth() + 1); end.setDate(0); end.setHours(23, 59, 59, 999);
+    await db.insert(schema.accountingPeriod).values({
+        id: "PERIOD-CURR",
+        companyId: "COMP-1",
+        code: `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}`,
+        startDate: start,
+        endDate: end,
+        status: "OPEN"
+    }).onConflictDoNothing();
+
+    // Auth seed data
+    await db.insert(schema.appUser).values({ id: "USR-DEV", email: "dev@example.com", name: "Dev" }).onConflictDoNothing();
+    await db.insert(schema.membership).values({ userId: "USR-DEV", companyId: "COMP-1", role: "admin" }).onConflictDoNothing();
+
+    console.log("Seeded company + accounts + current period + auth");
     await pool.end();
 }
 main().catch(e => { console.error(e); process.exit(1); });

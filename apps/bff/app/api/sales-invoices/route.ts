@@ -1,10 +1,16 @@
 import { SalesInvoice } from "@aibos/contracts/http/sales/sales-invoice.schema";
 import { postSalesInvoice } from "@aibos/services/src/posting";
 import { repo, tx } from "../../lib/db";
+import { ensurePostingAllowed } from "../../lib/policy";
+import { requireAuth, enforceCompanyMatch } from "../../lib/auth";
 
 export async function POST(req: Request) {
   try {
+    const auth = await requireAuth(req);
     const input = SalesInvoice.parse(await req.json());
+
+    enforceCompanyMatch(auth, input.company_id);
+    await ensurePostingAllowed(auth.company_id, input.doc_date);
 
     // Check for existing journal by idempotency key
     const rule = await import("@aibos/posting-rules").then(m => m.loadRule("sales-invoice"));
@@ -29,7 +35,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const journal = await postSalesInvoice(input, { repo, tx });
+    const journal = await postSalesInvoice({ ...input, company_id: auth.company_id }, { repo, tx });
     return Response.json({ journal_id: journal.id }, {
       status: 201,
       headers: {
@@ -40,6 +46,10 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("Sales invoice error:", error);
+    // Re-throw Response objects from policy checks
+    if (error instanceof Response) {
+      throw error;
+    }
     return Response.json({ error: "Invalid request data" }, {
       status: 400,
       headers: {

@@ -1,5 +1,6 @@
 import { pool } from "../../../lib/db";
 import { getDisclosure, clearCache } from "@aibos/policies";
+import { requireAuth } from "../../../lib/auth";
 
 type TBRow = { account_code: string; debit: number; credit: number; };
 
@@ -18,11 +19,11 @@ async function loadTB(company_id: string, currency: string): Promise<TBRow[]> {
 }
 
 export async function GET(req: Request) {
+    const auth = await requireAuth(req);
     clearCache(); // Clear cache for development
     const url = new URL(req.url);
-    const company_id = url.searchParams.get("company_id") ?? "COMP-1";
     const currency = url.searchParams.get("currency") ?? "MYR";
-    const tb = await loadTB(company_id, currency);
+    const tb = await loadTB(auth.company_id, currency);
     const policy = getDisclosure();
 
     function valOfAccounts(names: string[], sign: 1 | -1) {
@@ -59,7 +60,7 @@ export async function GET(req: Request) {
     const rows = policy.bs.map((s: any) => ({ line: s.line, value: Number(values[s.line] ?? 0).toFixed(2) }));
     const equationOK = Math.abs((values["Assets"] ?? 0) - (values["Liabilities"] ?? 0) - (values["Equity"] ?? 0)) < 0.005;
 
-    return Response.json({ company_id, currency, rows, equationOK }, {
+    return Response.json({ company_id: auth.company_id, currency, rows, equationOK }, {
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, OPTIONS',

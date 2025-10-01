@@ -2,10 +2,17 @@ import { PurchaseInvoice } from "@aibos/contracts/http/purchase/purchase-invoice
 import { postPurchaseInvoice } from "@aibos/services/src/posting-pi";
 import { repo, tx } from "../../lib/db";
 import { ok, created } from "../../lib/http";
+import { ensurePostingAllowed } from "../../lib/policy";
+import { requireAuth, enforceCompanyMatch } from "../../lib/auth";
 
 export async function POST(req: Request) {
     try {
+        const auth = await requireAuth(req);
         const input = PurchaseInvoice.parse(await req.json());
+
+        enforceCompanyMatch(auth, input.company_id);
+        await ensurePostingAllowed(auth.company_id, input.doc_date);
+
         // derive idempotency key like the service does (PurchaseInvoice:<id>:v1)
         const idemKey = `PurchaseInvoice:${input.id}:v1`;
 
@@ -18,10 +25,14 @@ export async function POST(req: Request) {
             });
         }
 
-        const journal = await postPurchaseInvoice(input, { repo, tx });
+        const journal = await postPurchaseInvoice({ ...input, company_id: auth.company_id }, { repo, tx });
         return created({ journal_id: journal.id }, `/api/journals/${journal.id}`);
     } catch (error) {
         console.error("Purchase invoice error:", error);
+        // Re-throw Response objects from policy checks
+        if (error instanceof Response) {
+            throw error;
+        }
         return Response.json({ error: "Invalid request data" }, {
             status: 400,
             headers: {

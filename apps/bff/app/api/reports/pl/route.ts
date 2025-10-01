@@ -1,5 +1,6 @@
 import { pool } from "../../../lib/db";
 import { getDisclosure } from "@aibos/policies";
+import { requireAuth } from "../../../lib/auth";
 
 type TBRow = { account_code: string; debit: number; credit: number; };
 
@@ -18,10 +19,10 @@ async function loadTB(company_id: string, currency: string): Promise<TBRow[]> {
 }
 
 export async function GET(req: Request) {
+    const auth = await requireAuth(req);
     const url = new URL(req.url);
-    const company_id = url.searchParams.get("company_id") ?? "COMP-1";
     const currency = url.searchParams.get("currency") ?? "MYR";
-    const tb = await loadTB(company_id, currency);
+    const tb = await loadTB(auth.company_id, currency);
     const policy = getDisclosure();
 
     function valOfAccounts(names: string[], sign: 1 | -1) {
@@ -53,7 +54,7 @@ export async function GET(req: Request) {
     const rows = policy.pl.map((s: any) => ({ line: s.line, value: Number(values[s.line] ?? 0).toFixed(2) }));
     const total = Number(values["Net Profit"] ?? 0).toFixed(2);
 
-    return Response.json({ company_id, currency, rows, total }, {
+    return Response.json({ company_id: auth.company_id, currency, rows, total }, {
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, OPTIONS',

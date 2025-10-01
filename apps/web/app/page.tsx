@@ -13,11 +13,15 @@ function Pill({ kind, children }: { kind: "created" | "replay" | "error"; childr
 
 function ItemSummary() {
   const [sum, setSum] = useState<any>(null);
+  const [apiKey, setApiKey] = useState<string>("");
+
   const load = async () => {
-    const r = await fetch("/api/inventory/summary?company_id=COMP-1&item_id=ITEM-1");
+    const headers: any = {};
+    if (apiKey) headers["X-API-Key"] = apiKey;
+    const r = await fetch("/api/inventory/summary?company_id=COMP-1&item_id=ITEM-1", { headers });
     setSum(await r.json());
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [apiKey]);
   return (
     <div style={{ border: "1px solid #ddd", padding: 12, borderRadius: 8, marginTop: 16, width: 380 }}>
       <h2 style={{ margin: 0, fontSize: 18 }}>Item Summary</h2>
@@ -38,10 +42,13 @@ function ItemSummary() {
 export default function Home() {
   const [out, setOut] = useState<Res | null>(null);
   const [status, setStatus] = useState<"idle" | "busy">("idle");
+  const [apiKey, setApiKey] = useState<string>("");
 
   async function call(path: string, body: any) {
     setStatus("busy");
-    const res = await fetch(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    const headers: any = { "content-type": "application/json" };
+    if (apiKey) headers["X-API-Key"] = apiKey;
+    const res = await fetch(path, { method: "POST", headers, body: JSON.stringify(body) });
     const json = await res.json();
     const replay = res.headers.get("X-Idempotent-Replay") === "true";
     setOut({ ...(json as Res), replay });
@@ -51,6 +58,11 @@ export default function Home() {
   return (
     <main style={{ padding: 24, fontFamily: "ui-sans-serif" }}>
       <h1>AIBOS — Hello Ledger</h1>
+
+      <div style={{ marginBottom: 12 }}>
+        <label>API Key: </label>
+        <input value={apiKey} onChange={e => setApiKey(e.target.value)} style={{ width: 420 }} placeholder="ak_xxx:secret" />
+      </div>
 
       <section style={{ marginBottom: 16 }}>
         <button disabled={status === "busy"} onClick={async () => {
@@ -112,17 +124,52 @@ export default function Home() {
       <div style={{ display: "flex", gap: 24 }}>
         <div>
           <button onClick={async () => {
-            const res = await fetch("/api/reports/trial-balance");
+            const headers: any = {};
+            if (apiKey) headers["X-API-Key"] = apiKey;
+            const res = await fetch("/api/reports/trial-balance", { headers });
             alert("TB loaded: " + res.status);
           }}>View Trial Balance</button>
           <button style={{ marginLeft: 8 }} onClick={async () => {
-            const res = await fetch("/api/reports/pl"); const json = await res.json();
+            const headers: any = {};
+            if (apiKey) headers["X-API-Key"] = apiKey;
+            const res = await fetch("/api/reports/pl", { headers }); const json = await res.json();
             alert("P&L\n" + json.rows.map((r: any) => `${r.line}: ${r.value}`).join("\n") + `\nTotal: ${json.total}`);
           }}>View P&L</button>
           <button style={{ marginLeft: 8 }} onClick={async () => {
-            const res = await fetch("/api/reports/bs"); const json = await res.json();
+            const headers: any = {};
+            if (apiKey) headers["X-API-Key"] = apiKey;
+            const res = await fetch("/api/reports/bs", { headers }); const json = await res.json();
             alert("Balance Sheet\n" + json.rows.map((r: any) => `${r.line}: ${r.value}`).join("\n") + `\nEquation OK: ${json.equationOK}`);
           }}>View Balance Sheet</button>
+        </div>
+
+        <div style={{ marginTop: 16 }}>
+          <h3>Period Management</h3>
+          <button style={{ marginLeft: 8 }} onClick={async () => {
+            const start = new Date(); start.setDate(1); start.setHours(0, 0, 0, 0);
+            const end = new Date(start); end.setMonth(end.getMonth() + 1); end.setDate(0); end.setHours(23, 59, 59, 999);
+            const headers: any = { "content-type": "application/json" };
+            if (apiKey) headers["X-API-Key"] = apiKey;
+            const res = await fetch("http://localhost:3000/api/periods", {
+              method: "POST", headers,
+              body: JSON.stringify({ company_id: "COMP-1", code: `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}`, start_date: start.toISOString(), end_date: end.toISOString(), status: "OPEN" })
+            });
+            alert("Open current period: " + res.status);
+          }}>Open Current Period</button>
+
+          <button style={{ marginLeft: 8 }} onClick={async () => {
+            const now = new Date();
+            const code = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+            const start = new Date(); start.setDate(1); start.setHours(0, 0, 0, 0);
+            const end = new Date(start); end.setMonth(end.getMonth() + 1); end.setDate(0); end.setHours(23, 59, 59, 999);
+            const headers: any = { "content-type": "application/json" };
+            if (apiKey) headers["X-API-Key"] = apiKey;
+            const res = await fetch("http://localhost:3000/api/periods", {
+              method: "POST", headers,
+              body: JSON.stringify({ company_id: "COMP-1", code, start_date: start.toISOString(), end_date: end.toISOString(), status: "CLOSED" })
+            });
+            alert("Close current period: " + res.status);
+          }}>Close Current Period</button>
         </div>
 
         <div style={{ marginTop: 16 }}>
