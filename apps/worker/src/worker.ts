@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { Pool } from "pg";
 import { processDueReversals } from "./reversals";
+import { processWebhooksOnce } from "./webhooks";
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL || "postgresql://aibos:aibos@localhost:5432/aibos"
@@ -35,8 +36,9 @@ async function main() {
     // simple poller
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        await runOnce();               // outbox
-        await processDueReversals();   // reversals
+        await runOnce();               // existing outbox drain logs, etc.
+        await processDueReversals();   // from M6
+        await processWebhooksOnce();   // NEW
         await new Promise(r => setTimeout(r, 1500));
     }
 }
