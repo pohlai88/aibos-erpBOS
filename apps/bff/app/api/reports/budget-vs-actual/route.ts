@@ -1,7 +1,8 @@
 import { pool } from "../../../lib/db";
-import { ok, unprocessable } from "../../../lib/http";
+import { ok, badRequest, unauthorized, forbidden, unprocessable } from "../../../lib/http";
 import { requireAuth, requireCapability } from "../../../lib/auth";
 import { withRouteErrors, isResponse } from "../../../lib/route-utils";
+import { parseISO, addMonths, startOfMonth, format } from "date-fns";
 
 type BudgetActualRow = {
     account_code: string;
@@ -13,6 +14,11 @@ type BudgetActualRow = {
     variance_pct: number;
 };
 
+/**
+ * GET /api/reports/budget-vs-actual
+ * qps: company_id, from, to, budget_id
+ * optional: cost_center_id, project_id, group=account | account,cost_center | account,project
+ */
 export const GET = withRouteErrors(async (req: Request) => {
     const auth = await requireAuth(req);
     if (isResponse(auth)) return auth;
@@ -21,173 +27,251 @@ export const GET = withRouteErrors(async (req: Request) => {
     if (isResponse(capCheck)) return capCheck;
 
     const url = new URL(req.url);
-    const companyId = url.searchParams.get("company_id");
-    const from = url.searchParams.get("from");
-    const to = url.searchParams.get("to");
-    const budgetId = url.searchParams.get("budget_id");
-    const costCenterId = url.searchParams.get("cost_center_id");
-    const projectId = url.searchParams.get("project_id");
-    const group = url.searchParams.get("group") || "account";
+    const company_id = url.searchParams.get("company_id") ?? "";
+    const fromStr = url.searchParams.get("from") ?? "";
+    const toStr = url.searchParams.get("to") ?? "";
+    const budget_id = url.searchParams.get("budget_id") ?? "";
+    const cc = url.searchParams.get("cost_center_id"); // can be null
+    const prj = url.searchParams.get("project_id");     // can be null
+    const groupParam = (url.searchParams.get("group") ?? "account").toLowerCase();
+    const pivot = (url.searchParams.get("pivot") ?? "").toLowerCase(); // "cost_center" | "project" | ""
+    const pivotNullLabel = url.searchParams.get("pivot_null_label") ?? "__NULL__";
+    const precision = parseInt(url.searchParams.get("precision") ?? "2");
+    const grandTotal = url.searchParams.get("grand_total") !== "false";
 
-    if (!companyId || !from || !to || !budgetId) {
-        return unprocessable("company_id, from, to, and budget_id are required");
+    if (auth.company_id !== company_id) return forbidden("company mismatch");
+
+    if (!company_id || !fromStr || !toStr || !budget_id) {
+        return badRequest("company_id, from, to, budget_id are required");
     }
 
-    if (companyId !== auth.company_id) {
-        return unprocessable("Company ID mismatch");
+    let from: Date, to: Date;
+    try {
+        from = parseISO(fromStr);
+        to = parseISO(toStr);
+    } catch {
+        return badRequest("invalid from/to");
     }
 
-    // Get company base currency
-    const company = await pool.query(`select currency from company where id=$1`, [companyId]);
-    const baseCurrency = company.rows[0]?.currency || "MYR";
+    // Normalize group keys and build SQL grouping
+    const groupKeys = groupParam.split(",").map(s => s.trim()).filter(Boolean);
+    // Supported keys
+    const supported = new Set(["account", "cost_center", "project"]);
+    for (const g of groupKeys) if (!supported.has(g)) return badRequest(`unsupported group key: ${g}`);
 
-    // Parse group parameter
-    const groupFields = group.split(",").map(f => f.trim());
+    // Will group by at least account_code
+    const groupByCols: string[] = ["account_code"];
+    if (groupKeys.includes("cost_center")) groupByCols.push("cost_center_id");
+    if (groupKeys.includes("project")) groupByCols.push("project_id");
 
-    // Build actuals query
-    let actualsSql = `
-        select jl.account_code,
-               jl.cost_center_id,
-               jl.project_id,
-               sum(case when jl.dc='D' then 
-                 case 
-                   when jl.base_amount IS NOT NULL AND jl.base_currency = $2 THEN jl.base_amount::numeric
-                   ELSE jl.amount::numeric 
-                 END
-                 ELSE -case 
-                   when jl.base_amount IS NOT NULL AND jl.base_currency = $2 THEN jl.base_amount::numeric
-                   ELSE jl.amount::numeric 
-                 END
-                 END) as actual
+    // Build month buckets list for budgets (YYYY-MM)
+    const months: string[] = [];
+    let cur = startOfMonth(from);
+    const toEnd = startOfMonth(addMonths(startOfMonth(to), 1)); // exclusive
+    while (cur < toEnd) {
+        months.push(format(cur, "yyyy-MM"));
+        cur = addMonths(cur, 1);
+    }
+
+    // NULL-friendly join strategy: coalesce dimension keys to '' on both sides
+    // Actuals sign rule must match PL (DR - CR).
+    // NOTE: cost_center/project filters are applied with IS NULL logic as well.
+
+    const params: any[] = [];
+    let p = 0;
+
+    const actualsSQL = `
+        select
+            jl.account_code,
+            coalesce(jl.cost_center_id, '') as cost_center_id,
+            coalesce(jl.project_id,     '') as project_id,
+            sum(case when jl.dc='DR' then jl.base_amount else -jl.base_amount end) as actual
         from journal_line jl
         join journal j on j.id = jl.journal_id
-        where j.company_id = $1
-          and j.posting_date >= $3 and j.posting_date < $4::date + 1
+        where j.company_id = $${++p}               -- $1
+            and j.posting_date >= $${++p}::date      -- $2
+            and j.posting_date <  $${++p}::date + 1  -- $3 (inclusive end date)
+            ${cc ? `and jl.cost_center_id = $${++p}` : ``}  -- $4?
+            ${prj ? `and jl.project_id     = $${++p}` : ``}  -- $5?
+        group by 1,2,3
     `;
+    params.push(company_id, fromStr, toStr);
+    if (cc) params.push(cc);
+    if (prj) params.push(prj);
 
-    const actualsParams: any[] = [companyId, baseCurrency, from, to];
-    let paramIndex = 5;
+    // Budgets across month buckets
+    const monthArraySQL = `select unnest($${++p}::text[]) as period_month`; // $n months[]
+    const monthsParamIndex = p;
+    params.push(months);
 
-    if (costCenterId) {
-        actualsSql += ` and jl.cost_center_id = $${paramIndex}`;
-        actualsParams.push(costCenterId);
-        paramIndex++;
-    }
-
-    if (projectId) {
-        actualsSql += ` and jl.project_id = $${paramIndex}`;
-        actualsParams.push(projectId);
-        paramIndex++;
-    }
-
-    actualsSql += ` group by jl.account_code`;
-
-    if (groupFields.includes("cost_center")) {
-        actualsSql += `, jl.cost_center_id`;
-    }
-    if (groupFields.includes("project")) {
-        actualsSql += `, jl.project_id`;
-    }
-
-    // Build budgets query
-    let budgetsSql = `
-        select bl.account_code,
-               bl.cost_center_id,
-               bl.project_id,
-               sum(bl.amount_base) as budget
+    const budgetsSQL = `
+        with months as (${monthArraySQL})
+        select
+            bl.account_code,
+            coalesce(bl.cost_center_id, '') as cost_center_id,
+            coalesce(bl.project_id,     '') as project_id,
+            sum(bl.amount_base) as budget
         from budget_line bl
-        where bl.company_id = $1
-          and bl.budget_id = $${paramIndex}
-          and bl.period_month between to_char($3::date,'YYYY-MM') and to_char($4::date,'YYYY-MM')
+        join budget b on b.id = bl.budget_id and b.company_id = bl.company_id
+        join months m on m.period_month = bl.period_month
+        where bl.company_id = $${++p}   -- $n+1 company
+            and bl.budget_id  = $${++p}   -- $n+2 budget
+            ${cc ? `and bl.cost_center_id = $${++p}` : ``}
+            ${prj ? `and bl.project_id     = $${++p}` : ``}
+        group by 1,2,3
+    `;
+    params.push(company_id, budget_id);
+    if (cc) params.push(cc);
+    if (prj) params.push(prj);
+
+    // Outer join on normalized keys
+    const outerSQL = `
+        with
+        A as (${actualsSQL}),
+        B as (${budgetsSQL})
+        select
+            coalesce(A.account_code, B.account_code)     as account_code,
+            coalesce(A.cost_center_id, B.cost_center_id) as cost_center_id,
+            coalesce(A.project_id,     B.project_id)     as project_id,
+            coalesce(B.budget, 0) as budget,
+            coalesce(A.actual, 0) as actual
+        from A
+        full outer join B
+            on A.account_code   = B.account_code
+            and A.cost_center_id = B.cost_center_id
+            and A.project_id     = B.project_id
     `;
 
-    const budgetsParams = [...actualsParams];
-    budgetsParams.push(budgetId);
-    paramIndex++;
+    // Execute
+    const { rows } = await pool.query(outerSQL, params);
 
-    if (costCenterId) {
-        budgetsSql += ` and bl.cost_center_id = $${paramIndex}`;
-        budgetsParams.push(costCenterId);
-        paramIndex++;
+    // Shape rows per requested grouping; compute variance safely
+    type Row = {
+        account_code: string;
+        cost_center_id?: string | null;
+        project_id?: string | null;
+        budget: string | number; // pg numeric
+        actual: string | number;
     }
 
-    if (projectId) {
-        budgetsSql += ` and bl.project_id = $${paramIndex}`;
-        budgetsParams.push(projectId);
-        paramIndex++;
-    }
+    const shaped = rows.map((r: Row) => {
+        // NULL-normalize back (we had '' while joining)
+        const account_code = r.account_code ?? "";
+        const cost_center_id = r.cost_center_id === "" ? null : r.cost_center_id ?? null;
+        const project_id = r.project_id === "" ? null : r.project_id ?? null;
 
-    budgetsSql += ` group by bl.account_code`;
-
-    if (groupFields.includes("cost_center")) {
-        budgetsSql += `, bl.cost_center_id`;
-    }
-    if (groupFields.includes("project")) {
-        budgetsSql += `, bl.project_id`;
-    }
-
-    // Execute queries
-    const actualsResult = await pool.query(actualsSql, actualsParams);
-    const budgetsResult = await pool.query(budgetsSql, budgetsParams);
-
-    // Create maps for joining
-    const actualsMap = new Map<string, number>();
-    const budgetsMap = new Map<string, number>();
-
-    for (const row of actualsResult.rows) {
-        const key = `${row.account_code}|${row.cost_center_id || ''}|${row.project_id || ''}`;
-        actualsMap.set(key, Number(row.actual || 0));
-    }
-
-    for (const row of budgetsResult.rows) {
-        const key = `${row.account_code}|${row.cost_center_id || ''}|${row.project_id || ''}`;
-        budgetsMap.set(key, Number(row.budget || 0));
-    }
-
-    // Combine and calculate variances
-    const allKeys = new Set([...actualsMap.keys(), ...budgetsMap.keys()]);
-    const rows: BudgetActualRow[] = [];
-    let totalBudget = 0;
-    let totalActual = 0;
-
-    for (const key of allKeys) {
-        const parts = key.split('|');
-        const account_code = parts[0] || '';
-        const cost_center_id = parts[1] || undefined;
-        const project_id = parts[2] || undefined;
-        const budget = budgetsMap.get(key) || 0;
-        const actual = actualsMap.get(key) || 0;
+        const budget = Number(r.budget ?? 0);
+        const actual = Number(r.actual ?? 0);
         const variance = actual - budget;
-        const variance_pct = budget !== 0 ? variance / Math.abs(budget) : 0;
+        const variance_pct = budget === 0 ? null : variance / Math.abs(budget);
 
-        rows.push({
-            account_code,
-            ...(cost_center_id && { cost_center_id }),
-            ...(project_id && { project_id }),
-            budget,
-            actual,
-            variance,
-            variance_pct
+        const base: any = { account_code, budget, actual, variance, variance_pct };
+
+        // Include dimension fields for grouping OR pivoting
+        const includeCostCenter = groupByCols.includes("cost_center_id") || pivot === "cost_center";
+        const includeProject = groupByCols.includes("project_id") || pivot === "project";
+
+        if (includeCostCenter) base.cost_center_id = cost_center_id;
+        if (includeProject) base.project_id = project_id;
+
+        return base;
+    });
+
+    // Totals (no dimension keys)
+    const totals = shaped.reduce((acc: any, r: any) => {
+        acc.budget += r.budget ?? 0;
+        acc.actual += r.actual ?? 0;
+        acc.variance += r.variance ?? 0;
+        return acc;
+    }, { budget: 0, actual: 0, variance: 0 as number });
+
+    const totals_pct = totals.budget === 0 ? null : totals.variance / Math.abs(totals.budget);
+
+    // Handle pivot functionality
+    if (pivot === "cost_center" || pivot === "project") {
+        const axisKey = pivot === "cost_center" ? "cost_center_id" : "project_id";
+
+        // collect distinct pivot keys (null → pivotNullLabel for display; keep null internal)
+        const pivotKeys: (string | null)[] = [];
+        const seen = new Set<string>();
+        for (const r of shaped) {
+            const k = (r as any)[axisKey] ?? null;
+            const sk = k ?? pivotNullLabel;
+            if (!seen.has(sk)) { seen.add(sk); pivotKeys.push(k); }
+        }
+
+        // group rows by account_code then by pivot key
+        type Agg = Record<string, { budget: number; actual: number }>;
+        const byAccount: Record<string, Agg> = {};
+        for (const r of shaped) {
+            const acct = r.account_code as string;
+            const k = ((r as any)[axisKey] ?? null) as (string | null);
+            if (!byAccount[acct]) byAccount[acct] = {};
+            const cell = byAccount[acct][k ?? pivotNullLabel] ?? { budget: 0, actual: 0 };
+            cell.budget += r.budget ?? 0;
+            cell.actual += r.actual ?? 0;
+            byAccount[acct][k ?? pivotNullLabel] = cell;
+        }
+
+        // build matrix rows
+        const matrixRows = Object.entries(byAccount).map(([account_code, axisAgg]) => {
+            const row: any = { account_code };
+            let rowBudget = 0, rowActual = 0;
+            for (const k of pivotKeys) {
+                const keyStr = k ?? pivotNullLabel;
+                const { budget = 0, actual = 0 } = axisAgg[keyStr] ?? {};
+                const variance = actual - budget;
+                const variance_pct = budget === 0 ? null : variance / Math.abs(budget);
+                // write column set under a stable key
+                row[keyStr] = { budget, actual, variance, variance_pct };
+                rowBudget += budget; rowActual += actual;
+            }
+            // optional row totals
+            row.total = {
+                budget: rowBudget,
+                actual: rowActual,
+                variance: rowActual - rowBudget,
+                variance_pct: rowBudget === 0 ? null : (rowActual - rowBudget) / Math.abs(rowBudget),
+            };
+            return row;
         });
 
-        totalBudget += budget;
-        totalActual += actual;
+        // column totals
+        const totalsByPivot: Record<string, { budget: number; actual: number; variance: number; variance_pct: number | null }> = {};
+        for (const k of pivotKeys) {
+            const keyStr = k ?? pivotNullLabel;
+            let b = 0, a = 0;
+            for (const r of matrixRows) {
+                const cell = r[keyStr] || { budget: 0, actual: 0 };
+                b += cell.budget || 0;
+                a += cell.actual || 0;
+            }
+            const v = a - b;
+            totalsByPivot[keyStr] = {
+                budget: b, actual: a, variance: v, variance_pct: b === 0 ? null : v / Math.abs(b),
+            };
+        }
+
+        return ok({
+            base_currency: "MYR", // TODO: get from company
+            from: fromStr,
+            to: toStr,
+            budget_id,
+            pivot_axis: axisKey,                    // "cost_center_id" or "project_id"
+            pivot_keys: pivotKeys,                  // e.g. ["CC-OPS","CC-RND", null]
+            rows: matrixRows,                       // row per account, columns per pivot key
+            totals_by_pivot: totalsByPivot,         // column totals
+        });
     }
 
-    const totalVariance = totalActual - totalBudget;
-    const totalVariancePct = totalBudget !== 0 ? totalVariance / Math.abs(totalBudget) : 0;
-
     return ok({
-        base_currency: baseCurrency,
-        from,
-        to,
-        group: groupFields,
-        rows,
-        totals: {
-            budget: totalBudget,
-            actual: totalActual,
-            variance: totalVariance,
-            variance_pct: totalVariancePct
-        }
+        base_currency: "MYR", // TODO: get from company
+        from: fromStr,
+        to: toStr,
+        budget_id,
+        group: groupKeys.length ? groupKeys : ["account"],
+        months,                          // helpful for debugging
+        rows: shaped,
+        totals: { ...totals, variance_pct: totals_pct }
     });
 });
