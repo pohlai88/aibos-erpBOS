@@ -1,11 +1,7 @@
 import "dotenv/config";
-import { Pool } from "pg";
+import { pool } from "./db";
 import { processDueReversals } from "./reversals";
 import { processWebhooksOnce } from "./webhooks";
-
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL || "postgresql://aibos:aibos@localhost:5432/aibos"
-});
 
 async function runOnce() {
     const client = await pool.connect();

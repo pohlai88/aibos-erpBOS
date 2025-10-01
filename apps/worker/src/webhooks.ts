@@ -1,11 +1,25 @@
 import fetch from "node-fetch";
 import crypto from "node:crypto";
-import { Pool } from "pg";
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+import { pool } from "./db";
 
 // backoff schedule (minutes)
 const BACKOFF = [1, 5, 15, 60, 180]; // then dead
+
+function extractCompanyId(payloadText: string): string | null {
+    try {
+        const p = JSON.parse(payloadText);
+        // common shapes to try
+        return (
+            p.company_id ||
+            p.companyId ||
+            p.journal?.company_id ||
+            p.journal?.companyId ||
+            p.event?.company_id ||
+            p.event?.companyId ||
+            null
+        );
+    } catch { return null; }
+}
 
 function hmacSign(secret: string, ts: string, body: string) {
     const msg = `${ts}.${body}`;
@@ -38,32 +52,34 @@ async function fanoutNewOutboxRows() {
     // We only enqueue for events not yet enqueued to any hook for the same company/topic pair.
     // For simplicity, do last N items.
     const out = await pool.query(
-        `select id, topic, payload from outbox
-     where created_at >= now() - interval '10 minutes'
-     order by created_at desc limit 50`
+        `select id, topic, payload::text as payload
+       from outbox
+      where created_at >= now() - interval '10 minutes'
+      order by created_at desc limit 50`
     );
 
     for (const ev of out.rows) {
-        // payload should contain company_id; if not, deliver to all hooks (scoped worker could be improved)
-        let companyId: string | null = null;
-        try { const p = typeof ev.payload === "string" ? JSON.parse(ev.payload) : ev.payload; companyId = p.company_id ?? null; } catch { }
-        if (!companyId) continue;
+        const companyId = extractCompanyId(ev.payload);
+        if (!companyId) continue; // skip if we cannot scope
 
         const hooks = await pool.query(
-            `select id, url, secret, topics from webhook where company_id=$1 and enabled=true`,
+            `select id, url, secret, topics
+         from webhook
+        where company_id=$1 and enabled=true`,
             [companyId]
         );
-        const targets = hooks.rows.filter((h: any) => h.topics.includes(ev.topic));
+
+        const targets = hooks.rows.filter((h: any) => Array.isArray(h.topics) && h.topics.includes(ev.topic));
         for (const h of targets) {
-            // Upsert-like guard: avoid duplicate pending for same (hook,event)
             const exist = await pool.query(
                 `select 1 from webhook_attempt where webhook_id=$1 and event_id=$2 limit 1`,
                 [h.id, ev.id]
             );
             if (exist.rows.length) continue;
+
             await pool.query(
                 `insert into webhook_attempt(id, webhook_id, event_id, topic, payload, status)
-         values ($1,$2,$3,$4,$5,'pending')`,
+         values ($1, $2, $3, $4, $5::jsonb, 'pending')`,
                 [crypto.randomUUID(), h.id, ev.id, ev.topic, ev.payload]
             );
         }
@@ -121,6 +137,15 @@ async function deliverPending() {
 }
 
 export async function processWebhooksOnce() {
-    await fanoutNewOutboxRows();
-    await deliverPending();
+    try {
+        await fanoutNewOutboxRows();
+    } catch (e) {
+        console.error("[WEBHOOK] fanout error:", e);
+    }
+
+    try {
+        await deliverPending();
+    } catch (e) {
+        console.error("[WEBHOOK] delivery error:", e);
+    }
 }
