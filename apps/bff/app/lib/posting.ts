@@ -1,6 +1,7 @@
 import { repo, tx } from "./db";
 import { loadRule, get } from "@aibos/posting-rules";
 import { computeBaseAmounts } from "./fx";
+import { ensureDimValid, ensureDimsMeetAccountPolicy } from "./dimensions";
 
 type Money = { amount: string; currency: string };
 type JLine = {
@@ -9,6 +10,9 @@ type JLine = {
     party_type?: "Customer" | "Supplier"; party_id?: string;
     base_amount?: Money; base_currency?: string;
     txn_amount?: Money; txn_currency?: string;
+    // Dimensions (M14)
+    cost_center_id?: string;
+    project_id?: string;
 };
 
 export async function postByRule(doctype: string, id: string, currency: string, company_id: string, doc: any) {
@@ -39,6 +43,27 @@ export async function postByRule(doctype: string, id: string, currency: string, 
         });
 
     const lines = [...map("debits"), ...map("credits")];
+
+    // Handle dimensions (M14) - apply doc-level defaults and validate
+    const docCostCenter = get(doc, "cost_center_id");
+    const docProject = get(doc, "project_id");
+
+    for (const line of lines) {
+        // Apply doc-level defaults if line doesn't have specific values
+        const cc = line.cost_center_id ?? docCostCenter ?? null;
+        const pr = line.project_id ?? docProject ?? null;
+
+        // Validate dimensions exist and are active
+        await ensureDimValid(cc, "cost_center");
+        await ensureDimValid(pr, "project");
+
+        // Validate dimensions meet account policy
+        await ensureDimsMeetAccountPolicy(line.account_code, company_id, { cc, pr });
+
+        // Update line with validated dimensions
+        line.cost_center_id = cc;
+        line.project_id = pr;
+    }
 
     // Compute base amounts for multi-currency support
     const docDate = doc.doc_date || new Date().toISOString();

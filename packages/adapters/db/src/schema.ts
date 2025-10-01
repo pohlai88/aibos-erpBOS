@@ -16,6 +16,9 @@ export const account = pgTable("account", {
     type: text("type").notNull(),            // Asset/Liability/Equity/Income/Expense
     normalBalance: char("normal_balance", { length: 1 }).notNull(), // D/C
     parentCode: text("parent_code"),
+    // Dimension policies (M14)
+    requireCostCenter: text("require_cost_center").notNull().default("false"),
+    requireProject: text("require_project").notNull().default("false"),
 });
 
 export const accountingPeriod = pgTable("accounting_period", {
@@ -58,7 +61,10 @@ export const journalLine = pgTable("journal_line", {
     baseAmount: numeric("base_amount", { precision: 20, scale: 6 }),
     baseCurrency: char("base_currency", { length: 3 }),
     txnAmount: numeric("txn_amount", { precision: 20, scale: 6 }),
-    txnCurrency: char("txn_currency", { length: 3 })
+    txnCurrency: char("txn_currency", { length: 3 }),
+    // Dimensions (M14)
+    costCenterId: text("cost_center_id").references(() => dimCostCenter.id),
+    projectId: text("project_id").references(() => dimProject.id)
 });
 
 export const fxRate = pgTable("fx_rate", {
@@ -151,5 +157,43 @@ export const apiKey = pgTable("api_key", {
     name: text("name").notNull(),
     hash: text("hash").notNull(),             // SHA256 of secret
     enabled: text("enabled").notNull().default("true"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+});
+
+// --- Dimensions & Cost Centers (M14) -----------------------------------------
+export const dimCostCenter = pgTable("dim_cost_center", {
+    id: text("id").primaryKey(),              // e.g. "CC-OPS"
+    name: text("name").notNull(),
+    parentId: text("parent_id"), // optional hierarchy - will add reference after table creation
+    active: text("active").notNull().default("true"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+});
+
+export const dimProject = pgTable("dim_project", {
+    id: text("id").primaryKey(),              // e.g. "PRJ-ALPHA"
+    name: text("name").notNull(),
+    active: text("active").notNull().default("true"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+});
+
+// --- Budgets & Variance (M14.1) -------------------------------------------
+export const budget = pgTable("budget", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").references(() => company.id).notNull(),
+    name: text("name").notNull(),
+    currency: text("currency").notNull(),
+    locked: text("locked").notNull().default("false"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+});
+
+export const budgetLine = pgTable("budget_line", {
+    id: text("id").primaryKey(),
+    budgetId: text("budget_id").references(() => budget.id, { onDelete: "cascade" }).notNull(),
+    companyId: text("company_id").references(() => company.id).notNull(),
+    periodMonth: char("period_month", { length: 7 }).notNull(), // e.g. '2025-11'
+    accountCode: text("account_code").notNull(),
+    costCenterId: text("cost_center_id").references(() => dimCostCenter.id),
+    projectId: text("project_id").references(() => dimProject.id),
+    amountBase: numeric("amount_base", { precision: 20, scale: 6 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
 });

@@ -6,16 +6,17 @@ export type Capability =
     | "payments:post"
     | "periods:manage"
     | "keys:manage"
-    | "audit:read";
+    | "audit:read"
+    | "budgets:manage";
 
 export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
     admin: [
         "reports:read", "journals:post", "reversal:create", "inventory:move",
-        "payments:post", "periods:manage", "keys:manage", "audit:read"
+        "payments:post", "periods:manage", "keys:manage", "audit:read", "budgets:manage"
     ],
     accountant: [
         "reports:read", "journals:post", "reversal:create", "inventory:move",
-        "payments:post", "audit:read"
+        "payments:post", "audit:read", "budgets:manage"
     ],
     ops: [
         "reports:read", "inventory:move", "audit:read"

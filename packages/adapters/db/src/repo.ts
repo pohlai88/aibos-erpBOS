@@ -79,7 +79,10 @@ export class DrizzleLedgerRepo implements LedgerRepo {
         baseAmount: (l as any).base_amount?.amount,
         baseCurrency: (l as any).base_currency,
         txnAmount: (l as any).txn_amount?.amount,
-        txnCurrency: (l as any).txn_currency
+        txnCurrency: (l as any).txn_currency,
+        // Dimensions (M14)
+        costCenterId: (l as any).cost_center_id,
+        projectId: (l as any).project_id
       });
     }
     return { id, lines: j.lines };

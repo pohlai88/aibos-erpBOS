@@ -16,10 +16,10 @@ async function getPresentQuotes(base: string, present: string, onISO: string) {
     return rows.map(r => ({ date: r.date, from: r.from, to: r.to, rate: Number(r.rate) }));
 }
 
-type TBRow = { account_code: string; debit: number; credit: number; };
+type TBRow = { account_code: string; debit: number; credit: number; cost_center_id?: string; project_id?: string; };
 
-async function loadTB(company_id: string, currency: string): Promise<TBRow[]> {
-    const sql = `
+async function loadTB(company_id: string, currency: string, filters: { cost_center_id?: string; project_id?: string; pivot?: string } = {}): Promise<TBRow[]> {
+    let sql = `
     SELECT jl.account_code,
            SUM(CASE WHEN jl.dc='D' THEN 
              CASE 
@@ -32,14 +32,53 @@ async function loadTB(company_id: string, currency: string): Promise<TBRow[]> {
                WHEN jl.base_amount IS NOT NULL AND jl.base_currency = $2 THEN jl.base_amount::numeric
                ELSE jl.amount::numeric 
              END
-             ELSE 0 END) AS credit
+             ELSE 0 END) AS credit`;
+
+    const params: any[] = [company_id, currency];
+    let paramIndex = 3;
+
+    // Add dimension filters
+    if (filters.cost_center_id) {
+        sql += `, jl.cost_center_id`;
+    }
+    if (filters.project_id) {
+        sql += `, jl.project_id`;
+    }
+
+    sql += `
     FROM journal_line jl
     JOIN journal j ON j.id = jl.journal_id
-    WHERE j.company_id = $1
-    GROUP BY jl.account_code
-  `;
-    const { rows } = await pool.query(sql, [company_id, currency]);
-    return rows.map(r => ({ account_code: r.account_code, debit: Number(r.debit || 0), credit: Number(r.credit || 0) }));
+    WHERE j.company_id = $1`;
+
+    if (filters.cost_center_id) {
+        sql += ` AND jl.cost_center_id = $${paramIndex}`;
+        params.push(filters.cost_center_id);
+        paramIndex++;
+    }
+
+    if (filters.project_id) {
+        sql += ` AND jl.project_id = $${paramIndex}`;
+        params.push(filters.project_id);
+        paramIndex++;
+    }
+
+    sql += ` GROUP BY jl.account_code`;
+
+    // Add dimension grouping for pivot
+    if (filters.pivot === "cost_center") {
+        sql += `, jl.cost_center_id`;
+    } else if (filters.pivot === "project") {
+        sql += `, jl.project_id`;
+    }
+
+    const { rows } = await pool.query(sql, params);
+    return rows.map(r => ({
+        account_code: r.account_code,
+        debit: Number(r.debit || 0),
+        credit: Number(r.credit || 0),
+        cost_center_id: r.cost_center_id,
+        project_id: r.project_id
+    }));
 }
 
 export const GET = withRouteErrors(async (req: Request) => {
@@ -59,7 +98,16 @@ export const GET = withRouteErrors(async (req: Request) => {
     const present = url.searchParams.get("present"); // e.g. "USD"
     const asOf = (url.searchParams.get("as_of") ?? new Date().toISOString()).slice(0, 10);
 
-    const tb = await loadTB(auth.company_id, currency);
+    // Dimension filters and pivot (M14)
+    const costCenterId = url.searchParams.get("cost_center_id");
+    const projectId = url.searchParams.get("project_id");
+    const pivot = url.searchParams.get("pivot");
+
+    const tb = await loadTB(auth.company_id, currency, {
+        ...(costCenterId && { cost_center_id: costCenterId }),
+        ...(projectId && { project_id: projectId }),
+        ...(pivot && { pivot })
+    });
     const policy = getDisclosure();
 
     function valOfAccounts(names: string[], sign: 1 | -1) {
@@ -113,7 +161,29 @@ export const GET = withRouteErrors(async (req: Request) => {
     }));
     const total = Number(convertedValues["Net Profit"] ?? 0).toFixed(2);
 
-    return Response.json({
+    // Handle pivot response (M14)
+    let pivotData = null;
+    if (pivot === "cost_center") {
+        const pivotTotals: Record<string, number> = {};
+        for (const row of tb) {
+            if (row.cost_center_id) {
+                const key = row.cost_center_id;
+                pivotTotals[key] = (pivotTotals[key] || 0) + (row.debit - row.credit);
+            }
+        }
+        pivotData = { by_cost_center: pivotTotals };
+    } else if (pivot === "project") {
+        const pivotTotals: Record<string, number> = {};
+        for (const row of tb) {
+            if (row.project_id) {
+                const key = row.project_id;
+                pivotTotals[key] = (pivotTotals[key] || 0) + (row.debit - row.credit);
+            }
+        }
+        pivotData = { by_project: pivotTotals };
+    }
+
+    const response: any = {
         company_id: auth.company_id,
         currency: presentCurrency,
         base_currency: baseCurrency,
@@ -121,7 +191,14 @@ export const GET = withRouteErrors(async (req: Request) => {
         rate_used: rate,
         rows,
         total
-    }, {
+    };
+
+    if (pivotData) {
+        response.pivot = pivot;
+        response.totals = pivotData;
+    }
+
+    return Response.json(response, {
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, OPTIONS',

@@ -45,6 +45,17 @@ export function unprocessable(message: string, details?: any) {
     });
 }
 
+export function notFound(message: string) {
+    return Response.json({ error: message }, {
+        status: 404,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+        }
+    });
+}
+
 export function serverError(message: string) {
     return Response.json({ error: message }, {
         status: 500,
