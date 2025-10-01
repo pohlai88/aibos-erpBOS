@@ -1,4 +1,0 @@
-{
-  "/api/ping/route": "app/api/ping/route.js",
-  "/api/auth/whoami/route": "app/api/auth/whoami/route.js"
-}
