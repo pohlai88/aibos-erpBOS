@@ -5,48 +5,50 @@
    ▲ Next.js 15.5.4
 
    Creating an optimized production build ...
- ✓ Compiled successfully in 6.9s
+ ✓ Compiled successfully in 9.7s
    Skipping linting
    Checking validity of types ...
    Collecting page data ...
-   Generating static pages (0/25) ...
-   Generating static pages (6/25) 
-   Generating static pages (12/25) 
-   Generating static pages (18/25) 
- ✓ Generating static pages (25/25)
+   Generating static pages (0/27) ...
+   Generating static pages (6/27) 
+   Generating static pages (13/27) 
+   Generating static pages (20/27) 
+ ✓ Generating static pages (27/27)
    Finalizing page optimization ...
    Collecting build traces ...
 
 Route (app)                                  Size  First Load JS
-┌ ƒ /api/audit/events                       187 B         101 kB
-├ ƒ /api/audit/journals                     187 B         101 kB
-├ ƒ /api/audit/journals/[id]/lines          187 B         101 kB
-├ ƒ /api/auth/keys                          187 B         101 kB
-├ ƒ /api/auth/keys/[id]                     187 B         101 kB
-├ ƒ /api/auth/keys/[id]/rotate              187 B         101 kB
-├ ƒ /api/auth/switch-company                187 B         101 kB
-├ ƒ /api/auth/test                          187 B         101 kB
-├ ƒ /api/auth/whoami                        187 B         101 kB
-├ ƒ /api/healthz                            187 B         101 kB
-├ ƒ /api/inventory/issues                   187 B         101 kB
-├ ƒ /api/inventory/receipts                 187 B         101 kB
-├ ƒ /api/inventory/summary                  187 B         101 kB
-├ ƒ /api/journals/[id]                      187 B         101 kB
-├ ƒ /api/journals/[id]/reverse              187 B         101 kB
-├ ƒ /api/payments/receive                   187 B         101 kB
-├ ƒ /api/payments/supplier                  187 B         101 kB
-├ ƒ /api/periods                            187 B         101 kB
-├ ƒ /api/ping                               187 B         101 kB
-├ ƒ /api/purchase-invoices                  187 B         101 kB
-├ ƒ /api/readyz                             187 B         101 kB
-├ ƒ /api/reports/aging                      187 B         101 kB
-├ ƒ /api/reports/bs                         187 B         101 kB
-├ ƒ /api/reports/pl                         187 B         101 kB
-├ ƒ /api/reports/trial-balance              187 B         101 kB
-├ ƒ /api/sales-invoices                     187 B         101 kB
-├ ƒ /api/webhooks                           187 B         101 kB
-├ ƒ /api/webhooks/[id]                      187 B         101 kB
-└ ƒ /api/webhooks/replay                    187 B         101 kB
+┌ ƒ /api/audit/events                       194 B         101 kB
+├ ƒ /api/audit/journals                     194 B         101 kB
+├ ƒ /api/audit/journals/[id]/lines          194 B         101 kB
+├ ƒ /api/auth/keys                          194 B         101 kB
+├ ƒ /api/auth/keys/[id]                     194 B         101 kB
+├ ƒ /api/auth/keys/[id]/rotate              194 B         101 kB
+├ ƒ /api/auth/switch-company                194 B         101 kB
+├ ƒ /api/auth/test                          194 B         101 kB
+├ ƒ /api/auth/whoami                        194 B         101 kB
+├ ƒ /api/fx/rates                           194 B         101 kB
+├ ƒ /api/fx/revalue                         194 B         101 kB
+├ ƒ /api/healthz                            194 B         101 kB
+├ ƒ /api/inventory/issues                   194 B         101 kB
+├ ƒ /api/inventory/receipts                 194 B         101 kB
+├ ƒ /api/inventory/summary                  194 B         101 kB
+├ ƒ /api/journals/[id]                      194 B         101 kB
+├ ƒ /api/journals/[id]/reverse              194 B         101 kB
+├ ƒ /api/payments/receive                   194 B         101 kB
+├ ƒ /api/payments/supplier                  194 B         101 kB
+├ ƒ /api/periods                            194 B         101 kB
+├ ƒ /api/ping                               194 B         101 kB
+├ ƒ /api/purchase-invoices                  194 B         101 kB
+├ ƒ /api/readyz                             194 B         101 kB
+├ ƒ /api/reports/aging                      194 B         101 kB
+├ ƒ /api/reports/bs                         194 B         101 kB
+├ ƒ /api/reports/pl                         194 B         101 kB
+├ ƒ /api/reports/trial-balance              194 B         101 kB
+├ ƒ /api/sales-invoices                     194 B         101 kB
+├ ƒ /api/webhooks                           194 B         101 kB
+├ ƒ /api/webhooks/[id]                      194 B         101 kB
+└ ƒ /api/webhooks/replay                    194 B         101 kB
 + First Load JS shared by all              100 kB
   ├ chunks/688-1230125f9665709e.js        44.4 kB
   ├ chunks/8dd80cee-9676efcf037caaaa.js   54.2 kB

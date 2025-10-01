@@ -3,6 +3,7 @@ import { Pool, PoolClient } from "pg";
 import * as schema from "./schema";
 import { eq, and } from "drizzle-orm";
 import type { LedgerRepo, RepoJournal, RepoJournalLine, Tx, TxManager } from "@aibos/ports";
+import crypto from "node:crypto";
 
 export type DbTx = { client: PoolClient };
 export class DrizzleTxManager implements TxManager {
@@ -61,7 +62,9 @@ export class DrizzleLedgerRepo implements LedgerRepo {
       currency: j.currency,
       sourceDoctype: j.source_doctype,
       sourceId: j.source_id,
-      idempotencyKey: j.idempotency_key
+      idempotencyKey: j.idempotency_key,
+      baseCurrency: (j as any).base_currency,
+      rateUsed: (j as any).rate_used
     });
     for (const l of j.lines) {
       await db.insert(schema.journalLine).values({
@@ -72,7 +75,11 @@ export class DrizzleLedgerRepo implements LedgerRepo {
         amount: l.amount.amount,
         currency: l.currency,
         partyType: l.party_type,
-        partyId: l.party_id
+        partyId: l.party_id,
+        baseAmount: (l as any).base_amount?.amount,
+        baseCurrency: (l as any).base_currency,
+        txnAmount: (l as any).txn_amount?.amount,
+        txnCurrency: (l as any).txn_currency
       });
     }
     return { id, lines: j.lines };
@@ -81,29 +88,31 @@ export class DrizzleLedgerRepo implements LedgerRepo {
   async trialBalance(companyId: string, currency: string, tx?: DbTx): Promise<Array<{ account_code: string, debit: string, credit: string, currency: string }>> {
     const db = this.dbFrom(tx);
 
-    // Query journal lines for the company and currency
+    // Query journal lines for the company - use base_amount if available, fallback to amount
     const lines = await db
       .select({
         account_code: schema.journalLine.accountCode,
         dc: schema.journalLine.dc,
         amount: schema.journalLine.amount,
+        base_amount: schema.journalLine.baseAmount,
+        base_currency: schema.journalLine.baseCurrency,
         currency: schema.journalLine.currency
       })
       .from(schema.journalLine)
       .innerJoin(schema.journal, eq(schema.journalLine.journalId, schema.journal.id))
-      .where(
-        and(
-          eq(schema.journal.companyId, companyId),
-          eq(schema.journalLine.currency, currency)
-        )
-      );
+      .where(eq(schema.journal.companyId, companyId));
 
     // Aggregate by account
     const acc = new Map<string, { d: number; c: number }>();
     for (const line of lines) {
       const key = line.account_code;
       const slot = acc.get(key) ?? { d: 0, c: 0 };
-      const amt = Number(line.amount);
+      
+      // Use base_amount if available and matches requested currency, otherwise use amount
+      const amt = (line.base_amount && line.base_currency === currency) 
+        ? Number(line.base_amount) 
+        : Number(line.amount);
+        
       if (line.dc === "D") slot.d += amt; else slot.c += amt;
       acc.set(key, slot);
     }
@@ -132,4 +141,17 @@ export class DrizzleLedgerRepo implements LedgerRepo {
       payload: JSON.stringify(event)
     });
   }
+}
+
+// FX Rate adapter functions
+export async function getFxQuotesForDateOrBefore(db: Pool, from: string, to: string, onISO: string, daysBack = 30) {
+  // fetch within window to reduce scan
+  const { rows } = await db.query(`
+    select date::text as date, from_ccy as from, to_ccy as to, rate::text
+    from fx_rate
+    where from_ccy = $1 and to_ccy = $2 and date <= $3 and date >= ($3::date - $4::int)
+    order by date desc
+    limit 30
+  `, [from, to, onISO, daysBack]);
+  return rows.map(r => ({ date: r.date, from: r.from, to: r.to, rate: Number(r.rate) }));
 }

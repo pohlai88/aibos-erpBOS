@@ -39,7 +39,10 @@ export const journal = pgTable("journal", {
     idempotencyKey: text("idempotency_key").notNull().unique(),
     isReversal: text("is_reversal").default("false").notNull(),
     reversesJournalId: text("reverses_journal_id"),
-    autoReverseOn: timestamp("auto_reverse_on", { withTimezone: true })
+    autoReverseOn: timestamp("auto_reverse_on", { withTimezone: true }),
+    // Multi-currency fields
+    baseCurrency: char("base_currency", { length: 3 }),
+    rateUsed: numeric("rate_used", { precision: 20, scale: 10 })
 });
 
 export const journalLine = pgTable("journal_line", {
@@ -51,6 +54,21 @@ export const journalLine = pgTable("journal_line", {
     currency: char("currency", { length: 3 }).notNull(),
     partyType: text("party_type"),
     partyId: text("party_id"),
+    // Multi-currency fields
+    baseAmount: numeric("base_amount", { precision: 20, scale: 6 }),
+    baseCurrency: char("base_currency", { length: 3 }),
+    txnAmount: numeric("txn_amount", { precision: 20, scale: 6 }),
+    txnCurrency: char("txn_currency", { length: 3 })
+});
+
+export const fxRate = pgTable("fx_rate", {
+    id: text("id").primaryKey(),
+    date: timestamp("date", { withTimezone: true }).notNull(),
+    fromCcy: char("from_ccy", { length: 3 }).notNull(),
+    toCcy: char("to_ccy", { length: 3 }).notNull(),
+    rate: numeric("rate", { precision: 20, scale: 10 }).notNull(),
+    source: text("source").default("manual").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const outbox = pgTable("outbox", {

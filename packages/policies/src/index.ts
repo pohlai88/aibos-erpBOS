@@ -24,3 +24,6 @@ export function getDisclosure(): Disclosure {
 export function clearCache(): void {
     cache = null;
 }
+
+// Export FX policy
+export * from "./fx";

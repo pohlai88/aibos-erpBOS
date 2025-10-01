@@ -8,6 +8,11 @@ export type RepoJournalLine = {
     currency: string;
     party_type?: "Customer" | "Supplier";
     party_id?: string;
+    // Multi-currency fields
+    base_amount?: Money;
+    base_currency?: string;
+    txn_amount?: Money;
+    txn_currency?: string;
 };
 
 export type RepoJournal = {
@@ -19,6 +24,9 @@ export type RepoJournal = {
     source_id: string;
     idempotency_key: string;
     lines: RepoJournalLine[];
+    // Multi-currency fields
+    base_currency?: string;
+    rate_used?: number;
 };
 
 export interface Tx {

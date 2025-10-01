@@ -10,18 +10,35 @@ export const GET = withRouteErrors(async (req: Request) => {
   if (isResponse(capCheck)) return capCheck;
 
   const url = new URL(req.url);
-  const currency = url.searchParams.get("currency") ?? "MYR";
+  
+  // Get company base currency
+  const company = await pool.query(`select base_currency from company where id=$1`, [auth.company_id]);
+  const baseCurrency = company.rows[0]?.base_currency || "MYR";
+  
+  const currency = url.searchParams.get("currency") ?? baseCurrency;
 
   const sql = `
     SELECT
       jl.account_code,
       jl.currency,
-      SUM(CASE WHEN jl.dc = 'D' THEN jl.amount::numeric ELSE 0 END) AS debit,
-      SUM(CASE WHEN jl.dc = 'C' THEN jl.amount::numeric ELSE 0 END) AS credit
+      jl.base_currency,
+      jl.base_amount,
+      SUM(CASE WHEN jl.dc = 'D' THEN 
+        CASE 
+          WHEN jl.base_amount IS NOT NULL AND jl.base_currency = $2 THEN jl.base_amount::numeric
+          ELSE jl.amount::numeric 
+        END
+        ELSE 0 END) AS debit,
+      SUM(CASE WHEN jl.dc = 'C' THEN 
+        CASE 
+          WHEN jl.base_amount IS NOT NULL AND jl.base_currency = $2 THEN jl.base_amount::numeric
+          ELSE jl.amount::numeric 
+        END
+        ELSE 0 END) AS credit
     FROM journal_line jl
     JOIN journal j ON j.id = jl.journal_id
-    WHERE j.company_id = $1 AND j.currency = $2
-    GROUP BY jl.account_code, jl.currency
+    WHERE j.company_id = $1
+    GROUP BY jl.account_code, jl.currency, jl.base_currency, jl.base_amount
     ORDER BY jl.account_code;
   `;
 
@@ -37,13 +54,14 @@ export const GET = withRouteErrors(async (req: Request) => {
       account_code: r.account_code as string,
       debit: d.toFixed(2),
       credit: c.toFixed(2),
-      currency: r.currency as string
+      currency: currency
     };
   });
 
   return Response.json({
     company_id: auth.company_id,
     currency,
+    base_currency: baseCurrency,
     rows: mapped,
     control: { debit: debit.toFixed(2), credit: credit.toFixed(2) }
   }, {

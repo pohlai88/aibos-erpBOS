@@ -2,6 +2,7 @@ import type { SalesInvoice } from "@aibos/contracts/http/sales/sales-invoice.sch
 import type { LedgerRepo, TxManager } from "@aibos/ports";
 import { genId, type JournalLine, insertJournal } from "./ledger";
 import { loadRule, get } from "@aibos/posting-rules";
+import { computeBaseAmounts } from "./fx";
 
 // map rule lines → JournalLine using SI doc
 function mapLines(si: SalesInvoice, kind: "debits" | "credits"): JournalLine[] {
@@ -15,6 +16,8 @@ function mapLines(si: SalesInvoice, kind: "debits" | "credits"): JournalLine[] {
       dc: kind === "debits" ? "D" : "C",
       amount: money,
       currency: si.currency,
+      txn_amount: money,
+      txn_currency: si.currency,
     };
     if (l.party?.type && l.party.field) {
       const partyId = get(si, l.party.field);
@@ -28,7 +31,7 @@ function mapLines(si: SalesInvoice, kind: "debits" | "credits"): JournalLine[] {
   return lines;
 }
 
-type Deps = { repo?: LedgerRepo; tx?: TxManager };
+type Deps = { repo?: LedgerRepo; tx?: TxManager; pool?: any };
 
 export async function postSalesInvoice(si: SalesInvoice, deps: Deps = {}) {
   // derive idempotency key per rule
@@ -43,6 +46,29 @@ export async function postSalesInvoice(si: SalesInvoice, deps: Deps = {}) {
 
   const lines = [...mapLines(si, "debits"), ...mapLines(si, "credits")];
 
+  // Compute base amounts for multi-currency (only if pool is available)
+  let fxData = { baseCurrency: si.currency, rateUsed: 1.0, baseAmounts: lines.map(l => parseFloat(l.amount.amount)) };
+
+  if (deps.pool) {
+    try {
+      fxData = await computeBaseAmounts(
+        deps.pool,
+        si.company_id,
+        si.doc_date,
+        lines.map(l => ({ amount: parseFloat(l.amount.amount), currency: l.currency }))
+      );
+    } catch (error) {
+      console.warn("FX computation failed, using transaction currency:", error);
+    }
+  }
+
+  // Update lines with base amounts
+  lines.forEach((line, index) => {
+    const baseAmount = fxData.baseAmounts[index] ?? parseFloat(line.amount.amount);
+    line.base_amount = { amount: baseAmount.toFixed(2), currency: fxData.baseCurrency };
+    line.base_currency = fxData.baseCurrency;
+  });
+
   if (deps.repo && deps.tx) {
     const id = await deps.tx.run(async (t: any) => {
       const existing = await deps.repo!.getIdByKey(key, t as any);
@@ -54,7 +80,9 @@ export async function postSalesInvoice(si: SalesInvoice, deps: Deps = {}) {
         source_doctype: "SalesInvoice",
         source_id: si.id,
         idempotency_key: key,
-        lines
+        lines,
+        base_currency: fxData.baseCurrency,
+        rate_used: fxData.rateUsed
       }, t as any);
       await deps.repo!.enqueueOutbox({
         _meta: { name: "JournalPosted", version: 1, occurredAt: new Date().toISOString() },
@@ -69,7 +97,9 @@ export async function postSalesInvoice(si: SalesInvoice, deps: Deps = {}) {
       posting_date: si.doc_date,
       currency: si.currency,
       source: { doctype: "SalesInvoice", id: si.id },
-      lines
+      lines,
+      base_currency: fxData.baseCurrency,
+      rate_used: fxData.rateUsed
     }, key);
     return { id: j.id };
   }

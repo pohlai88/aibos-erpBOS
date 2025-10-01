@@ -4,6 +4,8 @@ import { ok, created, unprocessable } from "../../../lib/http";
 import { ensurePostingAllowed } from "../../../lib/policy";
 import { requireAuth, enforceCompanyMatch, requireCapability } from "../../../lib/auth";
 import { withRouteErrors, isResponse } from "../../../lib/route-utils";
+import { computeRealizedFX } from "../../../lib/realized-fx";
+import crypto from "node:crypto";
 
 type Body = {
     id?: string;
@@ -73,6 +75,37 @@ export const POST = withRouteErrors(async (req: Request) => {
             amount: { amount: b.amount.toFixed(2), currency: b.currency },
             party_id: b.party_id
         });
+
+        // Compute and post realized FX if there are allocations
+        if (b.allocations?.length) {
+            try {
+                const fxLines = await computeRealizedFX(id, b.doc_date, b.currency, b.amount, auth.company_id);
+                
+                if (fxLines.length > 0) {
+                    // Post additional FX lines to the same journal
+                    for (const fxLine of fxLines) {
+                        await client.query(`
+                            insert into journal_line(id, journal_id, account_code, dc, amount, currency, base_amount, base_currency, txn_amount, txn_currency)
+                            values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                        `, [
+                            crypto.randomUUID(),
+                            journalId,
+                            fxLine.account_code,
+                            fxLine.dc,
+                            fxLine.amount.toFixed(2),
+                            fxLine.currency,
+                            fxLine.amount.toFixed(2),
+                            fxLine.currency,
+                            fxLine.amount.toFixed(2),
+                            fxLine.currency
+                        ]);
+                    }
+                }
+            } catch (error) {
+                console.warn("Realized FX computation failed:", error);
+                // Continue without FX - don't fail the payment
+            }
+        }
 
         await client.query(`update payment set journal_id=$1 where id=$2`, [journalId, id]);
         await client.query("COMMIT");

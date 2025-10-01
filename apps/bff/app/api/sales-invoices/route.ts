@@ -1,6 +1,6 @@
 import { SalesInvoice } from "@aibos/contracts/http/sales/sales-invoice.schema";
 import { postSalesInvoice } from "@aibos/services/src/posting";
-import { repo, tx } from "../../lib/db";
+import { repo, tx, pool } from "../../lib/db";
 import { ensurePostingAllowed } from "../../lib/policy";
 import { requireAuth, enforceCompanyMatch, requireCapability } from "../../lib/auth";
 import { withRouteErrors, isResponse } from "../../lib/route-utils";
@@ -43,7 +43,7 @@ export const POST = withRouteErrors(async (req: Request) => {
     });
   }
 
-  const journal = await postSalesInvoice({ ...input, company_id: authResult.company_id }, { repo, tx });
+  const journal = await postSalesInvoice({ ...input, company_id: authResult.company_id }, { repo, tx, pool });
   return Response.json({ journal_id: journal.id }, {
     status: 201,
     headers: {
