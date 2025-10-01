@@ -27,3 +27,6 @@ export function clearCache(): void {
 
 // Export FX policy
 export * from "./fx";
+
+// Export Tax policy
+export * from "./tax";

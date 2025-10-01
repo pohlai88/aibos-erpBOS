@@ -2,17 +2,40 @@ import { pool } from "../../../lib/db";
 import { getDisclosure } from "@aibos/policies";
 import { requireAuth, requireCapability } from "../../../lib/auth";
 import { withRouteErrors, isResponse } from "../../../lib/route-utils";
+import { convertToPresent } from "@aibos/policies";
+
+async function getPresentQuotes(base: string, present: string, onISO: string) {
+    const { rows } = await pool.query(
+        `select date::text as date, from_ccy as from, to_ccy as to, rate::text
+       from fx_rate
+      where from_ccy=$1 and to_ccy=$2 and date <= $3
+      order by date desc
+      limit 1`,
+        [base, present, onISO]
+    );
+    return rows.map(r => ({ date: r.date, from: r.from, to: r.to, rate: Number(r.rate) }));
+}
 
 type TBRow = { account_code: string; debit: number; credit: number; };
 
 async function loadTB(company_id: string, currency: string): Promise<TBRow[]> {
     const sql = `
     SELECT jl.account_code,
-           SUM(CASE WHEN jl.dc='D' THEN jl.amount::numeric ELSE 0 END) AS debit,
-           SUM(CASE WHEN jl.dc='C' THEN jl.amount::numeric ELSE 0 END) AS credit
+           SUM(CASE WHEN jl.dc='D' THEN 
+             CASE 
+               WHEN jl.base_amount IS NOT NULL AND jl.base_currency = $2 THEN jl.base_amount::numeric
+               ELSE jl.amount::numeric 
+             END
+             ELSE 0 END) AS debit,
+           SUM(CASE WHEN jl.dc='C' THEN 
+             CASE 
+               WHEN jl.base_amount IS NOT NULL AND jl.base_currency = $2 THEN jl.base_amount::numeric
+               ELSE jl.amount::numeric 
+             END
+             ELSE 0 END) AS credit
     FROM journal_line jl
     JOIN journal j ON j.id = jl.journal_id
-    WHERE j.company_id = $1 AND j.currency = $2
+    WHERE j.company_id = $1
     GROUP BY jl.account_code
   `;
     const { rows } = await pool.query(sql, [company_id, currency]);
@@ -27,7 +50,15 @@ export const GET = withRouteErrors(async (req: Request) => {
     if (isResponse(capCheck)) return capCheck;
 
     const url = new URL(req.url);
-    const currency = url.searchParams.get("currency") ?? "MYR";
+
+    // Get company base currency
+    const company = await pool.query(`select base_currency from company where id=$1`, [auth.company_id]);
+    const baseCurrency = company.rows[0]?.base_currency || "MYR";
+
+    const currency = url.searchParams.get("currency") ?? baseCurrency;
+    const present = url.searchParams.get("present"); // e.g. "USD"
+    const asOf = (url.searchParams.get("as_of") ?? new Date().toISOString()).slice(0, 10);
+
     const tb = await loadTB(auth.company_id, currency);
     const policy = getDisclosure();
 
@@ -57,10 +88,40 @@ export const GET = withRouteErrors(async (req: Request) => {
         }
     }
 
-    const rows = policy.pl.map((s: any) => ({ line: s.line, value: Number(values[s.line] ?? 0).toFixed(2) }));
-    const total = Number(values["Net Profit"] ?? 0).toFixed(2);
+    // Optional presentation currency conversion
+    let rate = null;
+    let presentCurrency = currency;
+    let convertedValues = values;
 
-    return Response.json({ company_id: auth.company_id, currency, rows, total }, {
+    if (present && present !== currency) {
+        const quotes = await getPresentQuotes(currency, present, asOf);
+        if (quotes.length) {
+            rate = quotes[0]?.rate;
+            presentCurrency = present;
+
+            // Convert all values
+            convertedValues = {};
+            for (const [key, value] of Object.entries(values)) {
+                convertedValues[key] = convertToPresent(value, currency, present, quotes, asOf) ?? value;
+            }
+        }
+    }
+
+    const rows = policy.pl.map((s: any) => ({
+        line: s.line,
+        value: Number(convertedValues[s.line] ?? 0).toFixed(2)
+    }));
+    const total = Number(convertedValues["Net Profit"] ?? 0).toFixed(2);
+
+    return Response.json({
+        company_id: auth.company_id,
+        currency: presentCurrency,
+        base_currency: baseCurrency,
+        present_currency: rate ? present : currency,
+        rate_used: rate,
+        rows,
+        total
+    }, {
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, OPTIONS',

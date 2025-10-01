@@ -1,10 +1,11 @@
 import { PurchaseInvoice } from "@aibos/contracts/http/purchase/purchase-invoice.schema";
 import { postPurchaseInvoice } from "@aibos/services/src/posting-pi";
-import { repo, tx } from "../../lib/db";
+import { repo, tx, pool } from "../../lib/db";
 import { ok, created } from "../../lib/http";
 import { ensurePostingAllowed } from "../../lib/policy";
 import { requireAuth, enforceCompanyMatch, requireCapability } from "../../lib/auth";
 import { withRouteErrors, isResponse } from "../../lib/route-utils";
+import { resolveTaxRule, mapTaxAccount } from "../../lib/tax";
 
 export const POST = withRouteErrors(async (req: Request) => {
     const auth = await requireAuth(req);
@@ -33,7 +34,13 @@ export const POST = withRouteErrors(async (req: Request) => {
         });
     }
 
-    const journal = await postPurchaseInvoice({ ...input, company_id: auth.company_id }, { repo, tx });
+    const journal = await postPurchaseInvoice({ ...input, company_id: auth.company_id }, { 
+        repo, 
+        tx, 
+        pool, 
+        resolveTaxRule, 
+        mapTaxAccount 
+    });
     return created({ journal_id: journal.id }, `/api/journals/${journal.id}`);
 });
 

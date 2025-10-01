@@ -46,7 +46,7 @@ export async function postByRule(doctype: string, id: string, currency: string, 
 
     // Populate multi-currency fields
     lines.forEach((line, index) => {
-        line.base_amount = { amount: baseAmounts.baseAmounts[index].toFixed(2), currency: baseAmounts.baseCurrency };
+        line.base_amount = { amount: (baseAmounts.baseAmounts[index] ?? parseFloat(line.amount.amount)).toFixed(2), currency: baseAmounts.baseCurrency };
         line.base_currency = baseAmounts.baseCurrency;
         line.txn_amount = line.amount;
         line.txn_currency = line.currency;

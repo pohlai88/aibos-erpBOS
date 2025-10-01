@@ -107,12 +107,12 @@ export class DrizzleLedgerRepo implements LedgerRepo {
     for (const line of lines) {
       const key = line.account_code;
       const slot = acc.get(key) ?? { d: 0, c: 0 };
-      
+
       // Use base_amount if available and matches requested currency, otherwise use amount
-      const amt = (line.base_amount && line.base_currency === currency) 
-        ? Number(line.base_amount) 
+      const amt = (line.base_amount && line.base_currency === currency)
+        ? Number(line.base_amount)
         : Number(line.amount);
-        
+
       if (line.dc === "D") slot.d += amt; else slot.c += amt;
       acc.set(key, slot);
     }
@@ -153,5 +153,17 @@ export async function getFxQuotesForDateOrBefore(db: Pool, from: string, to: str
     order by date desc
     limit 30
   `, [from, to, onISO, daysBack]);
+  return rows.map(r => ({ date: r.date, from: r.from, to: r.to, rate: Number(r.rate) }));
+}
+
+export async function getPresentQuotes(db: Pool, base: string, present: string, onISO: string) {
+  const { rows } = await db.query(
+    `select date::text as date, from_ccy as from, to_ccy as to, rate::text
+       from fx_rate
+      where from_ccy=$1 and to_ccy=$2 and date <= $3
+      order by date desc
+      limit 1`,
+    [base, present, onISO]
+  );
   return rows.map(r => ({ date: r.date, from: r.from, to: r.to, rate: Number(r.rate) }));
 }

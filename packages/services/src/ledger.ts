@@ -16,6 +16,8 @@ export type JournalLine = {
   base_currency?: string;
   txn_amount?: Money;
   txn_currency?: string;
+  // Tax metadata
+  meta?: Record<string, any>;
 };
 
 export type Journal = {

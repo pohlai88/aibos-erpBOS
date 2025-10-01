@@ -16,3 +16,17 @@ export const DefaultFxPolicy: FxPolicy = {
         return q[0]?.rate ?? null;
     }
 };
+
+export function convertToPresent(
+    baseAmount: number,
+    baseCcy: string,
+    presentCcy: string,
+    quotes: FxQuote[],
+    onISO: string
+): number | null {
+    if (baseCcy === presentCcy) return baseAmount;
+    const rate = DefaultFxPolicy.selectRate(quotes, baseCcy, presentCcy, onISO);
+    if (!rate) return null;
+    // Keep 2dp for money (adjust if your currency precision differs)
+    return Math.round((baseAmount * rate) * 100) / 100;
+}

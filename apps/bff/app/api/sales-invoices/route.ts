@@ -4,6 +4,7 @@ import { repo, tx, pool } from "../../lib/db";
 import { ensurePostingAllowed } from "../../lib/policy";
 import { requireAuth, enforceCompanyMatch, requireCapability } from "../../lib/auth";
 import { withRouteErrors, isResponse } from "../../lib/route-utils";
+import { resolveTaxRule, mapTaxAccount } from "../../lib/tax";
 
 export const POST = withRouteErrors(async (req: Request) => {
   const authResult = await requireAuth(req);
@@ -43,7 +44,13 @@ export const POST = withRouteErrors(async (req: Request) => {
     });
   }
 
-  const journal = await postSalesInvoice({ ...input, company_id: authResult.company_id }, { repo, tx, pool });
+  const journal = await postSalesInvoice({ ...input, company_id: authResult.company_id }, { 
+    repo, 
+    tx, 
+    pool, 
+    resolveTaxRule, 
+    mapTaxAccount 
+  });
   return Response.json({ journal_id: journal.id }, {
     status: 201,
     headers: {

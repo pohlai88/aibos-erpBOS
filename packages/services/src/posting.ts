@@ -3,6 +3,7 @@ import type { LedgerRepo, TxManager } from "@aibos/ports";
 import { genId, type JournalLine, insertJournal } from "./ledger";
 import { loadRule, get } from "@aibos/posting-rules";
 import { computeBaseAmounts } from "./fx";
+import { computeTax } from "@aibos/policies";
 
 // map rule lines → JournalLine using SI doc
 function mapLines(si: SalesInvoice, kind: "debits" | "credits"): JournalLine[] {
@@ -31,7 +32,7 @@ function mapLines(si: SalesInvoice, kind: "debits" | "credits"): JournalLine[] {
   return lines;
 }
 
-type Deps = { repo?: LedgerRepo; tx?: TxManager; pool?: any };
+type Deps = { repo?: LedgerRepo; tx?: TxManager; pool?: any; resolveTaxRule?: any; mapTaxAccount?: any };
 
 export async function postSalesInvoice(si: SalesInvoice, deps: Deps = {}) {
   // derive idempotency key per rule
@@ -68,6 +69,52 @@ export async function postSalesInvoice(si: SalesInvoice, deps: Deps = {}) {
     line.base_amount = { amount: baseAmount.toFixed(2), currency: fxData.baseCurrency };
     line.base_currency = fxData.baseCurrency;
   });
+
+  // Add tax computation if tax_code_id is provided and helpers are available
+  if ((si as any).tax_code_id && deps.resolveTaxRule && deps.mapTaxAccount && deps.pool) {
+    try {
+      const taxCodeId = (si as any).tax_code_id;
+      const taxRule = await deps.resolveTaxRule(deps.pool, si.company_id, taxCodeId, si.doc_date);
+      
+      if (taxRule) {
+        // Calculate net amount (sum of non-tax lines)
+        const netAmount = lines.reduce((sum, line) => {
+          // Skip tax accounts (we'll add them separately)
+          if (line.account_code?.includes("Tax")) return sum;
+          return sum + parseFloat(line.base_amount?.amount ?? line.amount.amount);
+        }, 0);
+
+        const tax = computeTax({
+          company_id: si.company_id,
+          doc_date: si.doc_date,
+          code_id: taxCodeId,
+          base_amount: netAmount,
+          precision: taxRule.precision,
+          rounding: taxRule.rounding,
+          rate: taxRule.rate
+        });
+
+        const outputAccount = await deps.mapTaxAccount(deps.pool, si.company_id, taxCodeId, "output");
+        if (outputAccount) {
+          const taxLine: JournalLine = {
+            id: genId("JRL"),
+            account_code: outputAccount,
+            dc: "C", // Credit for output tax
+            amount: { amount: tax.tax_amount.toFixed(2), currency: fxData.baseCurrency },
+            currency: fxData.baseCurrency,
+            base_amount: { amount: tax.tax_amount.toFixed(2), currency: fxData.baseCurrency },
+            base_currency: fxData.baseCurrency,
+            txn_amount: { amount: tax.tax_amount.toFixed(2), currency: fxData.baseCurrency },
+            txn_currency: fxData.baseCurrency,
+            meta: { tax_code_id: taxCodeId, rate: taxRule.rate }
+          };
+          lines.push(taxLine);
+        }
+      }
+    } catch (error) {
+      console.warn("Tax computation failed:", error);
+    }
+  }
 
   if (deps.repo && deps.tx) {
     const id = await deps.tx.run(async (t: any) => {
