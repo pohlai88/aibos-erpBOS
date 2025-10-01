@@ -5,38 +5,45 @@
    ▲ Next.js 15.5.4
 
    Creating an optimized production build ...
- ✓ Compiled successfully in 8.6s
+ ✓ Compiled successfully in 12.3s
    Linting and checking validity of types ...
  ⨯ ESLint: Converting circular structure to JSON     --> starting at object with constructor 'Object'     |     property 'configs' -> object with constructor 'Object'     |     property 'flat/all' -> object with constructor 'Array'     |     ...     |     property 'plugins' -> object with constructor 'Object'     --- property '@typescript-eslint' closes the circle
    Collecting page data ...
-   Generating static pages (0/18) ...
-   Generating static pages (4/18) 
-   Generating static pages (8/18) 
-   Generating static pages (13/18) 
- ✓ Generating static pages (18/18)
+   Generating static pages (0/23) ...
+   Generating static pages (5/23) 
+   Generating static pages (11/23) 
+   Generating static pages (17/23) 
+ ✓ Generating static pages (23/23)
    Finalizing page optimization ...
    Collecting build traces ...
 
 Route (app)                                  Size  First Load JS
-┌ ƒ /api/auth/keys                          166 B         101 kB
-├ ƒ /api/auth/keys/[id]                     166 B         101 kB
-├ ƒ /api/auth/switch-company                166 B         101 kB
-├ ƒ /api/auth/whoami                        166 B         101 kB
-├ ƒ /api/inventory/issues                   166 B         101 kB
-├ ƒ /api/inventory/receipts                 166 B         101 kB
-├ ƒ /api/inventory/summary                  166 B         101 kB
-├ ƒ /api/journals/[id]                      166 B         101 kB
-├ ƒ /api/journals/[id]/reverse              166 B         101 kB
-├ ƒ /api/payments/receive                   166 B         101 kB
-├ ƒ /api/payments/supplier                  166 B         101 kB
-├ ƒ /api/periods                            166 B         101 kB
-├ ƒ /api/ping                               166 B         101 kB
-├ ƒ /api/purchase-invoices                  166 B         101 kB
-├ ƒ /api/reports/aging                      166 B         101 kB
-├ ƒ /api/reports/bs                         166 B         101 kB
-├ ƒ /api/reports/pl                         166 B         101 kB
-├ ƒ /api/reports/trial-balance              166 B         101 kB
-└ ƒ /api/sales-invoices                     166 B         101 kB
+┌ ƒ /api/audit/events                       181 B         101 kB
+├ ƒ /api/audit/journals                     181 B         101 kB
+├ ƒ /api/audit/journals/[id]/lines          181 B         101 kB
+├ ƒ /api/auth/keys                          181 B         101 kB
+├ ƒ /api/auth/keys/[id]                     181 B         101 kB
+├ ƒ /api/auth/keys/[id]/rotate              181 B         101 kB
+├ ƒ /api/auth/switch-company                181 B         101 kB
+├ ƒ /api/auth/test                          181 B         101 kB
+├ ƒ /api/auth/whoami                        181 B         101 kB
+├ ƒ /api/healthz                            181 B         101 kB
+├ ƒ /api/inventory/issues                   181 B         101 kB
+├ ƒ /api/inventory/receipts                 181 B         101 kB
+├ ƒ /api/inventory/summary                  181 B         101 kB
+├ ƒ /api/journals/[id]                      181 B         101 kB
+├ ƒ /api/journals/[id]/reverse              181 B         101 kB
+├ ƒ /api/payments/receive                   181 B         101 kB
+├ ƒ /api/payments/supplier                  181 B         101 kB
+├ ƒ /api/periods                            181 B         101 kB
+├ ƒ /api/ping                               181 B         101 kB
+├ ƒ /api/purchase-invoices                  181 B         101 kB
+├ ƒ /api/readyz                             181 B         101 kB
+├ ƒ /api/reports/aging                      181 B         101 kB
+├ ƒ /api/reports/bs                         181 B         101 kB
+├ ƒ /api/reports/pl                         181 B         101 kB
+├ ƒ /api/reports/trial-balance              181 B         101 kB
+└ ƒ /api/sales-invoices                     181 B         101 kB
 + First Load JS shared by all              100 kB
   ├ chunks/688-1230125f9665709e.js        44.4 kB
   ├ chunks/8dd80cee-9676efcf037caaaa.js   54.2 kB

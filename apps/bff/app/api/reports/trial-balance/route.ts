@@ -1,10 +1,13 @@
 import { pool } from "../../../lib/db";
-import { requireAuth } from "../../../lib/auth";
+import { requireAuth, requireCapability } from "../../../lib/auth";
 import { withRouteErrors, isResponse } from "../../../lib/route-utils";
 
 export const GET = withRouteErrors(async (req: Request) => {
   const auth = await requireAuth(req);
   if (isResponse(auth)) return auth;
+
+  const capCheck = requireCapability(auth, "reports:read");
+  if (isResponse(capCheck)) return capCheck;
 
   const url = new URL(req.url);
   const currency = url.searchParams.get("currency") ?? "MYR";

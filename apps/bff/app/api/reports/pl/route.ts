@@ -1,6 +1,6 @@
 import { pool } from "../../../lib/db";
 import { getDisclosure } from "@aibos/policies";
-import { requireAuth } from "../../../lib/auth";
+import { requireAuth, requireCapability } from "../../../lib/auth";
 import { withRouteErrors, isResponse } from "../../../lib/route-utils";
 
 type TBRow = { account_code: string; debit: number; credit: number; };
@@ -22,6 +22,9 @@ async function loadTB(company_id: string, currency: string): Promise<TBRow[]> {
 export const GET = withRouteErrors(async (req: Request) => {
     const auth = await requireAuth(req);
     if (isResponse(auth)) return auth;
+
+    const capCheck = requireCapability(auth, "reports:read");
+    if (isResponse(capCheck)) return capCheck;
 
     const url = new URL(req.url);
     const currency = url.searchParams.get("currency") ?? "MYR";

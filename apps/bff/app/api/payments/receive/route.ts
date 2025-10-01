@@ -2,7 +2,7 @@ import { pool } from "../../../lib/db";
 import { postByRule } from "../../../lib/posting";
 import { ok, created, unprocessable } from "../../../lib/http";
 import { ensurePostingAllowed } from "../../../lib/policy";
-import { requireAuth, enforceCompanyMatch } from "../../../lib/auth";
+import { requireAuth, enforceCompanyMatch, requireCapability } from "../../../lib/auth";
 import { withRouteErrors, isResponse } from "../../../lib/route-utils";
 
 type Body = {
@@ -18,13 +18,16 @@ type Body = {
 export const POST = withRouteErrors(async (req: Request) => {
     const auth = await requireAuth(req);
     if (isResponse(auth)) return auth;
-    
+
+    const capCheck = requireCapability(auth, "payments:post");
+    if (isResponse(capCheck)) return capCheck;
+
     const b = await req.json() as Body;
     const id = b.id ?? crypto.randomUUID();
 
     const companyMatchResult = enforceCompanyMatch(auth, b.company_id);
     if (isResponse(companyMatchResult)) return companyMatchResult;
-    
+
     const postingCheck = await ensurePostingAllowed(auth.company_id, b.doc_date);
     if (isResponse(postingCheck)) return postingCheck;
 
@@ -85,7 +88,7 @@ export const POST = withRouteErrors(async (req: Request) => {
 export const GET = withRouteErrors(async (req: Request) => {
     const auth = await requireAuth(req);
     if (isResponse(auth)) return auth;
-    
+
     const url = new URL(req.url);
     const id = url.searchParams.get("id")!;
     const { rows } = await pool.query("select * from payment where id=$1 and company_id=$2", [id, auth.company_id]);

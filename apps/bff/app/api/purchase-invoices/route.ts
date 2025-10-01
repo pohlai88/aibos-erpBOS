@@ -3,12 +3,15 @@ import { postPurchaseInvoice } from "@aibos/services/src/posting-pi";
 import { repo, tx } from "../../lib/db";
 import { ok, created } from "../../lib/http";
 import { ensurePostingAllowed } from "../../lib/policy";
-import { requireAuth, enforceCompanyMatch } from "../../lib/auth";
+import { requireAuth, enforceCompanyMatch, requireCapability } from "../../lib/auth";
 import { withRouteErrors, isResponse } from "../../lib/route-utils";
 
 export const POST = withRouteErrors(async (req: Request) => {
     const auth = await requireAuth(req);
     if (isResponse(auth)) return auth;
+
+    const capCheck = requireCapability(auth, "journals:post");
+    if (isResponse(capCheck)) return capCheck;
 
     const input = PurchaseInvoice.parse(await req.json());
 

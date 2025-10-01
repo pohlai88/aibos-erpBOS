@@ -123,6 +123,7 @@ export default function Home() {
 
       <div style={{ display: "flex", gap: 24 }}>
         <div>
+          <a href="/audit" style={{ textDecoration: "none", color: "#0066cc", marginRight: 16 }}>🔍 Audit Explorer</a>
           <button onClick={async () => {
             const headers: any = {};
             if (apiKey) headers["X-API-Key"] = apiKey;

@@ -2,7 +2,7 @@ import { pool } from "../../../lib/db";
 import { postByRule } from "../../../lib/posting";
 import { created, ok, unprocessable } from "../../../lib/http";
 import { ensurePostingAllowed } from "../../../lib/policy";
-import { requireAuth, enforceCompanyMatch } from "../../../lib/auth";
+import { requireAuth, enforceCompanyMatch, requireCapability } from "../../../lib/auth";
 import { withRouteErrors, isResponse } from "../../../lib/route-utils";
 
 type Body = { id?: string; company_id: string; item_id: string; qty: number; currency: string };
@@ -10,7 +10,7 @@ type Body = { id?: string; company_id: string; item_id: string; qty: number; cur
 export const GET = withRouteErrors(async (req: Request) => {
   const auth = await requireAuth(req);
   if (isResponse(auth)) return auth;
-  
+
   const url = new URL(req.url);
   const id = url.searchParams.get("id")!;
   const { rows } = await pool.query(
@@ -24,13 +24,16 @@ export const GET = withRouteErrors(async (req: Request) => {
 export const POST = withRouteErrors(async (req: Request) => {
   const auth = await requireAuth(req);
   if (isResponse(auth)) return auth;
-  
+
+  const capCheck = requireCapability(auth, "inventory:move");
+  if (isResponse(capCheck)) return capCheck;
+
   const b = await req.json() as Body;
   const id = b.id ?? crypto.randomUUID();
 
   const companyMatchResult = enforceCompanyMatch(auth, b.company_id);
   if (isResponse(companyMatchResult)) return companyMatchResult;
-  
+
   const postingISO = new Date().toISOString();
   const postingCheck = await ensurePostingAllowed(auth.company_id, postingISO);
   if (isResponse(postingCheck)) return postingCheck;

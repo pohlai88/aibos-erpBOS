@@ -5,21 +5,22 @@
    ▲ Next.js 15.5.4
 
    Creating an optimized production build ...
- ✓ Compiled successfully in 4.7s
+ ✓ Compiled successfully in 5.7s
    Linting and checking validity of types ...
  ⨯ ESLint: Converting circular structure to JSON     --> starting at object with constructor 'Object'     |     property 'configs' -> object with constructor 'Object'     |     property 'flat/all' -> object with constructor 'Array'     |     ...     |     property 'plugins' -> object with constructor 'Object'     --- property '@typescript-eslint' closes the circle
    Collecting page data ...
-   Generating static pages (0/6) ...
-   Generating static pages (1/6) 
-   Generating static pages (2/6) 
-   Generating static pages (4/6) 
- ✓ Generating static pages (6/6)
+   Generating static pages (0/7) ...
+   Generating static pages (1/7) 
+   Generating static pages (3/7) 
+   Generating static pages (5/7) 
+ ✓ Generating static pages (7/7)
    Finalizing page optimization ...
    Collecting build traces ...
 
 Route (app)                                 Size  First Load JS
-┌ ○ /                                     2.5 kB         104 kB
+┌ ○ /                                    2.56 kB         104 kB
 ├ ○ /_not-found                            991 B         103 kB
+├ ○ /audit                               2.01 kB         104 kB
 ├ ○ /reports/bs                            568 B         102 kB
 └ ○ /reports/pl                            570 B         102 kB
 + First Load JS shared by all             102 kB

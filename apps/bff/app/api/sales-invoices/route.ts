@@ -2,18 +2,21 @@ import { SalesInvoice } from "@aibos/contracts/http/sales/sales-invoice.schema";
 import { postSalesInvoice } from "@aibos/services/src/posting";
 import { repo, tx } from "../../lib/db";
 import { ensurePostingAllowed } from "../../lib/policy";
-import { requireAuth, enforceCompanyMatch } from "../../lib/auth";
+import { requireAuth, enforceCompanyMatch, requireCapability } from "../../lib/auth";
 import { withRouteErrors, isResponse } from "../../lib/route-utils";
 
 export const POST = withRouteErrors(async (req: Request) => {
   const authResult = await requireAuth(req);
   if (isResponse(authResult)) return authResult;
-  
+
+  const capCheck = requireCapability(authResult, "journals:post");
+  if (isResponse(capCheck)) return capCheck;
+
   const input = SalesInvoice.parse(await req.json());
-  
+
   const companyMatchResult = enforceCompanyMatch(authResult, input.company_id);
   if (isResponse(companyMatchResult)) return companyMatchResult;
-  
+
   const postingCheck = await ensurePostingAllowed(authResult.company_id, input.doc_date);
   if (isResponse(postingCheck)) return postingCheck;
 
