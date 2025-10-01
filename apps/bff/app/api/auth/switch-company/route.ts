@@ -1,10 +1,13 @@
 import { pool } from "../../../lib/db";
 import { requireAuth } from "../../../lib/auth";
 import { ok, unprocessable } from "../../../lib/http";
+import { withRouteErrors, isResponse } from "../../../lib/route-utils";
 
 /** Creates a scoped API key for the requested company if user is a member. */
-export async function POST(req: Request) {
+export const POST = withRouteErrors(async (req: Request) => {
   const auth = await requireAuth(req);
+  if (isResponse(auth)) return auth;
+  
   const b = await req.json() as { company_id: string; name?: string };
   if (!b?.company_id) return unprocessable("company_id required");
 
@@ -25,4 +28,4 @@ export async function POST(req: Request) {
     [id, auth.user_id, b.company_id, b.name ?? "switched", hash]
   );
   return ok({ id, secret, company_id: b.company_id });
-}
+});

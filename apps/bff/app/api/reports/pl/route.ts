@@ -1,6 +1,7 @@
 import { pool } from "../../../lib/db";
 import { getDisclosure } from "@aibos/policies";
 import { requireAuth } from "../../../lib/auth";
+import { withRouteErrors, isResponse } from "../../../lib/route-utils";
 
 type TBRow = { account_code: string; debit: number; credit: number; };
 
@@ -18,8 +19,10 @@ async function loadTB(company_id: string, currency: string): Promise<TBRow[]> {
     return rows.map(r => ({ account_code: r.account_code, debit: Number(r.debit || 0), credit: Number(r.credit || 0) }));
 }
 
-export async function GET(req: Request) {
+export const GET = withRouteErrors(async (req: Request) => {
     const auth = await requireAuth(req);
+    if (isResponse(auth)) return auth;
+
     const url = new URL(req.url);
     const currency = url.searchParams.get("currency") ?? "MYR";
     const tb = await loadTB(auth.company_id, currency);
@@ -61,7 +64,7 @@ export async function GET(req: Request) {
             'Access-Control-Allow-Headers': 'Content-Type',
         }
     });
-}
+});
 
 export async function OPTIONS(req: Request) {
     return new Response(null, {

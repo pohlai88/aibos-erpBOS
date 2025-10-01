@@ -1,8 +1,11 @@
 import { pool } from "../../../lib/db";
 import { requireAuth } from "../../../lib/auth";
+import { withRouteErrors, isResponse } from "../../../lib/route-utils";
 
-export async function GET(req: Request) {
+export const GET = withRouteErrors(async (req: Request) => {
   const auth = await requireAuth(req);
+  if (isResponse(auth)) return auth;
+
   const url = new URL(req.url);
   const currency = url.searchParams.get("currency") ?? "MYR";
 
@@ -47,7 +50,7 @@ export async function GET(req: Request) {
       'Access-Control-Allow-Headers': 'Content-Type',
     }
   });
-}
+});
 
 export async function OPTIONS(req: Request) {
   return new Response(null, {

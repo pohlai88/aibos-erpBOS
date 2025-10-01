@@ -1,7 +1,7 @@
 import { pool } from "./db";
 
-/** Throws Response with 422/423 if posting forbidden */
-export async function ensurePostingAllowed(company_id: string, postingISO: string) {
+/** Returns Response with 422/423 if posting forbidden, void if allowed */
+export async function ensurePostingAllowed(company_id: string, postingISO: string): Promise<Response | void> {
     const { rows } = await pool.query(
         `select id, status, start_date, end_date
        from accounting_period
@@ -13,10 +13,10 @@ export async function ensurePostingAllowed(company_id: string, postingISO: strin
         [company_id, postingISO]
     );
     if (!rows.length) {
-        throw new Response(JSON.stringify({ ok: false, message: "No open period for posting date" }), { status: 422, headers: { "content-type": "application/json" } });
+        return new Response(JSON.stringify({ ok: false, message: "No open period for posting date" }), { status: 422, headers: { "content-type": "application/json" } });
     }
     const p = rows[0];
     if (String(p.status).toUpperCase() !== "OPEN") {
-        throw new Response(JSON.stringify({ ok: false, message: "Period is closed/locked" }), { status: 423, headers: { "content-type": "application/json" } });
+        return new Response(JSON.stringify({ ok: false, message: "Period is closed/locked" }), { status: 423, headers: { "content-type": "application/json" } });
     }
 }

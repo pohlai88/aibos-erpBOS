@@ -3,11 +3,14 @@ import { postByRule } from "../../../lib/posting";
 import { created, ok, unprocessable } from "../../../lib/http";
 import { ensurePostingAllowed } from "../../../lib/policy";
 import { requireAuth, enforceCompanyMatch } from "../../../lib/auth";
+import { withRouteErrors, isResponse } from "../../../lib/route-utils";
 
 type Body = { id?: string; company_id: string; item_id: string; qty: number; currency: string };
 
-export async function GET(req: Request) {
+export const GET = withRouteErrors(async (req: Request) => {
   const auth = await requireAuth(req);
+  if (isResponse(auth)) return auth;
+  
   const url = new URL(req.url);
   const id = url.searchParams.get("id")!;
   const { rows } = await pool.query(
@@ -16,16 +19,21 @@ export async function GET(req: Request) {
   );
   if (!rows.length) return new Response("Not found", { status: 404 });
   return ok({ ok: true, data: rows[0] });
-}
+});
 
-export async function POST(req: Request) {
+export const POST = withRouteErrors(async (req: Request) => {
   const auth = await requireAuth(req);
+  if (isResponse(auth)) return auth;
+  
   const b = await req.json() as Body;
   const id = b.id ?? crypto.randomUUID();
 
-  enforceCompanyMatch(auth, b.company_id);
+  const companyMatchResult = enforceCompanyMatch(auth, b.company_id);
+  if (isResponse(companyMatchResult)) return companyMatchResult;
+  
   const postingISO = new Date().toISOString();
-  await ensurePostingAllowed(auth.company_id, postingISO);
+  const postingCheck = await ensurePostingAllowed(auth.company_id, postingISO);
+  if (isResponse(postingCheck)) return postingCheck;
 
   const client = await pool.connect();
   try {
@@ -94,7 +102,7 @@ export async function POST(req: Request) {
   } finally {
     client.release();
   }
-}
+});
 
 export async function OPTIONS(req: Request) {
   return new Response(null, {

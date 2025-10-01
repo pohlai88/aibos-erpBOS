@@ -1,18 +1,23 @@
 import { pool } from "../../lib/db";
 import { ok, created, unprocessable } from "../../lib/http";
 import { requireAuth, enforceCompanyMatch } from "../../lib/auth";
+import { withRouteErrors, isResponse } from "../../lib/route-utils";
 
-export async function GET(req: Request) {
+export const GET = withRouteErrors(async (req: Request) => {
     const auth = await requireAuth(req);
+    if (isResponse(auth)) return auth;
+    
     const { rows } = await pool.query(
         `select id, code, start_date, end_date, status from accounting_period where company_id=$1 order by start_date desc`,
         [auth.company_id]
     );
     return ok({ items: rows });
-}
+});
 
-export async function POST(req: Request) {
+export const POST = withRouteErrors(async (req: Request) => {
     const auth = await requireAuth(req);
+    if (isResponse(auth)) return auth;
+    
     const b = await req.json() as {
         company_id: string;
         code: string;
@@ -20,7 +25,8 @@ export async function POST(req: Request) {
         status: "OPEN" | "CLOSED";
     };
 
-    enforceCompanyMatch(auth, b.company_id);
+    const companyMatchResult = enforceCompanyMatch(auth, b.company_id);
+    if (isResponse(companyMatchResult)) return companyMatchResult;
 
     if (new Date(b.start_date) > new Date(b.end_date)) {
         return unprocessable("start_date must be <= end_date");
@@ -34,4 +40,4 @@ export async function POST(req: Request) {
         [id, auth.company_id, b.code, b.start_date, b.end_date, b.status]
     );
     return created({ id }, `/api/periods?company_id=${auth.company_id}`);
-}
+});
