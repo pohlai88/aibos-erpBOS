@@ -1,0 +1,6 @@
+{
+  doctype: "StockIssue",
+  idempotencyKey: ["doctype", "id"],
+  debits: [{ account: "COGS", amountField: "cost" }],
+  credits: [{ account: "Inventory", amountField: "cost" }],
+}

@@ -15,6 +15,13 @@
       "when": 1759242843586,
       "tag": "0001_purple_captain_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1759253518842,
+      "tag": "0002_absurd_madame_hydra",
+      "breakpoints": true
     }
   ]
 }

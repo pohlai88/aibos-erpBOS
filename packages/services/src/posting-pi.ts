@@ -5,7 +5,7 @@ import { loadRule, get } from "@aibos/posting-rules";
 
 function mapLines(pi: PurchaseInvoice, kind: "debits" | "credits"): JournalLine[] {
     const rule = loadRule("purchase-invoice");
-    return rule[kind].map(l => {
+    return rule[kind].map((l: any) => {
         const money = get(pi, l.amountField);
         if (!money) throw new Error(`Missing amountField ${l.amountField}`);
         const jl: JournalLine = {
@@ -31,7 +31,7 @@ export async function postPurchaseInvoice(pi: PurchaseInvoice, deps: Deps = {}) 
     const lines: JournalLine[] = [...mapLines(pi, "debits"), ...mapLines(pi, "credits")];
 
     if (deps.repo && deps.tx) {
-        const id = await deps.tx.run(async (t) => {
+        const id = await deps.tx.run(async (t: any) => {
             const existing = await deps.repo!.getIdByKey(key, t as any);
             if (existing) return existing;
             const res = await deps.repo!.insertJournal({

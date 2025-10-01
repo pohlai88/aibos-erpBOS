@@ -43,14 +43,14 @@ export async function GET(req: Request) {
     // second pass: formulas
     for (const s of policy.pl) {
         if ("formula" in s) {
-            const expr = s.formula.replace(/\b([A-Za-z ][A-Za-z ]+)\b/g, (_m, name) => (values[name] ?? 0).toString());
+            const expr = s.formula.replace(/\b([A-Za-z ][A-Za-z ]+)\b/g, (_m: string, name: string) => (values[name] ?? 0).toString());
             // extremely simple evaluator: only + operations used above
-            const v = expr.split("+").map(x => Number(x.trim())).reduce((a, b) => a + b, 0);
+            const v = expr.split("+").map((x: string) => Number(x.trim())).reduce((a: number, b: number) => a + b, 0);
             values[s.line] = v;
         }
     }
 
-    const rows = policy.pl.map(s => ({ line: s.line, value: Number(values[s.line] ?? 0).toFixed(2) }));
+    const rows = policy.pl.map((s: any) => ({ line: s.line, value: Number(values[s.line] ?? 0).toFixed(2) }));
     const total = Number(values["Net Profit"] ?? 0).toFixed(2);
 
     return Response.json({ company_id, currency, rows, total }, {

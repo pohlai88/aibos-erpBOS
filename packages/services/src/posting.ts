@@ -6,7 +6,7 @@ import { loadRule, get } from "@aibos/posting-rules";
 // map rule lines → JournalLine using SI doc
 function mapLines(si: SalesInvoice, kind: "debits" | "credits"): JournalLine[] {
   const rule = loadRule("sales-invoice");
-  const lines = rule[kind].map(l => {
+  const lines = rule[kind].map((l: any) => {
     const money = get(si, l.amountField);
     if (!money) throw new Error(`Missing amountField ${l.amountField}`);
     const jl: JournalLine = {
@@ -33,7 +33,7 @@ type Deps = { repo?: LedgerRepo; tx?: TxManager };
 export async function postSalesInvoice(si: SalesInvoice, deps: Deps = {}) {
   // derive idempotency key per rule
   const rule = loadRule("sales-invoice");
-  const idParts = rule.idempotencyKey.map(k =>
+  const idParts = rule.idempotencyKey.map((k: string) =>
     k === "doctype" ? "SalesInvoice" :
       k === "id" ? si.id :
         k === "version" ? "v1" :
@@ -44,7 +44,7 @@ export async function postSalesInvoice(si: SalesInvoice, deps: Deps = {}) {
   const lines = [...mapLines(si, "debits"), ...mapLines(si, "credits")];
 
   if (deps.repo && deps.tx) {
-    const id = await deps.tx.run(async (t) => {
+    const id = await deps.tx.run(async (t: any) => {
       const existing = await deps.repo!.getIdByKey(key, t as any);
       if (existing) return existing;
       const res = await deps.repo!.insertJournal({

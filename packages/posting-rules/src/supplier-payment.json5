@@ -1,0 +1,12 @@
+{
+  doctype: "SupplierPayment",
+  idempotencyKey: ["doctype", "id"],
+  debits: [
+    {
+      account: "Trade Payables",
+      amountField: "amount",
+      party: { type: "Supplier", field: "party_id" },
+    },
+  ],
+  credits: [{ account: "Bank", amountField: "amount" }],
+}

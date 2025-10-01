@@ -25,6 +25,22 @@ async function main() {
         { id: "ACC-EXP", companyId: "COMP-1", code: "Expense", name: "Expense", type: "Expense", normalBalance: "D" }
     ]).onConflictDoNothing();
 
+    // inventory accounts
+    await db.insert(schema.account).values([
+        { id: "ACC-INV", companyId: "COMP-1", code: "Inventory", name: "Inventory", type: "Asset", normalBalance: "D" },
+        { id: "ACC-COGS", companyId: "COMP-1", code: "COGS", name: "COGS", type: "Expense", normalBalance: "D" }
+    ]).onConflictDoNothing();
+
+    // bank account
+    await db.insert(schema.account).values([
+        { id: "ACC-BANK", companyId: "COMP-1", code: "Bank", name: "Bank", type: "Asset", normalBalance: "D" }
+    ]).onConflictDoNothing();
+
+    // demo item
+    await db.insert(schema.item).values({
+        id: "ITEM-1", code: "ITEM-1", name: "Demo Item", uom: "EA"
+    }).onConflictDoNothing();
+
     console.log("Seeded company + accounts");
     await pool.end();
 }

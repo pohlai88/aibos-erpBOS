@@ -2,6 +2,9 @@
   "name": "@aibos/services",
   "version": "0.0.0",
   "type": "module",
+  "scripts": {
+    "dev": "echo 'Services - no dev server needed'"
+  },
   "dependencies": {
     "@aibos/ports": "workspace:*",
     "@aibos/posting-rules": "workspace:*"

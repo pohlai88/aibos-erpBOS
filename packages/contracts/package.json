@@ -1,10 +1,16 @@
 {
   "name": "@aibos/contracts",
   "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./http/sales/sales-invoice.schema": "./http/sales/sales-invoice.schema.ts",
+    "./http/purchase/purchase-invoice.schema": "./http/purchase/purchase-invoice.schema.ts",
+    "./http/ping/ping.schema": "./http/ping/ping.schema.ts"
+  },
   "scripts": {
     "build": "pnpm gen:openapi",
     "check": "pnpm gen:openapi && git diff --exit-code openapi/openapi.json || (echo 'Commit OpenAPI changes' && exit 1)",
     "gen:openapi": "tsx ./scripts/build-openapi.ts"
-  },
-  "type": "module"
+  }
 }

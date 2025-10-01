@@ -61,16 +61,23 @@
     "build": "turbo run build",
     "changeset": "changeset",
     "clean": "turbo run clean",
+    "contracts:gen": "pnpm -w -F @aibos/contracts gen:openapi && pnpm -w -F @aibos/api-client gen:types",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose stop db",
     "depcruise": "depcruise --config .dependency-cruiser.cjs . || exit 1",
     "dev": "turbo run dev --parallel",
+    "dev:bff": "pnpm --filter bff dev",
+    "dev:web": "pnpm --filter web dev",
     "lint": "turbo run lint",
+    "rules:build": "pnpm -w -F @aibos/posting-rules build",
     "syncpack:check": "syncpack lint",
     "syncpack:fix": "syncpack fix-mismatches",
     "syncpack:list": "syncpack list-mismatches",
     "type-check": "turbo run type-check",
-    "verify": "pnpm -w contracts:check && pnpm -w client:gen && pnpm -w depcruise"
+    "verify": "pnpm contracts:gen && pnpm rules:build",
+    "worker": "pnpm --filter worker dev"
   }
 }

@@ -67,10 +67,10 @@ export async function trialBalance(company_id: string, currency: string): Promis
   for (const [key, v] of acc.entries()) {
     const [account_code, curr] = key.split(":");
     rows.push({
-      account_code,
+      account_code: account_code || "",
       debit: v.d.toFixed(2),
       credit: v.c.toFixed(2),
-      currency: curr,
+      currency: curr || "",
     });
   }
   // sort for stable UI
@@ -121,8 +121,8 @@ export class LedgerService {
             dc: l.dc,
             amount: l.amount,
             currency: l.currency,
-            party_type: l.party_type,
-            party_id: l.party_id
+            ...(l.party_type && { party_type: l.party_type }),
+            ...(l.party_id && { party_id: l.party_id })
           }))
         };
       }
@@ -140,8 +140,8 @@ export class LedgerService {
           dc: l.dc,
           amount: l.amount,
           currency: l.currency,
-          party_type: l.party_type,
-          party_id: l.party_id
+          ...(l.party_type && { party_type: l.party_type }),
+          ...(l.party_id && { party_id: l.party_id })
         }))
       };
 
@@ -156,8 +156,8 @@ export class LedgerService {
           dc: l.dc,
           amount: l.amount,
           currency: l.currency,
-          party_type: l.party_type,
-          party_id: l.party_id
+          ...(l.party_type && { party_type: l.party_type }),
+          ...(l.party_id && { party_id: l.party_id })
         }))
       };
     }
@@ -174,8 +174,11 @@ export class LedgerService {
   async trialBalance(companyId: string, currency: string): Promise<TrialBalanceRow[]> {
     if (this.ledgerRepo && this.txManager) {
       // Database implementation
-      return await this.txManager.run(async (tx) => {
-        const rows = await (this.ledgerRepo as any).trialBalance(companyId, currency, tx);
+      return await this.txManager.run(async (tx: Tx) => {
+        if (!this.ledgerRepo?.trialBalance) {
+          throw new Error("Trial balance not supported by this repository");
+        }
+        const rows = await this.ledgerRepo.trialBalance(companyId, currency, tx);
         return rows.map((r: any) => ({
           account_code: r.account_code,
           debit: r.debit,

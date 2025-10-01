@@ -6,8 +6,8 @@
         "dev": "tsx src/worker.ts"
     },
     "dependencies": {
-        "pg": "^8.11.5",
-        "drizzle-orm": "^0.32.0",
+        "pg": "^8.16.3",
+        "drizzle-orm": "^0.44.5",
         "dotenv": "^16.4.5"
     }
 }

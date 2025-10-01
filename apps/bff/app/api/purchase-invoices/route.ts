@@ -1,19 +1,25 @@
 import { PurchaseInvoice } from "@aibos/contracts/http/purchase/purchase-invoice.schema";
 import { postPurchaseInvoice } from "@aibos/services/src/posting-pi";
 import { repo, tx } from "../../lib/db";
+import { ok, created } from "../../lib/http";
 
 export async function POST(req: Request) {
     try {
         const input = PurchaseInvoice.parse(await req.json());
+        // derive idempotency key like the service does (PurchaseInvoice:<id>:v1)
+        const idemKey = `PurchaseInvoice:${input.id}:v1`;
+
+        // quick existence probe
+        const existing = await repo.getIdByKey(idemKey as any);
+        if (existing) {
+            return ok({ journal_id: existing }, {
+                "X-Idempotent-Replay": "true",
+                "Location": `/api/journals/${existing}`
+            });
+        }
+
         const journal = await postPurchaseInvoice(input, { repo, tx });
-        return Response.json({ journal_id: journal.id }, {
-            status: 201,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'POST, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type',
-            }
-        });
+        return created({ journal_id: journal.id }, `/api/journals/${journal.id}`);
     } catch (error) {
         console.error("Purchase invoice error:", error);
         return Response.json({ error: "Invalid request data" }, {

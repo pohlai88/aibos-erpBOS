@@ -5,7 +5,7 @@
   "devDependencies": {},
   "scripts": {
     "build": "tsc -b",
-    "dev": "tsx src/dev.ts",
+    "dev": "echo 'API client - no dev server needed'",
     "gen:types": "openapi-typescript ../contracts/openapi/openapi.json -o src/types.gen.ts"
   },
   "type": "module"

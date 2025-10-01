@@ -42,13 +42,13 @@ export async function GET(req: Request) {
     }
     for (const s of policy.bs) {
         if ("formula" in s) {
-            const expr = s.formula.replace(/\b([A-Za-z ][A-Za-z ]+)\b/g, (_m, name) => (values[name] ?? 0).toString());
+            const expr = s.formula.replace(/\b([A-Za-z ][A-Za-z ]+)\b/g, (_m: string, name: string) => (values[name] ?? 0).toString());
             // Handle both addition and subtraction
             const parts = expr.split(/([+\-])/);
-            let result = Number(parts[0].trim());
+            let result = Number(parts[0]?.trim() || 0);
             for (let i = 1; i < parts.length; i += 2) {
                 const operator = parts[i];
-                const operand = Number(parts[i + 1].trim());
+                const operand = Number(parts[i + 1]?.trim() || 0);
                 if (operator === '+') result += operand;
                 else if (operator === '-') result -= operand;
             }
@@ -56,7 +56,7 @@ export async function GET(req: Request) {
         }
     }
 
-    const rows = policy.bs.map(s => ({ line: s.line, value: Number(values[s.line] ?? 0).toFixed(2) }));
+    const rows = policy.bs.map((s: any) => ({ line: s.line, value: Number(values[s.line] ?? 0).toFixed(2) }));
     const equationOK = Math.abs((values["Assets"] ?? 0) - (values["Liabilities"] ?? 0) - (values["Equity"] ?? 0)) < 0.005;
 
     return Response.json({ company_id, currency, rows, equationOK }, {

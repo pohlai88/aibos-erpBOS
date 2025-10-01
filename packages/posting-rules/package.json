@@ -6,7 +6,8 @@
         ".": "./src/index.ts"
     },
     "scripts": {
-        "build": "echo 'No build needed - TypeScript files exported directly'"
+        "build": "echo 'No build needed - TypeScript files exported directly'",
+        "dev": "echo 'Posting rules - no dev server needed'"
     },
     "dependencies": {
         "json5": "^2.2.3"
