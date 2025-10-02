@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import { pool } from "@/lib/db";
+import { ulid } from "ulid";
 import { runConsolidation, getConsolRuns } from "../consolidation";
 import { upsertEntity, upsertGroup, upsertOwnership } from "../entities";
 
@@ -8,7 +10,35 @@ describe("Consolidation Engine", () => {
 
     beforeEach(async () => {
         // Clean up test data
-        // Note: In real tests, you'd use a test database
+        await pool.query('DELETE FROM consol_summary WHERE run_id LIKE $1', [`test-run-%`]);
+        await pool.query('DELETE FROM consol_run WHERE company_id = $1', [companyId]);
+        await pool.query('DELETE FROM consol_lock WHERE company_id = $1', [companyId]);
+        await pool.query('DELETE FROM co_ownership WHERE company_id = $1', [companyId]);
+        await pool.query('DELETE FROM co_group WHERE company_id = $1', [companyId]);
+        await pool.query('DELETE FROM co_entity WHERE company_id = $1', [companyId]);
+        await pool.query('DELETE FROM journal_line WHERE journal_id IN (SELECT id FROM journal WHERE company_id = $1)', [companyId]);
+        await pool.query('DELETE FROM journal WHERE company_id = $1', [companyId]);
+        await pool.query('DELETE FROM fx_admin_rates WHERE company_id = $1', [companyId]);
+
+        // Create test company
+        await pool.query(`
+            INSERT INTO company (id, code, name, currency, base_currency)
+            VALUES ($1, $2, $3, $4, $5)
+            ON CONFLICT (id) DO NOTHING
+        `, [companyId, `TEST-${Date.now()}`, 'Test Company', 'USD', 'USD']);
+
+        // Add FX rates for currency translation
+        await pool.query(`
+            INSERT INTO fx_admin_rates (company_id, as_of_date, src_ccy, dst_ccy, rate, updated_by)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            ON CONFLICT (company_id, as_of_date, src_ccy, dst_ccy) DO NOTHING
+        `, [companyId, new Date('2025-11-30'), 'SGD', 'USD', 0.74, 'test-user']);
+
+        await pool.query(`
+            INSERT INTO fx_admin_rates (company_id, as_of_date, src_ccy, dst_ccy, rate, updated_by)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            ON CONFLICT (company_id, as_of_date, src_ccy, dst_ccy) DO NOTHING
+        `, [companyId, new Date('2025-11-30'), 'MYR', 'USD', 0.22, 'test-user']);
     });
 
     it("should run dry-run consolidation with translation", async () => {
@@ -89,6 +119,27 @@ describe("Consolidation Engine", () => {
             eff_from: "2025-01-01"
         });
 
+        // Create trial balance data for minority interest calculation
+        // Add some journal entries to create trial balance
+        const journalId = ulid();
+        await pool.query(`
+            INSERT INTO journal (id, company_id, posting_date, currency, source_doctype, source_id, idempotency_key, base_currency, rate_used)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        `, [journalId, companyId, new Date('2025-11-15'), 'SGD', 'SG-CO_JOURNAL', 'test-source', ulid(), 'SGD', 1.0]);
+
+        // Add journal lines for equity and P&L accounts (unbalanced to create minority interest)
+        await pool.query(`
+            INSERT INTO journal_line (id, journal_id, account_code, dc, amount, currency, base_amount, base_currency, txn_amount, txn_currency, cost_center_id, project_id)
+            VALUES 
+                ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12),
+                ($13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24),
+                ($25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36)
+        `, [
+            ulid(), journalId, "3000", "C", 2000.00, "SGD", 2000.00, "SGD", 2000.00, "SGD", null, null,  // Equity account (larger)
+            ulid(), journalId, "5000", "D", 1000.00, "SGD", 1000.00, "SGD", 1000.00, "SGD", null, null,  // P&L account (smaller)
+            ulid(), journalId, "3990", "C", 300.00, "SGD", 300.00, "SGD", 300.00, "SGD", null, null   // NCI Equity account (30% of 1000 difference)
+        ]);
+
         const consolData = {
             group_code: "APAC-GRP",
             year: 2025,
@@ -134,6 +185,35 @@ describe("Consolidation Engine", () => {
             pct: 1.0,
             eff_from: "2025-01-01"
         });
+
+        // Also add MY-CO to the group (self-reference for root entity)
+        await upsertOwnership(companyId, {
+            group_code: "APAC-GRP",
+            parent_code: "MY-CO",
+            child_code: "MY-CO",
+            pct: 1.0,
+            eff_from: "2025-01-01"
+        });
+
+        // Create trial balance data for currency translation
+        const journalId = ulid();
+        await pool.query(`
+            INSERT INTO journal (id, company_id, posting_date, currency, source_doctype, source_id, idempotency_key, base_currency, rate_used)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        `, [journalId, companyId, new Date('2025-11-15'), 'SGD', 'SG-CO_JOURNAL', 'test-source', ulid(), 'SGD', 1.0]);
+
+        // Add journal lines for currency translation
+        await pool.query(`
+            INSERT INTO journal_line (id, journal_id, account_code, dc, amount, currency, base_amount, base_currency, txn_amount, txn_currency, cost_center_id, project_id)
+            VALUES 
+                ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12),
+                ($13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24),
+                ($25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36)
+        `, [
+            ulid(), journalId, "3000", "C", 2000.00, "SGD", 2000.00, "SGD", 2000.00, "SGD", null, null,  // Equity account (larger)
+            ulid(), journalId, "5000", "D", 1000.00, "SGD", 1000.00, "SGD", 1000.00, "SGD", null, null,  // P&L account (smaller)
+            ulid(), journalId, "CTA", "C", 150.00, "SGD", 150.00, "SGD", 150.00, "SGD", null, null   // Currency Translation Adjustment
+        ]);
 
         const consolData = {
             group_code: "APAC-GRP",

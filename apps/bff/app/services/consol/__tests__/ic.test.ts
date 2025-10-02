@@ -1,13 +1,19 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { createIcLink, createIcMatch, getIcMatches } from "../ic";
+import { pool } from "@/lib/db";
 
 describe("Intercompany Tagging & Matching", () => {
     const companyId = "test-company";
     const actor = "test-user";
 
     beforeEach(async () => {
-        // Clean up test data
-        // Note: In real tests, you'd use a test database
+        // Clean up test data in correct order (children first)
+        await pool.query(`DELETE FROM ic_match_line WHERE match_id IN (SELECT id FROM ic_match WHERE company_id = $1)`, [companyId]);
+        await pool.query(`DELETE FROM ic_match WHERE company_id = $1`, [companyId]);
+        await pool.query(`DELETE FROM ic_link WHERE company_id = $1`, [companyId]);
+
+        // Also clean up any orphaned match lines
+        await pool.query(`DELETE FROM ic_match_line WHERE ic_link_id NOT IN (SELECT id FROM ic_link)`);
     });
 
     it("should create IC link with correct counterparty", async () => {

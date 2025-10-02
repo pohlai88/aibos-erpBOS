@@ -104,6 +104,6 @@ describe("Consolidation Entities", () => {
         const ownership = await getOwnershipTree(companyId, "APAC-GRP", "2025-06-15");
         const minorityPct = 1.0 - (ownership[0]?.pct || 0);
 
-        expect(minorityPct).toBe(0.3);
+        expect(minorityPct).toBeCloseTo(0.3, 5);
     });
 });

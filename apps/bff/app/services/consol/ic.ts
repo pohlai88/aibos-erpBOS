@@ -81,19 +81,32 @@ export async function createIcMatch(
         throw new Error(`IC match tolerance exceeded: ${totalAmount} > ${data.tolerance}`);
     }
 
-    // Create match
-    await pool.query(`
-    INSERT INTO ic_match (id, company_id, group_code, year, month, tolerance, created_by)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
-  `, [matchId, companyId, data.group_code, data.year, data.month, data.tolerance, createdBy]);
+    // Use transaction to ensure atomicity
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
 
-    // Create match lines
-    for (const linkId of data.link_ids) {
-        const lineId = ulid();
-        await pool.query(`
-      INSERT INTO ic_match_line (id, match_id, ic_link_id)
-      VALUES ($1, $2, $3)
-    `, [lineId, matchId, linkId]);
+        // Create match
+        await client.query(`
+        INSERT INTO ic_match (id, company_id, group_code, year, month, tolerance, created_by)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `, [matchId, companyId, data.group_code, data.year, data.month, data.tolerance, createdBy]);
+
+        // Create match lines
+        for (const linkId of data.link_ids) {
+            const lineId = ulid();
+            await client.query(`
+          INSERT INTO ic_match_line (id, match_id, ic_link_id)
+          VALUES ($1, $2, $3)
+        `, [lineId, matchId, linkId]);
+        }
+
+        await client.query('COMMIT');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
     }
 
     return {

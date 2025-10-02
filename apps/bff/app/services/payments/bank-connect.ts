@@ -114,7 +114,16 @@ export async function upsertBankProfile(
         RETURNING *
     `, [companyId, bank_code, kind, JSON.stringify(config), active, updatedBy]);
 
-    return rows[0];
+    const row = rows[0];
+    return {
+        companyId: row.company_id,
+        bankCode: row.bank_code,
+        kind: row.kind,
+        config: row.config,
+        active: row.active,
+        updatedAt: row.updated_at,
+        updatedBy: row.updated_by
+    };
 }
 
 export async function getBankProfile(
@@ -126,7 +135,17 @@ export async function getBankProfile(
         WHERE company_id = $1 AND bank_code = $2
     `, [companyId, bankCode]);
 
-    return rows[0] || null;
+    if (!rows[0]) return null;
+    const row = rows[0];
+    return {
+        companyId: row.company_id,
+        bankCode: row.bank_code,
+        kind: row.kind,
+        config: row.config,
+        active: row.active,
+        updatedAt: row.updated_at,
+        updatedBy: row.updated_by
+    };
 }
 
 export async function listBankProfiles(companyId: string): Promise<BankConnProfile[]> {
@@ -136,7 +155,15 @@ export async function listBankProfiles(companyId: string): Promise<BankConnProfi
         ORDER BY bank_code
     `, [companyId]);
 
-    return rows;
+    return rows.map(row => ({
+        companyId: row.company_id,
+        bankCode: row.bank_code,
+        kind: row.kind,
+        config: row.config,
+        active: row.active,
+        updatedAt: row.updated_at,
+        updatedBy: row.updated_by
+    }));
 }
 
 // --- Dispatcher Service (Outbound) --------------------------------------------
@@ -169,34 +196,43 @@ export async function dispatchPaymentRun(
 
     // Generate PAIN.001 content (simplified for now)
     const pain001Content = await generatePain001Content(run_id);
-    const checksum = createHash('sha256').update(pain001Content).digest('hex');
-    const filename = `PAIN001_${run_id}_${Date.now()}.xml`;
+    // For idempotency, use a deterministic checksum based on run data, not content with timestamps
+    const checksum = createHash('sha256').update(`${run_id}_${bank_code}`).digest('hex');
+    const filename = `PAIN001_${run_id}_${checksum.substring(0, 8)}.xml`;
 
-    // Check for existing outbox entry (idempotency)
-    const { rows: existingRows } = await pool.query(`
-        SELECT * FROM bank_outbox
-        WHERE company_id = $1 AND run_id = $2 AND checksum = $3
-    `, [companyId, run_id, checksum]);
+    // Create business key for idempotency
+    const businessKey = `PAYMENT_RUN:${companyId}:${run_id}:${checksum}`;
 
-    if (existingRows.length > 0) {
-        return existingRows[0];
-    }
-
-    // Create outbox entry
-    const outboxId = ulid();
+    // Use upsert with business key for idempotency
     const { rows } = await pool.query(`
-        INSERT INTO bank_outbox (
-            id, company_id, run_id, bank_code, filename, payload, checksum, status
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        INSERT INTO bank_outbox (id, company_id, run_id, bank_code, filename, payload, checksum, status, attempts, last_error, business_key)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        ON CONFLICT (company_id, business_key) WHERE business_key IS NOT NULL
+        DO UPDATE SET status = EXCLUDED.status, attempts = EXCLUDED.attempts, last_error = EXCLUDED.last_error
         RETURNING *
-    `, [outboxId, companyId, run_id, bank_code, filename, pain001Content, checksum, 'queued']);
+    `, [ulid(), companyId, run_id, bank_code, filename, pain001Content, checksum, 'queued', 0, null, businessKey]);
+
+    const row = rows[0];
 
     // Log the dispatch attempt
     await logBankJob(companyId, bank_code, 'DISPATCH',
         `Queued ${dry_run ? 'dry-run ' : ''}dispatch for run ${run_id}`,
         JSON.stringify({ run_id, filename, dry_run }), true);
 
-    return rows[0];
+    return {
+        id: row.id,
+        companyId: row.company_id,
+        runId: row.run_id,
+        bankCode: row.bank_code,
+        filename: row.filename,
+        payload: row.payload,
+        checksum: row.checksum,
+        status: row.status,
+        attempts: row.attempts,
+        lastError: row.last_error,
+        createdAt: row.created_at,
+        sentAt: row.sent_at
+    };
 }
 
 async function generatePain001Content(runId: string): Promise<string> {
@@ -488,7 +524,14 @@ export async function upsertReasonNorm(data: ReasonNormUpsertType): Promise<Bank
         RETURNING *
     `, [bank_code, code, norm_status, norm_label]);
 
-    return rows[0];
+    const row = rows[0];
+    return {
+        bankCode: row.bank_code,
+        code: row.code,
+        normStatus: row.norm_status,
+        normLabel: row.norm_label,
+        updatedAt: row.updated_at
+    };
 }
 
 export async function normalizeReasonCode(
@@ -520,7 +563,17 @@ export async function logBankJob(
         RETURNING *
     `, [id, companyId, bankCode, kind, detail, payload, success]);
 
-    return rows[0];
+    const row = rows[0];
+    return {
+        id: row.id,
+        companyId: row.company_id,
+        bankCode: row.bank_code,
+        kind: row.kind,
+        detail: row.detail,
+        payload: row.payload,
+        success: row.success,
+        createdAt: row.created_at
+    };
 }
 
 export async function getBankJobLogs(
@@ -552,7 +605,16 @@ export async function getBankJobLogs(
     params.push(limit);
 
     const { rows } = await pool.query(query, params);
-    return rows;
+    return rows.map(row => ({
+        id: row.id,
+        companyId: row.company_id,
+        bankCode: row.bank_code,
+        kind: row.kind,
+        detail: row.detail,
+        payload: row.payload,
+        success: row.success,
+        createdAt: row.created_at
+    }));
 }
 
 // --- Outbox Management --------------------------------------------------------

@@ -6,25 +6,47 @@ import { POST as postDispatch } from '@/api/payments/bank/dispatch/route';
 import { POST as postFetch } from '@/api/payments/bank/fetch/route';
 import { GET as getJobs } from '@/api/payments/bank/jobs/route';
 
+// Mock the auth module
+vi.mock('@/lib/auth', () => ({
+    requireAuth: vi.fn(() => ({
+        company_id: 'test-company-123',
+        user_id: 'test-user-123',
+        api_key_id: 'test-api-key-123'
+    }))
+}));
+
+// Mock the rbac module
+vi.mock('@/lib/rbac', () => ({
+    requireCapability: vi.fn(() => true)
+}));
+
 describe('Bank Connectivity API Routes', () => {
     const testCompanyId = 'test-company-123';
     const testBankCode = 'HSBC-MY';
     const testUserId = 'test-user-123';
     const testApiKey = 'test-api-key-123';
 
-    // Mock auth function
-    const mockAuth = {
-        company_id: testCompanyId,
-        user_id: testUserId,
-        api_key_id: testApiKey
-    };
-
     beforeEach(async () => {
-        // Clean up test data
+        // Clean up test data in correct order (children first)
         await pool.query('DELETE FROM bank_job_log WHERE company_id = $1', [testCompanyId]);
         await pool.query('DELETE FROM bank_outbox WHERE company_id = $1', [testCompanyId]);
         await pool.query('DELETE FROM bank_conn_profile WHERE company_id = $1', [testCompanyId]);
+        await pool.query('DELETE FROM ap_pay_line WHERE run_id = $1', ['test-run-123']);
         await pool.query('DELETE FROM ap_pay_run WHERE company_id = $1', [testCompanyId]);
+
+        // Create payment run for tests
+        await pool.query(`
+            INSERT INTO ap_pay_run (id, company_id, year, month, status, ccy, created_by)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            ON CONFLICT (id) DO NOTHING
+        `, ['test-run-123', testCompanyId, 2024, 1, 'exported', 'MYR', testUserId]);
+
+        // Create payment lines
+        await pool.query(`
+            INSERT INTO ap_pay_line (id, run_id, supplier_id, invoice_id, due_date, gross_amount, pay_amount, inv_ccy, pay_ccy, status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            ON CONFLICT (run_id, invoice_id) DO NOTHING
+        `, ['test-line-123', 'test-run-123', 'supplier-123', 'invoice-123', '2024-01-15', 1000, 1000, 'MYR', 'MYR', 'selected']);
     });
 
     afterEach(async () => {
@@ -59,7 +81,11 @@ describe('Bank Connectivity API Routes', () => {
 
             // Mock requireAuth to return our test auth
             vi.mock('@/lib/auth', () => ({
-                requireAuth: vi.fn().mockResolvedValue(mockAuth)
+                requireAuth: vi.fn().mockResolvedValue({
+                    company_id: 'test-company-123',
+                    user_id: 'test-user-123',
+                    api_key_id: 'test-api-key-123'
+                })
             }));
 
             // Mock requireCapability to return success
@@ -81,13 +107,18 @@ describe('Bank Connectivity API Routes', () => {
             await pool.query(`
                 INSERT INTO bank_conn_profile (company_id, bank_code, kind, config, active, updated_by)
                 VALUES ($1, $2, $3, $4, $5, $6)
+                ON CONFLICT (company_id, bank_code) DO NOTHING
             `, [testCompanyId, testBankCode, 'SFTP', JSON.stringify({ host: 'sftp.hsbc.my' }), true, testUserId]);
 
             const req = new NextRequest(`http://localhost/api/payments/bank/profile?bank_code=${testBankCode}`);
 
             // Mock requireAuth
             vi.mock('@/lib/auth', () => ({
-                requireAuth: vi.fn().mockResolvedValue(mockAuth)
+                requireAuth: vi.fn().mockResolvedValue({
+                    company_id: 'test-company-123',
+                    user_id: 'test-user-123',
+                    api_key_id: 'test-api-key-123'
+                })
             }));
 
             const response = await getProfile(req);
@@ -102,7 +133,11 @@ describe('Bank Connectivity API Routes', () => {
 
             // Mock requireAuth
             vi.mock('@/lib/auth', () => ({
-                requireAuth: vi.fn().mockResolvedValue(mockAuth)
+                requireAuth: vi.fn().mockResolvedValue({
+                    company_id: 'test-company-123',
+                    user_id: 'test-user-123',
+                    api_key_id: 'test-api-key-123'
+                })
             }));
 
             const response = await getProfile(req);
@@ -110,22 +145,28 @@ describe('Bank Connectivity API Routes', () => {
         });
 
         it('should list all bank profiles via GET', async () => {
-            // Create multiple profiles
+            // Create multiple profiles with unique bank codes
             await pool.query(`
                 INSERT INTO bank_conn_profile (company_id, bank_code, kind, config, active, updated_by)
                 VALUES ($1, $2, $3, $4, $5, $6)
+                ON CONFLICT (company_id, bank_code) DO NOTHING
             `, [testCompanyId, 'HSBC-MY', 'SFTP', JSON.stringify({ host: 'sftp.hsbc.my' }), true, testUserId]);
 
             await pool.query(`
                 INSERT INTO bank_conn_profile (company_id, bank_code, kind, config, active, updated_by)
                 VALUES ($1, $2, $3, $4, $5, $6)
+                ON CONFLICT (company_id, bank_code) DO NOTHING
             `, [testCompanyId, 'DBS-SG', 'API', JSON.stringify({ api_base: 'https://api.dbs.sg' }), true, testUserId]);
 
             const req = new NextRequest('http://localhost/api/payments/bank/profile');
 
             // Mock requireAuth
             vi.mock('@/lib/auth', () => ({
-                requireAuth: vi.fn().mockResolvedValue(mockAuth)
+                requireAuth: vi.fn().mockResolvedValue({
+                    company_id: 'test-company-123',
+                    user_id: 'test-user-123',
+                    api_key_id: 'test-api-key-123'
+                })
             }));
 
             const response = await getProfile(req);
@@ -144,13 +185,8 @@ describe('Bank Connectivity API Routes', () => {
             await pool.query(`
                 INSERT INTO bank_conn_profile (company_id, bank_code, kind, config, active, updated_by)
                 VALUES ($1, $2, $3, $4, $5, $6)
+                ON CONFLICT (company_id, bank_code) DO NOTHING
             `, [testCompanyId, testBankCode, 'SFTP', JSON.stringify({ host: 'sftp.hsbc.my' }), true, testUserId]);
-
-            // Create payment run
-            await pool.query(`
-                INSERT INTO ap_pay_run (id, company_id, year, month, status, ccy, created_by)
-                VALUES ($1, $2, $3, $4, $5, $6, $7)
-            `, ['test-run-123', testCompanyId, 2024, 1, 'exported', 'MYR', testUserId]);
         });
 
         it('should dispatch payment run successfully', async () => {
@@ -168,7 +204,11 @@ describe('Bank Connectivity API Routes', () => {
 
             // Mock auth and capabilities
             vi.mock('@/lib/auth', () => ({
-                requireAuth: vi.fn().mockResolvedValue(mockAuth)
+                requireAuth: vi.fn().mockResolvedValue({
+                    company_id: 'test-company-123',
+                    user_id: 'test-user-123',
+                    api_key_id: 'test-api-key-123'
+                })
             }));
             vi.mock('@/lib/rbac', () => ({
                 requireCapability: vi.fn().mockResolvedValue(true)
@@ -199,7 +239,11 @@ describe('Bank Connectivity API Routes', () => {
 
             // Mock auth and capabilities
             vi.mock('@/lib/auth', () => ({
-                requireAuth: vi.fn().mockResolvedValue(mockAuth)
+                requireAuth: vi.fn().mockResolvedValue({
+                    company_id: 'test-company-123',
+                    user_id: 'test-user-123',
+                    api_key_id: 'test-api-key-123'
+                })
             }));
             vi.mock('@/lib/rbac', () => ({
                 requireCapability: vi.fn().mockResolvedValue(true)
@@ -212,16 +256,17 @@ describe('Bank Connectivity API Routes', () => {
 
     describe('Fetch Routes', () => {
         beforeEach(async () => {
-            // Create bank profile
+            // Create bank profile with different bank code to avoid conflicts
             await pool.query(`
                 INSERT INTO bank_conn_profile (company_id, bank_code, kind, config, active, updated_by)
                 VALUES ($1, $2, $3, $4, $5, $6)
-            `, [testCompanyId, testBankCode, 'SFTP', JSON.stringify({ host: 'sftp.hsbc.my' }), true, testUserId]);
+                ON CONFLICT (company_id, bank_code) DO NOTHING
+            `, [testCompanyId, 'DBS-SG', 'SFTP', JSON.stringify({ host: 'sftp.dbs.sg' }), true, testUserId]);
         });
 
         it('should fetch bank files successfully', async () => {
             const fetchData = {
-                bank_code: testBankCode,
+                bank_code: 'DBS-SG',
                 channel: 'pain002',
                 max_files: 10
             };
@@ -234,7 +279,11 @@ describe('Bank Connectivity API Routes', () => {
 
             // Mock auth and capabilities
             vi.mock('@/lib/auth', () => ({
-                requireAuth: vi.fn().mockResolvedValue(mockAuth)
+                requireAuth: vi.fn().mockResolvedValue({
+                    company_id: 'test-company-123',
+                    user_id: 'test-user-123',
+                    api_key_id: 'test-api-key-123'
+                })
             }));
             vi.mock('@/lib/rbac', () => ({
                 requireCapability: vi.fn().mockResolvedValue(true)
@@ -251,6 +300,9 @@ describe('Bank Connectivity API Routes', () => {
 
     describe('Job Log Routes', () => {
         beforeEach(async () => {
+            // Clean up existing job logs first
+            await pool.query('DELETE FROM bank_job_log WHERE company_id = $1', [testCompanyId]);
+
             // Create job logs
             await pool.query(`
                 INSERT INTO bank_job_log (id, company_id, bank_code, kind, detail, success)
@@ -268,7 +320,11 @@ describe('Bank Connectivity API Routes', () => {
 
             // Mock auth and capabilities
             vi.mock('@/lib/auth', () => ({
-                requireAuth: vi.fn().mockResolvedValue(mockAuth)
+                requireAuth: vi.fn().mockResolvedValue({
+                    company_id: 'test-company-123',
+                    user_id: 'test-user-123',
+                    api_key_id: 'test-api-key-123'
+                })
             }));
             vi.mock('@/lib/rbac', () => ({
                 requireCapability: vi.fn().mockResolvedValue(true)
@@ -286,7 +342,11 @@ describe('Bank Connectivity API Routes', () => {
 
             // Mock auth and capabilities
             vi.mock('@/lib/auth', () => ({
-                requireAuth: vi.fn().mockResolvedValue(mockAuth)
+                requireAuth: vi.fn().mockResolvedValue({
+                    company_id: 'test-company-123',
+                    user_id: 'test-user-123',
+                    api_key_id: 'test-api-key-123'
+                })
             }));
             vi.mock('@/lib/rbac', () => ({
                 requireCapability: vi.fn().mockResolvedValue(true)
