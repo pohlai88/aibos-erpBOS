@@ -8,62 +8,62 @@ import { AssetsConfigUpsert, AssetsConfigResponse } from "@contracts/assets_pref
 import { pool } from "../../../lib/db";
 
 export async function GET(req: NextRequest) {
-  const auth = await requireAuth(req);
-  if (auth instanceof Response) return auth;
+    const auth = await requireAuth(req);
+    if (auth instanceof Response) return auth;
 
-  const capCheck = requireCapability(auth, "capex:manage");
-  if (capCheck instanceof Response) return capCheck;
+    const capCheck = requireCapability(auth, "capex:manage");
+    if (capCheck instanceof Response) return capCheck;
 
-  try {
-    const result = await pool.query(
-      `SELECT * FROM assets_config WHERE company_id = $1`,
-      [auth.company_id]
-    );
+    try {
+        const result = await pool.query(
+            `SELECT * FROM assets_config WHERE company_id = $1`,
+            [auth.company_id]
+        );
 
-    if (result.rows.length === 0) {
-      // Return default configuration
-      const defaultConfig: AssetsConfigResponse = {
-        company_id: auth.company_id,
-        proration_enabled: false,
-        proration_basis: "days_in_month",
-        fx_presentation_policy: "post_month",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-      return ok(defaultConfig);
+        if (result.rows.length === 0) {
+            // Return default configuration
+            const defaultConfig: AssetsConfigResponse = {
+                company_id: auth.company_id,
+                proration_enabled: false,
+                proration_basis: "days_in_month",
+                fx_presentation_policy: "post_month",
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            };
+            return ok(defaultConfig);
+        }
+
+        const config = result.rows[0];
+        const response: AssetsConfigResponse = {
+            company_id: config.company_id,
+            proration_enabled: config.proration_enabled,
+            proration_basis: config.proration_basis,
+            fx_presentation_policy: config.fx_presentation_policy,
+            created_at: config.created_at,
+            updated_at: config.updated_at,
+        };
+
+        return ok(response);
+    } catch (error) {
+        if (error instanceof Error) {
+            return badRequest(`Failed to get configuration: ${error.message}`);
+        }
+        return badRequest("Failed to get configuration");
     }
-
-    const config = result.rows[0];
-    const response: AssetsConfigResponse = {
-      company_id: config.company_id,
-      proration_enabled: config.proration_enabled,
-      proration_basis: config.proration_basis,
-      fx_presentation_policy: config.fx_presentation_policy,
-      created_at: config.created_at,
-      updated_at: config.updated_at,
-    };
-
-    return ok(response);
-  } catch (error) {
-    if (error instanceof Error) {
-      return badRequest(`Failed to get configuration: ${error.message}`);
-    }
-    return badRequest("Failed to get configuration");
-  }
 }
 
 export async function PUT(req: NextRequest) {
-  const auth = await requireAuth(req);
-  if (auth instanceof Response) return auth;
+    const auth = await requireAuth(req);
+    if (auth instanceof Response) return auth;
 
-  const capCheck = requireCapability(auth, "capex:manage");
-  if (capCheck instanceof Response) return capCheck;
+    const capCheck = requireCapability(auth, "capex:manage");
+    if (capCheck instanceof Response) return capCheck;
 
-  try {
-    const input = AssetsConfigUpsert.parse(await req.json());
+    try {
+        const input = AssetsConfigUpsert.parse(await req.json());
 
-    await pool.query(
-      `INSERT INTO assets_config (company_id, proration_enabled, proration_basis, fx_presentation_policy, updated_at)
+        await pool.query(
+            `INSERT INTO assets_config (company_id, proration_enabled, proration_basis, fx_presentation_policy, updated_at)
        VALUES ($1, $2, $3, $4, NOW())
        ON CONFLICT (company_id)
        DO UPDATE SET
@@ -71,30 +71,30 @@ export async function PUT(req: NextRequest) {
          proration_basis = EXCLUDED.proration_basis,
          fx_presentation_policy = EXCLUDED.fx_presentation_policy,
          updated_at = NOW()`,
-      [auth.company_id, input.proration_enabled, input.proration_basis, input.fx_presentation_policy]
-    );
+            [auth.company_id, input.proration_enabled, input.proration_basis, input.fx_presentation_policy]
+        );
 
-    // Return updated configuration
-    const result = await pool.query(
-      `SELECT * FROM assets_config WHERE company_id = $1`,
-      [auth.company_id]
-    );
+        // Return updated configuration
+        const result = await pool.query(
+            `SELECT * FROM assets_config WHERE company_id = $1`,
+            [auth.company_id]
+        );
 
-    const config = result.rows[0];
-    const response: AssetsConfigResponse = {
-      company_id: config.company_id,
-      proration_enabled: config.proration_enabled,
-      proration_basis: config.proration_basis,
-      fx_presentation_policy: config.fx_presentation_policy,
-      created_at: config.created_at,
-      updated_at: config.updated_at,
-    };
+        const config = result.rows[0];
+        const response: AssetsConfigResponse = {
+            company_id: config.company_id,
+            proration_enabled: config.proration_enabled,
+            proration_basis: config.proration_basis,
+            fx_presentation_policy: config.fx_presentation_policy,
+            created_at: config.created_at,
+            updated_at: config.updated_at,
+        };
 
-    return ok(response);
-  } catch (error) {
-    if (error instanceof Error) {
-      return badRequest(`Failed to update configuration: ${error.message}`);
+        return ok(response);
+    } catch (error) {
+        if (error instanceof Error) {
+            return badRequest(`Failed to update configuration: ${error.message}`);
+        }
+        return badRequest("Failed to update configuration");
     }
-    return badRequest("Failed to update configuration");
-  }
 }

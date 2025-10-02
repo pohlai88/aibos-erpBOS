@@ -4,37 +4,37 @@
 import { describe, it, expect } from "vitest";
 
 describe("assets config route", () => {
-  it("compiles", () => {
-    expect(true).toBe(true);
-  });
+    it("compiles", () => {
+        expect(true).toBe(true);
+    });
 });
 
 describe("asset impairments route", () => {
-  it("compiles", () => {
-    expect(true).toBe(true);
-  });
+    it("compiles", () => {
+        expect(true).toBe(true);
+    });
 });
 
 describe("unpost route", () => {
-  it("compiles", () => {
-    expect(true).toBe(true);
-  });
+    it("compiles", () => {
+        expect(true).toBe(true);
+    });
 });
 
 describe("ui drafts route", () => {
-  it("compiles", () => {
-    expect(true).toBe(true);
-  });
+    it("compiles", () => {
+        expect(true).toBe(true);
+    });
 });
 
 describe("bulk posting dry-run route", () => {
-  it("compiles", () => {
-    expect(true).toBe(true);
-  });
+    it("compiles", () => {
+        expect(true).toBe(true);
+    });
 });
 
 describe("bulk posting commit route", () => {
-  it("compiles", () => {
-    expect(true).toBe(true);
-  });
+    it("compiles", () => {
+        expect(true).toBe(true);
+    });
 });

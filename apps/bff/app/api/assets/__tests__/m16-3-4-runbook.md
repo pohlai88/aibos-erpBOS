@@ -285,10 +285,12 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 When `proration_enabled: true`, the system automatically prorates the first month of depreciation/amortization based on the `in_service` date.
 
 **Proration Basis Options:**
+
 - `days_in_month`: Prorate based on actual days active in the month
 - `half_month`: Simple 50% proration for first month
 
 **Example:**
+
 - Asset in service: `2025-11-15`
 - November has 30 days
 - Days active: 16 (from 15th to 30th)
@@ -320,6 +322,7 @@ curl -sS -X GET -H "X-API-Key: <id>:<secret>" \
 ### **Unposting Safety Checks**
 
 The system automatically validates:
+
 - ✅ **Period status** (warns if period is closed)
 - ✅ **Posted entries** (warns if no entries to unpost)
 - ✅ **Recent activity** (warns about recent unposting)
@@ -426,12 +429,14 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ## 🎯 **Key Benefits**
 
 ### **Ops UI Features**
+
 - ✅ **Configuration management** (proration, FX policy)
 - ✅ **Impairment tracking** (with journal integration)
 - ✅ **Unpost/Repost** (with safety checks)
 - ✅ **Draft caching** (for UI state management)
 
 ### **Advanced Calculations**
+
 - ✅ **Proration** (first-month accuracy)
 - ✅ **FX presentation lock** (audit compliance)
 - ✅ **Impairment posting** (balanced journals)
@@ -450,6 +455,7 @@ curl -sS -X GET -H "X-API-Key: <id>:<secret>" \
 ```
 
 **Common Errors:**
+
 - `Invalid proration basis` → Use only "days_in_month" or "half_month"
 - `Invalid FX policy` → Use only "post_month" or "in_service"
 - `Configuration not found` → System will return defaults
@@ -463,6 +469,7 @@ curl -sS -X GET -H "X-API-Key: <id>:<secret>" \
 ```
 
 **Common Errors:**
+
 - `Plan not found` → Verify plan_id exists and is accessible
 - `No posting map` → Ensure asset class posting maps are configured
 - `Invalid amount` → Amount must be positive
@@ -478,6 +485,7 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ```
 
 **Common Warnings:**
+
 - `Period is closed` → Check accounting period status
 - `No posted entries` → Verify entries exist and are posted
 - `Recent unposting activity` → Check for recent reversals
@@ -493,7 +501,7 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ✅ **Proration** calculates first-month accurately  
 ✅ **FX locking** snapshots rates for audit  
 ✅ **Safety checks** prevent data corruption  
-✅ **Complete audit trail** for all operations  
+✅ **Complete audit trail** for all operations
 
 ---
 
@@ -512,21 +520,26 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ## 📚 **API Reference Summary**
 
 ### **Configuration**
+
 - `GET/PUT /api/assets/config` - Assets configuration
 
 ### **Impairments**
+
 - `POST /api/assets/impairments` - Create impairment
 - `GET /api/assets/impairments` - List impairments
 
 ### **Unposting**
+
 - `POST /api/assets/unpost` - Unpost/repost operations
 
 ### **Drafts**
+
 - `POST /api/assets/drafts` - Create draft
 - `GET /api/assets/drafts` - Get/list drafts
 - `DELETE /api/assets/drafts` - Delete draft
 
 ### **Enhanced Posting**
+
 - `POST /api/assets/posting/bulk/dry-run` - Dry-run with draft
 - `POST /api/assets/posting/bulk/commit` - Commit from draft
 
