@@ -8,3 +8,4 @@ export * from './cash';
 export * from './cash_alert_schedule';
 export * from './capex';
 export * from './intangibles';
+export * from './assets_import';
