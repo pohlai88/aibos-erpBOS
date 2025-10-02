@@ -2,15 +2,28 @@ import { pool } from "../../lib/db";
 import { ok, created, unprocessable } from "../../lib/http";
 import { requireAuth, enforceCompanyMatch, requireCapability } from "../../lib/auth";
 import { withRouteErrors, isResponse } from "../../lib/route-utils";
+import { setPeriodState, getPeriodState } from "../../services/gl/periods";
 
 export const GET = withRouteErrors(async (req: Request) => {
     const auth = await requireAuth(req);
     if (isResponse(auth)) return auth;
 
-    const { rows } = await pool.query(
-        `select id, code, start_date, end_date, status from accounting_period where company_id=$1 order by start_date desc`,
-        [auth.company_id]
-    );
+    const url = new URL(req.url);
+    const year = url.searchParams.get("year");
+
+    let sql = `SELECT year, month, state, updated_at, updated_by 
+               FROM periods 
+               WHERE company_id = $1`;
+    const params: any[] = [auth.company_id];
+
+    if (year) {
+        sql += ` AND year = $2`;
+        params.push(parseInt(year));
+    }
+
+    sql += ` ORDER BY year DESC, month DESC`;
+
+    const { rows } = await pool.query(sql, params);
     return ok({ items: rows });
 });
 
@@ -23,24 +36,24 @@ export const POST = withRouteErrors(async (req: Request) => {
 
     const b = await req.json() as {
         company_id: string;
-        code: string;
-        start_date: string; end_date: string;
-        status: "OPEN" | "CLOSED";
+        year: number;
+        month: number;
+        state: "open" | "pending_close" | "closed";
     };
 
     const companyMatchResult = enforceCompanyMatch(auth, b.company_id);
     if (isResponse(companyMatchResult)) return companyMatchResult;
 
-    if (new Date(b.start_date) > new Date(b.end_date)) {
-        return unprocessable("start_date must be <= end_date");
+    if (b.month < 1 || b.month > 12) {
+        return unprocessable("month must be between 1 and 12");
     }
 
-    const id = `PERIOD-${b.code}`;
-    await pool.query(
-        `insert into accounting_period(id, company_id, code, start_date, end_date, status)
-     values ($1,$2,$3,$4,$5,$6)
-     on conflict (id) do update set start_date=$4, end_date=$5, status=$6`,
-        [id, auth.company_id, b.code, b.start_date, b.end_date, b.status]
-    );
-    return created({ id }, `/api/periods?company_id=${auth.company_id}`);
+    await setPeriodState(auth.company_id, b.year, b.month, b.state, auth.user_id);
+
+    return created({
+        company_id: auth.company_id,
+        year: b.year,
+        month: b.month,
+        state: b.state
+    }, `/api/periods?company_id=${auth.company_id}&year=${b.year}`);
 });

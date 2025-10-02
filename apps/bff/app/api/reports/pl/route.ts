@@ -4,6 +4,7 @@ import { requireAuth, requireCapability } from "../../../lib/auth";
 import { withRouteErrors, isResponse } from "../../../lib/route-utils";
 import { convertToPresent } from "@aibos/policies";
 import { buildPivotMatrix } from "../../../reports/pivot-matrix";
+import { parseRollup, parseRollupLevel } from "../../../reports/pivot-params";
 
 async function getPresentQuotes(base: string, present: string, onISO: string) {
     const { rows } = await pool.query(
@@ -19,7 +20,7 @@ async function getPresentQuotes(base: string, present: string, onISO: string) {
 
 type TBRow = { account_code: string; debit: number; credit: number; cost_center_id?: string; project_id?: string; };
 
-async function loadTB(company_id: string, currency: string, filters: { cost_center_id?: string; project_id?: string; pivot?: string } = {}): Promise<TBRow[]> {
+async function loadTB(company_id: string, currency: string, filters: { cost_center_id?: string; project_id?: string; pivot?: string; rollup?: string } = {}): Promise<TBRow[]> {
     let sql = `
     SELECT jl.account_code,
            SUM(CASE WHEN jl.dc='D' THEN 
@@ -38,7 +39,7 @@ async function loadTB(company_id: string, currency: string, filters: { cost_cent
     const params: any[] = [company_id, currency];
     let paramIndex = 3;
 
-    // Add dimension filters
+    // Add dimension filters and rollup logic
     if (filters.cost_center_id) {
         sql += `, jl.cost_center_id`;
     }
@@ -46,10 +47,30 @@ async function loadTB(company_id: string, currency: string, filters: { cost_cent
         sql += `, jl.project_id`;
     }
 
+    // Add rollup support for cost center pivot
+    if (filters.pivot === "cost_center" && filters.rollup && filters.rollup !== "none") {
+        if (filters.rollup === "root") {
+            sql += `, COALESCE(subpath(cc.path,0,1)::text, cc.code) as cost_center_rollup`;
+        } else if (filters.rollup.startsWith("level:")) {
+            const level = Number(filters.rollup.split(":")[1] || "0");
+            sql += `, COALESCE(subpath(cc.path,0,${level + 1})::text, cc.code) as cost_center_rollup`;
+        } else {
+            sql += `, cc.code as cost_center_rollup`;
+        }
+    } else if (filters.pivot === "cost_center") {
+        sql += `, cc.code as cost_center_rollup`;
+    }
+
     sql += `
     FROM journal_line jl
-    JOIN journal j ON j.id = jl.journal_id
-    WHERE j.company_id = $1`;
+    JOIN journal j ON j.id = jl.journal_id`;
+
+    // Join cost center table for rollup support
+    if (filters.pivot === "cost_center") {
+        sql += ` LEFT JOIN dim_cost_center cc ON cc.id = jl.cost_center_id`;
+    }
+
+    sql += ` WHERE j.company_id = $1`;
 
     if (filters.cost_center_id) {
         sql += ` AND jl.cost_center_id = $${paramIndex}`;
@@ -67,7 +88,7 @@ async function loadTB(company_id: string, currency: string, filters: { cost_cent
 
     // Add dimension grouping for pivot
     if (filters.pivot === "cost_center") {
-        sql += `, jl.cost_center_id`;
+        sql += `, cost_center_rollup`;
     } else if (filters.pivot === "project") {
         sql += `, jl.project_id`;
     }
@@ -77,7 +98,7 @@ async function loadTB(company_id: string, currency: string, filters: { cost_cent
         account_code: r.account_code,
         debit: Number(r.debit || 0),
         credit: Number(r.credit || 0),
-        cost_center_id: r.cost_center_id,
+        cost_center_id: r.cost_center_rollup || r.cost_center_id,
         project_id: r.project_id
     }));
 }
@@ -106,11 +127,13 @@ export const GET = withRouteErrors(async (req: Request) => {
     const pivotNullLabel = url.searchParams.get("pivot_null_label") ?? "Unassigned";
     const precision = Number.parseInt(url.searchParams.get("precision") ?? "2", 10);
     const includeGrandTotal = url.searchParams.get("grand_total") !== "false";
+    const rollup = parseRollup(url.searchParams);
 
     const tb = await loadTB(auth.company_id, currency, {
         ...(costCenterId && { cost_center_id: costCenterId }),
         ...(projectId && { project_id: projectId }),
-        ...(pivot && { pivot })
+        ...(pivot && { pivot }),
+        ...(rollup !== "none" && { rollup })
     });
     const policy = getDisclosure();
 
@@ -202,7 +225,8 @@ export const GET = withRouteErrors(async (req: Request) => {
                 pivot,
                 pivot_null_label: pivotNullLabel,
                 precision: Number.isFinite(precision) ? precision : 2,
-                grand_total: includeGrandTotal
+                grand_total: includeGrandTotal,
+                rollup: rollup !== "none" ? rollup : undefined
             },
             ...matrix,
         }, {

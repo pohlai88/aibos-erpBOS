@@ -3,6 +3,7 @@ import { ok, badRequest, unauthorized, forbidden, unprocessable } from "../../..
 import { requireAuth, requireCapability } from "../../../lib/auth";
 import { withRouteErrors, isResponse } from "../../../lib/route-utils";
 import { parseISO, addMonths, startOfMonth, format } from "date-fns";
+import { convertToPresent } from "@aibos/policies";
 
 type BudgetActualRow = {
     account_code: string;
@@ -38,6 +39,8 @@ export const GET = withRouteErrors(async (req: Request) => {
     const pivotNullLabel = url.searchParams.get("pivot_null_label") ?? "__NULL__";
     const precision = parseInt(url.searchParams.get("precision") ?? "2");
     const grandTotal = url.searchParams.get("grand_total") !== "false";
+    const present = url.searchParams.get("present"); // e.g. "USD"
+    const asOf = (url.searchParams.get("as_of") ?? new Date().toISOString()).slice(0, 10);
 
     // M14.4: Scenario and compare_to parameters
     const scenario = url.searchParams.get("scenario") ?? "working"; // baseline|working|<version_code>
@@ -47,6 +50,23 @@ export const GET = withRouteErrors(async (req: Request) => {
 
     if (!company_id || !fromStr || !toStr || !budget_id) {
         return badRequest("company_id, from, to, budget_id are required");
+    }
+
+    // Get company base currency
+    const company = await pool.query(`select base_currency from company where id=$1`, [company_id]);
+    const baseCurrency = company.rows[0]?.base_currency || "MYR";
+
+    // Presentation currency conversion helper
+    async function getPresentQuotes(base: string, present: string, onISO: string) {
+        const { rows } = await pool.query(
+            `select date::text as date, from_ccy as from, to_ccy as to, rate::text
+           from fx_rate
+          where from_ccy=$1 and to_ccy=$2 and date <= $3
+          order by date desc
+          limit 1`,
+            [base, present, onISO]
+        );
+        return rows.map(r => ({ date: r.date, from: r.from, to: r.to, rate: Number(r.rate) }));
     }
 
     // M14.4: Resolve scenario and compare_to to version IDs
@@ -333,26 +353,104 @@ export const GET = withRouteErrors(async (req: Request) => {
             };
         }
 
+        // Optional presentation currency conversion
+        let rate = null;
+        let presentCurrency = baseCurrency;
+        let convertedMatrixRows = matrixRows;
+        let convertedTotalsByPivot = totalsByPivot;
+
+        if (present && present !== baseCurrency) {
+            const quotes = await getPresentQuotes(baseCurrency, present, asOf);
+            if (quotes.length) {
+                rate = quotes[0]?.rate;
+                presentCurrency = present;
+
+                // Convert matrix rows
+                convertedMatrixRows = matrixRows.map(row => {
+                    const convertedRow: any = { account_code: row.account_code };
+                    for (const [key, value] of Object.entries(row)) {
+                        if (key === 'account_code') continue;
+                        if (typeof value === 'object' && value !== null) {
+                            const cell = value as { budget?: number; actual?: number; variance?: number; variance_pct?: number | null };
+                            convertedRow[key] = {
+                                budget: convertToPresent(cell.budget || 0, baseCurrency, present, quotes, asOf) ?? (cell.budget || 0),
+                                actual: convertToPresent(cell.actual || 0, baseCurrency, present, quotes, asOf) ?? (cell.actual || 0),
+                                variance: convertToPresent(cell.variance || 0, baseCurrency, present, quotes, asOf) ?? (cell.variance || 0),
+                                variance_pct: cell.variance_pct
+                            };
+                        }
+                    }
+                    return convertedRow;
+                });
+
+                // Convert totals
+                convertedTotalsByPivot = {};
+                for (const [key, value] of Object.entries(totalsByPivot)) {
+                    convertedTotalsByPivot[key] = {
+                        budget: convertToPresent(value.budget || 0, baseCurrency, present, quotes, asOf) ?? (value.budget || 0),
+                        actual: convertToPresent(value.actual || 0, baseCurrency, present, quotes, asOf) ?? (value.actual || 0),
+                        variance: convertToPresent(value.variance || 0, baseCurrency, present, quotes, asOf) ?? (value.variance || 0),
+                        variance_pct: value.variance_pct
+                    };
+                }
+            }
+        }
+
         return ok({
-            base_currency: "MYR", // TODO: get from company
+            base_currency: baseCurrency,
+            present_currency: presentCurrency,
+            rate_used: rate,
             from: fromStr,
             to: toStr,
             budget_id,
             pivot_axis: axisKey,                    // "cost_center_id" or "project_id"
             pivot_keys: pivotKeys,                  // e.g. ["CC-OPS","CC-RND", null]
-            rows: matrixRows,                       // row per account, columns per pivot key
-            totals_by_pivot: totalsByPivot,         // column totals
+            rows: convertedMatrixRows,                       // row per account, columns per pivot key
+            totals_by_pivot: convertedTotalsByPivot,         // column totals
         });
     }
 
+    // Optional presentation currency conversion for non-pivot response
+    let rate = null;
+    let presentCurrency = baseCurrency;
+    let convertedShaped = shaped;
+    let convertedTotals = totals;
+
+    if (present && present !== baseCurrency) {
+        const quotes = await getPresentQuotes(baseCurrency, present, asOf);
+        if (quotes.length) {
+            rate = quotes[0]?.rate;
+            presentCurrency = present;
+
+            // Convert shaped rows
+            convertedShaped = shaped.map(row => ({
+                ...row,
+                budget: convertToPresent(row.budget || 0, baseCurrency, present, quotes, asOf) ?? (row.budget || 0),
+                actual: convertToPresent(row.actual || 0, baseCurrency, present, quotes, asOf) ?? (row.actual || 0),
+                variance: convertToPresent(row.variance || 0, baseCurrency, present, quotes, asOf) ?? (row.variance || 0),
+                variance_pct: row.variance_pct
+            }));
+
+            // Convert totals
+            convertedTotals = {
+                budget: convertToPresent(totals.budget || 0, baseCurrency, present, quotes, asOf) ?? (totals.budget || 0),
+                actual: convertToPresent(totals.actual || 0, baseCurrency, present, quotes, asOf) ?? (totals.actual || 0),
+                variance: convertToPresent(totals.variance || 0, baseCurrency, present, quotes, asOf) ?? (totals.variance || 0),
+                variance_pct: totals_pct
+            };
+        }
+    }
+
     return ok({
-        base_currency: "MYR", // TODO: get from company
+        base_currency: baseCurrency,
+        present_currency: presentCurrency,
+        rate_used: rate,
         from: fromStr,
         to: toStr,
         budget_id,
         group: groupKeys.length ? groupKeys : ["account"],
         months,                          // helpful for debugging
-        rows: shaped,
-        totals: { ...totals, variance_pct: totals_pct }
+        rows: convertedShaped,
+        totals: convertedTotals
     });
 });

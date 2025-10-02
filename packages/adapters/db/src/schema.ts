@@ -163,8 +163,10 @@ export const apiKey = pgTable("api_key", {
 // --- Dimensions & Cost Centers (M14) -----------------------------------------
 export const dimCostCenter = pgTable("dim_cost_center", {
     id: text("id").primaryKey(),              // e.g. "CC-OPS"
+    code: text("code").notNull(),             // path segment for ltree
     name: text("name").notNull(),
     parentId: text("parent_id"), // optional hierarchy - will add reference after table creation
+    path: text("path"),                       // ltree path for rollups
     active: text("active").notNull().default("true"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
 });
@@ -175,6 +177,18 @@ export const dimProject = pgTable("dim_project", {
     active: text("active").notNull().default("true"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
 });
+
+// --- Periods & Policy Enforcement (M17) -------------------------------------
+export const periods = pgTable("periods", {
+    companyId: text("company_id").references(() => company.id).notNull(),
+    year: integer("year").notNull(),
+    month: integer("month").notNull(),
+    state: text("state").notNull(), // 'open', 'pending_close', 'closed'
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedBy: text("updated_by").notNull()
+}, (table) => ({
+    pk: primaryKey({ columns: [table.companyId, table.year, table.month] })
+}));
 
 // --- Budgets & Variance (M14.1) -------------------------------------------
 export const budget = pgTable("budget", {
