@@ -15,7 +15,9 @@ export type Capability =
     | "cash:manage"
     | "capex:manage"
     | "fx:manage"
-    | "fx:read";
+    | "fx:read"
+    | "alloc:manage"
+    | "alloc:read";
 
 export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
     admin: [
@@ -23,19 +25,19 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "payments:post", "periods:manage", "keys:manage", "audit:read",
         "budgets:manage", "budgets:read", "budgets:approve",
         "forecasts:manage", "forecasts:approve",
-        "cash:manage", "capex:manage", "fx:manage", "fx:read"
+        "cash:manage", "capex:manage", "fx:manage", "fx:read", "alloc:manage", "alloc:read"
     ],
     accountant: [
         "reports:read", "journals:post", "reversal:create", "inventory:move",
         "payments:post", "audit:read",
         "budgets:manage", "budgets:read", "budgets:approve",
         "forecasts:manage", "forecasts:approve",
-        "cash:manage", "capex:manage", "fx:manage", "fx:read"
+        "cash:manage", "capex:manage", "fx:manage", "fx:read", "alloc:manage", "alloc:read"
     ],
     ops: [
         "reports:read", "inventory:move", "audit:read",
         "budgets:read", "forecasts:manage",
-        "cash:manage", "capex:manage", "fx:manage", "fx:read"
+        "cash:manage", "capex:manage", "fx:manage", "fx:read", "alloc:manage", "alloc:read"
     ],
 };
 

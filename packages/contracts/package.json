@@ -1,7 +1,9 @@
 {
   "name": "@aibos/contracts",
   "version": "0.0.0",
-  "type": "module",
+  "devDependencies": {
+    "@types/node": "24.6.0"
+  },
   "exports": {
     ".": "./src/index.ts",
     "./http/sales/sales-invoice.schema": "./http/sales/sales-invoice.schema.ts",
@@ -12,10 +14,8 @@
     "build": "pnpm gen:openapi",
     "check": "pnpm gen:openapi && git diff --exit-code openapi/openapi.json || (echo 'Commit OpenAPI changes' && exit 1)",
     "gen:openapi": "tsx ./scripts/build-openapi.ts",
-    "type-check": "tsc --noEmit",
-    "lint": "echo 'No linting configured for contracts'"
+    "lint": "echo 'No linting configured for contracts'",
+    "type-check": "tsc --noEmit"
   },
-  "devDependencies": {
-    "@types/node": "24.6.0"
-  }
+  "type": "module"
 }

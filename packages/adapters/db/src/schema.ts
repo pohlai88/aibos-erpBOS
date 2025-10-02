@@ -1,6 +1,9 @@
 import { pgTable, text, char, timestamp, numeric, pgEnum, primaryKey, integer, boolean, jsonb, date } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
+// Import allocation schemas
+export * from "./schema/alloc";
+
 export const company = pgTable("company", {
     id: text("id").primaryKey(),
     code: text("code").notNull().unique(),
@@ -600,3 +603,6 @@ export const fxAccountMap = pgTable("fx_account_map", {
 }, (table) => ({
     pk: primaryKey({ columns: [table.companyId, table.glAccount] })
 }));
+
+// --- Allocations & Shared-Services Recharges (M19) -------------------------
+// Imported from ./schema/alloc.ts

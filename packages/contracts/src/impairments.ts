@@ -50,6 +50,7 @@ export const UnpostResponse = z.object({
         amount: z.number(),
         journal_id: z.string(),
     })),
+    warnings: z.array(z.string()).optional(),
 });
 
 export type ImpairmentCreate = z.infer<typeof ImpairmentCreate>;

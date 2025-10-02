@@ -60,7 +60,7 @@ export const createHttpOk = <T>(data: T): HttpOk<T> => ({ ok: true, data });
 export const createHttpErr = (error: string, code?: ApiErrorCode): HttpErr => ({
     ok: false,
     error,
-    code
+    ...(code && { code })
 });
 
 /**

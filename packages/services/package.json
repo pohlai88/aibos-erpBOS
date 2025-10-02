@@ -1,16 +1,16 @@
 {
   "name": "@aibos/services",
   "version": "0.0.0",
-  "type": "module",
+  "dependencies": {
+    "@aibos/contracts": "workspace:*",
+    "@aibos/policies": "workspace:*",
+    "@aibos/ports": "workspace:*",
+    "@aibos/posting-rules": "workspace:*"
+  },
   "scripts": {
     "dev": "echo 'Services - no dev server needed'",
-    "type-check": "tsc --noEmit",
-    "lint": "echo 'No linting configured for services'"
+    "lint": "echo 'No linting configured for services'",
+    "type-check": "tsc --noEmit"
   },
-  "dependencies": {
-    "@aibos/ports": "workspace:*",
-    "@aibos/posting-rules": "workspace:*",
-    "@aibos/policies": "workspace:*",
-    "@aibos/contracts": "workspace:*"
-  }
+  "type": "module"
 }

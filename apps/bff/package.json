@@ -1,11 +1,12 @@
 {
   "name": "bff",
+  "version": "1.0.0",
   "dependencies": {
     "@aibos/contracts": "workspace:*",
     "@aibos/policies": "workspace:*",
-    "@aibos/services": "workspace:*",
-    "@aibos/posting-rules": "workspace:*",
     "@aibos/ports": "workspace:*",
+    "@aibos/posting-rules": "workspace:*",
+    "@aibos/services": "workspace:*",
     "date-fns": "^4.1.0",
     "inngest": "^3.20.0",
     "next": "15.5.4",
@@ -24,11 +25,11 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev -p 3000",
+    "lint": "eslint . --ext .ts,.tsx",
     "start": "next start -p 3000",
     "test": "vitest",
     "test:run": "vitest run",
-    "type-check": "tsc --noEmit",
-    "lint": "eslint . --ext .ts,.tsx"
+    "type-check": "tsc --noEmit"
   },
   "turbo": {
     "pipeline": {

@@ -6,6 +6,11 @@ node_modules/
 .pnpm-debug.log*
 pnpm-lock.yaml.bak
 
+# Block non-pnpm lockfiles
+package-lock.json
+yarn.lock
+.yarn-integrity
+
 # =============================================================================
 # BUILD OUTPUTS & CACHE
 # =============================================================================

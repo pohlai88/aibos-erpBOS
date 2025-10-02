@@ -30,8 +30,8 @@ export const POST = withRouteErrors(async (req: NextRequest) => {
             year: input.year,
             month: input.month,
             dryRun: input.dry_run,
-            accounts: input.accounts,
-            memo: input.memo,
+            accounts: input.accounts ?? [],
+            ...(input.memo && { memo: input.memo }),
             actor: auth.api_key_id ?? "system",
             baseCcy: base
         });

@@ -1,14 +1,16 @@
 // M15: Cash Flow Report (Pivot Parity)
 // apps/bff/app/api/reports/cash/route.ts
 
-import { ok, badRequest, forbidden } from "../../../lib/http";
+import { ok, badRequest } from "../../../lib/http";
 import { requireAuth, requireCapability } from "../../../lib/auth";
 import { withRouteErrors, isResponse } from "../../../lib/route-utils";
 import { buildMatrix } from "../../../lib/report-matrix";
 import { pool } from "../../../lib/db";
 import { convertToPresent } from "@aibos/policies";
 
-async function getPresentQuotes(base: string, present: string, onISO: string) {
+type Quote = { date: string; from: string; to: string; rate: number };
+
+async function getPresentQuotes(base: string, present: string, onISO: string): Promise<Quote[]> {
     const { rows } = await pool.query(
         `select date::text as date, from_ccy as from, to_ccy as to, rate::text
        from fx_rate
@@ -17,7 +19,7 @@ async function getPresentQuotes(base: string, present: string, onISO: string) {
       limit 1`,
         [base, present, onISO]
     );
-    return rows.map(r => ({ date: r.date, from: r.from, to: r.to, rate: Number(r.rate) }));
+    return rows.map((r: any) => ({ date: r.date, from: r.from, to: r.to, rate: Number(r.rate) }));
 }
 
 export const GET = withRouteErrors(async (req: Request) => {
@@ -34,8 +36,7 @@ export const GET = withRouteErrors(async (req: Request) => {
         const pivot = (url.searchParams.get("pivot") ?? "cost_center") as "cost_center" | "project";
         const nullLabel = url.searchParams.get("pivot_null_label") ?? "Unassigned";
         const precision = Number(url.searchParams.get("precision") ?? "2");
-        const grandTotal = (url.searchParams.get("grand_total") ?? "true") === "true";
-        const present = url.searchParams.get("present"); // e.g. "USD"
+        const includeGrandTotal = (url.searchParams.get("grand_total") ?? "true") === "true";
 
         if (!scenario || !scenario.startsWith("cash:")) {
             return badRequest("scenario must be cash:<code>");
@@ -66,43 +67,56 @@ export const GET = withRouteErrors(async (req: Request) => {
         );
 
         // Transform to report format
-        const lines = linesResult.rows.map(row => ({
+        const lines = linesResult.rows.map((row: any) => ({
             account_code: "CASH_NET",
             account_name: "Net Cash From Operations",
             pivot_key: pivot === "cost_center" ? row.cost_center : row.project,
-            amount: Number(row.net_change)
+            amount: Number(row.net_change),
         }));
 
         // Build matrix
         const matrix = buildMatrix(lines, {
             pivotNullLabel: nullLabel,
             precision,
-            includeGrandTotal: grandTotal
+            includeGrandTotal,
         });
 
         // Optional presentation currency conversion
-        let presentCurrency = "MYR"; // Default base currency
-        let rateUsed = 1;
+        let present_currency = "MYR";
+        let rate_used = 1;
 
-        if (present && present !== "MYR") {
-            const asOf = new Date(Date.UTC(year, 11, 31)); // Last day of year
-            const quotes = await getPresentQuotes("MYR", present, asOf.toISOString().split('T')[0]);
+        // Normalize to a definite string (never null/undefined)
+        const presentCcy: string = url.searchParams.get("present") ?? "MYR";
 
-            if (quotes.length > 0) {
-                rateUsed = quotes[0].rate;
-                presentCurrency = present;
+        if (presentCcy !== "MYR") {
+            const asOf = new Date(Date.UTC(year, 11, 31)); // last day of the year
+            const asOfISO = asOf.toISOString().slice(0, 10); // "YYYY-MM-DD" (avoids string|undefined)
+
+            const quotes = await getPresentQuotes("MYR", presentCcy, asOfISO);
+            const latest = quotes[0];
+
+            if (latest) {
+                rate_used = latest.rate;
+                present_currency = presentCcy;
 
                 // Convert matrix values
                 matrix.rows = matrix.rows.map(row => ({
                     ...row,
-                    values: Object.fromEntries(
-                        Object.entries(row.values).map(([k, v]) => [k, convertToPresent(Number(v), "MYR", present, quotes, asOf) ?? Number(v)])
+                    by_pivot: Object.fromEntries(
+                        Object.entries(row.by_pivot).map(([k, v]) => [
+                            k,
+                            convertToPresent(Number(v), "MYR", presentCcy, quotes, asOfISO) ?? Number(v),
+                        ])
                     ),
-                    total: row.total ? convertToPresent(Number(row.total), "MYR", present, quotes, asOf) ?? Number(row.total) : row.total
+                    row_total:
+                        convertToPresent(Number(row.row_total), "MYR", presentCcy, quotes, asOfISO) ??
+                        Number(row.row_total),
                 }));
 
-                if (matrix.grand_total) {
-                    matrix.grand_total = convertToPresent(Number(matrix.grand_total), "MYR", present, quotes, asOf) ?? Number(matrix.grand_total);
+                if (typeof matrix.grand_total !== "undefined") {
+                    matrix.grand_total =
+                        convertToPresent(Number(matrix.grand_total), "MYR", presentCcy, quotes, asOfISO) ??
+                        Number(matrix.grand_total);
                 }
             }
         }
@@ -111,8 +125,8 @@ export const GET = withRouteErrors(async (req: Request) => {
             scenario,
             year,
             ...matrix,
-            present_currency: presentCurrency,
-            rate_used: rateUsed
+            present_currency,
+            rate_used,
         });
     } catch (error) {
         console.error("Error generating cash report:", error);

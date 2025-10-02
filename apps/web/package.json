@@ -1,5 +1,6 @@
 {
   "name": "web",
+  "version": "1.0.0",
   "dependencies": {
     "@aibos/api-client": "workspace:*",
     "next": "15.5.4",
@@ -13,9 +14,9 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev -p 3001",
+    "lint": "eslint . --ext .ts,.tsx",
     "start": "next start -p 3001",
-    "type-check": "tsc --noEmit",
-    "lint": "eslint . --ext .ts,.tsx"
+    "type-check": "tsc --noEmit"
   },
   "turbo": {
     "pipeline": {

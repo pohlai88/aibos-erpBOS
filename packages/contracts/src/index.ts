@@ -16,3 +16,4 @@ export * from './fx';
 export * from './common/result';
 export * from './reports/cash';
 export * from './http/types';
+export * from './alloc';
