@@ -17,7 +17,10 @@ export async function insertBudgetLinesTxn(
     payload: any,
     parsedRows: ParsedRow[],
     apiKeyId: string,
-    opts?: { accountResolver?: (code: string) => Promise<string | null> }
+    opts?: { 
+        accountResolver?: (code: string) => Promise<string | null>;
+        versionId?: string; // M14.4: Target version for budget lines
+    }
 ) {
     const client = await pool.connect();
     try {
@@ -63,8 +66,8 @@ export async function insertBudgetLinesTxn(
 
             await client.query(
                 `INSERT INTO budget_line 
-         (id, budget_id, company_id, period_month, account_code, cost_center_id, project_id, amount_base, import_id)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+         (id, budget_id, company_id, period_month, account_code, cost_center_id, project_id, amount_base, import_id, version_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
                 [
                     budgetLineId,
                     r.year.toString(), // Use year as budget_id for now
@@ -74,7 +77,8 @@ export async function insertBudgetLinesTxn(
                     r.costCenter || null,
                     r.project || null,
                     r.amount,
-                    importId
+                    importId,
+                    opts?.versionId || null // M14.4: Include version ID
                 ]
             );
 

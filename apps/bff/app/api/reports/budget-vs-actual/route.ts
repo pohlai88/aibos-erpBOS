@@ -38,11 +38,50 @@ export const GET = withRouteErrors(async (req: Request) => {
     const pivotNullLabel = url.searchParams.get("pivot_null_label") ?? "__NULL__";
     const precision = parseInt(url.searchParams.get("precision") ?? "2");
     const grandTotal = url.searchParams.get("grand_total") !== "false";
+    
+    // M14.4: Scenario and compare_to parameters
+    const scenario = url.searchParams.get("scenario") ?? "working"; // baseline|working|<version_code>
+    const compareTo = url.searchParams.get("compare_to") ?? scenario; // For budget side comparison
 
     if (auth.company_id !== company_id) return forbidden("company mismatch");
 
     if (!company_id || !fromStr || !toStr || !budget_id) {
         return badRequest("company_id, from, to, budget_id are required");
+    }
+
+    // M14.4: Resolve scenario and compare_to to version IDs
+    let scenarioVersionId: string | null = null;
+    let compareToVersionId: string | null = null;
+
+    // Helper function to resolve scenario to version ID
+    const resolveScenario = async (scenarioParam: string): Promise<string | null> => {
+        if (scenarioParam === "baseline") {
+            const result = await pool.query(
+                `SELECT id FROM budget_version WHERE company_id = $1 AND is_baseline = true AND year = $2`,
+                [company_id, new Date(from).getFullYear()]
+            );
+            return result.rows[0]?.id || null;
+        } else if (scenarioParam === "working") {
+            const result = await pool.query(
+                `SELECT id FROM budget_version WHERE company_id = $1 AND status = 'draft' AND year = $2 ORDER BY updated_at DESC LIMIT 1`,
+                [company_id, new Date(from).getFullYear()]
+            );
+            return result.rows[0]?.id || null;
+        } else {
+            // Assume it's a version code
+            const result = await pool.query(
+                `SELECT id FROM budget_version WHERE company_id = $1 AND code = $2`,
+                [company_id, scenarioParam]
+            );
+            return result.rows[0]?.id || null;
+        }
+    };
+
+    scenarioVersionId = await resolveScenario(scenario);
+    compareToVersionId = await resolveScenario(compareTo);
+
+    if (!scenarioVersionId) {
+        return badRequest(`Scenario '${scenario}' not found or no budget version available`);
     }
 
     let from: Date, to: Date;
@@ -116,11 +155,13 @@ export const GET = withRouteErrors(async (req: Request) => {
         join months m on m.period_month = bl.period_month
         where bl.company_id = $${++p}   -- $n+1 company
             and bl.budget_id  = $${++p}   -- $n+2 budget
+            ${compareToVersionId ? `and bl.version_id = $${++p}` : `and bl.version_id IS NULL`}  -- $n+3 version
             ${cc ? `and bl.cost_center_id = $${++p}` : ``}
             ${prj ? `and bl.project_id     = $${++p}` : ``}
         group by 1,2,3
     `;
     params.push(company_id, budget_id);
+    if (compareToVersionId) params.push(compareToVersionId);
     if (cc) params.push(cc);
     if (prj) params.push(prj);
 

@@ -152,7 +152,29 @@ export const POST = withRouteErrors(async (req: Request) => {
     const totalErrors = parseResult.errors.length;
     const validRows = parseResult.rows.length - totalErrors;
 
-    const isDryRun = new URL(req.url).searchParams.get("dry_run") === "true";
+    const url = new URL(req.url);
+    const isDryRun = url.searchParams.get("dry_run") === "true";
+    const versionCode = url.searchParams.get("version"); // M14.4: Target version for import
+
+    // M14.4: Resolve version if specified
+    let targetVersionId: string | null = null;
+    if (versionCode) {
+        const versionResult = await pool.query(
+            `SELECT id, status FROM budget_version WHERE company_id = $1 AND code = $2`,
+            [auth.company_id, versionCode]
+        );
+
+        if (versionResult.rows.length === 0) {
+            return badRequest(`Budget version '${versionCode}' not found`);
+        }
+
+        const version = versionResult.rows[0];
+        if (version.status !== "draft") {
+            return badRequest(`Cannot import to version '${versionCode}' in ${version.status} status. Must be draft.`);
+        }
+
+        targetVersionId = version.id;
+    }
 
     if (isDryRun) {
         // Record dry-run metadata
@@ -210,7 +232,8 @@ export const POST = withRouteErrors(async (req: Request) => {
             costCenter: r.cost_center || undefined,
             project: r.project || undefined,
         })),
-        auth.user_id
+        auth.user_id,
+        { versionId: targetVersionId || undefined } // M14.4: Pass version ID to insert service
     );
 
     return ok({

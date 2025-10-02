@@ -1,4 +1,4 @@
-import { pgTable, text, char, timestamp, numeric, pgEnum, primaryKey, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, char, timestamp, numeric, pgEnum, primaryKey, integer, boolean, jsonb } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 export const company = pgTable("company", {
@@ -195,5 +195,65 @@ export const budgetLine = pgTable("budget_line", {
     costCenterId: text("cost_center_id").references(() => dimCostCenter.id),
     projectId: text("project_id").references(() => dimProject.id),
     amountBase: numeric("amount_base", { precision: 20, scale: 6 }).notNull(),
+    importId: text("import_id"), // M14.3: Link to budget_import for audit trail
+    versionId: text("version_id"), // M14.4: Link to budget_version
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
+});
+
+// --- Budget Import (M14.3) -----------------------------------------------
+export const budgetImport = pgTable("budget_import", {
+    id: text("id").primaryKey(), // ULID
+    companyId: text("company_id").notNull(),
+    sourceName: text("source_name").notNull(),
+    sourceHash: text("source_hash").notNull(),
+    mappingJson: jsonb("mapping_json").notNull(),
+    delimiter: text("delimiter").notNull().default(","),
+    rowsTotal: integer("rows_total").notNull().default(0),
+    rowsValid: integer("rows_valid").notNull().default(0),
+    rowsInvalid: integer("rows_invalid").notNull().default(0),
+    status: text("status").notNull().default("pending"), // pending|dry_run_ok|committed|failed
+    errorReport: jsonb("error_report"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdByKey: text("created_by_key").notNull(),
+});
+
+// --- Budget Versions & Approvals (M14.4) ----------------------------------
+export const budgetVersion = pgTable("budget_version", {
+    id: text("id").primaryKey(), // ULID
+    companyId: text("company_id").references(() => company.id).notNull(),
+    code: text("code").notNull(), // e.g. "FY25-BL", "FY25-WIP", "FY25-V2"
+    label: text("label").notNull(),
+    year: integer("year").notNull(),
+    isBaseline: boolean("is_baseline").notNull().default(false),
+    status: text("status").notNull().default("draft"), // draft|submitted|approved|returned|archived
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull(),
+});
+
+export const budgetApproval = pgTable("budget_approval", {
+    id: text("id").primaryKey(), // ULID
+    companyId: text("company_id").references(() => company.id).notNull(),
+    versionId: text("version_id").references(() => budgetVersion.id, { onDelete: "cascade" }).notNull(),
+    action: text("action").notNull(), // submit|approve|return
+    actor: text("actor").notNull(), // user id / api key id
+    comment: text("comment"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const budgetAlertRule = pgTable("budget_alert_rule", {
+    id: text("id").primaryKey(), // ULID
+    companyId: text("company_id").references(() => company.id).notNull(),
+    name: text("name").notNull(),
+    accountCode: text("account_code"), // null = all accounts
+    costCenter: text("cost_center"), // null = all cost centers
+    project: text("project"), // null = all projects
+    periodScope: text("period_scope").notNull(), // month|qtr|ytd
+    thresholdPct: numeric("threshold_pct", { precision: 5, scale: 2 }).notNull(), // e.g. 10 = 10%
+    comparator: text("comparator").notNull(), // gt|lt|gte|lte|abs_gt|abs_gte
+    delivery: jsonb("delivery").notNull(), // { "email":["..."], "webhook":"https://..." }
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
 });
