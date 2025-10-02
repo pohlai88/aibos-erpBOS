@@ -2,6 +2,12 @@ import { pool } from "@/lib/db";
 import { ulid } from "ulid";
 import { ConsolRunRequestType } from "@aibos/contracts";
 import { getOwnershipTree } from "./entities";
+import {
+    resolveTranslationMethod,
+    getCtaPolicy,
+    getNciMap,
+    getLedgerOption
+} from "./policy";
 
 // --- Consolidation Run Engine (M21) ----------------------------------------
 export interface ConsolRun {
@@ -98,6 +104,11 @@ export async function runConsolidation(
         minority: calculateMinoritySummary(minorityBalances)
     });
 
+    // Optional ledger posting
+    if (!data.dry_run) {
+        await postConsolidationLedger(companyId, data.group_code, minorityBalances, summary, presentCcy, actor);
+    }
+
     // Create lock if committing
     if (!data.dry_run) {
         await pool.query(`
@@ -167,17 +178,12 @@ async function translateToPresentationCurrency(
     year: number,
     month: number
 ): Promise<TrialBalanceRow[]> {
-    // Get FX rates for the period (month-end rates)
-    const { rows: fxRows } = await pool.query(`
-    SELECT src_ccy, dst_ccy, rate
-    FROM fx_admin_rates 
-    WHERE company_id = $1 AND as_of_date = $2
-  `, [companyId, `${year}-${month.toString().padStart(2, '0')}-01`]);
+    // Get CTA policy for account mapping
+    const ctaPolicy = await getCtaPolicy(companyId);
+    const ctaAccount = ctaPolicy?.ctaAccount || 'CTA';
 
-    const fxRates = new Map<string, number>();
-    for (const row of fxRows) {
-        fxRates.set(`${row.src_ccy}|${row.dst_ccy}`, Number(row.rate));
-    }
+    // Get FX rates for different translation methods
+    const fxRates = await getFxRatesForPeriod(companyId, year, month);
 
     const translatedBalances: TrialBalanceRow[] = [];
     const ctaAmounts = new Map<string, number>(); // For CTA calculation
@@ -188,11 +194,14 @@ async function translateToPresentationCurrency(
             continue;
         }
 
-        const rateKey = `${balance.currency}|${presentCcy}`;
-        const rate = fxRates.get(rateKey);
+        // Resolve translation method using policy engine
+        const translationMethod = await resolveTranslationMethod(companyId, balance.accountCode);
+
+        // Get appropriate rate based on translation method
+        const rate = getRateByMethod(fxRates, balance.currency, presentCcy, translationMethod, year, month);
 
         if (!rate) {
-            throw new Error(`FX rate not found for ${balance.currency} to ${presentCcy}`);
+            throw new Error(`FX rate not found for ${balance.currency} to ${presentCcy} using ${translationMethod} method`);
         }
 
         const translatedAmount = balance.balance * rate;
@@ -210,13 +219,13 @@ async function translateToPresentationCurrency(
         ctaAmounts.set(ctaKey, (ctaAmounts.get(ctaKey) || 0) + ctaAmount);
     }
 
-    // Add CTA entries
+    // Add CTA entries using configured account
     for (const [ctaKey, ctaAmount] of ctaAmounts) {
         if (Math.abs(ctaAmount) > 0.01) {
             const [entityCode, accountCode] = ctaKey.split('|');
             translatedBalances.push({
                 entityCode: entityCode || '',
-                accountCode: 'CTA', // CTA account
+                accountCode: ctaAccount,
                 balance: ctaAmount,
                 currency: presentCcy
             });
@@ -281,15 +290,10 @@ async function calculateMinorityInterest(
     balances: TrialBalanceRow[],
     ownershipTree: any[]
 ): Promise<TrialBalanceRow[]> {
-    // Get minority interest account mapping
-    const { rows: accountMapRows } = await pool.query(`
-    SELECT account FROM consol_account_map 
-    WHERE company_id = $1 AND purpose = 'MINORITY'
-  `, [companyId]);
-
-    const minorityAccount = accountMapRows.length > 0
-        ? accountMapRows[0].account
-        : '3990';
+    // Get NCI policy for account mapping
+    const nciMap = await getNciMap(companyId);
+    const nciEquityAccount = nciMap?.nciEquityAccount || '3990';
+    const nciNiAccount = nciMap?.nciNiAccount || '3991';
 
     const minorityBalances = [...balances];
     const ownershipMap = new Map<string, number>();
@@ -307,9 +311,14 @@ async function calculateMinorityInterest(
             const minorityAmount = balance.balance * minorityPct;
 
             if (Math.abs(minorityAmount) > 0.01) {
+                // Use appropriate NCI account based on account type
+                const nciAccount = balance.accountCode.match(/^[45]\d{3}/)
+                    ? nciNiAccount  // P&L accounts use NCI NI account
+                    : nciEquityAccount; // Balance sheet accounts use NCI equity account
+
                 minorityBalances.push({
                     entityCode: balance.entityCode,
-                    accountCode: minorityAccount,
+                    accountCode: nciAccount,
                     balance: minorityAmount,
                     currency: balance.currency
                 });
@@ -411,8 +420,9 @@ async function createConsolSummary(
 }
 
 function calculateTranslationSummary(balances: TrialBalanceRow[]): number {
+    // Sum all CTA-related accounts (could be multiple if different entities use different CTA accounts)
     return balances
-        .filter(b => b.accountCode === 'CTA')
+        .filter(b => b.accountCode.includes('CTA') || b.accountCode === 'CTA')
         .reduce((sum, b) => sum + b.balance, 0);
 }
 
@@ -423,8 +433,9 @@ function calculateIcElimSummary(balances: TrialBalanceRow[]): number {
 }
 
 function calculateMinoritySummary(balances: TrialBalanceRow[]): number {
+    // Sum both NCI equity and NCI NI accounts
     return balances
-        .filter(b => b.accountCode === '3990') // Minority interest account
+        .filter(b => b.accountCode.match(/^399[01]/)) // NCI accounts (3990, 3991)
         .reduce((sum, b) => sum + b.balance, 0);
 }
 
@@ -495,4 +506,186 @@ export async function getConsolRuns(
     }
 
     return runs;
+}
+
+// --- Policy-Aware FX Rate Management (M21.1) -----------------------------------
+async function getFxRatesForPeriod(
+    companyId: string,
+    year: number,
+    month: number
+): Promise<Map<string, { closing: number; average: number; historical: number }>> {
+    const periodStart = `${year}-${month.toString().padStart(2, '0')}-01`;
+    const periodEnd = `${year}-${month.toString().padStart(2, '0')}-${new Date(year, month, 0).getDate()}`;
+
+    // Get closing rates (month-end)
+    const { rows: closingRows } = await pool.query(`
+        SELECT src_ccy, dst_ccy, rate
+        FROM fx_admin_rates 
+        WHERE company_id = $1 AND as_of_date = $2
+    `, [companyId, periodEnd]);
+
+    // Get historical rates (beginning of year)
+    const { rows: historicalRows } = await pool.query(`
+        SELECT src_ccy, dst_ccy, rate
+        FROM fx_admin_rates 
+        WHERE company_id = $1 AND as_of_date = $2
+    `, [companyId, `${year}-01-01`]);
+
+    // Get average rates (monthly average - simplified to use closing for now)
+    // In a full implementation, this would calculate weighted average from daily rates
+    const { rows: averageRows } = await pool.query(`
+        SELECT src_ccy, dst_ccy, rate
+        FROM fx_admin_rates 
+        WHERE company_id = $1 AND as_of_date = $2
+    `, [companyId, periodEnd]); // Using closing as fallback for average
+
+    const fxRates = new Map<string, { closing: number; average: number; historical: number }>();
+
+    // Process closing rates
+    for (const row of closingRows) {
+        const key = `${row.src_ccy}|${row.dst_ccy}`;
+        if (!fxRates.has(key)) {
+            fxRates.set(key, { closing: 0, average: 0, historical: 0 });
+        }
+        fxRates.get(key)!.closing = Number(row.rate);
+    }
+
+    // Process historical rates
+    for (const row of historicalRows) {
+        const key = `${row.src_ccy}|${row.dst_ccy}`;
+        if (!fxRates.has(key)) {
+            fxRates.set(key, { closing: 0, average: 0, historical: 0 });
+        }
+        fxRates.get(key)!.historical = Number(row.rate);
+    }
+
+    // Process average rates
+    for (const row of averageRows) {
+        const key = `${row.src_ccy}|${row.dst_ccy}`;
+        if (!fxRates.has(key)) {
+            fxRates.set(key, { closing: 0, average: 0, historical: 0 });
+        }
+        fxRates.get(key)!.average = Number(row.rate);
+    }
+
+    return fxRates;
+}
+
+function getRateByMethod(
+    fxRates: Map<string, { closing: number; average: number; historical: number }>,
+    srcCcy: string,
+    dstCcy: string,
+    method: string,
+    year: number,
+    month: number
+): number | null {
+    const key = `${srcCcy}|${dstCcy}`;
+    const rates = fxRates.get(key);
+
+    if (!rates) return null;
+
+    switch (method) {
+        case 'CLOSING':
+            return rates.closing || null;
+        case 'AVERAGE':
+            return rates.average || rates.closing || null; // Fallback to closing
+        case 'HISTORICAL':
+            return rates.historical || rates.closing || null; // Fallback to closing
+        default:
+            return rates.closing || null;
+    }
+}
+
+// --- Optional Ledger Posting (M21.1) -------------------------------------------
+async function postConsolidationLedger(
+    companyId: string,
+    groupCode: string,
+    balances: TrialBalanceRow[],
+    summary: ConsolSummary[],
+    presentCcy: string,
+    actor: string
+): Promise<void> {
+    // Check if ledger posting is enabled
+    const ledgerOption = await getLedgerOption(companyId);
+    if (!ledgerOption?.enabled || !ledgerOption.ledgerEntity) {
+        return; // Ledger posting disabled
+    }
+
+    // Check for existing ledger entries (idempotency)
+    const { rows: existingRows } = await pool.query(`
+        SELECT 1 FROM journal 
+        WHERE company_id = $1 
+        AND source_doctype = 'CONSOL_LEDGER' 
+        AND source_id = $2
+    `, [companyId, `${groupCode}-${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}`]);
+
+    if (existingRows.length > 0) {
+        return; // Already posted
+    }
+
+    const journalId = ulid();
+    const idempotencyKey = `consol-ledger-${groupCode}-${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}`;
+
+    // Create consolidation journal
+    await pool.query(`
+        INSERT INTO journal (id, company_id, posting_date, currency, source_doctype, source_id, idempotency_key)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `, [
+        journalId,
+        companyId,
+        new Date().toISOString(),
+        presentCcy,
+        'CONSOL_LEDGER',
+        `${groupCode}-${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}`,
+        idempotencyKey
+    ]);
+
+    // Post summary entries
+    for (const summaryItem of summary) {
+        if (Math.abs(summaryItem.amount) > 0.01) {
+            const lineId = ulid();
+            await pool.query(`
+                INSERT INTO journal_line (id, journal_id, account_code, dc, amount, currency)
+                VALUES ($1, $2, $3, $4, $5, $6)
+            `, [
+                lineId,
+                journalId,
+                summaryItem.component === 'TRANSLATION' ? 'CTA' :
+                    summaryItem.component === 'IC_ELIM' ? '9890' : '3990',
+                summaryItem.amount >= 0 ? 'D' : 'C',
+                Math.abs(summaryItem.amount),
+                presentCcy
+            ]);
+        }
+    }
+
+    // Post consolidated balance sheet entries if summary account is configured
+    if (ledgerOption.summaryAccount) {
+        const consolidatedBs = generateConsolidatedBs(balances);
+        const totalAssets = consolidatedBs
+            .filter(b => b.account.match(/^1\d{3}/))
+            .reduce((sum, b) => sum + b.amount, 0);
+        const totalLiabilities = consolidatedBs
+            .filter(b => b.account.match(/^2\d{3}/))
+            .reduce((sum, b) => sum + b.amount, 0);
+        const totalEquity = consolidatedBs
+            .filter(b => b.account.match(/^3\d{3}/))
+            .reduce((sum, b) => sum + b.amount, 0);
+
+        // Post summary balance sheet entry
+        if (Math.abs(totalAssets - totalLiabilities - totalEquity) > 0.01) {
+            const lineId = ulid();
+            await pool.query(`
+                INSERT INTO journal_line (id, journal_id, account_code, dc, amount, currency)
+                VALUES ($1, $2, $3, $4, $5, $6)
+            `, [
+                lineId,
+                journalId,
+                ledgerOption.summaryAccount,
+                totalAssets > (totalLiabilities + totalEquity) ? 'D' : 'C',
+                Math.abs(totalAssets - totalLiabilities - totalEquity),
+                presentCcy
+            ]);
+        }
+    }
 }

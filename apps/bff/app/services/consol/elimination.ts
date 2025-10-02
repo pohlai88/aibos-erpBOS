@@ -3,6 +3,7 @@ import { ulid } from "ulid";
 import { postJournal, JournalEntry } from "@/services/gl/journals";
 import { IcElimRunRequestType } from "@aibos/contracts";
 import { getIcMatches } from "./ic";
+import { getIcElimRules } from "./ic-workbench";
 
 // --- IC Elimination Engine (M21) -------------------------------------------
 export interface IcElimRun {
@@ -269,4 +270,237 @@ export async function getIcElimRuns(
     }
 
     return runs;
+}
+
+// --- Rule-Based Elimination (M21.2) -------------------------------------------
+export async function runRuleBasedElimination(
+    companyId: string,
+    groupCode: string,
+    year: number,
+    month: number,
+    ruleCode?: string,
+    dryRun: boolean = true,
+    actor: string = 'system'
+): Promise<IcElimRunResult> {
+    const runId = ulid();
+
+    // Check for existing rule lock (idempotency)
+    if (!dryRun && ruleCode) {
+        const { rows: lockRows } = await pool.query(`
+            SELECT 1 FROM ic_elim_rule_lock 
+            WHERE company_id = $1 AND group_code = $2 AND year = $3 AND month = $4 AND rule_code = $5
+        `, [companyId, groupCode, year, month, ruleCode]);
+
+        if (lockRows.length > 0) {
+            throw new Error(`Rule-based elimination already committed for ${groupCode} ${year}-${month} rule ${ruleCode}`);
+        }
+    }
+
+    // Create run record
+    await pool.query(`
+        INSERT INTO ic_elim_run (id, company_id, group_code, year, month, mode, created_by)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `, [runId, companyId, groupCode, year, month, dryRun ? 'dry_run' : 'commit', actor]);
+
+    // Get elimination rules
+    const elimRules = await getIcElimRules(companyId);
+    const rulesToProcess = ruleCode ?
+        elimRules.filter(r => r.ruleCode === ruleCode) :
+        elimRules;
+
+    const allElimLines: IcElimLine[] = [];
+    let totalEliminations = 0;
+
+    // Process each rule
+    for (const rule of rulesToProcess) {
+        const ruleElimLines = await processEliminationRule(
+            companyId, groupCode, year, month, rule, runId
+        );
+
+        allElimLines.push(...ruleElimLines);
+        totalEliminations += ruleElimLines.length;
+
+        // Create rule lock if committing
+        if (!dryRun) {
+            await pool.query(`
+                INSERT INTO ic_elim_rule_lock (company_id, group_code, year, month, rule_code)
+                VALUES ($1, $2, $3, $4, $5)
+                ON CONFLICT DO NOTHING
+            `, [companyId, groupCode, year, month, rule.ruleCode]);
+        }
+    }
+
+    // Post elimination journals if not dry run
+    let journalsPosted = 0;
+    if (!dryRun && allElimLines.length > 0) {
+        journalsPosted = await postEliminationJournals(companyId, allElimLines, groupCode, year, month);
+    }
+
+    return {
+        runId,
+        lines: allElimLines,
+        summary: {
+            totalEliminations,
+            journalsPosted
+        }
+    };
+}
+
+async function processEliminationRule(
+    companyId: string,
+    groupCode: string,
+    year: number,
+    month: number,
+    rule: any,
+    runId: string
+): Promise<IcElimLine[]> {
+    const elimLines: IcElimLine[] = [];
+
+    // Get IC matches for the period
+    const icMatches = await getIcMatches(companyId, groupCode, year, month);
+
+    for (const match of icMatches) {
+        // Get IC links for this match
+        const { rows: linkRows } = await pool.query(`
+            SELECT il.entity_code, il.co_entity_cp, il.amount_base, il.source_type
+            FROM ic_match_line iml
+            JOIN ic_link il ON iml.ic_link_id = il.id
+            WHERE iml.match_id = $1
+        `, [match.id]);
+
+        // Group links by entity pairs
+        const entityPairs = new Map<string, any[]>();
+        for (const link of linkRows) {
+            const pairKey = `${link.entity_code}|${link.co_entity_cp}`;
+            if (!entityPairs.has(pairKey)) {
+                entityPairs.set(pairKey, []);
+            }
+            entityPairs.get(pairKey)!.push(link);
+        }
+
+        // Process each entity pair
+        for (const [pairKey, links] of entityPairs) {
+            const [entityA, entityB] = pairKey.split('|');
+
+            // Check if this pair matches the rule pattern
+            if (matchesRulePattern(links, rule)) {
+                const totalAmount = links.reduce((sum, link) => sum + Number(link.amount_base), 0);
+
+                if (Math.abs(totalAmount) > 0.01) {
+                    const elimLineId = ulid();
+                    elimLines.push({
+                        id: elimLineId,
+                        runId,
+                        entityCode: entityA,
+                        cpCode: entityB,
+                        amountBase: Math.abs(totalAmount),
+                        note: `Rule: ${rule.ruleCode}`
+                    });
+
+                    // Save elimination line
+                    await pool.query(`
+                        INSERT INTO ic_elim_line (id, run_id, entity_code, cp_code, amount_base, note)
+                        VALUES ($1, $2, $3, $4, $5, $6)
+                    `, [elimLineId, runId, entityA, entityB, Math.abs(totalAmount), `Rule: ${rule.ruleCode}`]);
+                }
+            }
+        }
+    }
+
+    return elimLines;
+}
+
+function matchesRulePattern(links: any[], rule: any): boolean {
+    if (!rule.src_account_like && !rule.cp_account_like) {
+        return true; // No pattern specified, match all
+    }
+
+    for (const link of links) {
+        const srcMatch = !rule.src_account_like ||
+            link.source_type.includes(rule.src_account_like);
+        const cpMatch = !rule.cp_account_like ||
+            link.source_type.includes(rule.cp_account_like);
+
+        if (srcMatch && cpMatch) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+async function postEliminationJournals(
+    companyId: string,
+    elimLines: IcElimLine[],
+    groupCode: string,
+    year: number,
+    month: number
+): Promise<number> {
+    // Get IC elimination account mapping
+    const { rows: accountMapRows } = await pool.query(`
+        SELECT account FROM consol_account_map 
+        WHERE company_id = $1 AND purpose = 'IC_ELIM'
+    `, [companyId]);
+
+    const elimAccount = accountMapRows.length > 0
+        ? accountMapRows[0].account
+        : '9890';
+
+    let journalsPosted = 0;
+
+    // Group eliminations by entity pair for journal posting
+    const elimGroups = new Map<string, IcElimLine[]>();
+    for (const elim of elimLines) {
+        const groupKey = `${elim.entityCode}|${elim.cpCode}`;
+        if (!elimGroups.has(groupKey)) {
+            elimGroups.set(groupKey, []);
+        }
+        elimGroups.get(groupKey)!.push(elim);
+    }
+
+    // Post journal for each entity pair
+    for (const [groupKey, elims] of elimGroups) {
+        const [entityA, entityB] = groupKey.split('|');
+        const totalAmount = elims.reduce((sum, elim) => sum + elim.amountBase, 0);
+
+        if (Math.abs(totalAmount) > 0.01) {
+            const journalId = ulid();
+            const idempotencyKey = `ic-elim-${groupCode}-${year}-${month}-${entityA}-${entityB}`;
+
+            const journal: JournalEntry = {
+                id: journalId,
+                companyId,
+                postingDate: new Date(year, month - 1, 1).toISOString(),
+                currency: 'USD', // Default currency
+                sourceDoctype: 'IC_ELIM',
+                sourceId: `${groupCode}-${year}-${month}`,
+                idempotencyKey,
+                lines: [
+                    {
+                        id: ulid(),
+                        accountCode: elimAccount,
+                        dc: 'D',
+                        amount: totalAmount,
+                        currency: 'USD',
+                        partyType: 'ENTITY',
+                        partyId: entityA
+                    },
+                    {
+                        id: ulid(),
+                        accountCode: elimAccount,
+                        dc: 'C',
+                        amount: totalAmount,
+                        currency: 'USD',
+                        partyType: 'ENTITY',
+                        partyId: entityB
+                    }
+                ]
+            };
+
+            await postJournal(journal);
+            journalsPosted++;
+        }
+    }
+
+    return journalsPosted;
 }

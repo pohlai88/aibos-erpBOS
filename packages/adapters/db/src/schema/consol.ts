@@ -179,3 +179,53 @@ export const consolLedgerOption = pgTable("consol_ledger_option", {
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
     updatedBy: text("updated_by").notNull(),
 });
+
+// --- Intercompany Auto-Matching & Workbench (M21.2) --------------------------
+export const icElimMap = pgTable("ic_elim_map", {
+    companyId: text("company_id").notNull(),
+    ruleCode: text("rule_code").notNull(),
+    srcAccountLike: text("src_account_like"),
+    cpAccountLike: text("cp_account_like"),
+    note: text("note"),
+    active: boolean("active").notNull().default(true),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull(),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.companyId, table.ruleCode] })
+}));
+
+export const icMatchProposal = pgTable("ic_match_proposal", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    groupCode: text("group_code").notNull(),
+    year: integer("year").notNull(),
+    month: integer("month").notNull(),
+    score: numeric("score").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const icMatchProposalLine = pgTable("ic_match_proposal_line", {
+    id: text("id").primaryKey(),
+    proposalId: text("proposal_id").notNull(),
+    icLinkId: text("ic_link_id").notNull(),
+    hint: text("hint"),
+});
+
+export const icWorkbenchDecision = pgTable("ic_workbench_decision", {
+    id: text("id").primaryKey(),
+    proposalId: text("proposal_id").notNull(),
+    decidedBy: text("decided_by").notNull(),
+    decision: text("decision").notNull(),
+    reason: text("reason"),
+    decidedAt: timestamp("decided_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const icElimRuleLock = pgTable("ic_elim_rule_lock", {
+    companyId: text("company_id").notNull(),
+    groupCode: text("group_code").notNull(),
+    year: integer("year").notNull(),
+    month: integer("month").notNull(),
+    ruleCode: text("rule_code").notNull(),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.companyId, table.groupCode, table.year, table.month, table.ruleCode] })
+}));

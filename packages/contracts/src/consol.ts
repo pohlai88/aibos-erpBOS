@@ -94,6 +94,29 @@ export const ConsolLedgerOptionUpsert = z.object({
     summary_account: z.string().optional(),
 });
 
+// --- Intercompany Auto-Matching & Workbench (M21.2) ---------------------------
+export const IcElimRuleUpsert = z.object({
+    rule_code: z.string().min(1),
+    src_account_like: z.string().optional(),
+    cp_account_like: z.string().optional(),
+    note: z.string().optional(),
+    active: z.boolean().default(true),
+});
+
+export const IcAutoMatchRequest = z.object({
+    group_code: z.string().min(1),
+    year: z.number().int(),
+    month: z.number().int().min(1).max(12),
+    tolerance: z.number().default(0.01),
+    window_days: z.number().default(7),
+});
+
+export const IcProposalDecision = z.object({
+    proposal_id: z.string().min(1),
+    decision: z.enum(["accept", "reject", "split"]),
+    reason: z.string().optional(),
+});
+
 // --- Response Types (M21) -------------------------------------------------
 export const EntityResponse = z.object({
     entity_code: z.string(),
@@ -224,6 +247,46 @@ export const ConsolLedgerOptionResponse = z.object({
     updated_by: z.string(),
 });
 
+// --- IC Auto-Matching Response Types (M21.2) ----------------------------------
+export const IcElimRuleResponse = z.object({
+    rule_code: z.string(),
+    src_account_like: z.string().optional(),
+    cp_account_like: z.string().optional(),
+    note: z.string().optional(),
+    active: z.boolean(),
+    updated_at: z.string(),
+    updated_by: z.string(),
+});
+
+export const IcMatchProposalResponse = z.object({
+    id: z.string(),
+    group_code: z.string(),
+    year: z.number(),
+    month: z.number(),
+    score: z.number(),
+    created_at: z.string(),
+    links: z.array(z.object({
+        id: z.string(),
+        entity_code: z.string(),
+        co_entity_cp: z.string(),
+        source_type: z.string(),
+        source_id: z.string(),
+        ext_ref: z.string().optional(),
+        amount_base: z.number(),
+        posted_at: z.string(),
+        hint: z.string().optional(),
+    })).optional(),
+});
+
+export const IcWorkbenchDecisionResponse = z.object({
+    id: z.string(),
+    proposal_id: z.string(),
+    decided_by: z.string(),
+    decision: z.string(),
+    reason: z.string().optional(),
+    decided_at: z.string(),
+});
+
 // --- Type Exports (M21) ----------------------------------------------------
 export type EntityUpsertType = z.infer<typeof EntityUpsert>;
 export type GroupUpsertType = z.infer<typeof GroupUpsert>;
@@ -241,6 +304,11 @@ export type ConsolCtaPolicyUpsertType = z.infer<typeof ConsolCtaPolicyUpsert>;
 export type ConsolNciMapUpsertType = z.infer<typeof ConsolNciMapUpsert>;
 export type ConsolLedgerOptionUpsertType = z.infer<typeof ConsolLedgerOptionUpsert>;
 
+// --- IC Auto-Matching Type Exports (M21.2) -----------------------------------
+export type IcElimRuleUpsertType = z.infer<typeof IcElimRuleUpsert>;
+export type IcAutoMatchRequestType = z.infer<typeof IcAutoMatchRequest>;
+export type IcProposalDecisionType = z.infer<typeof IcProposalDecision>;
+
 export type EntityResponseType = z.infer<typeof EntityResponse>;
 export type GroupResponseType = z.infer<typeof GroupResponse>;
 export type OwnershipResponseType = z.infer<typeof OwnershipResponse>;
@@ -255,3 +323,8 @@ export type ConsolRateOverrideResponseType = z.infer<typeof ConsolRateOverrideRe
 export type ConsolCtaPolicyResponseType = z.infer<typeof ConsolCtaPolicyResponse>;
 export type ConsolNciMapResponseType = z.infer<typeof ConsolNciMapResponse>;
 export type ConsolLedgerOptionResponseType = z.infer<typeof ConsolLedgerOptionResponse>;
+
+// --- IC Auto-Matching Response Type Exports (M21.2) --------------------------
+export type IcElimRuleResponseType = z.infer<typeof IcElimRuleResponse>;
+export type IcMatchProposalResponseType = z.infer<typeof IcMatchProposalResponse>;
+export type IcWorkbenchDecisionResponseType = z.infer<typeof IcWorkbenchDecisionResponse>;
