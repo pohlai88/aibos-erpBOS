@@ -1,5 +1,4 @@
 import { pool } from "../../lib/db";
-import { fxAdminRates } from "@aibos/adapters/db/schema";
 
 export async function upsertRate(companyId: string, actor: string, r: { as_of_date: string; src_ccy: string; dst_ccy: string; rate: number }) {
     await pool.query(

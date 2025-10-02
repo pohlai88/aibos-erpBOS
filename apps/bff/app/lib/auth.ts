@@ -9,6 +9,7 @@ export type AuthCtx = {
   company_id: string;
   role: "admin" | "accountant" | "ops";
   scopes: Capability[];
+  api_key_id?: string;
 };
 
 function sha256(x: string) {

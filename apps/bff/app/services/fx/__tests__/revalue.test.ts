@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { revalueMonetaryAccounts } from "../revalue";
 
 describe("FX revaluation math", () => {
@@ -15,19 +15,19 @@ describe("FX revaluation math", () => {
         ];
 
         // Mock getTrialBalances to return our test data
-        const mockGetTrialBalances = jest.fn().mockResolvedValue(mockTb);
+        const mockGetTrialBalances = vi.fn().mockResolvedValue(mockTb);
 
         // Mock getAdminRateOr1 to return 4.0 (USD to MYR)
-        const mockGetAdminRateOr1 = jest.fn().mockResolvedValue(4.0);
+        const mockGetAdminRateOr1 = vi.fn().mockResolvedValue(4.0);
 
         // Mock postJournal to avoid actual posting
-        const mockPostJournal = jest.fn().mockResolvedValue({ journalId: "test-je" });
+        const mockPostJournal = vi.fn().mockResolvedValue({ journalId: "test-je" });
 
         // Mock pool.query for run creation
-        const mockPoolQuery = jest.fn().mockResolvedValue({ rows: [] });
+        const mockPoolQuery = vi.fn().mockResolvedValue({ rows: [] });
 
         // Mock fx_account_map lookup
-        const mockAccountMap = jest.fn().mockResolvedValue({
+        const mockAccountMap = vi.fn().mockResolvedValue({
             rows: [{ unreal_gain_account: "7190", unreal_loss_account: "8190" }]
         });
 

@@ -8,6 +8,8 @@ export async function importRatesCsv(companyId: string, actor: string, fileText:
 
     for (let i = 0; i < rows.length; i++) {
         const r = rows[i];
+        if (!r) continue;
+
         try {
             const as_of_date = r[mapping?.as_of_date ?? "as_of_date"];
             const src_ccy = r[mapping?.src_ccy ?? "src_ccy"];

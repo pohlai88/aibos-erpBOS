@@ -1,10 +1,10 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { revalueMonetaryAccounts } from "../revalue";
 
 describe("FX revaluation period guard", () => {
     it("respects M17 period guard", async () => {
         // Mock postJournal to throw 423 for closed period
-        const mockPostJournal = jest.fn().mockRejectedValue(
+        const mockPostJournal = vi.fn().mockRejectedValue(
             Object.assign(new Error("Period 2025-11 is closed"), { status: 423 })
         );
 

@@ -1,9 +1,9 @@
 import { NextRequest } from "next/server";
-import { ok, badRequest, forbidden } from "../../lib/http";
-import { requireAuth, requireCapability } from "../../lib/auth";
-import { withRouteErrors, isResponse } from "../../lib/route-utils";
+import { ok, badRequest, forbidden } from "../../../lib/http";
+import { requireAuth, requireCapability } from "../../../lib/auth";
+import { withRouteErrors, isResponse } from "../../../lib/route-utils";
 import { FxRateUpsert } from "@aibos/contracts";
-import { upsertRate, listRates } from "../../services/fx/rates";
+import { upsertRate, listRates } from "../../../services/fx/rates";
 
 export const GET = withRouteErrors(async (req: NextRequest) => {
     const auth = await requireAuth(req);

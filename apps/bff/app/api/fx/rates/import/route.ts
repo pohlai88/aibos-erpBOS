@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
-import { ok, badRequest, forbidden } from "../../../lib/http";
-import { requireAuth, requireCapability } from "../../../lib/auth";
-import { withRouteErrors, isResponse } from "../../../lib/route-utils";
-import { importRatesCsv } from "../../../services/fx/ratesCsv";
+import { ok, badRequest, forbidden } from "../../../../lib/http";
+import { requireAuth, requireCapability } from "../../../../lib/auth";
+import { withRouteErrors, isResponse } from "../../../../lib/route-utils";
+import { importRatesCsv } from "../../../../services/fx/ratesCsv";
 
 export const POST = withRouteErrors(async (req: NextRequest) => {
     const auth = await requireAuth(req);

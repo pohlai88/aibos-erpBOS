@@ -1,6 +1,6 @@
 import { pool } from "../../lib/db";
-import { postJournal } from "./journals";
-import { getTrialBalances } from "./trial-balance";
+import { postJournal } from "../gl/journals";
+import { getTrialBalances } from "../gl/trial-balance";
 import { getAdminRateOr1 } from "../../reports/present";
 import { ulid } from "ulid";
 
