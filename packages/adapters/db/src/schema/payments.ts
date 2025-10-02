@@ -143,3 +143,116 @@ export const apFileProfile = pgTable("ap_file_profile", {
 }, (table) => ({
     pk: primaryKey({ columns: [table.companyId, table.bankCode] })
 }));
+
+// --- M23.1 Dual-Control & KYC Tables ----------------------------------------
+export const apApprovalPolicy = pgTable("ap_approval_policy", {
+    companyId: text("company_id").notNull(),
+    policyCode: text("policy_code").notNull(),
+    minAmount: numeric("min_amount").notNull().default("0"),
+    maxAmount: numeric("max_amount"),
+    currency: text("currency"),
+    requireReviewer: boolean("require_reviewer").notNull().default(true),
+    requireApprover: boolean("require_approver").notNull().default(true),
+    requireDualApprover: boolean("require_dual_approver").notNull().default(false),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull(),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.companyId, table.policyCode] })
+}));
+
+export const apSupplierPolicy = pgTable("ap_supplier_policy", {
+    companyId: text("company_id").notNull(),
+    supplierId: text("supplier_id").notNull(),
+    policyCode: text("policy_code").notNull(),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.companyId, table.supplierId] })
+}));
+
+export const apRunApproval = pgTable("ap_run_approval", {
+    id: text("id").primaryKey(),
+    runId: text("run_id").notNull(),
+    step: text("step").notNull(),
+    actor: text("actor").notNull(),
+    decidedAt: timestamp("decided_at", { withTimezone: true }).notNull().defaultNow(),
+    decision: text("decision").notNull(),
+    reason: text("reason"),
+});
+
+export const apPayeeKyc = pgTable("ap_payee_kyc", {
+    companyId: text("company_id").notNull(),
+    supplierId: text("supplier_id").notNull(),
+    residency: text("residency"),
+    taxForm: text("tax_form"),
+    taxId: text("tax_id"),
+    docType: text("doc_type"),
+    docRef: text("doc_ref"),
+    docExpires: date("doc_expires"),
+    riskLevel: text("risk_level"),
+    onHold: boolean("on_hold").notNull().default(false),
+    notes: text("notes"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull(),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.companyId, table.supplierId] })
+}));
+
+export const sanctionDenylist = pgTable("sanction_denylist", {
+    companyId: text("company_id").notNull(),
+    nameNorm: text("name_norm").notNull(),
+    country: text("country"),
+    source: text("source"),
+    listedAt: timestamp("listed_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const sanctionScreenRun = pgTable("sanction_screen_run", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    runId: text("run_id"),
+    supplierId: text("supplier_id"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+export const sanctionHit = pgTable("sanction_hit", {
+    id: text("id").primaryKey(),
+    screenId: text("screen_id").notNull(),
+    supplierId: text("supplier_id").notNull(),
+    nameNorm: text("name_norm").notNull(),
+    matchScore: numeric("match_score").notNull(),
+    source: text("source").notNull(),
+    status: text("status").notNull(),
+    decidedBy: text("decided_by"),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    reason: text("reason"),
+});
+
+export const apSupplierLimit = pgTable("ap_supplier_limit", {
+    companyId: text("company_id").notNull(),
+    supplierId: text("supplier_id").notNull(),
+    dayCap: numeric("day_cap"),
+    runCap: numeric("run_cap"),
+    yearCap: numeric("year_cap"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull(),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.companyId, table.supplierId] })
+}));
+
+export const apRunGate = pgTable("ap_run_gate", {
+    companyId: text("company_id").notNull(),
+    runId: text("run_id").notNull(),
+    gate: text("gate").notNull(),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.companyId, table.runId, table.gate] })
+}));
+
+export const sanctionAdapterProfile = pgTable("sanction_adapter_profile", {
+    companyId: text("company_id").notNull(),
+    adapter: text("adapter").notNull(),
+    config: jsonb("config").notNull(),
+    active: boolean("active").notNull().default(true),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull(),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.companyId, table.adapter] })
+}));
