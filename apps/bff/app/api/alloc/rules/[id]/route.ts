@@ -5,14 +5,14 @@ import { withRouteErrors, isResponse } from "@/lib/route-utils";
 import { deleteAllocRule } from "@/services/alloc/rules";
 
 // DELETE /api/alloc/rules/[id] - Delete allocation rule
-export const DELETE = withRouteErrors(async (req: NextRequest, { params }: { params: { id: string } }) => {
+export const DELETE = withRouteErrors(async (req: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const auth = await requireAuth(req);
     if (isResponse(auth)) return auth;
 
     const forbiddenCheck = requireCapability(auth, "alloc:manage");
     if (forbiddenCheck) return forbiddenCheck;
 
-    const ruleId = params.id;
+    const { id: ruleId } = await params;
     if (!ruleId) {
         return notFound("Rule ID is required");
     }
