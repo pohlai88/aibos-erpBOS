@@ -9,3 +9,6 @@ export * from './cash_alert_schedule';
 export * from './capex';
 export * from './intangibles';
 export * from './assets_import';
+export * from './assets_prefs';
+export * from './impairments';
+export * from './ui_drafts';

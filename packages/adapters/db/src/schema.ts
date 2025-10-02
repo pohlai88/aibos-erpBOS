@@ -460,3 +460,54 @@ export const intangiblePostingMap = pgTable("intangible_posting_map", {
 }, (t) => ({
     pk: primaryKey({ columns: [t.companyId, t.class] })
 }));
+
+// --- M16.3/M16.4: Assets Configuration & Advanced Features ---------------------
+export const assetsConfig = pgTable("assets_config", {
+    companyId: text("company_id").primaryKey(),
+    prorationEnabled: boolean("proration_enabled").notNull().default(false),
+    prorationBasis: text("proration_basis").notNull().default("days_in_month"),
+    fxPresentationPolicy: text("fx_presentation_policy").notNull().default("post_month"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const assetImpairment = pgTable("asset_impairment", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    planKind: text("plan_kind").notNull(),  // 'capex'|'intangible'
+    planId: text("plan_id").notNull(),
+    date: date("date").notNull(),
+    amount: numeric("amount").notNull(),
+    memo: text("memo"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+export const fxSnapshot = pgTable("fx_snapshot", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    planKind: text("plan_kind").notNull(),
+    planId: text("plan_id").notNull(),
+    policy: text("policy").notNull(),
+    year: integer("year"),
+    month: integer("month"),
+    rate: numeric("rate").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const assetsLimits = pgTable("assets_limits", {
+    companyId: text("company_id").primaryKey(),
+    importMaxRows: integer("import_max_rows").notNull().default(10000),
+    bulkPostMaxRows: integer("bulk_post_max_rows").notNull().default(5000),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const assetsUiDraft = pgTable("assets_ui_draft", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    kind: text("kind").notNull(),          // 'depr'|'amort'
+    year: integer("year").notNull(),
+    month: integer("month").notNull(),
+    payload: jsonb("payload").notNull(),   // dry-run summary blob
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+});
