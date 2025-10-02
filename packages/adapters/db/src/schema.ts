@@ -297,3 +297,48 @@ export const forecastLine = pgTable("forecast_line", {
     currency: char("currency", { length: 3 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// --- Working Capital & Cash Flow Forecast (M15) ------------------------------
+export const wcProfile = pgTable("wc_profile", {
+    id: text("id").primaryKey(), // ULID
+    companyId: text("company_id").references(() => company.id).notNull(),
+    name: text("name").notNull(),
+    dsoDays: numeric("dso_days").notNull(), // Days Sales Outstanding
+    dpoDays: numeric("dpo_days").notNull(), // Days Payables Outstanding
+    dioDays: numeric("dio_days").notNull(), // Days Inventory Outstanding
+    taxRatePct: numeric("tax_rate_pct").notNull().default("24"), // e.g., 24 = 24%
+    interestApr: numeric("interest_apr").notNull().default("6"), // annual %
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+export const cashForecastVersion = pgTable("cash_forecast_version", {
+    id: text("id").primaryKey(), // ULID
+    companyId: text("company_id").references(() => company.id).notNull(),
+    code: text("code").notNull(), // e.g., CFY25-01
+    label: text("label").notNull(),
+    year: integer("year").notNull(),
+    status: text("status").notNull().default("draft"), // draft|submitted|approved|returned|archived
+    profileId: text("profile_id").references(() => wcProfile.id), // fk to wc_profile.id (soft)
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull(),
+});
+
+export const cashLine = pgTable("cash_line", {
+    id: text("id").primaryKey(), // ULID
+    companyId: text("company_id").references(() => company.id).notNull(),
+    versionId: text("version_id").references(() => cashForecastVersion.id, { onDelete: "cascade" }).notNull(),
+    year: integer("year").notNull(),
+    month: integer("month").notNull(), // 1..12
+    currency: text("currency").notNull(), // source currency
+    presentCcy: text("present_ccy").notNull(), // presentation currency (post-conversion)
+    cashIn: numeric("cash_in").notNull().default("0"),
+    cashOut: numeric("cash_out").notNull().default("0"),
+    netChange: numeric("net_change").notNull().default("0"),
+    costCenter: text("cost_center"), // denormalized code (optional)
+    project: text("project"), // denormalized code (optional)
+    sourceHash: text("source_hash").notNull(), // idempotency for generation
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});

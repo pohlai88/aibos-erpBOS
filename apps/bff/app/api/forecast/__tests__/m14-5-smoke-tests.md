@@ -1,4 +1,5 @@
 # M14.5 Promotion Smoke Tests
+
 # Quick verification commands for M14.5 Driver-Based Rolling Forecast
 
 ## 1. What-If Simulation Test (±5% price, flat seasonality)
@@ -78,7 +79,7 @@ tail -f logs/app.log | grep -E "(forecast_generated|forecast_simulated)"
 ```bash
 # Test with different role capabilities
 # Admin: Should have forecasts:manage + forecasts:approve
-# Accountant: Should have forecasts:manage + forecasts:approve  
+# Accountant: Should have forecasts:manage + forecasts:approve
 # Ops: Should have forecasts:manage only
 
 # Test forecast generation with ops role
@@ -96,6 +97,6 @@ curl -X POST -H "X-API-Key: <ops-api-key>" -H "Content-Type: application/json" \
 ✅ **Report Test**: scenario=forecast:FY26-FC1 works with pivot  
 ✅ **RBAC Test**: Proper capability enforcement  
 ✅ **Observability**: Structured logs with duration_ms and lines_processed  
-✅ **Performance**: All operations complete within SLA targets  
+✅ **Performance**: All operations complete within SLA targets
 
 ## M14.5 Ready for Production! 🚀

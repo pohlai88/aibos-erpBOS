@@ -31,13 +31,13 @@ export const POST = withRouteErrors(async (
         const body = await req.json();
         const payload = GenerateForecastSchema.parse(body);
 
-            const result = await generateForecastFromBudget(
-                auth.company_id,
-                forecastVersionId,
-                payload.sourceBudgetVersionId,
-                payload.driverProfileId,
-                payload.simulationParams || undefined
-            );
+        const result = await generateForecastFromBudget(
+            auth.company_id,
+            forecastVersionId,
+            payload.sourceBudgetVersionId,
+            payload.driverProfileId,
+            payload.simulationParams || undefined
+        );
 
         return ok({
             result,

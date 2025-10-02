@@ -104,120 +104,120 @@ export async function getForecastVersion(companyId: string, versionId: string) {
 
 // Forecast Generation Service
 export async function generateForecastFromBudget(
-  companyId: string,
-  forecastVersionId: string,
-  sourceBudgetVersionId: string,
-  driverProfileId: string,
-  simulationParams?: ForecastSimulationParams
+    companyId: string,
+    forecastVersionId: string,
+    sourceBudgetVersionId: string,
+    driverProfileId: string,
+    simulationParams?: ForecastSimulationParams
 ) {
-  const startTime = Date.now();
-  
-  // Get driver profile
-  const profile = await getDriverProfile(companyId, driverProfileId);
-  if (!profile) {
-    throw new Error("Driver profile not found");
-  }
+    const startTime = Date.now();
 
-  const formulas = JSON.parse(profile.formula_json) as DriverFormula;
-  const seasonality = JSON.parse(profile.seasonality_json) as SeasonalityVector;
-
-  // Get source budget lines
-  const budgetResult = await pool.query(
-    `SELECT * FROM budget_line WHERE company_id = $1 AND version_id = $2`,
-    [companyId, sourceBudgetVersionId]
-  );
-  const budgetLines = budgetResult.rows;
-
-  // Generate forecast lines
-  const forecastLines = [];
-  
-  for (const budgetLine of budgetLines) {
-    const accountCode = budgetLine.account_code;
-    const formula = formulas[accountCode];
-    
-    if (!formula) {
-      // No driver formula - keep original budget amount
-      for (let month = 1; month <= 12; month++) {
-        const seasonalFactor = seasonality[month] || 100;
-        const amount = Number(budgetLine.amount_base) * (seasonalFactor / 100);
-        
-        forecastLines.push({
-          id: generateId(),
-          companyId,
-          versionId: forecastVersionId,
-          accountCode,
-          costCenterCode: budgetLine.cost_center_code,
-          projectCode: budgetLine.project_code,
-          month,
-          amount: amount.toString(),
-          currency: budgetLine.currency || "USD",
-        });
-      }
-    } else {
-      // Apply driver formula
-      const baseAmount = Number(budgetLine.amount_base);
-      const driverAmount = evaluateDriverFormula(formula, baseAmount, simulationParams);
-      
-      for (let month = 1; month <= 12; month++) {
-        const seasonalFactor = seasonality[month] || 100;
-        const amount = driverAmount * (seasonalFactor / 100);
-        
-        forecastLines.push({
-          id: generateId(),
-          companyId,
-          versionId: forecastVersionId,
-          accountCode,
-          costCenterCode: budgetLine.cost_center_code,
-          projectCode: budgetLine.project_code,
-          month,
-          amount: amount.toString(),
-          currency: budgetLine.currency || "USD",
-        });
-      }
+    // Get driver profile
+    const profile = await getDriverProfile(companyId, driverProfileId);
+    if (!profile) {
+        throw new Error("Driver profile not found");
     }
-  }
 
-  // Insert forecast lines
-  if (forecastLines.length > 0) {
-    for (const line of forecastLines) {
-      await pool.query(
-        `INSERT INTO forecast_line (id, company_id, version_id, account_code, cost_center_code, project_code, month, amount, currency)
+    const formulas = JSON.parse(profile.formula_json) as DriverFormula;
+    const seasonality = JSON.parse(profile.seasonality_json) as SeasonalityVector;
+
+    // Get source budget lines
+    const budgetResult = await pool.query(
+        `SELECT * FROM budget_line WHERE company_id = $1 AND version_id = $2`,
+        [companyId, sourceBudgetVersionId]
+    );
+    const budgetLines = budgetResult.rows;
+
+    // Generate forecast lines
+    const forecastLines = [];
+
+    for (const budgetLine of budgetLines) {
+        const accountCode = budgetLine.account_code;
+        const formula = formulas[accountCode];
+
+        if (!formula) {
+            // No driver formula - keep original budget amount
+            for (let month = 1; month <= 12; month++) {
+                const seasonalFactor = seasonality[month] || 100;
+                const amount = Number(budgetLine.amount_base) * (seasonalFactor / 100);
+
+                forecastLines.push({
+                    id: generateId(),
+                    companyId,
+                    versionId: forecastVersionId,
+                    accountCode,
+                    costCenterCode: budgetLine.cost_center_code,
+                    projectCode: budgetLine.project_code,
+                    month,
+                    amount: amount.toString(),
+                    currency: budgetLine.currency || "USD",
+                });
+            }
+        } else {
+            // Apply driver formula
+            const baseAmount = Number(budgetLine.amount_base);
+            const driverAmount = evaluateDriverFormula(formula, baseAmount, simulationParams);
+
+            for (let month = 1; month <= 12; month++) {
+                const seasonalFactor = seasonality[month] || 100;
+                const amount = driverAmount * (seasonalFactor / 100);
+
+                forecastLines.push({
+                    id: generateId(),
+                    companyId,
+                    versionId: forecastVersionId,
+                    accountCode,
+                    costCenterCode: budgetLine.cost_center_code,
+                    projectCode: budgetLine.project_code,
+                    month,
+                    amount: amount.toString(),
+                    currency: budgetLine.currency || "USD",
+                });
+            }
+        }
+    }
+
+    // Insert forecast lines
+    if (forecastLines.length > 0) {
+        for (const line of forecastLines) {
+            await pool.query(
+                `INSERT INTO forecast_line (id, company_id, version_id, account_code, cost_center_code, project_code, month, amount, currency)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-        [
-          line.id,
-          line.companyId,
-          line.versionId,
-          line.accountCode,
-          line.costCenterCode,
-          line.projectCode,
-          line.month,
-          line.amount,
-          line.currency,
-        ]
-      );
+                [
+                    line.id,
+                    line.companyId,
+                    line.versionId,
+                    line.accountCode,
+                    line.costCenterCode,
+                    line.projectCode,
+                    line.month,
+                    line.amount,
+                    line.currency,
+                ]
+            );
+        }
     }
-  }
 
-  const duration = Date.now() - startTime;
-  
-  // Observability logging
-  console.log(JSON.stringify({
-    event: "forecast_generated",
-    company_id: companyId,
-    forecast_version_id: forecastVersionId,
-    driver_profile_id: driverProfileId,
-    source_budget_version_id: sourceBudgetVersionId,
-    lines_processed: forecastLines.length,
-    duration_ms: duration,
-    simulation_params: simulationParams || null,
-    timestamp: new Date().toISOString()
-  }));
+    const duration = Date.now() - startTime;
 
-  return {
-    linesGenerated: forecastLines.length,
-    versionId: forecastVersionId,
-    durationMs: duration,
-  };
+    // Observability logging
+    console.log(JSON.stringify({
+        event: "forecast_generated",
+        company_id: companyId,
+        forecast_version_id: forecastVersionId,
+        driver_profile_id: driverProfileId,
+        source_budget_version_id: sourceBudgetVersionId,
+        lines_processed: forecastLines.length,
+        duration_ms: duration,
+        simulation_params: simulationParams || null,
+        timestamp: new Date().toISOString()
+    }));
+
+    return {
+        linesGenerated: forecastLines.length,
+        versionId: forecastVersionId,
+        durationMs: duration,
+    };
 }
 
 // Driver Formula Evaluation
@@ -232,10 +232,7 @@ function evaluateDriverFormula(
     let result = baseAmount;
 
     // Handle common patterns
-    if (formula.includes("revenue *")) {
-        const multiplier = parseFloat(formula.split("revenue *")[1]?.trim() || "1");
-        result = baseAmount * multiplier;
-    } else if (formula.includes("price * volume")) {
+    if (formula.includes("price * volume")) {
         // Revenue calculation
         const priceMultiplier = simulationParams?.priceDelta ? (1 + simulationParams.priceDelta / 100) : 1;
         const volumeMultiplier = simulationParams?.volumeDelta ? (1 + simulationParams.volumeDelta / 100) : 1;
@@ -255,89 +252,89 @@ function evaluateDriverFormula(
 
 // What-If Simulation (no DB writes)
 export async function simulateForecast(
-  companyId: string,
-  sourceBudgetVersionId: string,
-  driverProfileId: string,
-  simulationParams: ForecastSimulationParams
+    companyId: string,
+    sourceBudgetVersionId: string,
+    driverProfileId: string,
+    simulationParams: ForecastSimulationParams
 ) {
-  const startTime = Date.now();
-  
-  const profile = await getDriverProfile(companyId, driverProfileId);
-  if (!profile) {
-    throw new Error("Driver profile not found");
-  }
+    const startTime = Date.now();
 
-  const formulas = JSON.parse(profile.formula_json) as DriverFormula;
-  const seasonality = JSON.parse(profile.seasonality_json) as SeasonalityVector;
-
-  // Get source budget lines
-  const budgetResult = await pool.query(
-    `SELECT * FROM budget_line WHERE company_id = $1 AND version_id = $2`,
-    [companyId, sourceBudgetVersionId]
-  );
-  const budgetLines = budgetResult.rows;
-
-  // Generate simulation results (no DB writes)
-  const simulationResults = [];
-  
-  for (const budgetLine of budgetLines) {
-    const accountCode = budgetLine.account_code;
-    const formula = formulas[accountCode];
-    
-    if (!formula) {
-      // No driver formula - keep original budget amount
-      for (let month = 1; month <= 12; month++) {
-        const seasonalFactor = seasonality[month] || 100;
-        const amount = Number(budgetLine.amount_base) * (seasonalFactor / 100);
-        
-        simulationResults.push({
-          accountCode,
-          costCenterCode: budgetLine.cost_center_code,
-          projectCode: budgetLine.project_code,
-          month,
-          amount,
-          currency: budgetLine.currency || "USD",
-        });
-      }
-    } else {
-      // Apply driver formula
-      const baseAmount = Number(budgetLine.amount_base);
-      const driverAmount = evaluateDriverFormula(formula, baseAmount, simulationParams);
-      
-      for (let month = 1; month <= 12; month++) {
-        const seasonalFactor = seasonality[month] || 100;
-        const amount = driverAmount * (seasonalFactor / 100);
-        
-        simulationResults.push({
-          accountCode,
-          costCenterCode: budgetLine.cost_center_code,
-          projectCode: budgetLine.project_code,
-          month,
-          amount,
-          currency: budgetLine.currency || "USD",
-        });
-      }
+    const profile = await getDriverProfile(companyId, driverProfileId);
+    if (!profile) {
+        throw new Error("Driver profile not found");
     }
-  }
 
-  const duration = Date.now() - startTime;
-  
-  // Observability logging
-  console.log(JSON.stringify({
-    event: "forecast_simulated",
-    company_id: companyId,
-    driver_profile_id: driverProfileId,
-    source_budget_version_id: sourceBudgetVersionId,
-    lines_processed: simulationResults.length,
-    duration_ms: duration,
-    simulation_params: simulationParams,
-    timestamp: new Date().toISOString()
-  }));
+    const formulas = JSON.parse(profile.formula_json) as DriverFormula;
+    const seasonality = JSON.parse(profile.seasonality_json) as SeasonalityVector;
 
-  return {
-    simulationResults,
-    parameters: simulationParams,
-    linesGenerated: simulationResults.length,
-    durationMs: duration,
-  };
+    // Get source budget lines
+    const budgetResult = await pool.query(
+        `SELECT * FROM budget_line WHERE company_id = $1 AND version_id = $2`,
+        [companyId, sourceBudgetVersionId]
+    );
+    const budgetLines = budgetResult.rows;
+
+    // Generate simulation results (no DB writes)
+    const simulationResults = [];
+
+    for (const budgetLine of budgetLines) {
+        const accountCode = budgetLine.account_code;
+        const formula = formulas[accountCode];
+
+        if (!formula) {
+            // No driver formula - keep original budget amount
+            for (let month = 1; month <= 12; month++) {
+                const seasonalFactor = seasonality[month] || 100;
+                const amount = Number(budgetLine.amount_base) * (seasonalFactor / 100);
+
+                simulationResults.push({
+                    accountCode,
+                    costCenterCode: budgetLine.cost_center_code,
+                    projectCode: budgetLine.project_code,
+                    month,
+                    amount,
+                    currency: budgetLine.currency || "USD",
+                });
+            }
+        } else {
+            // Apply driver formula
+            const baseAmount = Number(budgetLine.amount_base);
+            const driverAmount = evaluateDriverFormula(formula, baseAmount, simulationParams);
+
+            for (let month = 1; month <= 12; month++) {
+                const seasonalFactor = seasonality[month] || 100;
+                const amount = driverAmount * (seasonalFactor / 100);
+
+                simulationResults.push({
+                    accountCode,
+                    costCenterCode: budgetLine.cost_center_code,
+                    projectCode: budgetLine.project_code,
+                    month,
+                    amount,
+                    currency: budgetLine.currency || "USD",
+                });
+            }
+        }
+    }
+
+    const duration = Date.now() - startTime;
+
+    // Observability logging
+    console.log(JSON.stringify({
+        event: "forecast_simulated",
+        company_id: companyId,
+        driver_profile_id: driverProfileId,
+        source_budget_version_id: sourceBudgetVersionId,
+        lines_processed: simulationResults.length,
+        duration_ms: duration,
+        simulation_params: simulationParams,
+        timestamp: new Date().toISOString()
+    }));
+
+    return {
+        simulationResults,
+        parameters: simulationParams,
+        linesGenerated: simulationResults.length,
+        durationMs: duration,
+    };
 }
