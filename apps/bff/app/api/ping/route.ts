@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   });
 }
 
-export async function OPTIONS(req: NextRequest) {
+export async function OPTIONS(_req: NextRequest) {
   return new Response(null, {
     status: 204,
     headers: {

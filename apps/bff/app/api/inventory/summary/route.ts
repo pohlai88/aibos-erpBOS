@@ -1,8 +1,8 @@
 import { pool } from "../../../lib/db";
 import { ok } from "../../../lib/http";
 
-export async function GET(req: Request) {
-    const url = new URL(req.url);
+export async function GET(_req: Request) {
+    const url = new URL(_req.url);
     const company_id = url.searchParams.get("company_id") ?? "COMP-1";
     const item_id = url.searchParams.get("item_id") ?? "ITEM-1";
     const { rows } = await pool.query(
@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     return ok({ company_id, item_id, on_hand_qty: Number(r.q).toFixed(6), moving_avg_cost: Number(r.mac).toFixed(6), total_value: Number(r.tv).toFixed(2), updated_at: r.updated_at });
 }
 
-export async function OPTIONS(req: Request) {
+export async function OPTIONS(_req: Request) {
     return new Response(null, {
         status: 204,
         headers: {
