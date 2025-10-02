@@ -558,3 +558,45 @@ export const assetsUiDraft = pgTable("assets_ui_draft", {
     payload: jsonb("payload").notNull(),   // dry-run summary blob
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
 });
+
+// --- FX Revaluation (M18) ---------------------------------------------------
+export const fxRevalRun = pgTable("fx_reval_run", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    year: integer("year").notNull(),
+    month: integer("month").notNull(),
+    mode: text("mode").notNull(), // 'dry_run' | 'commit'
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+export const fxRevalLine = pgTable("fx_reval_line", {
+    id: text("id").primaryKey(),
+    runId: text("run_id").references(() => fxRevalRun.id).notNull(),
+    glAccount: text("gl_account").notNull(),
+    currency: text("currency").notNull(),
+    balanceBase: numeric("balance_base").notNull(),
+    balanceSrc: numeric("balance_src").notNull(),
+    rateOld: numeric("rate_old").notNull(),
+    rateNew: numeric("rate_new").notNull(),
+    deltaBase: numeric("delta_base").notNull(),
+});
+
+export const fxRevalLock = pgTable("fx_reval_lock", {
+    companyId: text("company_id").notNull(),
+    year: integer("year").notNull(),
+    month: integer("month").notNull(),
+    glAccount: text("gl_account").notNull(),
+    currency: text("currency").notNull(),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.companyId, table.year, table.month, table.glAccount, table.currency] })
+}));
+
+export const fxAccountMap = pgTable("fx_account_map", {
+    companyId: text("company_id").notNull(),
+    glAccount: text("gl_account").notNull(),
+    unrealGainAccount: text("unreal_gain_account").notNull(),
+    unrealLossAccount: text("unreal_loss_account").notNull(),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.companyId, table.glAccount] })
+}));

@@ -1,26 +1,38 @@
-import { pool } from "../../../lib/db";
-import { requireAuth, requireCapability } from "../../../lib/auth";
-import { ok, created, unprocessable } from "../../../lib/http";
-import { withRouteErrors, isResponse } from "../../../lib/route-utils";
-import crypto from "node:crypto";
+import { NextRequest } from "next/server";
+import { ok, badRequest, forbidden } from "../../lib/http";
+import { requireAuth, requireCapability } from "../../lib/auth";
+import { withRouteErrors, isResponse } from "../../lib/route-utils";
+import { FxRateUpsert } from "@aibos/contracts";
+import { upsertRate, listRates } from "../../services/fx/rates";
 
-export const POST = withRouteErrors(async (req: Request) => {
+export const GET = withRouteErrors(async (req: NextRequest) => {
     const auth = await requireAuth(req);
     if (isResponse(auth)) return auth;
 
-    const capCheck = requireCapability(auth, "periods:manage"); // reuse admin-ish
+    const capCheck = requireCapability(auth, "fx:read");
     if (isResponse(capCheck)) return capCheck;
 
-    const body = await req.json() as { items: { date: string; from: string; to: string; rate: number }[] };
-    if (!Array.isArray(body.items) || body.items.length === 0) return unprocessable("items required");
+    const url = new URL(req.url);
+    const y = url.searchParams.get("year");
+    const m = url.searchParams.get("month");
 
-    for (const it of body.items) {
-        await pool.query(
-            `insert into fx_rate(id, date, from_ccy, to_ccy, rate, source)
-       values ($1,$2,$3,$4,$5,'manual')
-       on conflict (id) do nothing`,
-            [crypto.randomUUID(), it.date.slice(0, 10), it.from, it.to, it.rate]
-        );
+    const res = await listRates(auth.company_id, y && m ? { year: Number(y), month: Number(m) } : undefined);
+    return ok(res);
+});
+
+export const POST = withRouteErrors(async (req: NextRequest) => {
+    const auth = await requireAuth(req);
+    if (isResponse(auth)) return auth;
+
+    const capCheck = requireCapability(auth, "fx:manage");
+    if (isResponse(capCheck)) return capCheck;
+
+    try {
+        const body = FxRateUpsert.parse(await req.json());
+        const res = await upsertRate(auth.company_id, auth.api_key_id ?? "system", body);
+        return ok(res);
+    } catch (error) {
+        console.error("Error upserting FX rate:", error);
+        return badRequest("Invalid rate data");
     }
-    return created({ count: body.items.length }, "/api/fx/rates");
 });

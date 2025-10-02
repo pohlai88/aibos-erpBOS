@@ -12,3 +12,4 @@ export * from './assets_import';
 export * from './assets_prefs';
 export * from './impairments';
 export * from './ui_drafts';
+export * from './fx';
