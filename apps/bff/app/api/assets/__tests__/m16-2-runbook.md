@@ -21,7 +21,7 @@ Ensure your finance operations team has the `capex:manage` capability:
 
 ```sql
 -- Add capex:manage to your role assignments
-INSERT INTO api_key_scopes (api_key_id, scope) 
+INSERT INTO api_key_scopes (api_key_id, scope)
 VALUES ('<your-api-key-id>', 'capex:manage')
 ON CONFLICT DO NOTHING;
 ```
@@ -31,6 +31,7 @@ ON CONFLICT DO NOTHING;
 ## 📊 **CSV Format Reference**
 
 ### **CAPEX CSV Headers (Default)**
+
 ```csv
 asset_class,description,capex_amount,currency,present_ccy,in_service,life_m,method,cost_center,project
 IT,Laptop Fleet,120000,MYR,MYR,2025-11-01,36,SL,CC-OPS,PROJ-IT
@@ -38,6 +39,7 @@ PLANT,Machinery,500000,MYR,MYR,2025-11-01,60,DDB,CC-PROD,PROJ-PLANT
 ```
 
 ### **Intangibles CSV Headers (Default)**
+
 ```csv
 class,description,amount,currency,present_ccy,in_service,life_m,cost_center,project
 SOFTWARE,ERP License,240000,MYR,MYR,2025-11-01,24,,CC-OPS
@@ -49,6 +51,7 @@ PATENT,Technology Patent,180000,MYR,MYR,2025-11-01,120,,CC-R&D
 ## 📥 **CSV Import Operations**
 
 ### **1. CAPEX Import (Basic)**
+
 ```bash
 curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
   -F "file=@capex_plans.csv" \
@@ -57,6 +60,7 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "ok": true,
@@ -68,13 +72,14 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ```
 
 ### **2. Intangibles Import (With Header Mapping)**
+
 ```bash
 curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
   -F "file=@intangible_plans.csv" \
   -F 'json={
     "mapping": {
       "class": "Asset Class",
-      "description": "Description", 
+      "description": "Description",
       "amount": "Cost",
       "in_service": "Start Date",
       "life_m": "Months"
@@ -88,6 +93,7 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ```
 
 ### **3. Handle Import Errors**
+
 ```json
 {
   "ok": true,
@@ -112,6 +118,7 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ## 📤 **Bulk Posting Operations**
 
 ### **1. Dry-Run (Depreciation)**
+
 ```bash
 curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
   -H "content-type: application/json" \
@@ -125,6 +132,7 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "ok": true,
@@ -135,16 +143,16 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
     "month": 11,
     "plans": 2,
     "lines": 2,
-    "total_amount": 1500.00,
+    "total_amount": 1500.0,
     "sample": [
       {
         "plan_id": "plan-1",
-        "amount": 1000.00,
+        "amount": 1000.0,
         "present_ccy": "MYR"
       },
       {
-        "plan_id": "plan-2", 
-        "amount": 500.00,
+        "plan_id": "plan-2",
+        "amount": 500.0,
         "present_ccy": "MYR"
       }
     ],
@@ -154,6 +162,7 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ```
 
 ### **2. Actual Posting (Amortization)**
+
 ```bash
 curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
   -H "content-type: application/json" \
@@ -168,6 +177,7 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "ok": true,
@@ -183,6 +193,7 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ```
 
 ### **3. Selective Posting (Specific Plans)**
+
 ```bash
 curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
   -H "content-type: application/json" \
@@ -202,13 +213,16 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ## ⚠️ **Safety Features**
 
 ### **Posting Safety Checks**
+
 The system automatically validates:
+
 - ✅ **Future periods** (warns if posting for future months)
 - ✅ **Old periods** (warns if posting for periods >2 years ago)
 - ✅ **Duplicate posting** (warns if entries already posted)
 - ✅ **Dry-run enforcement** (blocks actual posting if safety checks fail)
 
 ### **Error Handling**
+
 - ✅ **CSV validation** (required fields, data types, formats)
 - ✅ **Idempotent imports** (duplicate plans are skipped)
 - ✅ **Graceful failures** (partial imports continue on errors)
@@ -219,6 +233,7 @@ The system automatically validates:
 ## 🔄 **Complete Workflow Example**
 
 ### **Step 1: Import CAPEX Plans**
+
 ```bash
 # Create sample CSV
 cat > capex_sample.csv << EOF
@@ -235,6 +250,7 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ```
 
 ### **Step 2: Generate Schedules**
+
 ```bash
 curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
   -H "content-type: application/json" \
@@ -243,6 +259,7 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ```
 
 ### **Step 3: Dry-Run Posting**
+
 ```bash
 curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
   -H "content-type: application/json" \
@@ -251,6 +268,7 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ```
 
 ### **Step 4: Actual Posting**
+
 ```bash
 curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
   -H "content-type: application/json" \
@@ -263,7 +281,7 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ## 📈 **Performance SLOs**
 
 - ✅ **CSV Import**: p95 < 2s for 5k rows
-- ✅ **Bulk Dry-Run**: p95 < 300ms for 2k schedule rows  
+- ✅ **Bulk Dry-Run**: p95 < 300ms for 2k schedule rows
 - ✅ **Bulk Posting**: p95 < 2s for 2k rows
 - ✅ **Journal Balance**: All posted journals are balanced by construction
 
@@ -272,12 +290,14 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ## 🎯 **Key Benefits**
 
 ### **CSV Import**
+
 - ✅ **Flexible mapping** (handle different CSV header formats)
 - ✅ **Default values** (apply company-wide defaults)
 - ✅ **Idempotent** (safe to re-run imports)
 - ✅ **Error reporting** (detailed line-by-line feedback)
 
 ### **Bulk Posting**
+
 - ✅ **Dry-run diff** (see exactly what will be posted)
 - ✅ **Safety checks** (prevent accidental duplicate posting)
 - ✅ **Selective posting** (post specific plans only)
@@ -288,6 +308,7 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ## 🔍 **Troubleshooting**
 
 ### **Common CSV Import Issues**
+
 ```bash
 # Check CSV structure
 curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
@@ -296,12 +317,14 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ```
 
 **Common Errors:**
+
 - `missing required fields` → Check CSV headers match expected format
 - `invalid capex_amount` → Ensure numeric values, no currency symbols
 - `invalid in_service date format` → Use YYYY-MM-DD format
 - `invalid method` → Use only "SL" or "DDB"
 
 ### **Common Posting Issues**
+
 ```bash
 # Check what's available for posting
 curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
@@ -311,6 +334,7 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ```
 
 **Common Warnings:**
+
 - `Posting for future period` → Normal for advance planning
 - `Some entries already posted` → Check for duplicate posting
 - `Posting for old period` → Verify period is correct
@@ -324,7 +348,7 @@ curl -sS -X POST -H "X-API-Key: <id>:<secret>" \
 ✅ **Bulk posting** creates balanced journals  
 ✅ **Error handling** provides actionable feedback  
 ✅ **Safety checks** prevent data corruption  
-✅ **Idempotent operations** safe to re-run  
+✅ **Idempotent operations** safe to re-run
 
 ---
 
