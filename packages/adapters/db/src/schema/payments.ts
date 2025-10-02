@@ -354,3 +354,102 @@ export const secretRef = pgTable("secret_ref", {
     name: text("name").primaryKey(),
     note: text("note"),
 });
+
+// --- M23.3 Early-Payment Discounts & Dynamic Discounting ----------------------
+
+export const apInvoice = pgTable("ap_invoice", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    supplierId: text("supplier_id").notNull(),
+    invoiceNo: text("invoice_no").notNull(),
+    invoiceDate: date("invoice_date").notNull(),
+    dueDate: date("due_date").notNull(),
+    grossAmount: numeric("gross_amount").notNull(),
+    discAmount: numeric("disc_amount").notNull().default("0"),
+    ccy: text("ccy").notNull(),
+    status: text("status").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+    // M23.3: Early payment discount terms
+    discountPct: numeric("discount_pct"),
+    discountDays: integer("discount_days"),
+    netDays: integer("net_days"),
+    discountDueDate: date("discount_due_date"),
+    termsText: text("terms_text"),
+});
+
+export const apDiscountPolicy = pgTable("ap_discount_policy", {
+    companyId: text("company_id").primaryKey(),
+    hurdleApy: numeric("hurdle_apy").notNull(),
+    minSavingsAmt: numeric("min_savings_amt").notNull().default("0"),
+    minSavingsPct: numeric("min_savings_pct").notNull().default("0"),
+    liquidityBuffer: numeric("liquidity_buffer").notNull().default("0"),
+    postingMode: text("posting_mode").notNull(),
+    postingAccount: text("posting_account"),
+    maxTenorDays: integer("max_tenor_days").notNull().default(30),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull(),
+});
+
+export const apDiscountRun = pgTable("ap_discount_run", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    presentCcy: text("present_ccy"),
+    status: text("status").notNull(),
+    windowFrom: date("window_from").notNull(),
+    windowTo: date("window_to").notNull(),
+    cashCap: numeric("cash_cap"),
+    createdBy: text("created_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const apDiscountLine = pgTable("ap_discount_line", {
+    id: text("id").primaryKey(),
+    runId: text("run_id").notNull(),
+    invoiceId: text("invoice_id").notNull(),
+    supplierId: text("supplier_id").notNull(),
+    invCcy: text("inv_ccy").notNull(),
+    payCcy: text("pay_ccy").notNull(),
+    baseAmount: numeric("base_amount").notNull(),
+    discountAmt: numeric("discount_amt").notNull(),
+    earlyPayAmt: numeric("early_pay_amt").notNull(),
+    apr: numeric("apr").notNull(),
+    payByDate: date("pay_by_date").notNull(),
+    selected: boolean("selected").notNull().default(false),
+});
+
+export const apDiscountOffer = pgTable("ap_discount_offer", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    supplierId: text("supplier_id").notNull(),
+    invoiceId: text("invoice_id").notNull(),
+    offerPct: numeric("offer_pct").notNull(),
+    payByDate: date("pay_by_date").notNull(),
+    status: text("status").notNull(),
+    token: text("token").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    decidedBy: text("decided_by"),
+});
+
+export const apDiscountPost = pgTable("ap_discount_post", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    runId: text("run_id").notNull(),
+    totalSavings: numeric("total_savings").notNull(),
+    journalId: text("journal_id"),
+    postedAt: timestamp("posted_at", { withTimezone: true }),
+    postedBy: text("posted_by"),
+});
+
+export const apTermsImport = pgTable("ap_terms_import", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    filename: text("filename"),
+    rowsOk: integer("rows_ok").notNull(),
+    rowsErr: integer("rows_err").notNull(),
+    payload: text("payload"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});

@@ -22,4 +22,5 @@ export * from './consol';
 export * from './cashflow';
 export * from './payments';
 export * from './payments-policy';
+export * from './payments-discount';
 export * from './bank-connect';

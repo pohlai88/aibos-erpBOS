@@ -17,5 +17,13 @@ export async function cleanCompany(companyId: string) {
     await pool.query(`DELETE FROM ap_pay_line WHERE run_id IN (SELECT id FROM ap_pay_run WHERE company_id = $1)`, [companyId]);
     await pool.query(`DELETE FROM ap_pay_run WHERE company_id = $1`, [companyId]);
 
+    // Clean up discount-related tables
+    await pool.query(`DELETE FROM ap_discount_line WHERE run_id IN (SELECT id FROM ap_discount_run WHERE company_id = $1)`, [companyId]);
+    await pool.query(`DELETE FROM ap_discount_run WHERE company_id = $1`, [companyId]);
+    await pool.query(`DELETE FROM ap_discount_offer WHERE company_id = $1`, [companyId]);
+    await pool.query(`DELETE FROM ap_discount_post WHERE company_id = $1`, [companyId]);
+    await pool.query(`DELETE FROM ap_discount_policy WHERE company_id = $1`, [companyId]);
+    await pool.query(`DELETE FROM ap_invoice WHERE company_id = $1`, [companyId]);
+
     await pool.query(`DELETE FROM bank_conn_profile WHERE company_id = $1`, [companyId]);
 }

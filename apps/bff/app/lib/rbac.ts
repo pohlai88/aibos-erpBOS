@@ -23,7 +23,10 @@ export type Capability =
     | "consol:manage"
     | "consol:read"
     | "pay:bank_profile"
-    | "pay:dispatch";
+    | "pay:dispatch"
+    | "pay:discount:policy"
+    | "pay:discount:run"
+    | "pay:discount:offer";
 
 export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
     admin: [
@@ -32,7 +35,7 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "budgets:manage", "budgets:read", "budgets:approve",
         "forecasts:manage", "forecasts:approve",
         "cash:manage", "capex:manage", "fx:manage", "fx:read", "alloc:manage", "alloc:read", "tax:manage", "tax:read", "consol:manage", "consol:read",
-        "pay:bank_profile", "pay:dispatch"
+        "pay:bank_profile", "pay:dispatch", "pay:discount:policy", "pay:discount:run", "pay:discount:offer"
     ],
     accountant: [
         "reports:read", "journals:post", "reversal:create", "inventory:move",
@@ -40,13 +43,13 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "budgets:manage", "budgets:read", "budgets:approve",
         "forecasts:manage", "forecasts:approve",
         "cash:manage", "capex:manage", "fx:manage", "fx:read", "alloc:manage", "alloc:read", "tax:manage", "tax:read", "consol:manage", "consol:read",
-        "pay:bank_profile", "pay:dispatch"
+        "pay:bank_profile", "pay:dispatch", "pay:discount:policy", "pay:discount:run", "pay:discount:offer"
     ],
     ops: [
         "reports:read", "inventory:move", "audit:read",
         "budgets:read", "forecasts:manage",
         "cash:manage", "capex:manage", "fx:manage", "fx:read", "alloc:manage", "alloc:read", "tax:manage", "tax:read", "consol:manage", "consol:read",
-        "pay:dispatch"
+        "pay:dispatch", "pay:discount:run", "pay:discount:offer"
     ],
 };
 
