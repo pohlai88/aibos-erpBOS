@@ -1,5 +1,0 @@
-class,description,amount,currency,present_ccy,in_service,life_m,cost_center,project
-SOFTWARE,ERP License,240000,MYR,MYR,2025-11-01,24,,PRJ-ALPHA
-SOFTWARE,CRM System,180000,MYR,MYR,2025-11-15,36,CC-SALES,PRJ-BETA
-PATENT,Technology Patent,500000,MYR,MYR,2025-11-01,120,CC-R&D,PRJ-GAMMA
-TRADEMARK,Brand Trademark,100000,MYR,MYR,2025-11-20,60,CC-MARKETING,
