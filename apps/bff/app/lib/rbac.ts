@@ -7,19 +7,24 @@ export type Capability =
     | "periods:manage"
     | "keys:manage"
     | "audit:read"
-    | "budgets:manage";
+    | "budgets:manage"
+    | "budgets:read"
+    | "budgets:approve";
 
 export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
     admin: [
         "reports:read", "journals:post", "reversal:create", "inventory:move",
-        "payments:post", "periods:manage", "keys:manage", "audit:read", "budgets:manage"
+        "payments:post", "periods:manage", "keys:manage", "audit:read", 
+        "budgets:manage", "budgets:read", "budgets:approve"
     ],
     accountant: [
         "reports:read", "journals:post", "reversal:create", "inventory:move",
-        "payments:post", "audit:read", "budgets:manage"
+        "payments:post", "audit:read", 
+        "budgets:manage", "budgets:read", "budgets:approve"
     ],
     ops: [
-        "reports:read", "inventory:move", "audit:read"
+        "reports:read", "inventory:move", "audit:read",
+        "budgets:read"
     ],
 };
 

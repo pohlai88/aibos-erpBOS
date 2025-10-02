@@ -29,7 +29,7 @@ export async function insertBudgetLinesTxn(
         const importId = `imp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
         // Resolve account codes → account ids (batch if you have a table)
-        let accountIdByCode = new Map<string, string>();
+        const accountIdByCode = new Map<string, string>();
         if (opts?.accountResolver) {
             const codes = Array.from(new Set(parsedRows.map(r => r.accountCode)));
             const results = await Promise.all(

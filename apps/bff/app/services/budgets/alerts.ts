@@ -1,61 +1,64 @@
 import { pool } from "../../lib/db";
 
 export interface AlertBreach {
-  ruleId: string;
-  account: string;
-  cc?: string;
-  project?: string;
-  variancePct: number;
-  amount: number;
-  budget: number;
-  actual: number;
+    ruleId: string;
+    account: string;
+    cc?: string;
+    project?: string;
+    variancePct: number;
+    amount: number;
+    budget: number;
+    actual: number;
 }
 
 export interface VarianceDataset {
-  account_code: string;
-  cost_center?: string;
-  project?: string;
-  budget: number;
-  actual: number;
+    account_code: string;
+    cost_center?: string;
+    project?: string;
+    budget: number;
+    actual: number;
 }
 
 // Helper function to compare values based on comparator
 function compare(comparator: string, value: number, threshold: number): boolean {
-  switch (comparator) {
-    case "gt": return value > threshold;
-    case "lt": return value < threshold;
-    case "gte": return value >= threshold;
-    case "lte": return value <= threshold;
-    case "abs_gt": return Math.abs(value) > threshold;
-    case "abs_gte": return Math.abs(value) >= threshold;
-    default: return false;
-  }
+    switch (comparator) {
+        case "gt": return value > threshold;
+        case "lt": return value < threshold;
+        case "gte": return value >= threshold;
+        case "lte": return value <= threshold;
+        case "abs_gt": return Math.abs(value) > threshold;
+        case "abs_gte": return Math.abs(value) >= threshold;
+        default: return false;
+    }
 }
 
 // Fetch variance dataset for a specific period
 async function fetchVarianceDataset(
-  companyId: string, 
-  period: { year: number; month: number },
-  scope: "month" | "qtr" | "ytd"
+    companyId: string,
+    period: { year: number; month: number },
+    scope: "month" | "qtr" | "ytd"
 ): Promise<VarianceDataset[]> {
-  let dateFilter = "";
-  const params = [companyId, period.year, period.month];
-  
-  switch (scope) {
-    case "month":
-      dateFilter = `AND j.posting_date >= $2-01-01 AND j.posting_date < $2-02-01`;
-      break;
-    case "qtr":
-      const quarterStart = Math.floor((period.month - 1) / 3) * 3 + 1;
-      dateFilter = `AND j.posting_date >= $2-${quarterStart.toString().padStart(2, '0')}-01 
-                    AND j.posting_date < $2-${(quarterStart + 3).toString().padStart(2, '0')}-01`;
-      break;
-    case "ytd":
-      dateFilter = `AND j.posting_date >= $2-01-01 AND j.posting_date < $2-12-32`;
-      break;
-  }
+    let dateFilter = "";
+    const params = [companyId, period.year, period.month];
 
-  const query = `
+    switch (scope) {
+        case "month": {
+            dateFilter = `AND j.posting_date >= $2-01-01 AND j.posting_date < $2-02-01`;
+            break;
+        }
+        case "qtr": {
+            const quarterStart = Math.floor((period.month - 1) / 3) * 3 + 1;
+            dateFilter = `AND j.posting_date >= $2-${quarterStart.toString().padStart(2, '0')}-01 
+                    AND j.posting_date < $2-${(quarterStart + 3).toString().padStart(2, '0')}-01`;
+            break;
+        }
+        case "ytd": {
+            dateFilter = `AND j.posting_date >= $2-01-01 AND j.posting_date < $2-12-32`;
+            break;
+        }
+    }
+
+    const query = `
     WITH budget_data AS (
       SELECT 
         bl.account_code,
@@ -91,82 +94,82 @@ async function fetchVarianceDataset(
     WHERE COALESCE(b.budget_amount, 0) != 0 OR COALESCE(a.actual_amount, 0) != 0
   `;
 
-  const result = await pool.query(query, params);
-  return result.rows;
+    const result = await pool.query(query, params);
+    return result.rows;
 }
 
 // Dispatch notifications (stub implementation)
 async function dispatchNotifications(breaches: AlertBreach[]): Promise<void> {
-  // TODO: Implement actual email/webhook delivery
-  console.log(`Alert: ${breaches.length} variance breaches detected`, breaches);
-  
-  for (const breach of breaches) {
-    // In a real implementation, you would:
-    // 1. Fetch the alert rule to get delivery configuration
-    // 2. Send emails to configured recipients
-    // 3. Call webhook URLs
-    // 4. Log the notification for audit trail
-    console.log(`Breach: ${breach.account} - ${breach.variancePct.toFixed(2)}% variance`);
-  }
+    // TODO: Implement actual email/webhook delivery
+    console.log(`Alert: ${breaches.length} variance breaches detected`, breaches);
+
+    for (const breach of breaches) {
+        // In a real implementation, you would:
+        // 1. Fetch the alert rule to get delivery configuration
+        // 2. Send emails to configured recipients
+        // 3. Call webhook URLs
+        // 4. Log the notification for audit trail
+        console.log(`Breach: ${breach.account} - ${breach.variancePct.toFixed(2)}% variance`);
+    }
 }
 
 // Main alert evaluation function
 export async function evaluateAlerts(
-  companyId: string, 
-  period: { year: number; month: number }
+    companyId: string,
+    period: { year: number; month: number }
 ): Promise<AlertBreach[]> {
-  // Get active alert rules
-  const rulesResult = await pool.query(
-    `SELECT * FROM budget_alert_rule 
+    // Get active alert rules
+    const rulesResult = await pool.query(
+        `SELECT * FROM budget_alert_rule 
      WHERE company_id = $1 AND is_active = true`,
-    [companyId]
-  );
+        [companyId]
+    );
 
-  if (rulesResult.rows.length === 0) {
-    return [];
-  }
-
-  const breaches: AlertBreach[] = [];
-
-  for (const rule of rulesResult.rows) {
-    // Fetch variance dataset for this rule's scope
-    const dataset = await fetchVarianceDataset(companyId, period, rule.period_scope);
-
-    // Filter dataset based on rule criteria
-    const filteredDataset = dataset.filter(row => {
-      if (rule.account_code && row.account_code !== rule.account_code) return false;
-      if (rule.cost_center && row.cost_center !== rule.cost_center) return false;
-      if (rule.project && row.project !== rule.project) return false;
-      return true;
-    });
-
-    // Evaluate each row against the rule
-    for (const row of filteredDataset) {
-      const variancePct = row.budget ? ((row.actual - row.budget) / row.budget) * 100 : 0;
-      
-      if (row.budget === 0) continue; // Skip if no budget to compare against
-      
-      const hit = compare(rule.comparator, variancePct, rule.threshold_pct);
-      
-      if (hit) {
-        breaches.push({
-          ruleId: rule.id,
-          account: row.account_code,
-          cc: row.cost_center,
-          project: row.project,
-          variancePct: Number(variancePct.toFixed(2)),
-          amount: row.actual - row.budget,
-          budget: row.budget,
-          actual: row.actual,
-        });
-      }
+    if (rulesResult.rows.length === 0) {
+        return [];
     }
-  }
 
-  // Dispatch notifications
-  if (breaches.length > 0) {
-    await dispatchNotifications(breaches);
-  }
+    const breaches: AlertBreach[] = [];
 
-  return breaches;
+    for (const rule of rulesResult.rows) {
+        // Fetch variance dataset for this rule's scope
+        const dataset = await fetchVarianceDataset(companyId, period, rule.period_scope);
+
+        // Filter dataset based on rule criteria
+        const filteredDataset = dataset.filter(row => {
+            if (rule.account_code && row.account_code !== rule.account_code) return false;
+            if (rule.cost_center && row.cost_center !== rule.cost_center) return false;
+            if (rule.project && row.project !== rule.project) return false;
+            return true;
+        });
+
+        // Evaluate each row against the rule
+        for (const row of filteredDataset) {
+            const variancePct = row.budget ? ((row.actual - row.budget) / row.budget) * 100 : 0;
+
+            if (row.budget === 0) continue; // Skip if no budget to compare against
+
+            const hit = compare(rule.comparator, variancePct, rule.threshold_pct);
+
+            if (hit) {
+                breaches.push({
+                    ruleId: rule.id,
+                    account: row.account_code,
+                    ...(row.cost_center && { cc: row.cost_center }),
+                    ...(row.project && { project: row.project }),
+                    variancePct: Number(variancePct.toFixed(2)),
+                    amount: row.actual - row.budget,
+                    budget: row.budget,
+                    actual: row.actual,
+                });
+            }
+        }
+    }
+
+    // Dispatch notifications
+    if (breaches.length > 0) {
+        await dispatchNotifications(breaches);
+    }
+
+    return breaches;
 }

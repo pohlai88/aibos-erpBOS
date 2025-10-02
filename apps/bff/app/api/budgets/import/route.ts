@@ -233,7 +233,7 @@ export const POST = withRouteErrors(async (req: Request) => {
             project: r.project || undefined,
         })),
         auth.user_id,
-        { versionId: targetVersionId || undefined } // M14.4: Pass version ID to insert service
+        targetVersionId ? { versionId: targetVersionId } : {} // M14.4: Pass version ID to insert service
     );
 
     return ok({
