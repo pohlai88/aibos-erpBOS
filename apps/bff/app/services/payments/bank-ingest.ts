@@ -232,7 +232,7 @@ function parseCamt053Xml(payload: string): any[] {
                 }
             } else if (line.includes('<Amt')) {
                 const amountMatch = line.match(/<Amt.*?Ccy="([^"]+)".*?>(.*?)<\/Amt>/);
-                if (amountMatch) {
+                if (amountMatch && amountMatch[1] && amountMatch[2]) {
                     currentTxn.ccy = amountMatch[1];
                     currentTxn.amount = parseFloat(amountMatch[2]);
                 }
@@ -256,15 +256,15 @@ function parseCsvBankFile(payload: string): any[] {
         return transactions;
     }
 
-    const headers = lines[0].split(',').map(h => h.trim());
+    const headers = lines[0]?.split(',').map(h => h.trim()) || [];
 
     for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim());
+        const values = lines[i]?.split(',').map(v => v.trim()) || [];
         if (values.length !== headers.length) continue;
 
-        const txn: any = {};
+        const txn: Record<string, string> = {};
         for (let j = 0; j < headers.length; j++) {
-            txn[headers[j].toLowerCase()] = values[j];
+            txn[headers[j]?.toLowerCase() || ''] = values[j] || '';
         }
 
         // Map common CSV fields

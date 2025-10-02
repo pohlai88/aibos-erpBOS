@@ -8,13 +8,13 @@ export async function POST(req: NextRequest) {
     try {
         const auth = await requireAuth(req);
         if (auth instanceof Response) return auth;
-        
+
         const json = await req.json();
         const data = SupplierPolicyAssign.parse(json);
-        
+
         const policy = await assignSupplierPolicy(auth.company_id, data);
-        
-        return Response.json({ 
+
+        return Response.json({
             policy,
             message: 'Supplier policy assigned successfully'
         }, {

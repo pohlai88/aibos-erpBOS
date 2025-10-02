@@ -325,11 +325,11 @@ function calculatePairScore(
 
     // Account pattern rule match (medium signal)
     for (const rule of elimRules) {
-        if (rule.src_account_like && rule.cp_account_like) {
-            const srcMatch = linkA.source_type.includes(rule.src_account_like) ||
-                linkB.source_type.includes(rule.src_account_like);
-            const cpMatch = linkA.source_type.includes(rule.cp_account_like) ||
-                linkB.source_type.includes(rule.cp_account_like);
+        if (rule.srcAccountLike && rule.cpAccountLike) {
+            const srcMatch = linkA.source_type.includes(rule.srcAccountLike) ||
+                linkB.source_type.includes(rule.srcAccountLike);
+            const cpMatch = linkA.source_type.includes(rule.cpAccountLike) ||
+                linkB.source_type.includes(rule.cpAccountLike);
 
             if (srcMatch && cpMatch) {
                 score += 0.1;
@@ -446,7 +446,7 @@ export async function makeProposalDecision(
         proposalId: data.proposal_id,
         decidedBy,
         decision: data.decision,
-        reason: data.reason,
+        reason: data.reason || '',
         decidedAt: new Date().toISOString()
     };
 }

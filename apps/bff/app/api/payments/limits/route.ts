@@ -8,13 +8,13 @@ export async function POST(req: NextRequest) {
     try {
         const auth = await requireAuth(req);
         if (auth instanceof Response) return auth;
-        
+
         const json = await req.json();
         const data = SupplierLimitUpsert.parse(json);
-        
+
         const limit = await upsertSupplierLimit(auth.company_id, data, auth.user_id);
-        
-        return Response.json({ 
+
+        return Response.json({
             limit,
             message: 'Supplier limits updated successfully'
         }, {

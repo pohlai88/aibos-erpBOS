@@ -8,13 +8,13 @@ export async function POST(req: NextRequest) {
     try {
         const auth = await requireAuth(req);
         if (auth instanceof Response) return auth;
-        
+
         const json = await req.json();
         const data = SanctionScreenRequest.parse(json);
-        
+
         const result = await runSanctionsScreen(auth.company_id, data, auth.user_id);
-        
-        return Response.json({ 
+
+        return Response.json({
             screen_id: result.screenId,
             hits: result.hits,
             message: 'Sanctions screening completed successfully'

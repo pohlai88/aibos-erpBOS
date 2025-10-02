@@ -391,8 +391,8 @@ async function processEliminationRule(
                     elimLines.push({
                         id: elimLineId,
                         runId,
-                        entityCode: entityA,
-                        cpCode: entityB,
+                        entityCode: entityA || '',
+                        cpCode: entityB || '',
                         amountBase: Math.abs(totalAmount),
                         note: `Rule: ${rule.ruleCode}`
                     });
@@ -468,36 +468,23 @@ async function postEliminationJournals(
             const idempotencyKey = `ic-elim-${groupCode}-${year}-${month}-${entityA}-${entityB}`;
 
             const journal: JournalEntry = {
-                id: journalId,
-                companyId,
-                postingDate: new Date(year, month - 1, 1).toISOString(),
-                currency: 'USD', // Default currency
-                sourceDoctype: 'IC_ELIM',
-                sourceId: `${groupCode}-${year}-${month}`,
-                idempotencyKey,
+                date: new Date(year, month - 1, 1),
+                memo: `IC Elimination: ${groupCode} ${year}-${month}`,
                 lines: [
                     {
-                        id: ulid(),
-                        accountCode: elimAccount,
-                        dc: 'D',
-                        amount: totalAmount,
-                        currency: 'USD',
-                        partyType: 'ENTITY',
-                        partyId: entityA
+                        accountId: elimAccount,
+                        debit: totalAmount,
+                        description: `IC Elimination: ${entityA} ↔ ${entityB}`
                     },
                     {
-                        id: ulid(),
-                        accountCode: elimAccount,
-                        dc: 'C',
-                        amount: totalAmount,
-                        currency: 'USD',
-                        partyType: 'ENTITY',
-                        partyId: entityB
+                        accountId: elimAccount,
+                        credit: totalAmount,
+                        description: `IC Elimination: ${entityA} ↔ ${entityB}`
                     }
                 ]
             };
 
-            await postJournal(journal);
+            await postJournal(companyId, journal);
             journalsPosted++;
         }
     }

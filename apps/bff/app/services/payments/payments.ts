@@ -32,9 +32,9 @@ export interface SupplierBank {
 export interface PaymentPref {
     companyId: string;
     supplierId: string;
-    payTerms?: string;
-    payDayRule?: string;
-    minAmount?: number;
+    payTerms?: string | undefined;
+    payDayRule?: string | undefined;
+    minAmount?: number | undefined;
     holdPay: boolean;
     updatedAt: string;
     updatedBy: string;
@@ -47,7 +47,7 @@ export interface PayRun {
     month: number;
     status: string;
     ccy: string;
-    presentCcy?: string;
+    presentCcy?: string | undefined;
     createdBy: string;
     createdAt: string;
     approvedBy?: string;
@@ -71,10 +71,10 @@ export interface PayLine {
     payAmount: number;
     invCcy: string;
     payCcy: string;
-    fxRate?: number;
-    bankRef?: string;
+    fxRate?: number | undefined;
+    bankRef?: string | undefined;
     status: string;
-    note?: string;
+    note?: string | undefined;
 }
 
 export interface PayExport {

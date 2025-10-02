@@ -53,7 +53,7 @@ export interface CfLine {
     label: string;
     period: string;
     amount: number;
-    note?: string;
+    note?: string | undefined;
 }
 
 export interface CfRunResult {
@@ -660,7 +660,7 @@ export async function runConsolidatedCashFlow(
     // Process each entity
     for (const entity of entityRows) {
         const entityLines = scope === 'INDIRECT'
-            ? await buildEntityIndirectCashFlowLines(entity.entity_code, data as CfRunIndirectReqType, runId)
+            ? await buildEntityIndirectCashFlowLines(entity.entity_code, data as CfRunIndirectReqType, runId, companyId)
             : await buildEntityDirect13WeekCashFlowLines(entity.entity_code, data as CfRunDirectReqType, runId);
 
         // Convert to presentation currency if needed
@@ -703,7 +703,8 @@ export async function runConsolidatedCashFlow(
 async function buildEntityIndirectCashFlowLines(
     entityCode: string,
     data: CfRunIndirectReqType,
-    runId: string
+    runId: string,
+    companyId: string
 ): Promise<CfLine[]> {
     const lines: CfLine[] = [];
     const period = `${data.year}-${data.month.toString().padStart(2, '0')}`;
@@ -713,7 +714,7 @@ async function buildEntityIndirectCashFlowLines(
     const previousBalances = await getEntityGlBalances(entityCode, data.year, data.month - 1);
 
     // Get cash flow mapping rules
-    const cfMaps = await getCfMaps(data.company_id || '', data.map_code);
+    const cfMaps = await getCfMaps(companyId, data.map_code);
 
     // Calculate deltas and apply mapping rules
     for (const map of cfMaps) {
@@ -887,7 +888,7 @@ function aggregateConsolidatedLines(lines: CfLine[]): CfLine[] {
         if (aggregated.has(key)) {
             const existing = aggregated.get(key)!;
             existing.amount += line.amount;
-            existing.note = existing.note ? `${existing.note}; ${line.note}` : line.note;
+            existing.note = existing.note ? `${existing.note}; ${line.note || ''}` : line.note || undefined;
         } else {
             aggregated.set(key, { ...line });
         }

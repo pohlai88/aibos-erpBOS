@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { ApprovalPolicyUpsert, SupplierPolicyAssign, SupplierLimitUpsert } from "@aibos/contracts";
-import { 
-    upsertApprovalPolicy, 
+import {
+    upsertApprovalPolicy,
     getApprovalPolicies,
     assignSupplierPolicy,
     upsertSupplierLimit
@@ -13,9 +13,9 @@ export async function GET(req: NextRequest) {
     try {
         const auth = await requireAuth(req);
         if (auth instanceof Response) return auth;
-        
+
         const policies = await getApprovalPolicies(auth.company_id);
-        
+
         return Response.json({ policies }, {
             status: 200,
             headers: { 'Access-Control-Allow-Origin': '*' }
@@ -30,13 +30,13 @@ export async function POST(req: NextRequest) {
     try {
         const auth = await requireAuth(req);
         if (auth instanceof Response) return auth;
-        
+
         const json = await req.json();
         const data = ApprovalPolicyUpsert.parse(json);
-        
+
         const policy = await upsertApprovalPolicy(auth.company_id, data, auth.user_id);
-        
-        return Response.json({ 
+
+        return Response.json({
             policy,
             message: 'Approval policy updated successfully'
         }, {

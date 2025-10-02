@@ -56,13 +56,14 @@ export async function importDriverData(
         // Process each record
         for (const record of records) {
             try {
+                const recordObj = record as Record<string, string>;
                 const driverData: CfDriverWeekUpsertType = {
-                    year: parseInt(record[mapping.year] || record['year']),
-                    iso_week: parseInt(record[mapping.iso_week] || record['iso_week']),
-                    driver_code: record[mapping.driver_code] || record['driver_code'],
-                    cost_center: record[mapping.cost_center] || record['cost_center'],
-                    project: record[mapping.project] || record['project'],
-                    amount: parseFloat(record[mapping.amount] || record['amount']),
+                    year: parseInt(recordObj[mapping.year || 'year'] || recordObj['year'] || '0'),
+                    iso_week: parseInt(recordObj[mapping.iso_week || 'iso_week'] || recordObj['iso_week'] || '0'),
+                    driver_code: recordObj[mapping.driver_code || 'driver_code'] || recordObj['driver_code'] || '',
+                    cost_center: recordObj[mapping.cost_center || 'cost_center'] || recordObj['cost_center'],
+                    project: recordObj[mapping.project || 'project'] || recordObj['project'],
+                    amount: parseFloat(recordObj[mapping.amount || 'amount'] || recordObj['amount'] || '0'),
                     scenario
                 };
 
@@ -168,10 +169,11 @@ export async function importBankData(
         // Process each record
         for (const record of records) {
             try {
+                const recordObj = record as Record<string, string>;
                 const txnData = {
-                    txnDate: record[mapping.txn_date] || record['txn_date'],
-                    amount: parseFloat(record[mapping.amount] || record['amount']),
-                    memo: record[mapping.memo] || record['memo']
+                    txnDate: recordObj[mapping.txn_date || 'txn_date'] || recordObj['txn_date'] || '',
+                    amount: parseFloat(recordObj[mapping.amount || 'amount'] || recordObj['amount'] || '0'),
+                    memo: recordObj[mapping.memo || 'memo'] || recordObj['memo']
                 };
 
                 // Validate required fields
@@ -197,7 +199,7 @@ export async function importBankData(
                     acctCode,
                     txnDate: txnData.txnDate,
                     amount: txnData.amount,
-                    memo: txnData.memo,
+                    memo: txnData.memo || '',
                     uniqHash
                 }, createdBy);
 

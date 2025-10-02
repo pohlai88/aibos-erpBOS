@@ -18,8 +18,8 @@ export interface ApprovalPolicy {
     companyId: string;
     policyCode: string;
     minAmount: number;
-    maxAmount?: number;
-    currency?: string;
+    maxAmount?: number | undefined;
+    currency?: string | undefined;
     requireReviewer: boolean;
     requireApprover: boolean;
     requireDualApprover: boolean;
@@ -36,9 +36,9 @@ export interface SupplierPolicy {
 export interface SupplierLimit {
     companyId: string;
     supplierId: string;
-    dayCap?: number;
-    runCap?: number;
-    yearCap?: number;
+    dayCap?: number | undefined;
+    runCap?: number | undefined;
+    yearCap?: number | undefined;
     updatedAt: string;
     updatedBy: string;
 }
@@ -283,7 +283,7 @@ export async function upsertDenylist(
     data: DenylistUpsertType
 ): Promise<void> {
     const nameNorm = normalizeName(data.name);
-    
+
     await pool.query(`
         INSERT INTO sanction_denylist (company_id, name_norm, country, source)
         VALUES ($1, $2, $3, $4)
@@ -314,7 +314,7 @@ export async function runSanctionsScreen(
     createdBy: string
 ): Promise<{ screenId: string; hits: SanctionHit[] }> {
     const screenId = ulid();
-    
+
     // Create screen run
     await pool.query(`
         INSERT INTO sanction_screen_run (id, company_id, run_id, supplier_id, created_by)
@@ -342,8 +342,8 @@ export async function runSanctionsScreen(
         const supplierKyc = await getPayeeKyc(companyId, supplier.supplier_id);
         if (!supplierKyc) continue;
 
-        const normalizedName = normalizeName(supplierKyc.supplier_id);
-        
+        const normalizedName = normalizeName(supplierKyc.supplierId);
+
         // Check local denylist
         const { rows: denylistRows } = await pool.query(`
             SELECT name_norm, country, source FROM sanction_denylist
@@ -586,11 +586,11 @@ async function validatePolicyRequirements(
 
         // Check KYC requirements
         const kyc = await getPayeeKyc(companyId, line.supplier_id);
-        if (kyc?.on_hold) {
+        if (kyc?.onHold) {
             throw new Error(`Supplier ${line.supplier_id} is on hold`);
         }
 
-        if (kyc?.doc_expires && new Date(kyc.doc_expires) <= new Date()) {
+        if (kyc?.docExpires && new Date(kyc.docExpires) <= new Date()) {
             throw new Error(`Supplier ${line.supplier_id} KYC document expired`);
         }
 

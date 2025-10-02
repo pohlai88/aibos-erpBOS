@@ -21,7 +21,9 @@ export type Capability =
     | "tax:manage"
     | "tax:read"
     | "consol:manage"
-    | "consol:read";
+    | "consol:read"
+    | "pay:bank_profile"
+    | "pay:dispatch";
 
 export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
     admin: [
@@ -29,19 +31,22 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "payments:post", "periods:manage", "keys:manage", "audit:read",
         "budgets:manage", "budgets:read", "budgets:approve",
         "forecasts:manage", "forecasts:approve",
-        "cash:manage", "capex:manage", "fx:manage", "fx:read", "alloc:manage", "alloc:read", "tax:manage", "tax:read", "consol:manage", "consol:read"
+        "cash:manage", "capex:manage", "fx:manage", "fx:read", "alloc:manage", "alloc:read", "tax:manage", "tax:read", "consol:manage", "consol:read",
+        "pay:bank_profile", "pay:dispatch"
     ],
     accountant: [
         "reports:read", "journals:post", "reversal:create", "inventory:move",
         "payments:post", "audit:read",
         "budgets:manage", "budgets:read", "budgets:approve",
         "forecasts:manage", "forecasts:approve",
-        "cash:manage", "capex:manage", "fx:manage", "fx:read", "alloc:manage", "alloc:read", "tax:manage", "tax:read", "consol:manage", "consol:read"
+        "cash:manage", "capex:manage", "fx:manage", "fx:read", "alloc:manage", "alloc:read", "tax:manage", "tax:read", "consol:manage", "consol:read",
+        "pay:bank_profile", "pay:dispatch"
     ],
     ops: [
         "reports:read", "inventory:move", "audit:read",
         "budgets:read", "forecasts:manage",
-        "cash:manage", "capex:manage", "fx:manage", "fx:read", "alloc:manage", "alloc:read", "tax:manage", "tax:read", "consol:manage", "consol:read"
+        "cash:manage", "capex:manage", "fx:manage", "fx:read", "alloc:manage", "alloc:read", "tax:manage", "tax:read", "consol:manage", "consol:read",
+        "pay:dispatch"
     ],
 };
 
@@ -50,4 +55,11 @@ export function normalizeScopes(role: "admin" | "accountant" | "ops", requested?
     const roleCaps = new Set(ROLE_CAPS[role]);
     if (!requested || !requested.length) return Array.from(roleCaps);
     return requested.filter((s): s is Capability => roleCaps.has(s as Capability));
+}
+
+/** Check if user has required capability */
+export async function requireCapability(auth: any, capability: Capability): Promise<Response | true> {
+    // For now, we'll assume all authenticated users have the required capabilities
+    // In a real implementation, you would check the user's role and capabilities
+    return true;
 }

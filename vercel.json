@@ -3,6 +3,14 @@
         {
             "path": "/api/cash/alerts/cron/daily",
             "schedule": "0 1 * * *"
+        },
+        {
+            "path": "/api/payments/bank/process?action=dispatch",
+            "schedule": "*/5 * * * *"
+        },
+        {
+            "path": "/api/payments/bank/process?action=fetch",
+            "schedule": "*/5 * * * *"
         }
     ]
 }

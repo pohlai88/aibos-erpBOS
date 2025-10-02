@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { DenylistUpsert, SanctionScreenRequest, SanctionDecision } from "@aibos/contracts";
-import { 
-    upsertDenylist, 
+import {
+    upsertDenylist,
     getDenylist,
     runSanctionsScreen,
     decideSanctionHit
@@ -13,9 +13,9 @@ export async function GET(req: NextRequest) {
     try {
         const auth = await requireAuth(req);
         if (auth instanceof Response) return auth;
-        
+
         const denylist = await getDenylist(auth.company_id);
-        
+
         return Response.json({ denylist }, {
             status: 200,
             headers: { 'Access-Control-Allow-Origin': '*' }
@@ -30,13 +30,13 @@ export async function POST(req: NextRequest) {
     try {
         const auth = await requireAuth(req);
         if (auth instanceof Response) return auth;
-        
+
         const json = await req.json();
         const data = DenylistUpsert.parse(json);
-        
+
         await upsertDenylist(auth.company_id, data);
-        
-        return Response.json({ 
+
+        return Response.json({
             message: 'Denylist entry added successfully'
         }, {
             status: 200,

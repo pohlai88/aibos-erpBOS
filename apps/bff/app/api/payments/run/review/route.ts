@@ -8,13 +8,13 @@ export async function POST(req: NextRequest) {
     try {
         const auth = await requireAuth(req);
         if (auth instanceof Response) return auth;
-        
+
         const json = await req.json();
         const data = RunReview.parse(json);
-        
+
         await reviewPayRun(auth.company_id, data, auth.user_id);
-        
-        return Response.json({ 
+
+        return Response.json({
             message: data.decision === 'approve' ? 'Payment run reviewed successfully' : 'Payment run rejected'
         }, {
             status: 200,

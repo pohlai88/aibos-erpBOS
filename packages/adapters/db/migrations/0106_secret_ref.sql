@@ -1,0 +1,6 @@
+BEGIN;
+CREATE TABLE IF NOT EXISTS secret_ref (
+  name TEXT PRIMARY KEY,
+  note TEXT
+);
+COMMIT;

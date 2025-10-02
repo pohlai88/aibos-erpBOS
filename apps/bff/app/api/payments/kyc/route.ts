@@ -8,16 +8,16 @@ export async function GET(req: NextRequest) {
     try {
         const auth = await requireAuth(req);
         if (auth instanceof Response) return auth;
-        
+
         const url = new URL(req.url);
         const supplierId = url.searchParams.get('supplier_id');
-        
+
         if (!supplierId) {
             return Response.json({ error: 'supplier_id parameter required' }, { status: 400 });
         }
-        
+
         const kyc = await getPayeeKyc(auth.company_id, supplierId);
-        
+
         return Response.json({ kyc }, {
             status: 200,
             headers: { 'Access-Control-Allow-Origin': '*' }
@@ -32,13 +32,13 @@ export async function POST(req: NextRequest) {
     try {
         const auth = await requireAuth(req);
         if (auth instanceof Response) return auth;
-        
+
         const json = await req.json();
         const data = PayeeKycUpsert.parse(json);
-        
+
         const kyc = await upsertPayeeKyc(auth.company_id, data, auth.user_id);
-        
-        return Response.json({ 
+
+        return Response.json({
             kyc,
             message: 'KYC dossier updated successfully'
         }, {

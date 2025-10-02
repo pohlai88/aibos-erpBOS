@@ -43,6 +43,9 @@ export const apPayRun = pgTable("ap_pay_run", {
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     approvedBy: text("approved_by"),
     approvedAt: timestamp("approved_at", { withTimezone: true }),
+    // M23.2: Bank connectivity state machine fields
+    acknowledgedAt: timestamp("acknowledged_at", { withTimezone: true }),
+    failedReason: text("failed_reason"),
 });
 
 export const apPayLine = pgTable("ap_pay_line", {
@@ -256,3 +259,98 @@ export const sanctionAdapterProfile = pgTable("sanction_adapter_profile", {
 }, (table) => ({
     pk: primaryKey({ columns: [table.companyId, table.adapter] })
 }));
+
+// --- M23.2 Bank Connectivity & Acknowledgments ---------------------------------
+export const bankConnProfile = pgTable("bank_conn_profile", {
+    companyId: text("company_id").notNull(),
+    bankCode: text("bank_code").notNull(),
+    kind: text("kind").notNull(),
+    config: jsonb("config").notNull(),
+    active: boolean("active").notNull().default(true),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull(),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.companyId, table.bankCode] })
+}));
+
+export const bankFetchCursor = pgTable("bank_fetch_cursor", {
+    companyId: text("company_id").notNull(),
+    bankCode: text("bank_code").notNull(),
+    channel: text("channel").notNull(),
+    cursor: text("cursor"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.companyId, table.bankCode, table.channel] })
+}));
+
+export const bankOutbox = pgTable("bank_outbox", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    runId: text("run_id").notNull(),
+    bankCode: text("bank_code").notNull(),
+    filename: text("filename").notNull(),
+    payload: text("payload").notNull(),
+    checksum: text("checksum").notNull(),
+    status: text("status").notNull(),
+    attempts: integer("attempts").notNull().default(0),
+    lastError: text("last_error"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+});
+
+export const bankJobLog = pgTable("bank_job_log", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    bankCode: text("bank_code").notNull(),
+    kind: text("kind").notNull(),
+    detail: text("detail").notNull(),
+    payload: text("payload"),
+    success: boolean("success").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const bankAck = pgTable("bank_ack", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    bankCode: text("bank_code").notNull(),
+    ackKind: text("ack_kind").notNull(),
+    filename: text("filename").notNull(),
+    payload: text("payload").notNull(),
+    uniqHash: text("uniq_hash").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const bankAckMap = pgTable("bank_ack_map", {
+    id: text("id").primaryKey(),
+    ackId: text("ack_id").notNull(),
+    runId: text("run_id"),
+    lineId: text("line_id"),
+    status: text("status").notNull(),
+    reasonCode: text("reason_code"),
+    reasonLabel: text("reason_label"),
+});
+
+export const bankReasonNorm = pgTable("bank_reason_norm", {
+    bankCode: text("bank_code").notNull(),
+    code: text("code").notNull(),
+    normStatus: text("norm_status").notNull(),
+    normLabel: text("norm_label").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.bankCode, table.code] })
+}));
+
+export const bankInboxAudit = pgTable("bank_inbox_audit", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    bankCode: text("bank_code").notNull(),
+    channel: text("channel").notNull(),
+    filename: text("filename").notNull(),
+    uniqHash: text("uniq_hash").notNull(),
+    storedAt: timestamp("stored_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const secretRef = pgTable("secret_ref", {
+    name: text("name").primaryKey(),
+    note: text("note"),
+});
