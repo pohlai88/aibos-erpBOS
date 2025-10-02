@@ -1,4 +1,4 @@
-import { pgTable, text, char, timestamp, numeric, pgEnum, primaryKey, integer, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, char, timestamp, numeric, pgEnum, primaryKey, integer, boolean, jsonb, date } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 export const company = pgTable("company", {
@@ -369,3 +369,94 @@ export const cashAlertSchedule = pgTable("cash_alert_schedule", {
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
     updatedBy: text("updated_by").notNull(),
 });
+
+// --- Capex & Depreciation (M16) ------------------------------------------------
+export const assetClassRef = pgTable("asset_class_ref", {
+    code: text("code").primaryKey(),
+    label: text("label").notNull(),
+    method: text("method").notNull(),          // SL | DDB
+    defaultLifeM: integer("default_life_m").notNull(),
+    residualPct: numeric("residual_pct").notNull().default("0"),
+});
+
+export const capexPlan = pgTable("capex_plan", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    assetClass: text("asset_class").notNull(),
+    description: text("description").notNull(),
+    capexAmount: numeric("capex_amount").notNull(),
+    currency: text("currency").notNull(),
+    presentCcy: text("present_ccy").notNull(),
+    inService: date("in_service").notNull(),
+    lifeM: integer("life_m"),
+    method: text("method"),
+    costCenter: text("cost_center"),
+    project: text("project"),
+    sourceHash: text("source_hash").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+export const deprSchedule = pgTable("depr_schedule", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    planId: text("plan_id").notNull(),
+    year: integer("year").notNull(),
+    month: integer("month").notNull(),
+    currency: text("currency").notNull(),
+    presentCcy: text("present_ccy").notNull(),
+    amount: numeric("amount").notNull(),
+    bookedFlag: boolean("booked_flag").notNull().default(false),
+    bookedJournalId: text("booked_journal_id"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const assetPostingMap = pgTable("asset_posting_map", {
+    companyId: text("company_id").notNull(),
+    assetClass: text("asset_class").notNull(),
+    deprExpenseAccount: text("depr_expense_account").notNull(),
+    accumDeprAccount: text("accum_depr_account").notNull(),
+}, (t) => ({
+    pk: primaryKey({ columns: [t.companyId, t.assetClass] })
+}));
+
+// --- Intangibles & Amortization (M16.1) -----------------------------------------
+export const intangiblePlan = pgTable("intangible_plan", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    class: text("class").notNull(),
+    description: text("description").notNull(),
+    amount: numeric("amount").notNull(),
+    currency: text("currency").notNull(),
+    presentCcy: text("present_ccy").notNull(),
+    inService: date("in_service").notNull(),
+    lifeM: integer("life_m").notNull(),
+    costCenter: text("cost_center"),
+    project: text("project"),
+    sourceHash: text("source_hash").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+export const amortSchedule = pgTable("amort_schedule", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    planId: text("plan_id").notNull(),
+    year: integer("year").notNull(),
+    month: integer("month").notNull(),
+    currency: text("currency").notNull(),
+    presentCcy: text("present_ccy").notNull(),
+    amount: numeric("amount").notNull(),
+    bookedFlag: boolean("booked_flag").notNull().default(false),
+    bookedJournalId: text("booked_journal_id"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const intangiblePostingMap = pgTable("intangible_posting_map", {
+    companyId: text("company_id").notNull(),
+    class: text("class").notNull(),
+    amortExpenseAccount: text("amort_expense_account").notNull(),
+    accumAmortAccount: text("accum_amort_account").notNull(),
+}, (t) => ({
+    pk: primaryKey({ columns: [t.companyId, t.class] })
+}));
