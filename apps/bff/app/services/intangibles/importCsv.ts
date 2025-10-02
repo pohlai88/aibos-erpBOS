@@ -26,12 +26,14 @@ export async function importIntangiblesCsv(
 
     for (let i = 0; i < rows.length; i++) {
         const r = rows[i];
+        if (!r) continue; // Skip undefined rows
+
         try {
             // Handle both "class" and "asset_class" mappings for flexibility
             const classValue = r[map.class ?? "class"] || r[map.asset_class ?? "asset_class"] || r["asset_class"];
 
             const input = {
-                class: classValue,
+                class: classValue || "",
                 description: pick(r, map.description ?? "description"),
                 amount: Number(pick(r, map.amount ?? "amount")),
                 currency: pick(r, map.currency ?? "currency", defs.currency),
@@ -76,16 +78,17 @@ export async function importIntangiblesCsv(
 /**
  * Validates CSV structure for Intangibles import
  */
-export function validateIntangiblesCsvStructure(text: string): { valid: boolean; error?: string; headers?: string[] } {
-    const { parseCsv } = require("../../utils/csv");
-
+export async function validateIntangiblesCsvStructure(text: string): Promise<{ valid: boolean; error?: string; headers?: string[] }> {
     try {
-        const rows = parseCsv(text);
+        const rows = await parseCsv(text);
         if (!rows.length) {
             return { valid: false, error: "No data rows found in CSV" };
         }
 
         const firstRow = rows[0];
+        if (!firstRow) {
+            return { valid: false, error: "No data rows found in CSV" };
+        }
         const requiredFields = ["class", "description", "amount", "currency", "present_ccy", "in_service", "life_m"];
         const missingFields = requiredFields.filter(field => !firstRow[field]);
 

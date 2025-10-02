@@ -3,7 +3,7 @@ import { Pool, PoolClient } from "pg";
 import * as schema from "./schema";
 import { eq, and } from "drizzle-orm";
 import type { LedgerRepo, RepoJournal, RepoJournalLine, Tx, TxManager } from "@aibos/ports";
-import crypto from "node:crypto";
+import * as crypto from "node:crypto";
 
 export type DbTx = { client: PoolClient };
 export class DrizzleTxManager implements TxManager {

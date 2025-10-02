@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
                 plan_id: imp.plan_id,
                 date: imp.date,
                 amount: imp.amount,
-                memo: imp.memo,
+                memo: imp.memo ?? undefined,
                 created_at: imp.created_at,
                 created_by: imp.created_by,
             })),

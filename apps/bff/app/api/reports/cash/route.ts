@@ -6,6 +6,19 @@ import { requireAuth, requireCapability } from "../../../lib/auth";
 import { withRouteErrors, isResponse } from "../../../lib/route-utils";
 import { buildMatrix } from "../../../lib/report-matrix";
 import { pool } from "../../../lib/db";
+import { convertToPresent } from "@aibos/policies";
+
+async function getPresentQuotes(base: string, present: string, onISO: string) {
+    const { rows } = await pool.query(
+        `select date::text as date, from_ccy as from, to_ccy as to, rate::text
+       from fx_rate
+      where from_ccy=$1 and to_ccy=$2 and date <= $3
+      order by date desc
+      limit 1`,
+        [base, present, onISO]
+    );
+    return rows.map(r => ({ date: r.date, from: r.from, to: r.to, rate: Number(r.rate) }));
+}
 
 export const GET = withRouteErrors(async (req: Request) => {
     try {
@@ -22,6 +35,7 @@ export const GET = withRouteErrors(async (req: Request) => {
         const nullLabel = url.searchParams.get("pivot_null_label") ?? "Unassigned";
         const precision = Number(url.searchParams.get("precision") ?? "2");
         const grandTotal = (url.searchParams.get("grand_total") ?? "true") === "true";
+        const present = url.searchParams.get("present"); // e.g. "USD"
 
         if (!scenario || !scenario.startsWith("cash:")) {
             return badRequest("scenario must be cash:<code>");
@@ -66,10 +80,39 @@ export const GET = withRouteErrors(async (req: Request) => {
             includeGrandTotal: grandTotal
         });
 
+        // Optional presentation currency conversion
+        let presentCurrency = "MYR"; // Default base currency
+        let rateUsed = 1;
+
+        if (present && present !== "MYR") {
+            const asOf = new Date(Date.UTC(year, 11, 31)); // Last day of year
+            const quotes = await getPresentQuotes("MYR", present, asOf.toISOString().split('T')[0]);
+
+            if (quotes.length > 0) {
+                rateUsed = quotes[0].rate;
+                presentCurrency = present;
+
+                // Convert matrix values
+                matrix.rows = matrix.rows.map(row => ({
+                    ...row,
+                    values: Object.fromEntries(
+                        Object.entries(row.values).map(([k, v]) => [k, convertToPresent(Number(v), "MYR", present, quotes, asOf) ?? Number(v)])
+                    ),
+                    total: row.total ? convertToPresent(Number(row.total), "MYR", present, quotes, asOf) ?? Number(row.total) : row.total
+                }));
+
+                if (matrix.grand_total) {
+                    matrix.grand_total = convertToPresent(Number(matrix.grand_total), "MYR", present, quotes, asOf) ?? Number(matrix.grand_total);
+                }
+            }
+        }
+
         return ok({
             scenario,
             year,
-            ...matrix
+            ...matrix,
+            present_currency: presentCurrency,
+            rate_used: rateUsed
         });
     } catch (error) {
         console.error("Error generating cash report:", error);

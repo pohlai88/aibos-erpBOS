@@ -26,6 +26,8 @@ export async function importCapexCsv(
 
     for (let i = 0; i < rows.length; i++) {
         const r = rows[i];
+        if (!r) continue; // Skip undefined rows
+
         try {
             const input = {
                 asset_class: pick(r, map.asset_class ?? "asset_class"),
@@ -79,16 +81,17 @@ export async function importCapexCsv(
 /**
  * Validates CSV structure for CAPEX import
  */
-export function validateCapexCsvStructure(text: string): { valid: boolean; error?: string; headers?: string[] } {
-    const { parseCsv } = require("../../utils/csv");
-
+export async function validateCapexCsvStructure(text: string): Promise<{ valid: boolean; error?: string; headers?: string[] }> {
     try {
-        const rows = parseCsv(text);
+        const rows = await parseCsv(text);
         if (!rows.length) {
             return { valid: false, error: "No data rows found in CSV" };
         }
 
         const firstRow = rows[0];
+        if (!firstRow) {
+            return { valid: false, error: "No data rows found in CSV" };
+        }
         const requiredFields = ["asset_class", "description", "capex_amount", "currency", "present_ccy", "in_service"];
         const missingFields = requiredFields.filter(field => !firstRow[field]);
 

@@ -190,6 +190,39 @@ export const periods = pgTable("periods", {
     pk: primaryKey({ columns: [table.companyId, table.year, table.month] })
 }));
 
+// --- FX Admin Rates (M17) ---------------------------------------------------
+export const fxAdminRates = pgTable("fx_admin_rates", {
+    companyId: text("company_id").references(() => company.id).notNull(),
+    asOfDate: date("as_of_date").notNull(),
+    srcCcy: text("src_ccy").notNull(),
+    dstCcy: text("dst_ccy").notNull(),
+    rate: numeric("rate").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedBy: text("updated_by").notNull()
+}, (table) => ({
+    pk: primaryKey({ columns: [table.companyId, table.asOfDate, table.srcCcy, table.dstCcy] })
+}));
+
+// --- Journal Entries & Lines (M17) -----------------------------------------
+export const journalEntries = pgTable("journal_entries", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").references(() => company.id).notNull(),
+    date: date("date").notNull(),
+    memo: text("memo"),
+    tags: jsonb("tags"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    createdBy: text("created_by").notNull()
+});
+
+export const journalLines = pgTable("journal_lines", {
+    id: text("id").primaryKey(),
+    journalId: text("journal_id").references(() => journalEntries.id).notNull(),
+    accountId: text("account_id").references(() => account.id).notNull(),
+    debit: numeric("debit", { precision: 15, scale: 2 }).notNull().default("0"),
+    credit: numeric("credit", { precision: 15, scale: 2 }).notNull().default("0"),
+    description: text("description")
+});
+
 // --- Budgets & Variance (M14.1) -------------------------------------------
 export const budget = pgTable("budget", {
     id: text("id").primaryKey(),

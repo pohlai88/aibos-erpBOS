@@ -8,9 +8,9 @@ export async function parseCsv(text: string): Promise<Record<string, string>[]> 
     const lines = text.replace(/\r\n/g, "\n").split("\n").filter(Boolean);
     if (!lines.length) return rows;
 
-    const headers = splitLine(lines[0]);
+    const headers = splitLine(lines[0]!);
     for (let i = 1; i < lines.length; i++) {
-        const cells = splitLine(lines[i]);
+        const cells = splitLine(lines[i]!);
         const row: Record<string, string> = {};
         for (let j = 0; j < headers.length; j++) {
             row[headers[j]] = cells[j] ?? "";
@@ -55,7 +55,7 @@ export function validateCsvStructure(text: string): { valid: boolean; error?: st
             return { valid: false, error: "CSV file is empty" };
         }
 
-        const headers = splitLine(lines[0]);
+        const headers = splitLine(lines[0]!);
         if (!headers.length) {
             return { valid: false, error: "No headers found in CSV" };
         }

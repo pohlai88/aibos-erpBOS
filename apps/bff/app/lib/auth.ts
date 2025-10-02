@@ -1,4 +1,4 @@
-import crypto from "node:crypto";
+import * as crypto from "node:crypto";
 import { pool } from "./db";
 import { Capability, normalizeScopes } from "./rbac";
 import { rateLimitCheck, retryAfterSecs } from "./ratelimit";
