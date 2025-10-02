@@ -1,7 +1,7 @@
 // M14.4: Budget Versions, Approvals, & Variance Alerts - Tests
 // Basic test suite for version workflow, import targeting, and alert evaluation
 
-// Note: Test runner functions are defined in generator.test.ts to avoid duplication
+import { describe, it, expect } from 'vitest';
 
 // Mock data for testing
 const mockBudgetVersion = {

@@ -1,24 +1,7 @@
 // Simple test runner for pivot matrix functionality
 // This is a basic test without external dependencies
 
-function describe(name: string, fn: () => void) { fn(); }
-function it(name: string, fn: () => void) { fn(); }
-function expect(actual: any) {
-    return {
-        toBe(expected: any) {
-            if (actual !== expected) throw new Error(`Expected ${expected}, got ${actual}`);
-        },
-        toEqual(expected: any) {
-            if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-                throw new Error(`Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
-            }
-        },
-        toBeUndefined() {
-            if (actual !== undefined) throw new Error(`Expected undefined, got ${actual}`);
-        }
-    };
-}
-
+import { describe, it, expect } from 'vitest';
 import { buildPivotMatrix } from "../pivot-matrix";
 
 describe("buildPivotMatrix", () => {

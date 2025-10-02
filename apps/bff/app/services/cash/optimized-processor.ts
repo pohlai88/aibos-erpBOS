@@ -17,6 +17,11 @@ export interface CompanyConfig {
     timezone: string;
     cash_version_code: string | null;
     is_active: boolean;
+    // Per-company schedule fields
+    schedule_enabled?: boolean;
+    hour_local?: number;
+    minute_local?: number;
+    schedule_scenario_code?: string;
 }
 
 export interface ProcessingResult {
@@ -196,10 +201,15 @@ export class EnterpriseCashAlertsProcessor {
                 const query = `
                     SELECT
                         c.id,
-                        COALESCE(cs.timezone, 'Asia/Ho_Chi_Minh') as timezone,
+                        COALESCE(s.timezone, cs.timezone, 'Asia/Ho_Chi_Minh') as timezone,
+                        s.enabled as schedule_enabled,
+                        s.hour_local,
+                        s.minute_local,
+                        s.scenario_code as schedule_scenario_code,
                         cs.cash_version_code,
                         c.is_active
                     FROM company c
+                    LEFT JOIN cash_alert_schedule s ON s.company_id = c.id
                     LEFT JOIN company_settings cs ON cs.company_id = c.id
                     WHERE c.is_active = true
                     ORDER BY c.id
@@ -211,10 +221,15 @@ export class EnterpriseCashAlertsProcessor {
                     timezone: row.timezone,
                     cash_version_code: row.cash_version_code,
                     is_active: row.is_active,
+                    // Per-company schedule fields
+                    schedule_enabled: row.schedule_enabled,
+                    hour_local: row.hour_local,
+                    minute_local: row.minute_local,
+                    schedule_scenario_code: row.schedule_scenario_code,
                 }));
             },
             'database',
-            'fetch_active_companies'
+            'fetch_active_companies_with_schedules'
         );
     }
 
@@ -318,7 +333,39 @@ export class EnterpriseCashAlertsProcessor {
         return await observability.traceOperation(
             'process_company',
             async () => {
-                // Resolve cash version code with caching
+                // Check if company has per-company schedule enabled
+                if (company.schedule_enabled) {
+                    // Use per-company schedule settings
+                    const localTime = this.getLocalTime(company.timezone);
+                    const scheduledHour = company.hour_local || 8;
+                    const scheduledMinute = company.minute_local || 0;
+
+                    // Only process if current local time matches scheduled time
+                    if (localTime.hour !== scheduledHour || localTime.minute !== scheduledMinute) {
+                        console.log(`⏰ Company ${company.id} scheduled for ${scheduledHour}:${scheduledMinute.toString().padStart(2, '0')} ${company.timezone}, current time: ${localTime.hour}:${localTime.minute.toString().padStart(2, '0')} - skipping`);
+                        return { breaches: [], cache_hit: false };
+                    }
+
+                    // Use schedule scenario code if available
+                    if (company.schedule_scenario_code) {
+                        const scenarioCode = company.schedule_scenario_code;
+                        const period = this.getLocalPeriod(company.timezone);
+
+                        // Evaluate alerts with optimization
+                        const evalResult = await this.evaluateAlertsOptimized(company.id, scenarioCode, period);
+
+                        // Dispatch notifications with error handling
+                        await this.errorHandler.executeWithErrorHandling(
+                            () => dispatchCashNotifications(company.id, evalResult.breaches),
+                            'external_api',
+                            `dispatch_notifications_${company.id}`
+                        );
+
+                        return evalResult;
+                    }
+                }
+
+                // Fallback to original logic (company_settings or last approved)
                 let scenarioCode = company.cash_version_code;
                 if (!scenarioCode) {
                     scenarioCode = await this.getLastApprovedCashVersion(company.id);
@@ -349,8 +396,10 @@ export class EnterpriseCashAlertsProcessor {
             {
                 company_id: company.id,
                 timezone: company.timezone,
-                scenario_code: company.cash_version_code || 'auto-resolved',
-                period: this.getLocalPeriod(company.timezone)
+                scenario_code: company.schedule_scenario_code || company.cash_version_code || 'auto-resolved',
+                period: this.getLocalPeriod(company.timezone),
+                schedule_enabled: company.schedule_enabled,
+                scheduled_time: company.schedule_enabled ? `${company.hour_local}:${company.minute_local}` : 'default'
             }
         );
     }
@@ -496,6 +545,25 @@ export class EnterpriseCashAlertsProcessor {
         return {
             year: Number(parts.year),
             month: Number(parts.month),
+        };
+    }
+
+    private getLocalTime(timezone: string): { hour: number; minute: number } {
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat('en-CA', {
+            timeZone: timezone,
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        });
+
+        const parts = Object.fromEntries(
+            formatter.formatToParts(now).map(p => [p.type, p.value])
+        );
+
+        return {
+            hour: Number(parts.hour),
+            minute: Number(parts.minute),
         };
     }
 

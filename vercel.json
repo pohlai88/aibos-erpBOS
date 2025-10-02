@@ -1,0 +1,8 @@
+{
+    "crons": [
+        {
+            "path": "/api/cash/alerts/cron/daily",
+            "schedule": "0 1 * * *"
+        }
+    ]
+}

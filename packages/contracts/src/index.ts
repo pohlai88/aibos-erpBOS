@@ -5,3 +5,4 @@ export * from '../http/ping.schema';
 export * from '../http/shared/primitives';
 export * from '../http/budget-import.schema';
 export * from './cash';
+export * from './cash_alert_schedule';

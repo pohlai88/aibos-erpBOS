@@ -1,4 +1,6 @@
 import { pool } from "../../lib/db";
+import { dispatchCashNotifications as realDispatchCashNotifications } from "./alerts.dispatcher";
+import { generateIdempotencyKey, checkIdempotency, recordIdempotency } from "./idempotency";
 
 type Period = { year: number; month: number };
 type Row = { cc?: string | null; project?: string | null; netChange: number };
@@ -12,8 +14,30 @@ function addMonths(p: Period, n: number): Period {
 export async function evaluateCashAlerts(
     companyId: string,
     cashVersionCode: string,
-    period: Period
+    period: Period,
+    skipIdempotency: boolean = false
 ) {
+    // Check idempotency to prevent duplicate alerts
+    if (!skipIdempotency) {
+        const idempotencyKey = generateIdempotencyKey({
+            company_id: companyId,
+            period: monthKey(period),
+            scenario_code: cashVersionCode
+        });
+
+        const existing = await checkIdempotency(idempotencyKey);
+        if (existing) {
+            console.log(`🔒 Duplicate alert prevented for ${companyId} ${monthKey(period)} ${cashVersionCode}`);
+            return {
+                version: cashVersionCode,
+                period,
+                breaches: [],
+                idempotent: true,
+                previous_dispatched_at: existing.dispatched_at
+            };
+        }
+    }
+
     // resolve version
     const versionResult = await pool.query(
         `SELECT id FROM cash_forecast_version WHERE company_id = $1 AND code = $2 LIMIT 1`,
@@ -108,10 +132,25 @@ export async function evaluateCashAlerts(
         }
     }
 
+    // Record idempotency to prevent future duplicates
+    if (!skipIdempotency && breaches.length > 0) {
+        await recordIdempotency(
+            generateIdempotencyKey({
+                company_id: companyId,
+                period: monthKey(period),
+                scenario_code: cashVersionCode
+            }),
+            companyId,
+            monthKey(period),
+            cashVersionCode,
+            breaches.length
+        );
+    }
+
     return { version: cashVersionCode, period, breaches };
 }
 
-// stubbed dispatcher (email/webhook later)
-export async function dispatchCashNotifications(_companyId: string, breaches: any[]) {
-    return { dispatched: breaches.length };
+// Re-export the real dispatcher as the default
+export async function dispatchCashNotifications(companyId: string, breaches: any[]) {
+    return await realDispatchCashNotifications(companyId, breaches);
 }

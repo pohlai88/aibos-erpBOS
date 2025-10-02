@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 
 /**
  * Type guard to check if a value is a Response object
@@ -12,17 +12,17 @@ export function isResponse(x: unknown): x is Response {
  * Use this to wrap route handlers for consistent error handling
  */
 export function withRouteErrors<
-  F extends (req: Request, ...args: any[]) => Promise<Response>
+  F extends (req: NextRequest, ...args: any[]) => Promise<Response>
 >(fn: F): F {
-  return (async (req: Request, ...args: any[]) => {
+  return (async (req: NextRequest, ...args: any[]) => {
     try {
       return await fn(req, ...args);
     } catch (err) {
       console.error("Unhandled route error:", err);
-      return NextResponse.json({ 
-        ok: false, 
-        error: "InternalServerError", 
-        message: "Internal Server Error" 
+      return NextResponse.json({
+        ok: false,
+        error: "InternalServerError",
+        message: "Internal Server Error"
       }, { status: 500 });
     }
   }) as F;

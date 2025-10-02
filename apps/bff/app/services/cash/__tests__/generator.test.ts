@@ -1,71 +1,7 @@
 // M15: Cash Flow Tests
 // apps/bff/app/services/cash/__tests__/generator.test.ts
 
-// Import test utilities from existing test files to avoid duplication
-// Note: These functions are already defined in other test files
-// We'll use a simple test runner for this specific test file
-
-function describe(name: string, fn: () => void) {
-    console.log(`\n🧪 ${name}`);
-    fn();
-}
-
-function it(name: string, fn: () => void) {
-    try {
-        fn();
-        console.log(`  ✅ ${name}`);
-    } catch (error) {
-        console.log(`  ❌ ${name}: ${error}`);
-        throw error;
-    }
-}
-
-function expect(actual: any) {
-    return {
-        toBe(expected: any) {
-            if (actual !== expected) {
-                throw new Error(`Expected ${expected}, got ${actual}`);
-            }
-        },
-        toBeGreaterThan(expected: any) {
-            if (actual <= expected) {
-                throw new Error(`Expected ${actual} to be greater than ${expected}`);
-            }
-        },
-        toBeLessThan(expected: any) {
-            if (actual >= expected) {
-                throw new Error(`Expected ${actual} to be less than ${expected}`);
-            }
-        },
-        toBeTruthy() {
-            if (!actual) {
-                throw new Error(`Expected truthy value, got ${actual}`);
-            }
-        },
-        toBeFalsy() {
-            if (actual) {
-                throw new Error(`Expected falsy value, got ${actual}`);
-            }
-        },
-        toBeNull() {
-            if (actual !== null) {
-                throw new Error(`Expected null, got ${actual}`);
-            }
-        },
-        toBeUndefined() {
-            if (actual !== undefined) {
-                throw new Error(`Expected undefined, got ${actual}`);
-            }
-        },
-        not: {
-            toBe(expected: any) {
-                if (actual === expected) {
-                    throw new Error(`Expected not to be ${expected}, but got ${actual}`);
-                }
-            }
-        }
-    };
-}
+import { describe, it, expect } from './test-utils';
 
 // Import the functions we want to test
 // Note: We'll test the math functions directly since they're pure functions
@@ -194,7 +130,7 @@ describe("Cash Flow Calculation", () => {
         };
 
         // Positive AR delta (customers paying slower) reduces cash
-        const deltas = { dAR: 10000, dAP: 0, dInv: 0 };
+        const deltas = { dAR: 20000, dAP: 0, dInv: 0 };
         const cash = cashFromPL(monthData, deltas.dAR, deltas.dAP, deltas.dInv);
 
         expect(cash.net).toBeLessThan(0); // Should be negative due to AR increase

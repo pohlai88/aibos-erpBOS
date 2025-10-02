@@ -14,7 +14,12 @@
       "@aibos/services/*": ["packages/services/*"],
       "@aibos/posting-rules": ["packages/posting-rules/src/index.ts"],
       "@aibos/policies": ["packages/policies/src/index.ts"],
-      "@aibos/ports": ["packages/ports/src/index.ts"]
+      "@aibos/ports": ["packages/ports/src/index.ts"],
+      "@contracts/*": ["packages/contracts/src/*"],
+      "@db/*": ["packages/adapters/db/src/*"],
+      "@db/client": ["packages/adapters/db/src/client.ts"],
+      "@db/schema/*": ["packages/adapters/db/src/schema/*"],
+      "@/": ["apps/bff/app/", "apps/bff/src/"]
     }
   }
 }
