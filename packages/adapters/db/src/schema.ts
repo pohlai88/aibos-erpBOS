@@ -257,3 +257,43 @@ export const budgetAlertRule = pgTable("budget_alert_rule", {
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     createdBy: text("created_by").notNull(),
 });
+
+// --- Driver-Based Rolling Forecast (M14.5) -----------------------------------
+export const driverProfile = pgTable("driver_profile", {
+    id: text("id").primaryKey(), // ULID
+    companyId: text("company_id").references(() => company.id).notNull(),
+    name: text("name").notNull(),
+    description: text("description"),
+    formulaJson: jsonb("formula_json").notNull(), // { "revenue": "price * volume", "cogs": "revenue * 0.6" }
+    seasonalityJson: jsonb("seasonality_json").notNull(), // [100, 95, 110, ...] - 12 months normalized to 100%
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+export const forecastVersion = pgTable("forecast_version", {
+    id: text("id").primaryKey(), // ULID
+    companyId: text("company_id").references(() => company.id).notNull(),
+    code: text("code").notNull(), // e.g. "FY25-FC1", "FY25-Q2-FC"
+    label: text("label").notNull(),
+    year: integer("year").notNull(),
+    driverProfileId: text("driver_profile_id").references(() => driverProfile.id),
+    status: text("status").notNull().default("draft"), // draft|submitted|approved|returned|archived
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull(),
+});
+
+export const forecastLine = pgTable("forecast_line", {
+    id: text("id").primaryKey(), // ULID
+    companyId: text("company_id").references(() => company.id).notNull(),
+    versionId: text("version_id").references(() => forecastVersion.id, { onDelete: "cascade" }).notNull(),
+    accountCode: text("account_code").notNull(),
+    costCenterCode: text("cost_center_code"),
+    projectCode: text("project_code"),
+    month: integer("month").notNull(), // 1-12
+    amount: numeric("amount", { precision: 20, scale: 2 }).notNull(),
+    currency: char("currency", { length: 3 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});

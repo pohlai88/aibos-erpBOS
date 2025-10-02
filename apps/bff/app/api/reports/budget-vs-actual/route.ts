@@ -38,7 +38,7 @@ export const GET = withRouteErrors(async (req: Request) => {
     const pivotNullLabel = url.searchParams.get("pivot_null_label") ?? "__NULL__";
     const precision = parseInt(url.searchParams.get("precision") ?? "2");
     const grandTotal = url.searchParams.get("grand_total") !== "false";
-    
+
     // M14.4: Scenario and compare_to parameters
     const scenario = url.searchParams.get("scenario") ?? "working"; // baseline|working|<version_code>
     const compareTo = url.searchParams.get("compare_to") ?? scenario; // For budget side comparison
@@ -67,8 +67,16 @@ export const GET = withRouteErrors(async (req: Request) => {
                 [company_id, new Date(from).getFullYear()]
             );
             return result.rows[0]?.id || null;
+        } else if (scenarioParam.startsWith("forecast:")) {
+            // M14.5: Forecast scenario - e.g., "forecast:FY25-FC1"
+            const forecastCode = scenarioParam.substring(9); // Remove "forecast:" prefix
+            const result = await pool.query(
+                `SELECT id FROM forecast_version WHERE company_id = $1 AND code = $2`,
+                [company_id, forecastCode]
+            );
+            return result.rows[0]?.id || null;
         } else {
-            // Assume it's a version code
+            // Assume it's a budget version code
             const result = await pool.query(
                 `SELECT id FROM budget_version WHERE company_id = $1 AND code = $2`,
                 [company_id, scenarioParam]
@@ -146,22 +154,51 @@ export const GET = withRouteErrors(async (req: Request) => {
     const budgetsSQL = `
         with months as (${monthArraySQL})
         select
-            bl.account_code,
-            coalesce(bl.cost_center_id, '') as cost_center_id,
-            coalesce(bl.project_id,     '') as project_id,
-            sum(bl.amount_base) as budget
-        from budget_line bl
-        join budget b on b.id = bl.budget_id and b.company_id = bl.company_id
-        join months m on m.period_month = bl.period_month
-        where bl.company_id = $${++p}   -- $n+1 company
-            and bl.budget_id  = $${++p}   -- $n+2 budget
-            ${compareToVersionId ? `and bl.version_id = $${++p}` : `and bl.version_id IS NULL`}  -- $n+3 version
-            ${cc ? `and bl.cost_center_id = $${++p}` : ``}
-            ${prj ? `and bl.project_id     = $${++p}` : ``}
+            account_code,
+            cost_center_id,
+            project_id,
+            sum(amount) as budget
+        from (
+            -- Budget lines
+            select
+                bl.account_code,
+                coalesce(bl.cost_center_id, '') as cost_center_id,
+                coalesce(bl.project_id, '') as project_id,
+                bl.amount_base as amount
+            from budget_line bl
+            join budget b on b.id = bl.budget_id and b.company_id = bl.company_id
+            join months m on m.period_month = bl.period_month
+            where bl.company_id = $${++p}   -- $n+1 company
+                and bl.budget_id = $${++p}   -- $n+2 budget
+                ${compareToVersionId ? `and bl.version_id = $${++p}` : `and bl.version_id IS NULL`}  -- $n+3 version
+                ${cc ? `and bl.cost_center_id = $${++p}` : ``}
+                ${prj ? `and bl.project_id = $${++p}` : ``}
+            
+            UNION ALL
+            
+            -- Forecast lines (M14.5)
+            select
+                fl.account_code,
+                coalesce(fl.cost_center_code, '') as cost_center_id,
+                coalesce(fl.project_code, '') as project_id,
+                fl.amount::numeric as amount
+            from forecast_line fl
+            join forecast_version fv on fv.id = fl.version_id and fv.company_id = fl.company_id
+            join months m on m.period_month = fl.month::text
+            where fl.company_id = $${++p}   -- $n+4 company
+                and fl.version_id = $${++p}   -- $n+5 forecast version
+                ${cc ? `and fl.cost_center_code = $${++p}` : ``}
+                ${prj ? `and fl.project_code = $${++p}` : ``}
+        ) combined
         group by 1,2,3
     `;
     params.push(company_id, budget_id);
     if (compareToVersionId) params.push(compareToVersionId);
+    if (cc) params.push(cc);
+    if (prj) params.push(prj);
+
+    // Add forecast parameters
+    params.push(company_id, compareToVersionId);
     if (cc) params.push(cc);
     if (prj) params.push(prj);
 
