@@ -2,8 +2,8 @@
 // Handles unposting and reposting of asset depreciation/amortization
 
 import { pool } from "../../lib/db";
-import { postJournal } from "../../gl/journals";
-import { UnpostRequest, UnpostResponse } from "@contracts/impairments";
+import { postJournal } from "@/services/gl/journals";
+import { UnpostRequest, UnpostResponse } from "@aibos/contracts";
 
 /**
  * Unposts asset depreciation/amortization entries
@@ -147,10 +147,10 @@ async function createReversingJournal(
         date: postingDate,
         memo: `Reversal of ${kind === "depr" ? "depreciation" : "amortization"} ${year}-${month.toString().padStart(2, "0")}`,
         lines: originalLines.map(line => ({
-            account_code: line.account_code,
+            accountId: line.account_code,
             debit: line.dc === "C" ? line.amount : 0, // Swap debit/credit
             credit: line.dc === "D" ? line.amount : 0,
-            currency: line.line_currency,
+            description: `Reversal of ${kind === "depr" ? "depreciation" : "amortization"} ${year}-${month.toString().padStart(2, "0")}`,
         })),
         tags: {
             module: kind === "depr" ? "capex" : "intangibles",
@@ -161,7 +161,7 @@ async function createReversingJournal(
     };
 
     const result = await postJournal(companyId, journal);
-    return { journal_id: result.journal_id };
+    return { journal_id: result.journalId };
 }
 
 /**

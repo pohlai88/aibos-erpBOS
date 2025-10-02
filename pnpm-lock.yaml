@@ -90,6 +90,12 @@ importers:
       '@aibos/policies':
         specifier: workspace:*
         version: link:../../packages/policies
+      '@aibos/ports':
+        specifier: workspace:*
+        version: link:../../packages/ports
+      '@aibos/posting-rules':
+        specifier: workspace:*
+        version: link:../../packages/posting-rules
       '@aibos/services':
         specifier: workspace:*
         version: link:../../packages/services
@@ -164,7 +170,11 @@ importers:
 
   packages/api-client: {}
 
-  packages/contracts: {}
+  packages/contracts:
+    devDependencies:
+      '@types/node':
+        specifier: 24.6.0
+        version: 24.6.0
 
   packages/policies: {}
 
@@ -184,6 +194,12 @@ importers:
 
   packages/services:
     dependencies:
+      '@aibos/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@aibos/policies':
+        specifier: workspace:*
+        version: link:../policies
       '@aibos/ports':
         specifier: workspace:*
         version: link:../ports

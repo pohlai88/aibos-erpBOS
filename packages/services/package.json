@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@aibos/ports": "workspace:*",
-    "@aibos/posting-rules": "workspace:*"
+    "@aibos/posting-rules": "workspace:*",
+    "@aibos/policies": "workspace:*",
+    "@aibos/contracts": "workspace:*"
   }
 }

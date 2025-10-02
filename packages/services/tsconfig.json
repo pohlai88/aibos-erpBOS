@@ -1,29 +1,19 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "composite": true,
     "outDir": "./dist",
-    "module": "esnext",
-    "target": "ES2022",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
     "types": ["node"],
-    "baseUrl": ".",
-    "paths": {
-      "@aibos/contracts/*": ["../contracts/*"],
-      "@aibos/api-client/*": ["../api-client/*"],
-      "@aibos/services/*": ["../services/*"],
-      "@aibos/posting-rules": ["../posting-rules/src/index.ts"],
-      "@aibos/policies": ["../policies/src/index.ts"],
-      "@aibos/ports": ["../ports/src/index.ts"]
-    }
+    "rootDir": "../../"
   },
   "include": [
-    "src/**/*",
-    "../contracts/**/*",
-    "../policies/**/*",
-    "../posting-rules/**/*",
-    "../ports/**/*"
+    "src",
+    "../contracts/src",
+    "../contracts/http",
+    "../ports/src",
+    "../posting-rules/src",
+    "../utils/src",
+    "../policies/src"
   ],
   "exclude": ["node_modules", "dist"]
 }

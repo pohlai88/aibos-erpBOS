@@ -2,11 +2,11 @@
 // GET current schedule, PUT upsert schedule
 
 import { NextRequest } from "next/server";
-import { ok, badRequest, forbidden } from "../../../../lib/http";
-import { requireAuth, requireCapability } from "../../../../lib/auth";
-import { withRouteErrors, isResponse } from "../../../../lib/route-utils";
-import { getSchedule, upsertSchedule, ensureScenarioExists } from "../../../../services/cash/schedule";
-import { CashAlertScheduleUpsert } from "@contracts/cash_alert_schedule";
+import { ok, badRequest, forbidden } from "@/lib/http";
+import { requireAuth, requireCapability } from "@/lib/auth";
+import { withRouteErrors, isResponse } from "@/lib/route-utils";
+import { getSchedule, upsertSchedule, ensureScenarioExists } from "@/services/cash/schedule";
+import { CashAlertScheduleUpsert } from "@aibos/contracts";
 
 export const GET = withRouteErrors(async (req: NextRequest) => {
     try {

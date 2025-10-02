@@ -1,12 +1,12 @@
 import { NextRequest } from "next/server";
-import { PingRequest, PingResponse } from "@aibos/contracts/http/ping.schema";
+import { PingRequest, PingResponse } from "@aibos/contracts";
 import { pingService } from "@aibos/services/src/ping";
 
 export async function POST(req: NextRequest) {
   const json = await req.json();
   const input = PingRequest.parse(json);
   const out = await pingService(input.msg);
-  return Response.json(PingResponse.parse(out), { 
+  return Response.json(PingResponse.parse(out), {
     status: 200,
     headers: {
       'Access-Control-Allow-Origin': '*',

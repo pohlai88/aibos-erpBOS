@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { importRatesCsv } from "../../services/fx/ratesCsv";
+import { importRatesCsv } from "../ratesCsv";
 
 describe("FX rates CSV import", () => {
     it("parses CSV with default mapping", async () => {

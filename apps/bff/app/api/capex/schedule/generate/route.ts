@@ -3,7 +3,7 @@
 
 import { NextRequest } from "next/server";
 import { ok, badRequest, forbidden } from "../../../../lib/http";
-import { DeprGenerateRequest } from "@contracts/capex";
+import { DeprGenerateRequest } from "@aibos/contracts";
 import { requireAuth, requireCapability } from "../../../../lib/auth";
 import { generateSchedules } from "../../../../services/capex/generate";
 

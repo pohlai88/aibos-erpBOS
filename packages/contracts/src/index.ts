@@ -13,3 +13,5 @@ export * from './assets_prefs';
 export * from './impairments';
 export * from './ui_drafts';
 export * from './fx';
+export * from './common/result';
+export * from './reports/cash';

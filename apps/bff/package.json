@@ -4,6 +4,8 @@
     "@aibos/contracts": "workspace:*",
     "@aibos/policies": "workspace:*",
     "@aibos/services": "workspace:*",
+    "@aibos/posting-rules": "workspace:*",
+    "@aibos/ports": "workspace:*",
     "date-fns": "^4.1.0",
     "inngest": "^3.20.0",
     "next": "15.5.4",

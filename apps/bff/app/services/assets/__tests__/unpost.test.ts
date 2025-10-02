@@ -26,7 +26,7 @@ describe("unpost/repost", () => {
     });
 
     it("returns dry-run summary for depreciation", async () => {
-        const { pool } = await import("../../../../lib/db");
+        const { pool } = await import("@/lib/db");
 
         // Mock database response
         vi.mocked(pool.query).mockResolvedValueOnce({
@@ -66,7 +66,7 @@ describe("unpost/repost", () => {
     });
 
     it("executes actual unposting", async () => {
-        const { pool } = await import("../../lib/db");
+        const { pool } = await import("@/lib/db");
         const { postJournal } = await import("../../gl/journals");
 
         // Mock database responses
@@ -106,7 +106,7 @@ describe("unpost/repost", () => {
             })
             .mockResolvedValueOnce({ rows: [] }); // Update schedule
 
-        vi.mocked(postJournal).mockResolvedValueOnce({ journal_id: "reversal-1" });
+        vi.mocked(postJournal).mockResolvedValueOnce({ journalId: "reversal-1", linesPosted: 2 });
 
         const result = await unpostAssets("company-1", "depr", 2025, 11, undefined, false);
 
@@ -122,7 +122,7 @@ describe("unpost/repost", () => {
     });
 
     it("validates unposting safety", async () => {
-        const { pool } = await import("../../../../lib/db");
+        const { pool } = await import("@/lib/db");
 
         // Mock database responses
         vi.mocked(pool.query)
@@ -137,7 +137,7 @@ describe("unpost/repost", () => {
     });
 
     it("warns about closed periods", async () => {
-        const { pool } = await import("../../../../lib/db");
+        const { pool } = await import("@/lib/db");
 
         // Mock database responses
         vi.mocked(pool.query)
@@ -152,7 +152,7 @@ describe("unpost/repost", () => {
     });
 
     it("warns about no posted entries", async () => {
-        const { pool } = await import("../../../../lib/db");
+        const { pool } = await import("@/lib/db");
 
         // Mock database responses
         vi.mocked(pool.query)

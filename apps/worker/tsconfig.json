@@ -1,23 +1,21 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "composite": true,
     "outDir": "./dist",
-    "module": "esnext",
-    "target": "ES2022",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
     "types": ["node"],
-    "baseUrl": ".",
-    "paths": {
-      "@aibos/contracts/*": ["../../packages/contracts/*"],
-      "@aibos/api-client/*": ["../../packages/api-client/*"],
-      "@aibos/services/*": ["../../packages/services/*"],
-      "@aibos/posting-rules": ["../../packages/posting-rules/src/index.ts"],
-      "@aibos/policies": ["../../packages/policies/src/index.ts"],
-      "@aibos/ports": ["../../packages/ports/src/index.ts"]
-    }
+    "rootDir": "../../"
   },
-  "include": ["src/**/*", "../bff/app/lib/**/*", "../../packages/**/*"],
+  "include": [
+    "src",
+    "tests",
+    "drizzle",
+    "migrations",
+    "../bff/app/lib/reversal.ts",
+    "../bff/app/lib/db.ts",
+    "../../packages/adapters/db/src/repo.ts",
+    "../../packages/adapters/db/src/schema.ts",
+    "../../packages/ports/src/index.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

@@ -13,7 +13,7 @@ export async function parseCsv(text: string): Promise<Record<string, string>[]> 
         const cells = splitLine(lines[i]!);
         const row: Record<string, string> = {};
         for (let j = 0; j < headers.length; j++) {
-            row[headers[j]] = cells[j] ?? "";
+            row[headers[j]!] = cells[j] ?? "";
         }
         rows.push(row);
     }

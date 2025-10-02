@@ -3,7 +3,7 @@
 
 import { parseCsv } from "../../utils/csv";
 import { upsertPlan } from "./plan";
-import { CsvImportPayload, CsvImportResult } from "@contracts/assets_import";
+import { CsvImportPayload, CsvImportResult } from "@aibos/contracts";
 
 type Row = Record<string, string>;
 

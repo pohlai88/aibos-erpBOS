@@ -21,7 +21,7 @@ describe("ui drafts", () => {
     });
 
     it("stores and retrieves draft", async () => {
-        const { pool } = await import("../../lib/db");
+        const { pool } = await import("@/lib/db");
 
         // Mock database responses
         vi.mocked(pool.query)
@@ -55,7 +55,7 @@ describe("ui drafts", () => {
     });
 
     it("returns null for expired draft", async () => {
-        const { pool } = await import("../../lib/db");
+        const { pool } = await import("@/lib/db");
 
         // Mock database response - no rows (expired)
         vi.mocked(pool.query).mockResolvedValueOnce({ rows: [] });
@@ -66,7 +66,7 @@ describe("ui drafts", () => {
     });
 
     it("deletes draft successfully", async () => {
-        const { pool } = await import("../../lib/db");
+        const { pool } = await import("@/lib/db");
 
         // Mock database response
         vi.mocked(pool.query).mockResolvedValueOnce({ rowCount: 1 });
@@ -77,7 +77,7 @@ describe("ui drafts", () => {
     });
 
     it("lists all drafts for company", async () => {
-        const { pool } = await import("../../lib/db");
+        const { pool } = await import("@/lib/db");
 
         // Mock database response
         vi.mocked(pool.query).mockResolvedValueOnce({
@@ -112,7 +112,7 @@ describe("ui drafts", () => {
     });
 
     it("cleans up expired drafts", async () => {
-        const { pool } = await import("../../lib/db");
+        const { pool } = await import("@/lib/db");
 
         // Mock database response
         vi.mocked(pool.query).mockResolvedValueOnce({ rowCount: 5 });
@@ -126,7 +126,7 @@ describe("ui drafts", () => {
         const { validateDraftParams } = await import("../uiDraft");
 
         expect(validateDraftParams("depr", 2025, 11, 900).valid).toBe(true);
-        expect(validateDraftParams("invalid", 2025, 11, 900).valid).toBe(false);
+        expect(validateDraftParams("depr" as any, 2025, 11, 900).valid).toBe(false);
         expect(validateDraftParams("depr", 1800, 11, 900).valid).toBe(false);
         expect(validateDraftParams("depr", 2025, 13, 900).valid).toBe(false);
         expect(validateDraftParams("depr", 2025, 11, 30).valid).toBe(false);

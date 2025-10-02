@@ -2,10 +2,10 @@
 // Handles bulk posting of depreciation/amortization with dry-run diff
 
 import { NextRequest } from "next/server";
-import { ok, badRequest, forbidden } from "../../../lib/http";
-import { requireAuth, requireCapability } from "../../../lib/auth";
-import { BulkPostRequest } from "@contracts/assets_import";
-import { bulkPostAssets, validatePostingSafety } from "../../../services/assets/bulkPost";
+import { ok, badRequest, forbidden } from "@/lib/http";
+import { requireAuth, requireCapability } from "@/lib/auth";
+import { BulkPostRequest } from "@aibos/contracts";
+import { bulkPostAssets, validatePostingSafety } from "@/services/assets/bulkPost";
 
 export async function POST(req: NextRequest) {
     const auth = await requireAuth(req);

@@ -3,7 +3,7 @@
 
 import { NextRequest } from "next/server";
 import { ok, badRequest, forbidden } from "../../../../lib/http";
-import { AmortGenerateRequest } from "@contracts/intangibles";
+import { AmortGenerateRequest } from "@aibos/contracts";
 import { requireAuth, requireCapability } from "../../../../lib/auth";
 import { generateAmortizationSchedules } from "../../../../services/intangibles/generate";
 

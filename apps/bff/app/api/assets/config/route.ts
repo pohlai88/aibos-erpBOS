@@ -4,7 +4,7 @@
 import { NextRequest } from "next/server";
 import { ok, badRequest, forbidden } from "../../../lib/http";
 import { requireAuth, requireCapability } from "../../../lib/auth";
-import { AssetsConfigUpsert, AssetsConfigResponse } from "@contracts/assets_prefs";
+import { AssetsConfigUpsert, AssetsConfigResponse } from "@aibos/contracts";
 import { pool } from "../../../lib/db";
 
 export async function GET(req: NextRequest) {

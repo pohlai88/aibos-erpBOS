@@ -1,19 +1,27 @@
 {
   "compilerOptions": {
     "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": false,
+    "resolveJsonModule": true,
     "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
-    "noEmit": true,
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": [],
     "baseUrl": ".",
     "paths": {
-      "@aibos/contracts/*": ["packages/contracts/*"],
+      "@aibos/contracts/*": ["packages/contracts/src/*"],
+      "@aibos/services/*": ["packages/services/src/*"],
+      "@aibos/policies/*": ["packages/policies/src/*"],
+      "@aibos/db/*": ["packages/adapters/db/src/*"],
+      "@aibos/utils/*": ["packages/utils/src/*"],
       "@aibos/api-client/*": ["packages/api-client/*"],
-      "@aibos/services/*": ["packages/services/*"],
       "@aibos/posting-rules": ["packages/posting-rules/src/index.ts"],
-      "@aibos/policies": ["packages/policies/src/index.ts"],
       "@aibos/ports": ["packages/ports/src/index.ts"],
       "@contracts/*": ["packages/contracts/src/*"],
       "@db/*": ["packages/adapters/db/src/*"],
@@ -21,5 +29,6 @@
       "@db/schema/*": ["packages/adapters/db/src/schema/*"],
       "@/": ["apps/bff/app/", "apps/bff/src/"]
     }
-  }
+  },
+  "include": ["packages", "apps"]
 }

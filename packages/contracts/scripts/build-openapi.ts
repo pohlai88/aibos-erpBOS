@@ -5,9 +5,9 @@ extendZodWithOpenApi(z); // <-- add this line
 
 import { registry as si } from "../http/sales/sales-invoice.routes.js";
 import { registryPI } from "../http/purchase/purchase-invoice.routes.js";
-import { writeFileSync, mkdirSync } from "node:fs";
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { writeFileSync, mkdirSync } from "fs";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 
 const gen = new OpenApiGeneratorV3([si, registryPI].flatMap(r => r.definitions));
 const doc = gen.generateDocument({

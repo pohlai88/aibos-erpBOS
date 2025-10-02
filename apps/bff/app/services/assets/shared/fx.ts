@@ -34,7 +34,7 @@ export async function resolveFxRate(params: FxRateParams): Promise<number> {
     }
 
     // Fetch fresh rate from FX service
-    const rate = await fetchFxRate(srcCcy, presentCcy, policy === "post_month" ? { year, month } : undefined);
+    const rate = await fetchFxRate(srcCcy, presentCcy, policy === "post_month" && year && month ? { year, month } : undefined);
 
     // Snapshot the rate for audit compliance
     const snapshotId = ulid();

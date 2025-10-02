@@ -26,7 +26,7 @@ describe("asset impairments", () => {
     });
 
     it("creates impairment for CAPEX plan", async () => {
-        const { pool } = await import("../../lib/db");
+        const { pool } = await import("@/lib/db");
         const { postJournal } = await import("../../gl/journals");
 
         // Mock database responses
@@ -35,7 +35,7 @@ describe("asset impairments", () => {
             .mockResolvedValueOnce({ rows: [{ asset_class: "IT", present_ccy: "MYR" }] }) // Get plan
             .mockResolvedValueOnce({ rows: [{ depr_expense_account: "7400", accum_depr_account: "1509" }] }); // Get posting map
 
-        vi.mocked(postJournal).mockResolvedValueOnce({ journal_id: "journal-123" });
+        vi.mocked(postJournal).mockResolvedValueOnce({ journalId: "journal-123", linesPosted: 2 });
 
         const input = {
             plan_kind: "capex" as const,
@@ -59,7 +59,7 @@ describe("asset impairments", () => {
     });
 
     it("creates impairment for Intangible plan", async () => {
-        const { pool } = await import("../../lib/db");
+        const { pool } = await import("@/lib/db");
         const { postJournal } = await import("../../gl/journals");
 
         // Mock database responses
@@ -68,7 +68,7 @@ describe("asset impairments", () => {
             .mockResolvedValueOnce({ rows: [{ class: "SOFTWARE", present_ccy: "MYR" }] }) // Get plan
             .mockResolvedValueOnce({ rows: [{ amort_expense_account: "7450", accum_amort_account: "1609" }] }); // Get posting map
 
-        vi.mocked(postJournal).mockResolvedValueOnce({ journal_id: "journal-456" });
+        vi.mocked(postJournal).mockResolvedValueOnce({ journalId: "journal-456", linesPosted: 2 });
 
         const input = {
             plan_kind: "intangible" as const,
@@ -92,7 +92,7 @@ describe("asset impairments", () => {
     });
 
     it("lists impairments correctly", async () => {
-        const { pool } = await import("../../../../lib/db");
+        const { pool } = await import("@/lib/db");
 
         // Mock database response
         vi.mocked(pool.query).mockResolvedValueOnce({
@@ -133,11 +133,11 @@ describe("asset impairments", () => {
             created_at: "2025-11-15T10:00:00Z",
             created_by: "user-1",
         });
-        expect(result[1].memo).toBeNull();
+        expect(result[1]?.memo).toBeNull();
     });
 
     it("filters impairments by plan kind", async () => {
-        const { pool } = await import("../../../../lib/db");
+        const { pool } = await import("@/lib/db");
 
         // Mock database response
         vi.mocked(pool.query).mockResolvedValueOnce({
@@ -158,6 +158,6 @@ describe("asset impairments", () => {
         const result = await listImpairments("company-1", "capex");
 
         expect(result).toHaveLength(1);
-        expect(result[0].plan_kind).toBe("capex");
+        expect(result[0]?.plan_kind).toBe("capex");
     });
 });

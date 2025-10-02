@@ -14,5 +14,8 @@
     "gen:openapi": "tsx ./scripts/build-openapi.ts",
     "type-check": "tsc --noEmit",
     "lint": "echo 'No linting configured for contracts'"
+  },
+  "devDependencies": {
+    "@types/node": "24.6.0"
   }
 }

@@ -4,7 +4,7 @@
 import { NextRequest } from "next/server";
 import { ok, badRequest, forbidden } from "../../../lib/http";
 import { requireAuth, requireCapability } from "../../../lib/auth";
-import { UiDraftCreate, UiDraftCommitRequest, UiDraftCommitResponse } from "@contracts/ui_drafts";
+import { UiDraftCreate, UiDraftCommitRequest, UiDraftCommitResponse } from "@aibos/contracts";
 import { putDraft, getDraft, deleteDraft, listDrafts } from "../../../services/assets/uiDraft";
 import { bulkPostAssets } from "../../../services/assets/bulkPost";
 

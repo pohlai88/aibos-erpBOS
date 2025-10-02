@@ -3,8 +3,8 @@
 
 import { pool } from "../../lib/db";
 import { ulid } from "ulid";
-import { postJournal } from "../../gl/journals";
-import { ImpairmentCreate } from "@contracts/impairments";
+import { postJournal } from "@/services/gl/journals";
+import { ImpairmentCreate } from "@aibos/contracts";
 
 export interface ImpairmentResult {
     id: string;
@@ -72,16 +72,16 @@ export async function postImpairmentJE(
         memo: journalMemo,
         lines: [
             {
-                account_code: postingMap.impairmentExpenseAccount,
+                accountId: postingMap.impairmentExpenseAccount,
                 debit: amount,
                 credit: 0,
-                currency: postingMap.currency,
+                description: `Impairment expense - ${planKind} plan ${planId}`,
             },
             {
-                account_code: postingMap.accumAccount,
+                accountId: postingMap.accumAccount,
                 debit: 0,
                 credit: amount,
-                currency: postingMap.currency,
+                description: `Accumulated impairment - ${planKind} plan ${planId}`,
             },
         ],
         tags: {
@@ -92,7 +92,7 @@ export async function postImpairmentJE(
     };
 
     const result = await postJournal(companyId, journal);
-    return result.journal_id;
+    return result.journalId;
 }
 
 /**

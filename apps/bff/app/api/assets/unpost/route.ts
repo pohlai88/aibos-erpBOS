@@ -4,7 +4,7 @@
 import { NextRequest } from "next/server";
 import { ok, badRequest, forbidden } from "../../../lib/http";
 import { requireAuth, requireCapability } from "../../../lib/auth";
-import { UnpostRequest, UnpostResponse } from "@contracts/impairments";
+import { UnpostRequest, UnpostResponse } from "@aibos/contracts";
 import { unpostAssets, validateUnpostSafety } from "../../../services/assets/unpost";
 
 export async function POST(req: NextRequest) {

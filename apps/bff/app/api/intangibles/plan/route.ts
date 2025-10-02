@@ -3,7 +3,7 @@
 
 import { NextRequest } from "next/server";
 import { ok, badRequest, forbidden } from "../../../lib/http";
-import { IntangiblePlanUpsert } from "@contracts/intangibles";
+import { IntangiblePlanUpsert } from "@aibos/contracts";
 import { requireAuth, requireCapability } from "../../../lib/auth";
 import { upsertIntangiblePlan } from "../../../services/intangibles/plan";
 

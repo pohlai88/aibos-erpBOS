@@ -2,10 +2,10 @@
 // Handles CSV import for Intangible plans with flexible column mapping
 
 import { NextRequest } from "next/server";
-import { ok, badRequest, forbidden } from "../../../lib/http";
-import { requireAuth, requireCapability } from "../../../lib/auth";
-import { importIntangiblesCsv } from "../../../services/intangibles/importCsv";
-import { CsvImportPayload } from "@contracts/assets_import";
+import { ok, badRequest, forbidden } from "@/lib/http";
+import { requireAuth, requireCapability } from "@/lib/auth";
+import { importIntangiblesCsv } from "@/services/intangibles/importCsv";
+import { CsvImportPayload } from "@aibos/contracts";
 
 export async function POST(req: NextRequest) {
     const auth = await requireAuth(req);

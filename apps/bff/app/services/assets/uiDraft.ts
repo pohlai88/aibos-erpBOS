@@ -3,7 +3,7 @@
 
 import { pool } from "../../lib/db";
 import { ulid } from "ulid";
-import { UiDraftCreate, UiDraftResponse } from "@contracts/ui_drafts";
+import { UiDraftCreate, UiDraftResponse } from "@aibos/contracts";
 
 /**
  * Stores a UI draft with TTL

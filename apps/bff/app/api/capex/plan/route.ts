@@ -3,7 +3,7 @@
 
 import { NextRequest } from "next/server";
 import { ok, badRequest, forbidden } from "../../../lib/http";
-import { CapexPlanUpsert } from "@contracts/capex";
+import { CapexPlanUpsert } from "@aibos/contracts";
 import { requireAuth, requireCapability } from "../../../lib/auth";
 import { upsertPlan } from "../../../services/capex/plan";
 

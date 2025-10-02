@@ -4,7 +4,7 @@
 import { NextRequest } from "next/server";
 import { ok, badRequest, forbidden } from "../../../lib/http";
 import { requireAuth, requireCapability } from "../../../lib/auth";
-import { ImpairmentCreate, ImpairmentListResponse } from "@contracts/impairments";
+import { ImpairmentCreate, ImpairmentListResponse } from "@aibos/contracts";
 import { createImpairment, listImpairments } from "../../../services/assets/impairments";
 
 export async function POST(req: NextRequest) {

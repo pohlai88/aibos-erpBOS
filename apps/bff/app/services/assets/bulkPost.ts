@@ -4,7 +4,7 @@
 import { postDepreciation } from "../capex/post";
 import { postAmortization } from "../intangibles/post";
 import { pool } from "../../lib/db";
-import { BulkPostResult } from "@contracts/assets_import";
+import { BulkPostResult } from "@aibos/contracts";
 
 export async function bulkPostAssets(
     companyId: string,
