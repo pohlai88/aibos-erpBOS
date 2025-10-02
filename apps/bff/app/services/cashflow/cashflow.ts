@@ -649,7 +649,7 @@ export async function runConsolidatedCashFlow(
         INSERT INTO cf_run (id, company_id, scope, year, month, start_date, mode, present_ccy, scenario, created_by)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     `, [
-        runId, companyId, scope, 
+        runId, companyId, scope,
         'year' in data ? data.year : new Date(data.start_date).getFullYear(),
         'month' in data ? data.month : null,
         'start_date' in data ? data.start_date : null,
@@ -659,7 +659,7 @@ export async function runConsolidatedCashFlow(
 
     // Process each entity
     for (const entity of entityRows) {
-        const entityLines = scope === 'INDIRECT' 
+        const entityLines = scope === 'INDIRECT'
             ? await buildEntityIndirectCashFlowLines(entity.entity_code, data as CfRunIndirectReqType, runId)
             : await buildEntityDirect13WeekCashFlowLines(entity.entity_code, data as CfRunDirectReqType, runId);
 
@@ -723,7 +723,7 @@ async function buildEntityIndirectCashFlowLines(
 
         if (Math.abs(delta) > 0.01) {
             const adjustedAmount = map.sign === '+' ? delta : -delta;
-            
+
             lines.push({
                 id: ulid(),
                 runId,
@@ -750,7 +750,7 @@ async function buildEntityDirect13WeekCashFlowLines(
     for (let week = 0; week < data.weeks; week++) {
         const weekDate = new Date(startDate);
         weekDate.setDate(startDate.getDate() + (week * 7));
-        
+
         const year = weekDate.getFullYear();
         const isoWeek = getISOWeek(weekDate);
         const period = `${year}-W${isoWeek.toString().padStart(2, '0')}`;
@@ -787,7 +787,7 @@ async function buildEntityDirect13WeekCashFlowLines(
 
 async function getEntityGlBalances(entityCode: string, year: number, month: number): Promise<any[]> {
     const periodEnd = `${year}-${month.toString().padStart(2, '0')}-${new Date(year, month, 0).getDate()}`;
-    
+
     const { rows } = await pool.query(`
         SELECT a.code, a.name, a.type, 
                COALESCE(SUM(CASE WHEN jl.dc = 'D' THEN jl.amount ELSE -jl.amount END), 0) as balance
@@ -883,7 +883,7 @@ function aggregateConsolidatedLines(lines: CfLine[]): CfLine[] {
 
     for (const line of lines) {
         const key = `${line.label}|${line.period}`;
-        
+
         if (aggregated.has(key)) {
             const existing = aggregated.get(key)!;
             existing.amount += line.amount;
