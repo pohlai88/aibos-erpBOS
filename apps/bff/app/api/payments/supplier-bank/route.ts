@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { SupplierBankUpsert, PaymentPrefUpsert } from "@aibos/contracts";
-import { 
-    upsertSupplierBank, 
+import {
+    upsertSupplierBank,
     getSupplierBanks,
     upsertPaymentPref
 } from "@/services/payments/payments";
@@ -12,9 +12,9 @@ export async function GET(req: NextRequest) {
     try {
         const auth = await requireAuth(req);
         if (auth instanceof Response) return auth;
-        
+
         const banks = await getSupplierBanks(auth.company_id);
-        
+
         return Response.json({ banks }, {
             status: 200,
             headers: { 'Access-Control-Allow-Origin': '*' }
@@ -29,12 +29,12 @@ export async function POST(req: NextRequest) {
     try {
         const auth = await requireAuth(req);
         if (auth instanceof Response) return auth;
-        
+
         const json = await req.json();
         const data = SupplierBankUpsert.parse(json);
-        
+
         const bank = await upsertSupplierBank(auth.company_id, data, auth.user_id);
-        
+
         return Response.json({ bank }, {
             status: 200,
             headers: { 'Access-Control-Allow-Origin': '*' }

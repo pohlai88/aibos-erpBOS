@@ -8,13 +8,13 @@ export async function POST(req: NextRequest) {
     try {
         const auth = await requireAuth(req);
         if (auth instanceof Response) return auth;
-        
+
         const json = await req.json();
         const data = BankFileImport.parse(json);
-        
+
         const result = await importBankFile(auth.company_id, data, auth.user_id);
-        
-        return Response.json({ 
+
+        return Response.json({
             result,
             message: result.success ? 'Bank file imported successfully' : 'Bank file import completed with errors'
         }, {

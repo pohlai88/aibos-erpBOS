@@ -7,19 +7,19 @@ export async function GET(req: NextRequest) {
     try {
         const auth = await requireAuth(req);
         if (auth instanceof Response) return auth;
-        
+
         const url = new URL(req.url);
         const status = url.searchParams.get('status');
         const year = url.searchParams.get('year') ? parseInt(url.searchParams.get('year')!) : undefined;
         const month = url.searchParams.get('month') ? parseInt(url.searchParams.get('month')!) : undefined;
-        
+
         const runs = await getPayRuns(
             auth.company_id,
             status || undefined,
             year,
             month
         );
-        
+
         return Response.json({ runs }, {
             status: 200,
             headers: { 'Access-Control-Allow-Origin': '*' }

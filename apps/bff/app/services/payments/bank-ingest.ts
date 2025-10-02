@@ -113,7 +113,7 @@ export async function importBankFile(
 
     } catch (error) {
         errors.push(`Import error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        
+
         return {
             success: false,
             transactionsImported: 0,
@@ -159,7 +159,7 @@ async function matchTransactionsToRuns(companyId: string): Promise<{
         if (lineRows.length > 0) {
             // Found match - use first one
             const line = lineRows[0];
-            
+
             await pool.query(`
                 UPDATE bank_txn_map 
                 SET matched_run_id = $1, matched_line_id = $2, status = 'matched'
@@ -208,7 +208,7 @@ function parseCamt053Xml(payload: string): any[] {
     // Simplified CAMT.053 XML parser
     // In a real implementation, you'd use a proper XML parser
     const transactions: any[] = [];
-    
+
     // Extract transaction data from XML
     // This is a simplified version - real implementation would parse XML properly
     const lines = payload.split('\n');
@@ -251,13 +251,13 @@ function parseCamt053Xml(payload: string): any[] {
 function parseCsvBankFile(payload: string): any[] {
     const transactions: any[] = [];
     const lines = payload.split('\n');
-    
+
     if (lines.length < 2) {
         return transactions;
     }
 
     const headers = lines[0].split(',').map(h => h.trim());
-    
+
     for (let i = 1; i < lines.length; i++) {
         const values = lines[i].split(',').map(v => v.trim());
         if (values.length !== headers.length) continue;

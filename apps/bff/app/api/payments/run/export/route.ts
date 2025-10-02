@@ -8,13 +8,13 @@ export async function POST(req: NextRequest) {
     try {
         const auth = await requireAuth(req);
         if (auth instanceof Response) return auth;
-        
+
         const json = await req.json();
         const data = PayRunExport.parse(json);
-        
+
         const exportData = await exportPayRun(auth.company_id, data, auth.user_id);
-        
-        return Response.json({ 
+
+        return Response.json({
             export: exportData,
             message: 'Payment run exported successfully'
         }, {

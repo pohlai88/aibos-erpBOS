@@ -321,7 +321,7 @@ export async function exportPayRun(
     createdBy: string
 ): Promise<PayExport> {
     const run = await getPayRunWithLines(companyId, data.run_id);
-    
+
     if (run.status !== 'approved') {
         throw new Error('Can only export approved runs');
     }
@@ -334,7 +334,7 @@ export async function exportPayRun(
 
     // Generate export file
     const exportData = await generateExportFile(run, fileProfile, data.format || fileProfile.format);
-    
+
     // Save export record
     const exportId = ulid();
     await pool.query(`
@@ -367,7 +367,7 @@ export async function executePayRun(
     executedBy: string
 ): Promise<PayRun> {
     const run = await getPayRunWithLines(companyId, data.run_id);
-    
+
     if (run.status !== 'exported') {
         throw new Error('Can only execute exported runs');
     }
@@ -644,7 +644,7 @@ function generateCsvExport(run: PayRun, fileProfile: any): string {
 
 async function queueRemittanceNotifications(runId: string, lines: PayLine[]): Promise<void> {
     const suppliers = new Set(lines.map(line => line.supplierId));
-    
+
     for (const supplierId of suppliers) {
         const remittanceId = ulid();
         await pool.query(`
@@ -658,7 +658,7 @@ async function postPaymentJournals(companyId: string, run: PayRun): Promise<void
     // This would integrate with the existing journal posting system
     // For now, we'll create a placeholder
     const journalId = ulid();
-    
+
     // Post payment journal entry
     await pool.query(`
         INSERT INTO journal (id, company_id, posting_date, currency, source_doctype, source_id)
