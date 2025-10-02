@@ -24,7 +24,7 @@ export const POST = withRouteErrors(async (
         const auth = await requireAuth(req);
         if (isResponse(auth)) return auth;
 
-        const capCheck = requireCapability(auth, "budgets:manage");
+        const capCheck = requireCapability(auth, "forecasts:manage");
         if (isResponse(capCheck)) return capCheck;
 
         const { id: forecastVersionId } = await params;

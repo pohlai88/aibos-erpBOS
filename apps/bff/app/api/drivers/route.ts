@@ -17,7 +17,7 @@ export const POST = withRouteErrors(async (req: Request) => {
         const auth = await requireAuth(req);
         if (isResponse(auth)) return auth;
 
-        const capCheck = requireCapability(auth, "budgets:manage");
+        const capCheck = requireCapability(auth, "forecasts:manage");
         if (isResponse(capCheck)) return capCheck;
 
         const body = await req.json();
@@ -60,7 +60,7 @@ export const GET = withRouteErrors(async (req: Request) => {
         const auth = await requireAuth(req);
         if (isResponse(auth)) return auth;
 
-        const capCheck = requireCapability(auth, "budgets:read");
+        const capCheck = requireCapability(auth, "forecasts:manage");
         if (isResponse(capCheck)) return capCheck;
 
         const profiles = await listDriverProfiles(auth.company_id);

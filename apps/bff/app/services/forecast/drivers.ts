@@ -2,7 +2,7 @@ import { pool } from "../../lib/db";
 
 // Simple ULID generator
 function generateId(): string {
-  return `dp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `dp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
 // Types for driver formulas and seasonality
@@ -15,22 +15,22 @@ export interface SeasonalityVector {
 }
 
 export interface ForecastSimulationParams {
-  priceDelta?: number | undefined; // ±% change in price
-  volumeDelta?: number | undefined; // ±% change in volume
-  fxRate?: number | undefined; // FX rate multiplier
-  seasonalityOverride?: SeasonalityVector | undefined;
+    priceDelta?: number | undefined; // ±% change in price
+    volumeDelta?: number | undefined; // ±% change in volume
+    fxRate?: number | undefined; // FX rate multiplier
+    seasonalityOverride?: SeasonalityVector | undefined;
 }
 
 // Driver Profile Service
 export async function createDriverProfile(
-  companyId: string,
-  actor: string,
-  input: {
-    name: string;
-    description?: string | undefined;
-    formulaJson: DriverFormula;
-    seasonalityJson: SeasonalityVector;
-  }
+    companyId: string,
+    actor: string,
+    input: {
+        name: string;
+        description?: string | undefined;
+        formulaJson: DriverFormula;
+        seasonalityJson: SeasonalityVector;
+    }
 ) {
     const id = generateId();
     await pool.query(
@@ -67,14 +67,14 @@ export async function listDriverProfiles(companyId: string) {
 
 // Forecast Version Service
 export async function createForecastVersion(
-  companyId: string,
-  actor: string,
-  input: {
-    code: string;
-    label: string;
-    year: number;
-    driverProfileId?: string | undefined;
-  }
+    companyId: string,
+    actor: string,
+    input: {
+        code: string;
+        label: string;
+        year: number;
+        driverProfileId?: string | undefined;
+    }
 ) {
     const id = generateId();
     await pool.query(
@@ -110,6 +110,8 @@ export async function generateForecastFromBudget(
   driverProfileId: string,
   simulationParams?: ForecastSimulationParams
 ) {
+  const startTime = Date.now();
+  
   // Get driver profile
   const profile = await getDriverProfile(companyId, driverProfileId);
   if (!profile) {
@@ -196,9 +198,25 @@ export async function generateForecastFromBudget(
     }
   }
 
+  const duration = Date.now() - startTime;
+  
+  // Observability logging
+  console.log(JSON.stringify({
+    event: "forecast_generated",
+    company_id: companyId,
+    forecast_version_id: forecastVersionId,
+    driver_profile_id: driverProfileId,
+    source_budget_version_id: sourceBudgetVersionId,
+    lines_processed: forecastLines.length,
+    duration_ms: duration,
+    simulation_params: simulationParams || null,
+    timestamp: new Date().toISOString()
+  }));
+
   return {
     linesGenerated: forecastLines.length,
     versionId: forecastVersionId,
+    durationMs: duration,
   };
 }
 
@@ -242,6 +260,8 @@ export async function simulateForecast(
   driverProfileId: string,
   simulationParams: ForecastSimulationParams
 ) {
+  const startTime = Date.now();
+  
   const profile = await getDriverProfile(companyId, driverProfileId);
   if (!profile) {
     throw new Error("Driver profile not found");
@@ -300,9 +320,24 @@ export async function simulateForecast(
     }
   }
 
+  const duration = Date.now() - startTime;
+  
+  // Observability logging
+  console.log(JSON.stringify({
+    event: "forecast_simulated",
+    company_id: companyId,
+    driver_profile_id: driverProfileId,
+    source_budget_version_id: sourceBudgetVersionId,
+    lines_processed: simulationResults.length,
+    duration_ms: duration,
+    simulation_params: simulationParams,
+    timestamp: new Date().toISOString()
+  }));
+
   return {
     simulationResults,
     parameters: simulationParams,
     linesGenerated: simulationResults.length,
+    durationMs: duration,
   };
 }
