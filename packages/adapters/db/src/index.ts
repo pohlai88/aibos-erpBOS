@@ -29,74 +29,85 @@ export class DatabaseAdapter implements TxManager, LedgerRepo {
         }
     }
 
-  async existsByKey(key: string, tx?: Tx): Promise<boolean> {
-    const db = tx || this.db;
-    const result = await db
-      .select()
-      .from(schema.journal)
-      .where(eq(schema.journal.idempotencyKey, key))
-      .limit(1);
-    
-    return result.length > 0;
-  }
+    async existsByKey(key: string, tx?: Tx): Promise<boolean> {
+        const db = (tx as any) || this.db;
+        const result = await db
+            .select()
+            .from(schema.journal)
+            .where(eq(schema.journal.idempotencyKey, key))
+            .limit(1);
+
+        return result.length > 0;
+    }
+
+    async getIdByKey(key: string, tx?: Tx): Promise<string | null> {
+        const db = (tx as any) || this.db;
+        const result = await db
+            .select({ id: schema.journal.id })
+            .from(schema.journal)
+            .where(eq(schema.journal.idempotencyKey, key))
+            .limit(1);
+
+        return result.length > 0 ? result[0].id : null;
+    }
 
     async insertJournal(
         journal: Omit<RepoJournal, "id">,
         tx?: Tx
     ): Promise<{ id: string; lines: RepoJournalLine[] }> {
-        const db = tx || this.db;
+        const db = (tx as any) || this.db;
 
         // Insert journal
         const [insertedJournal] = await db
-            .insert(schema.journals)
+            .insert(schema.journal)
             .values({
-                company_id: journal.company_id,
-                posting_date: new Date(journal.posting_date),
+                companyId: journal.company_id,
+                postingDate: new Date(journal.posting_date),
                 currency: journal.currency,
-                source_doctype: journal.source_doctype,
-                source_id: journal.source_id,
-                idempotency_key: journal.idempotency_key,
+                sourceDoctype: journal.source_doctype,
+                sourceId: journal.source_id,
+                idempotencyKey: journal.idempotency_key,
             })
             .returning();
 
         // Insert journal lines
         const insertedLines = await db
-            .insert(schema.journalLines)
+            .insert(schema.journalLine)
             .values(
-                journal.lines.map(line => ({
-                    journal_id: insertedJournal.id,
-                    account_code: line.account_code,
+                journal.lines.map((line: RepoJournalLine) => ({
+                    journalId: insertedJournal.id,
+                    accountCode: line.account_code,
                     dc: line.dc,
-                    amount: line.amount,
+                    amount: line.amount.amount,
                     currency: line.currency,
-                    party_type: line.party_type,
-                    party_id: line.party_id,
+                    partyType: line.party_type,
+                    partyId: line.party_id,
                 }))
             )
             .returning();
 
         return {
             id: insertedJournal.id,
-            lines: insertedLines.map(line => ({
+            lines: insertedLines.map((line: any) => ({
                 id: line.id,
-                account_code: line.account_code,
+                account_code: line.accountCode,
                 dc: line.dc as "D" | "C",
-                amount: line.amount as Money,
+                amount: { amount: line.amount, currency: line.currency } as Money,
                 currency: line.currency,
-                party_type: line.party_type as "Customer" | "Supplier" | undefined,
-                party_id: line.party_id || undefined,
+                party_type: line.partyType as "Customer" | "Supplier" | undefined,
+                party_id: line.partyId || undefined,
             })),
         };
     }
 
     async enqueueOutbox(event: unknown, tx?: Tx): Promise<void> {
-        const db = tx || this.db;
+        const db = (tx as any) || this.db;
 
         await db.insert(schema.outbox).values({
-            event_type: typeof event === "object" && event !== null && "type" in event
+            topic: typeof event === "object" && event !== null && "type" in event
                 ? String(event.type)
                 : "unknown",
-            event_data: event as Record<string, unknown>,
+            payload: JSON.stringify(event),
         });
     }
 

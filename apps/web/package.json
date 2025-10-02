@@ -13,7 +13,9 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev -p 3001",
-    "start": "next start -p 3001"
+    "start": "next start -p 3001",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --ext .ts,.tsx"
   },
   "turbo": {
     "pipeline": {

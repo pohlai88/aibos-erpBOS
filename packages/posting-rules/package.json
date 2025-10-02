@@ -7,7 +7,9 @@
     },
     "scripts": {
         "build": "echo 'No build needed - TypeScript files exported directly'",
-        "dev": "echo 'Posting rules - no dev server needed'"
+        "dev": "echo 'Posting rules - no dev server needed'",
+        "type-check": "tsc --noEmit",
+        "lint": "echo 'No linting configured for posting-rules'"
     },
     "dependencies": {
         "json5": "^2.2.3"

@@ -11,6 +11,8 @@
   "scripts": {
     "build": "pnpm gen:openapi",
     "check": "pnpm gen:openapi && git diff --exit-code openapi/openapi.json || (echo 'Commit OpenAPI changes' && exit 1)",
-    "gen:openapi": "tsx ./scripts/build-openapi.ts"
+    "gen:openapi": "tsx ./scripts/build-openapi.ts",
+    "type-check": "tsc --noEmit",
+    "lint": "echo 'No linting configured for contracts'"
   }
 }

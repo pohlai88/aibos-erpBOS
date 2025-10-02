@@ -207,10 +207,13 @@ export const GET = withRouteErrors(async (req: Request) => {
             const acct = r.account_code as string;
             const k = ((r as any)[axisKey] ?? null) as (string | null);
             if (!byAccount[acct]) byAccount[acct] = {};
-            const cell = byAccount[acct][k ?? pivotNullLabel] ?? { budget: 0, actual: 0 };
-            cell.budget += r.budget ?? 0;
-            cell.actual += r.actual ?? 0;
-            byAccount[acct][k ?? pivotNullLabel] = cell;
+            const accountData = byAccount[acct];
+            if (accountData) {
+                const cell = accountData[k ?? pivotNullLabel] ?? { budget: 0, actual: 0 };
+                cell.budget += r.budget ?? 0;
+                cell.actual += r.actual ?? 0;
+                accountData[k ?? pivotNullLabel] = cell;
+            }
         }
 
         // build matrix rows

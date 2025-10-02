@@ -81,6 +81,7 @@
     "syncpack:fix": "syncpack fix-mismatches",
     "syncpack:list": "syncpack list-mismatches",
     "type-check": "turbo run type-check",
+    "link-check": "pnpm --filter @aibos/contracts check",
     "verify": "pnpm contracts:gen && pnpm rules:build",
     "worker": "pnpm --filter worker dev"
   }

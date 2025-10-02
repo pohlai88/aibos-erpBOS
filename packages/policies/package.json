@@ -4,5 +4,9 @@
     "type": "module",
     "exports": {
         ".": "./src/index.ts"
+    },
+    "scripts": {
+        "type-check": "tsc --noEmit",
+        "lint": "echo 'No linting configured for policies'"
     }
 }

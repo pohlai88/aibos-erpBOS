@@ -3,7 +3,9 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "tsx src/worker.ts"
+        "dev": "tsx src/worker.ts",
+        "type-check": "tsc --noEmit",
+        "lint": "echo 'No linting configured for worker'"
     },
     "dependencies": {
         "dotenv": "^16.4.5",

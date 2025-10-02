@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "echo 'Services - no dev server needed'"
+    "dev": "echo 'Services - no dev server needed'",
+    "type-check": "tsc --noEmit",
+    "lint": "echo 'No linting configured for services'"
   },
   "dependencies": {
     "@aibos/ports": "workspace:*",

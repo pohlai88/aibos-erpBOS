@@ -1,0 +1,24 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "module": "esnext",
+    "target": "ES2022",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@aibos/contracts/*": ["../contracts/*"],
+      "@aibos/api-client/*": ["../api-client/*"],
+      "@aibos/services/*": ["../services/*"],
+      "@aibos/posting-rules": ["../posting-rules/src/index.ts"],
+      "@aibos/policies": ["../policies/src/index.ts"],
+      "@aibos/ports": ["../ports/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*", "../ports/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

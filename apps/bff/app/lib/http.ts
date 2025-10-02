@@ -45,6 +45,17 @@ export function unprocessable(message: string, details?: any) {
     });
 }
 
+export function unauthorized(message: string) {
+    return Response.json({ error: message }, {
+        status: 401,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+        }
+    });
+}
+
 export function forbidden(message: string) {
     return Response.json({ error: message }, {
         status: 403,

@@ -27,7 +27,10 @@ module.exports = [
           { from: ["apps/bff"], allow: ["packages/services", "packages/contracts"] },
           { from: ["packages/services"], allow: ["packages/contracts"] }
         ]
-      }]
+      }],
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/triple-slash-reference": "warn"
     },
   },
   {

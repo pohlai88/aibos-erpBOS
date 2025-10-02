@@ -3,6 +3,7 @@ import { getDisclosure } from "@aibos/policies";
 import { requireAuth, requireCapability } from "../../../lib/auth";
 import { withRouteErrors, isResponse } from "../../../lib/route-utils";
 import { convertToPresent } from "@aibos/policies";
+import { buildPivotMatrix } from "../../../reports/pivot-matrix";
 
 async function getPresentQuotes(base: string, present: string, onISO: string) {
     const { rows } = await pool.query(
@@ -102,6 +103,9 @@ export const GET = withRouteErrors(async (req: Request) => {
     const costCenterId = url.searchParams.get("cost_center_id");
     const projectId = url.searchParams.get("project_id");
     const pivot = url.searchParams.get("pivot");
+    const pivotNullLabel = url.searchParams.get("pivot_null_label") ?? "Unassigned";
+    const precision = Number.parseInt(url.searchParams.get("precision") ?? "2", 10);
+    const includeGrandTotal = url.searchParams.get("grand_total") !== "false";
 
     const tb = await loadTB(auth.company_id, currency, {
         ...(costCenterId && { cost_center_id: costCenterId }),
@@ -161,26 +165,53 @@ export const GET = withRouteErrors(async (req: Request) => {
     }));
     const total = Number(convertedValues["Net Profit"] ?? 0).toFixed(2);
 
-    // Handle pivot response (M14)
-    let pivotData = null;
-    if (pivot === "cost_center") {
-        const pivotTotals: Record<string, number> = {};
-        for (const row of tb) {
-            if (row.cost_center_id) {
-                const key = row.cost_center_id;
-                pivotTotals[key] = (pivotTotals[key] || 0) + (row.debit - row.credit);
+    // Handle matrix pivot response (M14.3)
+    if (pivot) {
+        // Get account names for matrix rows
+        const accountNames = await pool.query(
+            `SELECT code, name FROM account WHERE company_id = $1`,
+            [auth.company_id]
+        );
+        const accountNameMap = new Map(
+            accountNames.rows.map(r => [r.code, r.name])
+        );
+
+        // Adapt TB data to pivot format
+        const lines = tb.map(r => ({
+            account_code: r.account_code,
+            account_name: accountNameMap.get(r.account_code) || r.account_code,
+            cost_center: r.cost_center_id,
+            project: r.project_id,
+            amount: Number(r.debit - r.credit) || 0,
+        }));
+
+        const matrix = buildPivotMatrix(
+            lines,
+            (l) => `${l.account_code} ${l.account_name}`,
+            {
+                pivotKey: pivot as "cost_center" | "project",
+                nullLabel: pivotNullLabel,
+                precision: Number.isFinite(precision) ? precision : 2,
+                grandTotal: includeGrandTotal,
+                valueKey: "amount"
             }
-        }
-        pivotData = { by_cost_center: pivotTotals };
-    } else if (pivot === "project") {
-        const pivotTotals: Record<string, number> = {};
-        for (const row of tb) {
-            if (row.project_id) {
-                const key = row.project_id;
-                pivotTotals[key] = (pivotTotals[key] || 0) + (row.debit - row.credit);
+        );
+
+        return Response.json({
+            meta: {
+                pivot,
+                pivot_null_label: pivotNullLabel,
+                precision: Number.isFinite(precision) ? precision : 2,
+                grand_total: includeGrandTotal
+            },
+            ...matrix,
+        }, {
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type',
             }
-        }
-        pivotData = { by_project: pivotTotals };
+        });
     }
 
     const response: any = {
@@ -192,11 +223,6 @@ export const GET = withRouteErrors(async (req: Request) => {
         rows,
         total
     };
-
-    if (pivotData) {
-        response.pivot = pivot;
-        response.totals = pivotData;
-    }
 
     return Response.json(response, {
         headers: {

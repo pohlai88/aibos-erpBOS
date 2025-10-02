@@ -6,7 +6,9 @@
   "scripts": {
     "build": "tsc -b",
     "dev": "echo 'API client - no dev server needed'",
-    "gen:types": "openapi-typescript ../contracts/openapi/openapi.json -o src/types.gen.ts"
+    "gen:types": "openapi-typescript ../contracts/openapi/openapi.json -o src/types.gen.ts",
+    "type-check": "tsc --noEmit",
+    "lint": "echo 'No linting configured for api-client'"
   },
   "turbo": {
     "pipeline": {
