@@ -1,38 +1,7 @@
 // M14.4: Budget Versions, Approvals, & Variance Alerts - Tests
 // Basic test suite for version workflow, import targeting, and alert evaluation
 
-// Simple test runner for M14.4 functionality
-function describe(name: string, fn: () => void) { fn(); }
-function it(name: string, fn: () => void) { fn(); }
-function expect(actual: any) {
-    return {
-        toBe(expected: any) {
-            if (actual !== expected) throw new Error(`Expected ${expected}, got ${actual}`);
-        },
-        toEqual(expected: any) {
-            if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-                throw new Error(`Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
-            }
-        },
-        toBeUndefined() {
-            if (actual !== undefined) throw new Error(`Expected undefined, got ${actual}`);
-        },
-        toBeTruthy() {
-            if (!actual) throw new Error(`Expected truthy value, got ${actual}`);
-        },
-        toBeFalsy() {
-            if (actual) throw new Error(`Expected falsy value, got ${actual}`);
-        },
-        toBeNull() {
-            if (actual !== null) throw new Error(`Expected null, got ${actual}`);
-        },
-        not: {
-            toBe(expected: any) {
-                if (actual === expected) throw new Error(`Expected not ${expected}, got ${actual}`);
-            }
-        }
-    };
-}
+// Note: Test runner functions are defined in generator.test.ts to avoid duplication
 
 // Mock data for testing
 const mockBudgetVersion = {

@@ -1,43 +1,5 @@
 // M14.5 Driver-Based Rolling Forecast Tests
-// Simple test runner for forecast functionality
-
-function describe(name: string, fn: () => void) { fn(); }
-function it(name: string, fn: () => void) { fn(); }
-function expect(actual: any) {
-    return {
-        toBe(expected: any) {
-            if (actual !== expected) throw new Error(`Expected ${expected}, got ${actual}`);
-        },
-        toEqual(expected: any) {
-            if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-                throw new Error(`Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
-            }
-        },
-        toBeUndefined() {
-            if (actual !== undefined) throw new Error(`Expected undefined, got ${actual}`);
-        },
-        toBeTruthy() {
-            if (!actual) throw new Error(`Expected truthy value, got ${actual}`);
-        },
-        toBeFalsy() {
-            if (actual) throw new Error(`Expected falsy value, got ${actual}`);
-        },
-        toBeNull() {
-            if (actual !== null) throw new Error(`Expected null, got ${actual}`);
-        },
-        toBeGreaterThan(expected: any) {
-            if (actual <= expected) throw new Error(`Expected ${actual} to be greater than ${expected}`);
-        },
-        toBeLessThan(expected: any) {
-            if (actual >= expected) throw new Error(`Expected ${actual} to be less than ${expected}`);
-        },
-        not: {
-            toBe(expected: any) {
-                if (actual === expected) throw new Error(`Expected not ${expected}, got ${actual}`);
-            }
-        }
-    };
-}
+// Note: Test runner functions are defined in generator.test.ts to avoid duplication
 
 // Mock data for testing
 const mockDriverProfile = {

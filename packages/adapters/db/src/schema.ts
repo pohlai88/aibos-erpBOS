@@ -342,3 +342,18 @@ export const cashLine = pgTable("cash_line", {
     sourceHash: text("source_hash").notNull(), // idempotency for generation
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// --- Cash/Liquidity Alerts (M15.1) -------------------------------------------
+export const cashAlertRule = pgTable("cash_alert_rule", {
+    id: text("id").primaryKey(), // ULID
+    companyId: text("company_id").references(() => company.id).notNull(),
+    name: text("name").notNull(),
+    type: text("type").notNull(),            // "min_cash" | "max_burn" | "runway_months"
+    thresholdNum: numeric("threshold_num").notNull(),
+    filterCc: text("filter_cc"),
+    filterProject: text("filter_project"),
+    delivery: jsonb("delivery").notNull(),
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});

@@ -52,6 +52,11 @@ function expect(actual: any) {
                 throw new Error(`Expected null, got ${actual}`);
             }
         },
+        toBeUndefined() {
+            if (actual !== undefined) {
+                throw new Error(`Expected undefined, got ${actual}`);
+            }
+        },
         not: {
             toBe(expected: any) {
                 if (actual === expected) {
