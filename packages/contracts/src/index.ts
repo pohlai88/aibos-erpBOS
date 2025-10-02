@@ -17,3 +17,5 @@ export * from './common/result';
 export * from './reports/cash';
 export * from './http/types';
 export * from './alloc';
+export * from './tax_return';
+export * from './consol';

@@ -134,7 +134,7 @@ async function processAllocRule(
     const lines: AllocLine[] = [];
 
     // Filter trial balance based on rule criteria
-    let sourcePool = trialBalance.filter(row => {
+    const sourcePool = trialBalance.filter(row => {
         if (rule.srcAccount && !row.accountCode.includes(rule.srcAccount)) return false;
         if (rule.srcCcLike && row.costCenter && !row.costCenter.includes(rule.srcCcLike)) return false;
         if (rule.srcProject && row.project !== rule.srcProject) return false;

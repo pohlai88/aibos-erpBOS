@@ -3,6 +3,8 @@ import { relations } from "drizzle-orm";
 
 // Import allocation schemas
 export * from "./schema/alloc";
+export * from "./schema/tax_return";
+export * from "./schema/consol";
 
 export const company = pgTable("company", {
     id: text("id").primaryKey(),
@@ -22,6 +24,8 @@ export const account = pgTable("account", {
     // Dimension policies (M14)
     requireCostCenter: text("require_cost_center").notNull().default("false"),
     requireProject: text("require_project").notNull().default("false"),
+    // Account class for consolidation policy (M21.1)
+    class: text("class"),                     // ASSET/LIAB/EQUITY/REVENUE/EXPENSE
 });
 
 export const accountingPeriod = pgTable("accounting_period", {
@@ -31,9 +35,7 @@ export const accountingPeriod = pgTable("accounting_period", {
     startDate: timestamp("start_date", { withTimezone: true }).notNull(),
     endDate: timestamp("end_date", { withTimezone: true }).notNull(),
     status: text("status").notNull(),
-}, (t) => ({
-    uniq: primaryKey({ columns: [t.id] })
-}));
+});
 
 export const journal = pgTable("journal", {
     id: text("id").primaryKey(),

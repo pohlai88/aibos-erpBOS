@@ -43,6 +43,13 @@
       "when": 1759324134685,
       "tag": "0005_orange_sunset_bain",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1759405242748,
+      "tag": "0006_aspiring_prodigy",
+      "breakpoints": true
     }
   ]
 }

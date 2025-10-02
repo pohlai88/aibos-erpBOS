@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS alloc_driver_value (
   value       NUMERIC NOT NULL,
   updated_at  timestamptz NOT NULL DEFAULT now(),
   updated_by  TEXT NOT NULL,
-  PRIMARY KEY (company_id, driver_code, year, month, COALESCE(cost_center,''), COALESCE(project,''))
+  PRIMARY KEY (company_id, driver_code, year, month, cost_center, project)
 );
 
 COMMIT;

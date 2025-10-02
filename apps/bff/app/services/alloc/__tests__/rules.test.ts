@@ -12,7 +12,7 @@ describe("Allocation Rules Service", () => {
 
     it("should create a PERCENT allocation rule with targets", async () => {
         const ruleData = {
-            code: "TEST-PERCENT",
+            code: `TEST-PERCENT-${Date.now()}`,
             name: "Test Percent Rule",
             active: true,
             method: "PERCENT" as const,
@@ -35,7 +35,7 @@ describe("Allocation Rules Service", () => {
 
     it("should create a DRIVER_SHARE allocation rule", async () => {
         const ruleData = {
-            code: "TEST-DRIVER",
+            code: `TEST-DRIVER-${Date.now()}`,
             name: "Test Driver Rule",
             active: true,
             method: "DRIVER_SHARE" as const,
@@ -48,7 +48,7 @@ describe("Allocation Rules Service", () => {
         expect(result.id).toBeDefined();
 
         const rules = await getActiveAllocRules(companyId, 2025, 11);
-        const rule = rules.find(r => r.code === "TEST-DRIVER");
+        const rule = rules.find(r => r.code === ruleData.code);
         expect(rule).toBeDefined();
         expect(rule?.method).toBe("DRIVER_SHARE");
         expect(rule?.driverCode).toBe("HEADCOUNT");

@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db";
 import { ulid } from "ulid";
-import { AllocRuleUpsertType, AllocDriverUpsertType } from "@aibos/contracts";
+import { AllocRuleUpsertType, AllocDriverUpsertType, AllocRuleUpsert, AllocDriverUpsert } from "@aibos/contracts";
 
 export interface AllocRule {
     id: string;
@@ -44,7 +44,10 @@ export async function upsertAllocRule(
     actor: string,
     input: AllocRuleUpsertType
 ): Promise<{ id: string }> {
-    const ruleId = input.id || ulid();
+    // Validate input with Zod
+    const validatedInput = AllocRuleUpsert.parse(input);
+
+    const ruleId = validatedInput.id || ulid();
 
     await pool.query(`
     INSERT INTO alloc_rule (
@@ -67,18 +70,18 @@ export async function upsertAllocRule(
       updated_at = now(),
       updated_by = EXCLUDED.updated_by
   `, [
-        ruleId, companyId, input.code, input.name, input.active, input.method,
-        input.driver_code, input.rate_per_unit, input.src_account, input.src_cc_like,
-        input.src_project, input.eff_from, input.eff_to, input.order_no, actor
+        ruleId, companyId, validatedInput.code, validatedInput.name, validatedInput.active, validatedInput.method,
+        validatedInput.driver_code, validatedInput.rate_per_unit, validatedInput.src_account, validatedInput.src_cc_like,
+        validatedInput.src_project, validatedInput.eff_from, validatedInput.eff_to, validatedInput.order_no, actor
     ]);
 
     // Handle targets for PERCENT method
-    if (input.method === 'PERCENT' && input.targets) {
+    if (validatedInput.method === 'PERCENT' && validatedInput.targets) {
         // Delete existing targets
         await pool.query('DELETE FROM alloc_rule_target WHERE rule_id = $1', [ruleId]);
 
         // Insert new targets
-        for (const target of input.targets) {
+        for (const target of validatedInput.targets) {
             await pool.query(`
         INSERT INTO alloc_rule_target (rule_id, target_cc, percent)
         VALUES ($1, $2, $3)
@@ -140,20 +143,23 @@ export async function upsertAllocDriverValues(
     actor: string,
     input: AllocDriverUpsertType
 ): Promise<{ rowsInserted: number }> {
+    // Validate input with Zod
+    const validatedInput = AllocDriverUpsert.parse(input);
+
     let rowsInserted = 0;
 
-    for (const row of input.rows) {
+    for (const row of validatedInput.rows) {
         await pool.query(`
       INSERT INTO alloc_driver_value (
         company_id, driver_code, year, month, cost_center, project, value, updated_by
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      ON CONFLICT (company_id, driver_code, year, month, COALESCE(cost_center,''), COALESCE(project,''))
+      ON CONFLICT (company_id, driver_code, year, month, cost_center, project)
       DO UPDATE SET
         value = EXCLUDED.value,
         updated_at = now(),
         updated_by = EXCLUDED.updated_by
     `, [
-            companyId, input.driver_code, input.year, input.month,
+            companyId, validatedInput.driver_code, validatedInput.year, validatedInput.month,
             row.cost_center, row.project, row.value, actor
         ]);
         rowsInserted++;

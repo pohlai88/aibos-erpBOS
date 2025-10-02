@@ -1,30 +1,30 @@
 import { pool } from "../../lib/db";
 
 export interface TrialBalanceRow {
-    account_code: string;
-    currency: string;
-    base_currency: string;
-    balance_base: number;
-    balance_src: number;
+  account_code: string;
+  currency: string;
+  base_currency: string;
+  balance_base: number;
+  balance_src: number;
 }
 
 export async function getTrialBalances(
-    companyId: string,
-    options: {
-        year: number;
-        month: number;
-        monetaryOnly?: boolean;
-        groupByCurrency?: boolean;
-        currency?: string;
-    }
+  companyId: string,
+  options: {
+    year: number;
+    month: number;
+    monetaryOnly?: boolean;
+    groupByCurrency?: boolean;
+    currency?: string;
+  }
 ): Promise<TrialBalanceRow[]> {
-    const baseCurrency = options.currency || "MYR";
+  const baseCurrency = options.currency || "MYR";
 
-    // Get month-end date
-    const monthEnd = new Date(Date.UTC(options.year, options.month, 0));
-    const monthEndStr = monthEnd.toISOString().split('T')[0];
+  // Get month-end date
+  const monthEnd = new Date(Date.UTC(options.year, options.month, 0));
+  const monthEndStr = monthEnd.toISOString().split('T')[0];
 
-    let sql = `
+  let sql = `
     SELECT
       jl.account_code,
       jl.currency,
@@ -44,20 +44,20 @@ export async function getTrialBalances(
     FROM journal_line jl
     JOIN journal j ON j.id = jl.journal_id
     WHERE j.company_id = $1
-    AND j.date <= $3
+    AND j.posting_date <= $3
   `;
 
-    if (options.monetaryOnly) {
-        // Add filter for monetary accounts (cash, AR, AP, loans, etc.)
-        sql += ` AND jl.account_code IN (
-      SELECT account_code FROM account 
+  if (options.monetaryOnly) {
+    // Add filter for monetary accounts (cash, AR, AP, loans, etc.)
+    sql += ` AND jl.account_code IN (
+      SELECT code FROM account 
       WHERE company_id = $1 
-      AND account_type IN ('asset', 'liability')
-      AND account_code LIKE '1%' OR account_code LIKE '2%'
+      AND type IN ('asset', 'liability')
+      AND (code LIKE '1%' OR code LIKE '2%')
     )`;
-    }
+  }
 
-    sql += `
+  sql += `
     GROUP BY jl.account_code, jl.currency, jl.base_currency
     HAVING ABS(SUM(CASE WHEN jl.dc = 'D' THEN 
       CASE 
@@ -73,19 +73,19 @@ export async function getTrialBalances(
     ORDER BY jl.account_code, jl.currency;
   `;
 
-    const { rows } = await pool.query(sql, [companyId, baseCurrency, monthEndStr]);
+  const { rows } = await pool.query(sql, [companyId, baseCurrency, monthEndStr]);
 
-    return rows.map(r => {
-        const debit = Number(r.debit ?? 0);
-        const credit = Number(r.credit ?? 0);
-        const balance = debit - credit;
+  return rows.map(r => {
+    const debit = Number(r.debit ?? 0);
+    const credit = Number(r.credit ?? 0);
+    const balance = debit - credit;
 
-        return {
-            account_code: r.account_code as string,
-            currency: r.currency as string,
-            base_currency: r.base_currency as string,
-            balance_base: balance,
-            balance_src: balance // For now, assume same as base - this would need currency conversion logic
-        };
-    });
+    return {
+      account_code: r.account_code as string,
+      currency: r.currency as string,
+      base_currency: r.base_currency as string,
+      balance_base: balance,
+      balance_src: balance // For now, assume same as base - this would need currency conversion logic
+    };
+  });
 }
