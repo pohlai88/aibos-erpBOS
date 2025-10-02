@@ -1,7 +1,7 @@
 // M15.2: Cash Alerts Dispatcher Tests
 // Smoke tests for email/webhook dispatch functionality
 
-import { describe, it, expect } from './test-utils';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { dispatchCashNotifications } from '../alerts.dispatcher';
 
 // Mock fetch for webhook testing
@@ -20,6 +20,17 @@ function resetMockFetch() {
 }
 
 describe("Cash Alerts Dispatcher", () => {
+    beforeEach(() => {
+        // Use fake timers for all tests to control retry delays
+        vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+        // Restore real timers after each test
+        vi.useRealTimers();
+        resetMockFetch();
+    });
+
     it("handles empty breaches gracefully", async () => {
         const result = await dispatchCashNotifications("test-company", []);
 
@@ -49,13 +60,12 @@ describe("Cash Alerts Dispatcher", () => {
 
         expect(result.dispatched).toBe(1);
         expect(result.mode).toBe("webhook");
-
-        resetMockFetch();
     });
 
     it("handles webhook failures gracefully", async () => {
-        // Mock fetch to reject
-        global.fetch = () => Promise.reject(new Error("Network error"));
+        // Mock fetch to reject with network error
+        const mockFetchReject = vi.fn().mockRejectedValue(new Error("Network error"));
+        global.fetch = mockFetchReject;
 
         const breaches = [
             {
@@ -67,18 +77,25 @@ describe("Cash Alerts Dispatcher", () => {
             }
         ];
 
-        const result = await dispatchCashNotifications(
+        // Start the dispatch operation
+        const dispatchPromise = dispatchCashNotifications(
             "test-company",
             breaches,
             "cash:CFY26-01",
             { webhook: "https://invalid-webhook.com" }
         );
 
-        // Should return dispatched count of 0 when webhook fails
+        // Advance timers to complete all retry attempts quickly
+        await vi.runAllTimersAsync();
+
+        const result = await dispatchPromise;
+
+        // Should return dispatched count of 0 when webhook fails after all retries
         expect(result.dispatched).toBe(0);
         expect(result.mode).toBe("webhook");
 
-        resetMockFetch();
+        // Verify fetch was called multiple times due to retries
+        expect(mockFetchReject).toHaveBeenCalledTimes(4); // 1 initial + 3 retries
     });
 
     it("returns noop mode when no delivery configured", async () => {
@@ -134,8 +151,6 @@ describe("Cash Alerts Dispatcher", () => {
 
         expect(result.dispatched).toBe(1);
         expect(result.mode).toBe("webhook");
-
-        resetMockFetch();
     });
 });
 

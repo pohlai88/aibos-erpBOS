@@ -33,10 +33,20 @@ function doubleDecliningBalance(amount: number, lifeM: number, residualPct: numb
     let base = amount;
 
     for (let i = 0; i < lifeM; i++) {
+        // If we've already reached the floor, no more depreciation
+        if (base <= floor) {
+            arr.push(0);
+            continue;
+        }
+
         let dep = base * rate;
+
+        // If this depreciation would take us below the floor, 
+        // adjust to exactly reach the floor
         if (base - dep < floor) {
             dep = base - floor;
         }
+
         arr.push(dep);
         base -= dep;
     }
