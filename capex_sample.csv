@@ -1,0 +1,5 @@
+asset_class,description,capex_amount,currency,present_ccy,in_service,life_m,method,cost_center,project
+IT,Laptop Fleet,120000,MYR,MYR,2025-11-01,36,SL,CC-OPS,PRJ-ALPHA
+IT,Server Infrastructure,500000,MYR,MYR,2025-11-15,60,DDB,CC-IT,PRJ-BETA
+PLANT,Manufacturing Equipment,800000,MYR,MYR,2025-11-01,120,DDB,CC-PROD,PRJ-GAMMA
+PLANT,Office Furniture,50000,MYR,MYR,2025-11-20,60,SL,CC-ADMIN,
