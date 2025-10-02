@@ -6,6 +6,7 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.3.4",
     "@types/json5": "^2.2.0",
+    "csv-parse": "^6.1.0",
     "json5": "^2.2.3",
     "next": "15.5.4",
     "openapi-typescript": "^7.9.1",
