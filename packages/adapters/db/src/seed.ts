@@ -1,8 +1,9 @@
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
+import { getDatabaseUrl } from "./db-url.js";
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL || "postgresql://aibos:aibos@localhost:5432/aibos" });
+const pool = new Pool({ connectionString: getDatabaseUrl() });
 const db = drizzle(pool, { schema });
 
 async function main() {

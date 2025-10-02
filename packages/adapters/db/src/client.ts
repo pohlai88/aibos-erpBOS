@@ -1,10 +1,10 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "./schema.js";
+import { getDatabaseUrl } from "./db-url.js";
 
 // Create a singleton database connection
-const connectionString = process.env.DATABASE_URL || "postgresql://localhost:5432/aibos";
-const pool = new Pool({ connectionString });
+const pool = new Pool({ connectionString: getDatabaseUrl() });
 export const db = drizzle(pool, { schema });
 
 // Export schema for direct access

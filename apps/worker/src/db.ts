@@ -1,15 +1,20 @@
 import { Pool } from "pg";
 
-function getDbUrl() {
-    // Prefer explicit worker var, else global, else sane default.
-    const u = process.env.WORKER_DATABASE_URL
-        || process.env.DATABASE_URL
-        || "postgres://aibos:aibos@localhost:5432/aibos";
-    // Guard common misconfigurations:
-    if (typeof u !== "string" || !u.includes("://")) {
-        throw new Error("Invalid DATABASE_URL / WORKER_DATABASE_URL");
+// Worker can use WORKER_DATABASE_URL for isolation, fallback to DATABASE_URL
+function getWorkerDbUrl(): string {
+    const workerUrl = process.env.WORKER_DATABASE_URL;
+    if (workerUrl) {
+        return workerUrl;
     }
-    return u;
+
+    // Fallback to DATABASE_URL with validation
+    const url = process.env.DATABASE_URL;
+    if (!url) {
+        throw new Error(
+            "DATABASE_URL is required. For local dev, put it in .env.local (web/bff) or .env (root)."
+        );
+    }
+    return url;
 }
 
-export const pool = new Pool({ connectionString: getDbUrl() });
+export const pool = new Pool({ connectionString: getWorkerDbUrl() });
