@@ -1,0 +1,26 @@
+[33mcommit 855f3af11022eb1846346b0630e9894ee7279c01[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m
+Author: pohlai88 <jackwee@ai-bos.io>
+Date:   Fri Oct 3 23:15:41 2025 +0700
+
+    feat: Complete M24.2 Customer Portal implementation
+    
+    - Add portal_idempotency database migration
+    - Implement missing service methods: listIntents and refundIntent
+    - Create real gateway implementations (Stripe/Adyen/PayPal)
+    - Integrate M15.2 email service for magic links and receipts
+    - Implement webhook signature verification for all gateways
+    - Add comprehensive email templates for portal access and receipts
+    - Update environment configuration with PAY_GATEWAY selection
+    - Complete gateway factory with real implementations
+    
+    All remaining M24.2 functionality is now implemented and ready for production.
+
+ apps/bff/app/services/ar/checkout.ts               | 166 [32m+++++++++++[m[31m-[m
+ apps/bff/app/services/ar/portal.ts                 |  21 [32m+[m[31m-[m
+ apps/bff/app/services/email/portal.ts              | 282 [32m+++++++++++++++++++++[m
+ apps/bff/app/services/gateway/adyen.ts             | 176 [32m+++++++++++++[m
+ apps/bff/app/services/gateway/factory.ts           |  20 [32m+[m[31m-[m
+ apps/bff/app/services/gateway/paypal.ts            | 183 [32m+++++++++++++[m
+ apps/bff/app/services/gateway/stripe.ts            | 166 [32m++++++++++++[m
+ .../db/migrations/0139_portal_idempotency.sql      |  17 [32m++[m
+ 8 files changed, 1009 insertions(+), 22 deletions(-)

@@ -29,14 +29,14 @@ export class StripeGateway implements Gateway {
                 amount: amountCents,
                 currency: params.ccy.toLowerCase(),
                 customer: params.customerRef,
-                setup_future_usage: params.saveMethod ? 'off_session' : undefined,
+                ...(params.saveMethod && { setup_future_usage: 'off_session' }),
                 metadata: {
                     customer_ref: params.customerRef,
                 },
             });
 
             return {
-                clientSecret: paymentIntent.client_secret || undefined,
+                ...(paymentIntent.client_secret && { clientSecret: paymentIntent.client_secret }),
                 extRef: paymentIntent.id,
             };
         } catch (error) {
@@ -52,11 +52,19 @@ export class StripeGateway implements Gateway {
         try {
             const paymentIntent = await this.stripe.paymentIntents.capture(params.extRef);
             
+            // Get the latest charge to calculate fees
+            const charges = await this.stripe.charges.list({
+                payment_intent: params.extRef,
+                limit: 1
+            });
+            
+            const fee = charges.data[0]?.balance_transaction ? 
+                await this.getStripeFee(charges.data[0].balance_transaction as string) : undefined;
+            
             return {
                 extRef: paymentIntent.id,
                 capturedAmount: paymentIntent.amount / 100, // Convert from cents
-                fee: paymentIntent.charges?.data[0]?.balance_transaction ? 
-                    await this.getStripeFee(paymentIntent.charges.data[0].balance_transaction as string) : undefined,
+                ...(fee !== undefined && { fee })
             };
         } catch (error) {
             console.error('Stripe capture error:', error);
@@ -69,12 +77,15 @@ export class StripeGateway implements Gateway {
         amount?: number;
     }): Promise<GatewayRefund> {
         try {
-            const refundAmount = params.amount ? Math.round(params.amount * 100) : undefined;
-            
-            const refund = await this.stripe.refunds.create({
+            const refundParams: any = {
                 payment_intent: params.extRef,
-                amount: refundAmount,
-            });
+            };
+            
+            if (params.amount) {
+                refundParams.amount = Math.round(params.amount * 100);
+            }
+            
+            const refund = await this.stripe.refunds.create(refundParams);
 
             return {
                 extRef: refund.id,
@@ -157,7 +168,7 @@ export class StripeGateway implements Gateway {
     private async getStripeFee(balanceTransactionId: string): Promise<number> {
         try {
             const balanceTransaction = await this.stripe.balanceTransactions.retrieve(balanceTransactionId);
-            return balanceTransaction.fee_details.reduce((total, fee) => total + fee.amount, 0) / 100;
+            return balanceTransaction.fee_details.reduce((total: number, fee: any) => total + fee.amount, 0) / 100;
         } catch (error) {
             console.error('Failed to get Stripe fee:', error);
             return 0;

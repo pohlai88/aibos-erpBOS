@@ -99,3 +99,8 @@ export function cors204() {
         }
     });
 }
+
+// Helper function to check if a value is a Response object
+export function isResponse(value: any): value is Response {
+    return value instanceof Response;
+}

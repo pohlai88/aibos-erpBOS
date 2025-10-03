@@ -200,7 +200,7 @@ export class ArCheckoutService {
             amount,
             ccy: currency,
             customerRef,
-            saveMethod
+            saveMethod: saveMethod || false
         });
     }
 
@@ -481,6 +481,9 @@ export class ArCheckoutService {
         }
 
         const checkoutIntent = intent[0];
+        if (!checkoutIntent) {
+            throw new Error('Checkout intent not found');
+        }
         
         if (checkoutIntent.status !== 'captured') {
             throw new Error('Only captured intents can be refunded');
@@ -499,16 +502,15 @@ export class ArCheckoutService {
         await this.dbInstance.insert(arCheckoutTxn).values({
             id: refundId,
             intentId: intentId,
-            companyId,
-            customerId: checkoutIntent.customerId,
-            type: 'refund',
+            gateway: checkoutIntent.gateway,
+            extRef: `refund_${refundId}`,
+            status: 'refunded',
             amount: refundAmountFinal.toString(),
             ccy: checkoutIntent.presentCcy,
-            gateway: checkoutIntent.gateway,
-            gatewayRef: `refund_${refundId}`,
-            status: 'refunded',
-            reason: reason || 'Customer requested refund',
-            createdBy: refundedBy,
+            payload: {
+                reason: reason || 'Customer requested refund',
+                refundedBy: refundedBy,
+            }
         });
 
         // Update intent status

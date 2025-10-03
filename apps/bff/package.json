@@ -8,6 +8,8 @@
     "@aibos/ports": "workspace:*",
     "@aibos/posting-rules": "workspace:*",
     "@aibos/services": "workspace:*",
+    "@adyen/api-library": "^2.0.0",
+    "@paypal/checkout-server-sdk": "^1.0.3",
     "@types/node": "24.6.0",
     "date-fns": "^4.1.0",
     "inngest": "^3.20.0",
@@ -15,6 +17,7 @@
     "nodemailer": "^7.0.6",
     "react": "19.1.1",
     "react-dom": "19.1.1",
+    "stripe": "^14.0.0",
     "ulid": "^3.0.1"
   },
   "devDependencies": {

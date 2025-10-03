@@ -53,7 +53,7 @@ export class ArPortalService {
             const emailResult = await emailService.sendMagicLink(
                 req.email,
                 magicLink,
-                req.customer_name,
+                undefined, // customer name not available in request
                 'AI-BOS' // TODO: Get actual company name
             );
 

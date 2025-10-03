@@ -5,10 +5,10 @@ import { z } from "zod";
 import { ArSurchargeService } from "@/services/ar/surcharge";
 
 const SurchargePolicySchema = z.object({
-    enabled: z.boolean(),
-    pct: z.number().min(0).max(1),
-    min_fee: z.number().min(0),
-    cap_fee: z.number().min(0).optional()
+  enabled: z.boolean(),
+  pct: z.number().min(0).max(1),
+  min_fee: z.number().min(0),
+  cap_fee: z.number().min(0).optional().or(z.undefined())
 });
 
 const surchargeService = new ArSurchargeService();
@@ -47,8 +47,13 @@ export async function PUT(req: NextRequest) {
 
         const result = await surchargeService.updatePolicy(
             auth.company_id,
-            auth.user_id ?? "unknown",
-            input.data
+            {
+                enabled: input.data.enabled,
+                pct: input.data.pct,
+                min_fee: input.data.min_fee,
+                ...(input.data.cap_fee !== undefined && { cap_fee: input.data.cap_fee })
+            },
+            auth.user_id ?? "unknown"
         );
         return ok(result);
     } catch (err: any) {
