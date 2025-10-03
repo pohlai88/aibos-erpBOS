@@ -3,7 +3,6 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "composite": true,
     "declaration": true,
     "emitDeclarationOnly": true,
     "declarationMap": false,
@@ -12,8 +11,7 @@
     "verbatimModuleSyntax": true,
     "strict": true,
     "skipLibCheck": true,
-    "tsBuildInfoFile": "dist/.tsbuildinfo"
+    "incremental": false
   },
-  "include": ["src/**/*.ts"],
-  "references": [{ "path": "../contracts" }]
+  "include": ["src/**/*.ts"]
 }

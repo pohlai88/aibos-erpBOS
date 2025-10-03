@@ -4,7 +4,7 @@ export default defineConfig({
   entry: ["src/index.ts"],
   format: ["esm", "cjs"],
   dts: false,                  // d.ts from tsc
-  clean: true,
+  clean: false,               // Don't clean - preserve .d.ts files from tsc
   outDir: "dist",
   splitting: false,
   treeshake: true,

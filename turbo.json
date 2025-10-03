@@ -8,7 +8,8 @@
   "globalDependencies": [
     "pnpm-lock.yaml",
     "tsconfig.base.json",
-    "packages/*/tsconfig.json"
+    "packages/*/tsconfig.json",
+    "packages/*/tsup.config.ts"
   ],
   "tasks": {
     "gen:openapi": {
@@ -37,9 +38,39 @@
       ],
       "cache": true
     },
+    "build:types": {
+      "dependsOn": [
+        "^build:types"
+      ],
+      "outputs": [
+        "dist/**/*.d.ts"
+      ],
+      "inputs": [
+        "src/**",
+        "tsconfig.json"
+      ],
+      "cache": true
+    },
+    "build:js": {
+      "dependsOn": [
+        "build:types"
+      ],
+      "outputs": [
+        "dist/**/*.js",
+        "dist/**/*.cjs",
+        "dist/**/*.map"
+      ],
+      "inputs": [
+        "src/**",
+        "tsup.config.ts",
+        "package.json"
+      ],
+      "cache": true
+    },
     "build#lib": {
       "dependsOn": [
-        "^build"
+        "build:types",
+        "build:js"
       ],
       "outputs": [
         "dist/**"

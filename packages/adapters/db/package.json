@@ -19,10 +19,12 @@
       "default": "./dist/schema.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "clean": "rimraf dist",
-    "build:types": "tsc -b",
+    "build:types": "tsc",
     "build:js": "tsup",
     "build": "pnpm run build:types && pnpm run build:js"
   },

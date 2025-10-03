@@ -67,8 +67,10 @@
   "scripts": {
     "build": "turbo run build",
     "build:types": "turbo run build:types",
+    "build:types:force": "turbo run build:types -- --force",
+    "rebuild": "pnpm clean && pnpm build",
     "changeset": "changeset",
-    "clean": "rimraf --glob packages/**/dist apps/**/.next packages/**/*.tsbuildinfo",
+    "clean": "rimraf --glob packages/**/dist apps/**/.next packages/**/*.tsbuildinfo apps/**/*.tsbuildinfo",
     "contracts:gen": "pnpm -w -F @aibos/contracts gen:openapi && pnpm -w -F @aibos/api-client gen:types",
     "db:down": "docker compose stop db",
     "db:generate": "pnpm -w drizzle-kit generate",

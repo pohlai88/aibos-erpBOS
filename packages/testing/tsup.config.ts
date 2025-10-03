@@ -5,7 +5,7 @@ export default defineConfig({
     format: ["esm", "cjs"],     // -> .mjs + .cjs
     dts: false,                 // -> tsc -b handles types
     sourcemap: true,            // -> .map
-    clean: true,
+    clean: false,               // Don't clean - preserve .d.ts files from tsc
     treeshake: true,
     target: "es2020",
     outDir: "dist",
