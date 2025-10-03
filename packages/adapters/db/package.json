@@ -23,14 +23,17 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -b",
+    "build:types": "tsc -b",
+    "build:js": "tsup",
+    "build": "pnpm run build:types && pnpm run build:js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "dev": "echo 'DB adapter - no dev server needed'",
     "migrate:generate": "drizzle-kit generate",
     "migrate:push": "drizzle-kit push",
     "seed": "tsx src/seed.ts",
-    "type-check": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx",
-    "test": "echo 'No tests configured for db-adapter'"
+    "test": "echo 'No tests configured for db-adapter'",
+    "clean": "rimraf dist"
   },
   "dependencies": {
     "@aibos/ports": "workspace:*",

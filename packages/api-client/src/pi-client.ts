@@ -1,4 +1,4 @@
-import type { paths } from "./types.gen";
+import type { paths } from "./types.gen.js";
 
 export async function createPurchaseInvoice(
     body: NonNullable<paths["/purchase-invoices"]["post"]["requestBody"]>["content"]["application/json"],

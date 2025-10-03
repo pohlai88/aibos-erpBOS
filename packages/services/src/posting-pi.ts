@@ -1,8 +1,8 @@
-import type { PurchaseInvoice } from "@aibos/contracts/http/purchase/purchase-invoice.schema";
+import type { PurchaseInvoice } from "@aibos/contracts";
 import type { LedgerRepo, TxManager } from "@aibos/ports";
-import { genId, insertJournal, type JournalLine } from "./ledger";
+import { genId, insertJournal, type JournalLine } from "./ledger.js";
 import { loadRule, get } from "@aibos/posting-rules";
-import { computeBaseAmounts } from "./fx";
+import { computeBaseAmounts } from "./fx.js";
 import { computeTax } from "@aibos/policies";
 
 function mapLines(pi: PurchaseInvoice, kind: "debits" | "credits"): JournalLine[] {

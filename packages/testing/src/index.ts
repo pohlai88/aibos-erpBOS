@@ -1,1 +1,1 @@
-export * from "./pg-mock";
+export * from "./pg-mock.js";

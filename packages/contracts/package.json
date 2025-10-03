@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "type": "module",
   "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.ts",
-      "import": "./dist/src/index.js",
-      "require": "./dist/src/index.js",
-      "default": "./dist/src/index.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
     },
     "./http/sales/sales-invoice.schema": {
       "types": "./dist/http/sales/sales-invoice.schema.d.ts",
@@ -36,12 +36,15 @@
     "openapi"
   ],
   "scripts": {
-    "build": "tsc -b",
+    "build:types": "tsc -b",
+    "build:js": "tsup",
+    "build": "pnpm run build:types && pnpm run build:js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "check": "pnpm gen:openapi && git diff --exit-code openapi/openapi.json || (echo 'Commit OpenAPI changes' && exit 1)",
     "gen:openapi": "tsx ./scripts/build-openapi.ts",
     "lint": "eslint src http scripts --ext .ts,.tsx",
-    "type-check": "tsc --noEmit",
-    "test": "echo 'No tests configured for contracts'"
+    "test": "echo 'No tests configured for contracts'",
+    "clean": "rimraf dist"
   },
   "devDependencies": {
     "@types/node": "24.6.0"

@@ -41,16 +41,13 @@
       "dependsOn": [
         "^build"
       ],
+      "outputs": [
+        "dist/**"
+      ],
       "inputs": [
         "src/**",
-        "package.json",
-        "tsconfig*.json",
-        "!**/*.test.*"
-      ],
-      "outputs": [
-        "dist/**",
-        "build/**",
-        "types/**"
+        "tsconfig.json",
+        "tsup.config.ts"
       ],
       "cache": true
     },
@@ -75,9 +72,9 @@
       ],
       "cache": true
     },
-    "type-check": {
+    "typecheck": {
       "dependsOn": [
-        "^type-check"
+        "^typecheck"
       ],
       "inputs": [
         "src/**",

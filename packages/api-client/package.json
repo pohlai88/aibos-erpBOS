@@ -2,14 +2,14 @@
   "name": "@aibos/api-client",
   "version": "1.0.0",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.js",
+      "require": "./dist/index.cjs",
       "default": "./dist/index.js"
     }
   },
@@ -17,12 +17,15 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -b",
+    "build:types": "tsc -b",
+    "build:js": "tsup",
+    "build": "pnpm run build:types && pnpm run build:js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "dev": "echo 'API client - no dev server needed'",
     "gen:types": "openapi-typescript ../contracts/openapi/openapi.json -o src/types.gen.ts",
     "lint": "eslint src --ext .ts,.tsx",
-    "type-check": "tsc --noEmit",
-    "test": "echo 'No tests configured for api-client'"
+    "test": "echo 'No tests configured for api-client'",
+    "clean": "rimraf dist"
   },
   "dependencies": {},
   "devDependencies": {

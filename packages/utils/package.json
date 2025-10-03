@@ -17,11 +17,14 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsc -b",
+        "build:types": "tsc -b",
+        "build:js": "tsup",
+        "build": "pnpm run build:types && pnpm run build:js",
+        "typecheck": "tsc -p tsconfig.json --noEmit",
         "dev": "echo 'Utils - no dev server needed'",
         "lint": "eslint src --ext .ts,.tsx",
-        "type-check": "tsc --noEmit",
-        "test": "echo 'No tests configured for utils'"
+        "test": "echo 'No tests configured for utils'",
+        "clean": "rimraf dist"
     },
     "devDependencies": {
         "@types/node": "24.6.0"

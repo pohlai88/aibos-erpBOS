@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ISODate, Currency, Money } from "../shared/primitives";
+import { ISODate, Currency, Money } from "../shared/primitives.js";
 
 export const PurchaseInvoiceLine = z.object({
     description: z.string().min(1),

@@ -2,26 +2,29 @@
   "name": "@aibos/policies",
   "version": "1.0.0",
   "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "default": "./dist/index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc -b",
+    "build:types": "tsc -b",
+    "build:js": "tsup",
+    "build": "pnpm run build:types && pnpm run build:js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "dev": "echo 'Policies - no dev server needed'",
     "lint": "eslint . --ext .ts,.tsx",
-    "type-check": "tsc --noEmit",
-    "test": "echo 'No tests configured for policies'"
+    "test": "echo 'No tests configured for policies'",
+    "clean": "rimraf dist"
   },
   "devDependencies": {
     "@types/node": "24.6.0"

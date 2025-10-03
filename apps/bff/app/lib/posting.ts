@@ -77,8 +77,8 @@ export async function postByRule(doctype: string, id: string, currency: string, 
         line.txn_currency = line.currency;
     });
 
-    const idActual = await tx.run(async (t) => {
-        const existing = await repo.getIdByKey(key, t as any);
+    const idActual = await tx.run(async (t: TxManager) => {
+        const existing = await repo.getIdByKey(key, t);
         if (existing) return existing;
         const res = await repo.insertJournal({
             company_id,

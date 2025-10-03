@@ -1,19 +1,23 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "emitDeclarationOnly": true,
     "composite": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "types": ["node"]
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "skipLibCheck": true,
+    "strict": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"],
+  "include": ["src/**/*.ts"],
   "references": [
-    { "path": "../adapters/db" },
     { "path": "../contracts" },
     { "path": "../ports" },
     { "path": "../posting-rules" },
-    { "path": "../utils" },
-    { "path": "../policies" }
+    { "path": "../policies" },
+    { "path": "../adapters/db" },
+    { "path": "../utils" }
   ]
 }

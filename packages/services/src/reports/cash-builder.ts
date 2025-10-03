@@ -1,6 +1,6 @@
 import { ok, err } from "@aibos/contracts";
 import type { CashReport, CashReportLine, CashMoney } from "@aibos/contracts";
-import { toCamel } from "../../../utils/src/casing";
+import { toCamel } from "@aibos/utils";
 
 type RawLine = { id: string; name: string; amount: number; currency: string; bucket?: string | number };
 

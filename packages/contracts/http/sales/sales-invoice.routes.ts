@@ -1,5 +1,5 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
-import { SalesInvoice } from "./sales-invoice.schema";
+import { SalesInvoice } from "./sales-invoice.schema.js";
 import { z } from "zod";
 
 export const registry = new OpenAPIRegistry();
@@ -13,7 +13,7 @@ registry.registerPath({
   method: "post",
   path: "/sales-invoices",
   summary: "Post a Sales Invoice",
-  request: { body: { content: { "application/json": { schema: SalesInvoice }}}},
+  request: { body: { content: { "application/json": { schema: SalesInvoice } } } },
   responses: {
     201: {
       description: "Journal created",

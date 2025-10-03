@@ -1,5 +1,5 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
-import { PurchaseInvoice } from "./purchase-invoice.schema";
+import { PurchaseInvoice } from "./purchase-invoice.schema.js";
 import { z } from "zod";
 
 export const registryPI = new OpenAPIRegistry();

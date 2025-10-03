@@ -26,8 +26,10 @@
     "drizzle-orm": "^0.44.5",
     "eslint": "^9.36.0",
     "eslint-plugin-boundaries": "^5.0.1",
+    "rimraf": "^6.0.1",
     "syncpack": "^13.0.4",
     "ts-node": "^10.9.2",
+    "tsup": "^8.5.0",
     "tsx": "^4.20.6",
     "turbo": "^2.5.8",
     "typescript": "5.9.2"
@@ -64,8 +66,9 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "build:types": "turbo run build:types",
     "changeset": "changeset",
-    "clean": "turbo run clean",
+    "clean": "rimraf --glob packages/**/dist apps/**/.next",
     "contracts:gen": "pnpm -w -F @aibos/contracts gen:openapi && pnpm -w -F @aibos/api-client gen:types",
     "db:down": "docker compose stop db",
     "db:generate": "pnpm -w drizzle-kit generate",
@@ -83,7 +86,7 @@
     "syncpack:check": "syncpack lint",
     "syncpack:fix": "syncpack fix-mismatches",
     "syncpack:list": "syncpack list-mismatches",
-    "type-check": "turbo run type-check",
+    "typecheck": "turbo run build:types && turbo run typecheck",
     "verify": "pnpm contracts:gen && pnpm rules:build",
     "worker": "pnpm --filter worker dev"
   }

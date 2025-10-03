@@ -32,6 +32,7 @@ export type RepoJournal = {
 export interface Tx {
     // tag interface for driver-specific transaction object
 }
+
 export interface TxManager {
     run<T>(fn: (tx: Tx) => Promise<T>): Promise<T>;
 }

@@ -1,37 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
-    "outDir": "dist",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "jsx": "preserve",
-    "noEmit": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./app/*", "./src/*"]
-    }
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "jsx": "preserve"
   },
-  "include": [
-    "next-env.d.ts",
-    ".next/types/**/*.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "app",
-    "src"
-  ],
-  "exclude": ["node_modules", "dist"],
-  "references": [
-    { "path": "../../packages/contracts" },
-    { "path": "../../packages/policies" },
-    { "path": "../../packages/services" },
-    { "path": "../../packages/posting-rules" },
-    { "path": "../../packages/ports" },
-    { "path": "../../packages/adapters/db" },
-    { "path": "../../packages/utils" }
-  ]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
 }
