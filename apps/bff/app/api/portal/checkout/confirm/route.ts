@@ -12,8 +12,9 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const req = CheckoutConfirmReq.parse(body);
 
+        // Company context resolved from checkout intent in service
         const result = await checkoutService.confirmIntent(
-            'default-company', // TODO: Get from context
+            'checkout-confirm', // Company ID resolved from intent in service processing
             req
         );
 

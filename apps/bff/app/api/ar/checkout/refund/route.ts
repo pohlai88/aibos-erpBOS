@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
         const auth = await requireAuth(request);
         if (auth instanceof Response) return auth;
 
-        const cap = requireCapability(auth, "ar:credit:policy");
+        const cap = requireCapability(auth, "ar:portal:ops");
         if (cap instanceof Response) return cap;
 
         const body = await request.json();

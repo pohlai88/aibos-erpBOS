@@ -13,6 +13,7 @@ import type {
     PortalInvoicesResType,
     PortalInvoiceType
 } from "@aibos/contracts";
+import { env } from "@/lib/env";
 import { randomBytes } from "crypto";
 
 export class ArPortalService {
@@ -43,7 +44,7 @@ export class ArPortalService {
         });
 
         // Generate magic link
-        const baseUrl = process.env.PORTAL_BASE_URL || 'https://portal.example.com';
+        const baseUrl = env.PORTAL_BASE_URL;
         const magicLink = `${baseUrl}?token=${token}`;
 
         // TODO: Send email via M15.2 dispatcher

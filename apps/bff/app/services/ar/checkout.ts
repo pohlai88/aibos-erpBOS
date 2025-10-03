@@ -17,6 +17,7 @@ import type {
 } from "@aibos/contracts";
 import { ArSurchargeService } from "./surcharge";
 import { ArCashApplicationService } from "./cash-application";
+import { gateway } from "../gateway/factory";
 
 export class ArCheckoutService {
     private surchargeService: ArSurchargeService;
@@ -66,8 +67,14 @@ export class ArCheckoutService {
         const surcharge = await this.surchargeService.calculateSurcharge(companyId, totalAmount);
         const totalWithSurcharge = totalAmount + surcharge;
 
-        // Create gateway intent (mock implementation)
-        const clientSecret = await this.createGatewayIntent(req.gateway, totalWithSurcharge, req.present_ccy);
+        // Create gateway intent using the gateway interface
+        const gatewayResult = await this.createGatewayIntent(
+            req.gateway,
+            totalWithSurcharge,
+            req.present_ccy,
+            customerId,
+            req.save_method
+        );
 
         // Create checkout intent
         const intentId = ulid();
@@ -81,7 +88,7 @@ export class ArCheckoutService {
             surcharge: surcharge.toString(),
             gateway: req.gateway,
             status: 'created',
-            clientSecret,
+            clientSecret: gatewayResult.clientSecret,
             createdBy,
         });
 
@@ -91,7 +98,7 @@ export class ArCheckoutService {
 
         return {
             intent_id: intentId,
-            client_secret: clientSecret,
+            client_secret: gatewayResult.clientSecret,
             amount: totalAmount,
             surcharge,
             total_amount: totalWithSurcharge,
@@ -179,19 +186,21 @@ export class ArCheckoutService {
     }
 
     /**
-     * Mock gateway intent creation
+     * Create gateway intent using the gateway interface
      */
     private async createGatewayIntent(
-        gateway: string,
+        gatewayType: string,
         amount: number,
-        currency: string
-    ): Promise<string> {
-        // Mock implementation - in production, integrate with actual gateways
-        const mockClientSecret = `pi_mock_${ulid()}`;
-
-        console.log(`Creating ${gateway} intent: ${amount} ${currency}`);
-
-        return mockClientSecret;
+        currency: string,
+        customerRef: string,
+        saveMethod?: boolean
+    ): Promise<{ clientSecret?: string; extRef: string }> {
+        return await gateway.createIntent({
+            amount,
+            ccy: currency,
+            customerRef,
+            saveMethod
+        });
     }
 
     /**

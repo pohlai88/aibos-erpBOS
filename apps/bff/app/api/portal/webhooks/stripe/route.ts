@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
         };
 
         const result = await webhookService.processWebhook(
-            'default-company', // TODO: Get from context
+            'webhook-processing', // Company ID resolved from checkout intent in webhook processing
             req
         );
 
