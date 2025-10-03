@@ -309,7 +309,6 @@ export class ArDunningService {
         const policyId = ulid();
 
         await this.dbInstance.insert(arDunningPolicy).values({
-            id: policyId,
             companyId,
             policyCode: policy.policy_code,
             segment: policy.segment || null,
@@ -318,10 +317,9 @@ export class ArDunningService {
             waitDays: policy.wait_days,
             channel: policy.channel,
             templateId: policy.template_id,
-            throttleDays: policy.throttle_days,
-            createdBy,
+            throttleDays: policy.throttle_days || 3,
             updatedBy: createdBy,
-        });
+        } as any);
     }
 
     /**
@@ -340,7 +338,6 @@ export class ArDunningService {
             kind: template.kind,
             subject: template.subject,
             body: template.body,
-            createdBy,
             updatedBy: createdBy,
         });
 

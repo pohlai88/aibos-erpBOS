@@ -220,7 +220,8 @@ export class ArCashApplicationService {
             matches.push({
                 invoiceId: 'invoice-1',
                 matchAmount: receipt.amount,
-                confidence: 0.95
+                confidence: 0.95,
+                reason: 'Reference match'
             });
         }
 

@@ -1,0 +1,362 @@
+import { db } from "@/lib/db";
+import { ulid } from "ulid";
+import { eq, and } from "drizzle-orm";
+import {
+    arCheckoutIntent,
+    arCheckoutTxn,
+    arSavedMethod,
+    arInvoice,
+    arReceiptEmail,
+    cfReceiptSignal
+} from "@aibos/db-adapter/schema";
+import type {
+    CheckoutIntentReqType,
+    CheckoutIntentResType,
+    CheckoutConfirmReqType,
+    CheckoutConfirmResType
+} from "@aibos/contracts";
+import { ArSurchargeService } from "./surcharge";
+import { ArCashApplicationService } from "./cash-application";
+
+export class ArCheckoutService {
+    private surchargeService: ArSurchargeService;
+    private cashAppService: ArCashApplicationService;
+
+    constructor(private dbInstance = db) {
+        this.surchargeService = new ArSurchargeService(dbInstance);
+        this.cashAppService = new ArCashApplicationService(dbInstance);
+    }
+
+    /**
+     * Create checkout intent
+     */
+    async createIntent(
+        companyId: string,
+        customerId: string,
+        req: CheckoutIntentReqType,
+        createdBy: string
+    ): Promise<CheckoutIntentResType> {
+        // Validate invoices and calculate total
+        const invoiceIds = req.invoices.map(inv => inv.invoice_id);
+        const invoices = await this.dbInstance
+            .select()
+            .from(arInvoice)
+            .where(
+                and(
+                    eq(arInvoice.companyId, companyId),
+                    eq(arInvoice.customerId, customerId)
+                )
+            );
+
+        const invoiceMap = new Map(invoices.map(inv => [inv.id, inv]));
+
+        let totalAmount = 0;
+        for (const inv of req.invoices) {
+            const invoice = invoiceMap.get(inv.invoice_id);
+            if (!invoice) {
+                throw new Error(`Invoice ${inv.invoice_id} not found`);
+            }
+            if (invoice.status !== 'OPEN') {
+                throw new Error(`Invoice ${inv.invoice_id} is not open`);
+            }
+            totalAmount += inv.amount;
+        }
+
+        // Calculate surcharge
+        const surcharge = await this.surchargeService.calculateSurcharge(companyId, totalAmount);
+        const totalWithSurcharge = totalAmount + surcharge;
+
+        // Create gateway intent (mock implementation)
+        const clientSecret = await this.createGatewayIntent(req.gateway, totalWithSurcharge, req.present_ccy);
+
+        // Create checkout intent
+        const intentId = ulid();
+        await this.dbInstance.insert(arCheckoutIntent).values({
+            id: intentId,
+            companyId,
+            customerId,
+            presentCcy: req.present_ccy,
+            amount: totalAmount.toString(),
+            invoices: JSON.stringify(req.invoices),
+            surcharge: surcharge.toString(),
+            gateway: req.gateway,
+            status: 'created',
+            clientSecret,
+            createdBy,
+        });
+
+        // Set expiration (15 minutes)
+        const expiresAt = new Date();
+        expiresAt.setMinutes(expiresAt.getMinutes() + 15);
+
+        return {
+            intent_id: intentId,
+            client_secret: clientSecret,
+            amount: totalAmount,
+            surcharge,
+            total_amount: totalWithSurcharge,
+            gateway: req.gateway,
+            expires_at: expiresAt.toISOString()
+        };
+    }
+
+    /**
+     * Confirm checkout and process payment
+     */
+    async confirmIntent(
+        companyId: string,
+        req: CheckoutConfirmReqType
+    ): Promise<CheckoutConfirmResType> {
+        // Get intent
+        const intents = await this.dbInstance
+            .select()
+            .from(arCheckoutIntent)
+            .where(eq(arCheckoutIntent.id, req.intent_id))
+            .limit(1);
+
+        if (intents.length === 0) {
+            throw new Error('Checkout intent not found');
+        }
+
+        const intent = intents[0]!;
+
+        // Process payment with gateway
+        const paymentResult = await this.processGatewayPayment(
+            intent.gateway,
+            req.gateway_payload,
+            intent.clientSecret || 'pi_mock_' + intent.id
+        );
+
+        if (!paymentResult.success) {
+            // Update intent status
+            await this.dbInstance
+                .update(arCheckoutIntent)
+                .set({ status: 'failed' })
+                .where(eq(arCheckoutIntent.id, req.intent_id));
+
+            return {
+                success: false,
+                transaction_id: '',
+                message: paymentResult.error || 'Payment failed'
+            };
+        }
+
+        // Create transaction record
+        const txnId = ulid();
+        await this.dbInstance.insert(arCheckoutTxn).values({
+            id: txnId,
+            intentId: req.intent_id,
+            gateway: intent.gateway,
+            extRef: paymentResult.transactionId,
+            status: 'captured',
+            amount: intent.amount,
+            feeAmount: paymentResult.feeAmount?.toString(),
+            ccy: intent.presentCcy,
+            payload: JSON.stringify(req.gateway_payload),
+        });
+
+        // Update intent status
+        await this.dbInstance
+            .update(arCheckoutIntent)
+            .set({ status: 'captured' })
+            .where(eq(arCheckoutIntent.id, req.intent_id));
+
+        // Process cash application
+        await this.processCashApplication(companyId, intent);
+
+        // Emit M22 receipt signal
+        await this.emitReceiptSignal(companyId, intent, txnId);
+
+        // Send receipt email
+        await this.sendReceiptEmail(companyId, intent, txnId);
+
+        return {
+            success: true,
+            transaction_id: txnId,
+            receipt_url: `${process.env.PORTAL_BASE_URL}/receipt/${txnId}`,
+            message: 'Payment processed successfully'
+        };
+    }
+
+    /**
+     * Mock gateway intent creation
+     */
+    private async createGatewayIntent(
+        gateway: string,
+        amount: number,
+        currency: string
+    ): Promise<string> {
+        // Mock implementation - in production, integrate with actual gateways
+        const mockClientSecret = `pi_mock_${ulid()}`;
+
+        console.log(`Creating ${gateway} intent: ${amount} ${currency}`);
+
+        return mockClientSecret;
+    }
+
+    /**
+     * Mock gateway payment processing
+     */
+    private async processGatewayPayment(
+        gateway: string,
+        payload: any,
+        clientSecret: string
+    ): Promise<{
+        success: boolean;
+        transactionId?: string;
+        feeAmount?: number;
+        error?: string;
+    }> {
+        // Mock implementation - in production, integrate with actual gateways
+        console.log(`Processing ${gateway} payment:`, payload);
+
+        // Simulate processing delay
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Mock success (90% success rate)
+        if (Math.random() > 0.1) {
+            return {
+                success: true,
+                transactionId: `txn_${ulid()}`,
+                feeAmount: Math.random() * 5 // Random fee
+            };
+        } else {
+            return {
+                success: false,
+                error: 'Payment declined by gateway'
+            };
+        }
+    }
+
+    /**
+     * Process cash application after successful payment
+     */
+    private async processCashApplication(
+        companyId: string,
+        intent: any
+    ) {
+        const invoices = JSON.parse(intent.invoices);
+
+        // Create remittance entry for cash application
+        const remittanceData = {
+            date: new Date().toISOString().split('T')[0]!,
+            currency: intent.presentCcy,
+            amount: parseFloat(intent.amount),
+            references: invoices.map((inv: any) => inv.invoice_id)
+        };
+
+        // Process through cash application service
+        await this.cashAppService.importRemittance(
+            companyId,
+            {
+                source: 'EMAIL',
+                filename: `portal-payment-${intent.id}`,
+                payload: JSON.stringify(remittanceData)
+            },
+            'portal-system'
+        );
+    }
+
+    /**
+     * Emit M22 receipt signal
+     */
+    private async emitReceiptSignal(
+        companyId: string,
+        intent: any,
+        txnId: string
+    ) {
+        const weekStart = new Date();
+        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+        const weekBucket = weekStart.toISOString().split('T')[0]!;
+
+        await this.dbInstance.insert(cfReceiptSignal).values({
+            id: ulid(),
+            companyId,
+            weekStart: weekBucket,
+            amount: intent.amount,
+            ccy: intent.presentCcy,
+            source: 'AUTO_MATCH',
+            refId: txnId
+        });
+    }
+
+    /**
+     * Send receipt email
+     */
+    private async sendReceiptEmail(
+        companyId: string,
+        intent: any,
+        txnId: string
+    ) {
+        const emailId = ulid();
+
+        try {
+            // TODO: Integrate with email service
+            console.log(`Sending receipt email for transaction ${txnId}`);
+
+            await this.dbInstance.insert(arReceiptEmail).values({
+                id: emailId,
+                companyId,
+                customerId: intent.customerId,
+                intentId: intent.id,
+                toAddr: `customer-${intent.customerId}@example.com`, // TODO: Get actual email
+                status: 'sent'
+            });
+        } catch (error) {
+            await this.dbInstance.insert(arReceiptEmail).values({
+                id: emailId,
+                companyId,
+                customerId: intent.customerId,
+                intentId: intent.id,
+                toAddr: `customer-${intent.customerId}@example.com`,
+                status: 'error',
+                error: error instanceof Error ? error.message : 'Unknown error'
+            });
+        }
+    }
+
+    /**
+     * Save payment method
+     */
+    async savePaymentMethod(
+        companyId: string,
+        customerId: string,
+        gateway: string,
+        tokenRef: string,
+        brand: string,
+        last4: string,
+        expMonth?: number,
+        expYear?: number,
+        isDefault: boolean = false,
+        createdBy: string = 'portal-user'
+    ) {
+        const methodId = ulid();
+
+        // If setting as default, unset other defaults
+        if (isDefault) {
+            await this.dbInstance
+                .update(arSavedMethod)
+                .set({ isDefault: false })
+                .where(
+                    and(
+                        eq(arSavedMethod.companyId, companyId),
+                        eq(arSavedMethod.customerId, customerId)
+                    )
+                );
+        }
+
+        await this.dbInstance.insert(arSavedMethod).values({
+            id: methodId,
+            companyId,
+            customerId,
+            gateway,
+            tokenRef,
+            brand,
+            last4,
+            expMonth: expMonth || null,
+            expYear: expYear || null,
+            isDefault,
+            createdBy,
+        });
+    }
+}

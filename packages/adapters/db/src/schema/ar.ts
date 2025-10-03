@@ -191,3 +191,109 @@ export const arCollectionsKpi = pgTable("ar_collections_kpi", {
     exposure: numeric("exposure"),                      // open AR + promised
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// --- AR Portal & Pay-Now (M24.2) ------------------------------------------
+
+export const arPortalSession = pgTable("ar_portal_session", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    customerId: text("customer_id").notNull(),
+    token: text("token").notNull(),                    // opaque, random
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+    meta: jsonb("meta"),
+});
+
+export const arCheckoutIntent = pgTable("ar_checkout_intent", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    customerId: text("customer_id").notNull(),
+    presentCcy: text("present_ccy").notNull(),
+    amount: numeric("amount").notNull(),                // intended total
+    invoices: jsonb("invoices").notNull(),              // [{invoice_id, amount}]
+    surcharge: numeric("surcharge").notNull().default("0"), // if applied
+    gateway: text("gateway").notNull(),                 // 'STRIPE','ADYEN','PAYPAL','BANK'
+    status: text("status").notNull(),                   // 'created','authorized','captured','failed','expired','voided','refunded'
+    clientSecret: text("client_secret"),                // gateway client secret if any
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+export const arCheckoutTxn = pgTable("ar_checkout_txn", {
+    id: text("id").primaryKey(),
+    intentId: text("intent_id").notNull().references(() => arCheckoutIntent.id, { onDelete: "cascade" }),
+    gateway: text("gateway").notNull(),
+    extRef: text("ext_ref"),                           // gateway payment id
+    status: text("status").notNull(),                  // 'authorized','captured','failed','refunded','voided'
+    amount: numeric("amount").notNull(),
+    feeAmount: numeric("fee_amount"),                  // gateway fee if provided
+    ccy: text("ccy").notNull(),
+    payload: jsonb("payload"),                        // webhook echo
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const arSavedMethod = pgTable("ar_saved_method", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    customerId: text("customer_id").notNull(),
+    gateway: text("gateway").notNull(),
+    tokenRef: text("token_ref").notNull(),             // network token / pm id (no PAN)
+    brand: text("brand"),                             // 'visa','mastercard','ach'
+    last4: text("last4"),
+    expMonth: integer("exp_month"),
+    expYear: integer("exp_year"),
+    isDefault: boolean("is_default").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+export const arSurchargePolicy = pgTable("ar_surcharge_policy", {
+    companyId: text("company_id").primaryKey(),
+    enabled: boolean("enabled").notNull().default(false),
+    pct: numeric("pct").notNull().default("0"),         // e.g., 0.015 = 1.5%
+    minFee: numeric("min_fee").notNull().default("0"),
+    capFee: numeric("cap_fee"),                       // optional cap
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull(),
+});
+
+export const arReceiptEmail = pgTable("ar_receipt_email", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    customerId: text("customer_id").notNull(),
+    intentId: text("intent_id").notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true }).notNull().defaultNow(),
+    toAddr: text("to_addr").notNull(),
+    status: text("status").notNull(),                 // 'sent','error'
+    error: text("error"),
+});
+
+export const arGatewayWebhookDlq = pgTable("ar_gateway_webhook_dlq", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    gateway: text("gateway").notNull(),
+    payload: jsonb("payload").notNull(),
+    reason: text("reason"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    retryAt: timestamp("retry_at", { withTimezone: true }),
+});
+
+// --- AR Invoice (for portal integration) ---------------------------------
+
+export const arInvoice = pgTable("ar_invoice", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    customerId: text("customer_id").notNull(),
+    invoiceNo: text("invoice_no").notNull(),
+    invoiceDate: date("invoice_date").notNull(),
+    dueDate: date("due_date").notNull(),
+    grossAmount: numeric("gross_amount").notNull(),
+    paidAmount: numeric("paid_amount").notNull().default("0"),
+    ccy: text("ccy").notNull(),
+    status: text("status").notNull(),                   // 'OPEN','PAID','CANCELLED','VOID'
+    portalLink: text("portal_link"),                    // cached in emails
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
