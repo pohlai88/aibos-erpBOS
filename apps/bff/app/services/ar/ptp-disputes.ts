@@ -466,26 +466,93 @@ export class ArPtpDisputesService {
      * Get PTP statistics for a company
      */
     async getPtpStats(companyId: string): Promise<any> {
-        // Placeholder implementation
-        return {
-            total: 0,
-            open: 0,
-            kept: 0,
-            broken: 0,
-            cancelled: 0
+        const ptps = await this.dbInstance
+            .select()
+            .from(arPtp)
+            .where(eq(arPtp.companyId, companyId));
+
+        const stats = {
+            total_open: 0,
+            total_kept: 0,
+            total_broken: 0,
+            total_cancelled: 0,
+            total_amount_open: 0,
+            total_amount_kept: 0,
+            total_amount_broken: 0,
+            total_amount_cancelled: 0
         };
+
+        for (const ptp of ptps) {
+            const amount = parseFloat(ptp.amount);
+
+            switch (ptp.status) {
+                case 'open':
+                    stats.total_open++;
+                    stats.total_amount_open += amount;
+                    break;
+                case 'kept':
+                    stats.total_kept++;
+                    stats.total_amount_kept += amount;
+                    break;
+                case 'broken':
+                    stats.total_broken++;
+                    stats.total_amount_broken += amount;
+                    break;
+                case 'cancelled':
+                    stats.total_cancelled++;
+                    stats.total_amount_cancelled += amount;
+                    break;
+            }
+        }
+
+        return stats;
     }
 
     /**
      * Get dispute statistics for a company
      */
     async getDisputeStats(companyId: string): Promise<any> {
-        // Placeholder implementation
-        return {
-            total: 0,
-            open: 0,
-            resolved: 0,
-            written_off: 0
+        const disputes = await this.dbInstance
+            .select()
+            .from(arDispute)
+            .where(eq(arDispute.companyId, companyId));
+
+        const stats = {
+            total_open: 0,
+            total_resolved: 0,
+            total_written_off: 0,
+            total_amount_open: 0,
+            total_amount_resolved: 0,
+            total_amount_written_off: 0,
+            by_reason: {
+                PRICING: 0,
+                SERVICE: 0,
+                DELIVERY: 0,
+                QUALITY: 0,
+                OTHER: 0
+            }
         };
+
+        for (const dispute of disputes) {
+            // Count by status
+            switch (dispute.status) {
+                case 'open':
+                    stats.total_open++;
+                    break;
+                case 'resolved':
+                    stats.total_resolved++;
+                    break;
+                case 'written_off':
+                    stats.total_written_off++;
+                    break;
+            }
+
+            // Count by reason code
+            if (dispute.reasonCode in stats.by_reason) {
+                stats.by_reason[dispute.reasonCode as keyof typeof stats.by_reason]++;
+            }
+        }
+
+        return stats;
     }
 }

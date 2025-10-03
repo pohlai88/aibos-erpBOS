@@ -1,4 +1,4 @@
-import { pgTable, text, integer, numeric, timestamp, date, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, numeric, timestamp, date, primaryKey, boolean, jsonb } from "drizzle-orm/pg-core";
 
 // --- AR Collections & Cash Application (M24) ------------------------------------
 
@@ -124,4 +124,70 @@ export const cfReceiptSignal = pgTable("cf_receipt_signal", {
     source: text("source").notNull(),                   // 'AUTO_MATCH','PTP','MANUAL'
     refId: text("ref_id"),                              // cash_app id / ptp id
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// --- AR Credit Management & Collections Workbench (M24.1) -------------------------
+
+export const arCreditPolicy = pgTable("ar_credit_policy", {
+    companyId: text("company_id").notNull(),
+    policyCode: text("policy_code").notNull(),          // 'DEFAULT','ENTERPRISE'
+    segment: text("segment"),                           // match customer segment
+    maxLimit: numeric("max_limit").notNull(),           // credit limit in base/present ccy
+    dsoTarget: integer("dso_target").notNull().default(45),
+    graceDays: integer("grace_days").notNull().default(5), // days beyond due before hold
+    ptpTolerance: integer("ptp_tolerance").notNull().default(2),
+    riskWeight: numeric("risk_weight").notNull().default("1.0"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull(),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.companyId, table.policyCode] })
+}));
+
+export const arCustomerCredit = pgTable("ar_customer_credit", {
+    companyId: text("company_id").notNull(),
+    customerId: text("customer_id").notNull(),
+    policyCode: text("policy_code").notNull(),
+    creditLimit: numeric("credit_limit").notNull(),     // override
+    riskScore: numeric("risk_score"),                   // external score 0..1 (higher worse)
+    onHold: boolean("on_hold").notNull().default(false),
+    holdReason: text("hold_reason"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull(),
+}, (table) => ({
+    pk: primaryKey({ columns: [table.companyId, table.customerId] })
+}));
+
+export const arCreditHoldLog = pgTable("ar_credit_hold_log", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    customerId: text("customer_id").notNull(),
+    event: text("event").notNull(),                     // 'HOLD','RELEASE'
+    reason: text("reason"),
+    snapshot: jsonb("snapshot"),                        // exposure, dso, risk when event triggered
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+export const arCollectionsNote = pgTable("ar_collections_note", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    customerId: text("customer_id").notNull(),
+    invoiceId: text("invoice_id"),
+    kind: text("kind").notNull(),                       // 'CALL','EMAIL','MEETING','NOTE'
+    body: text("body").notNull(),
+    nextActionDate: date("next_action_date"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+export const arCollectionsKpi = pgTable("ar_collections_kpi", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    asOfDate: date("as_of_date").notNull(),
+    customerId: text("customer_id"),
+    dso: numeric("dso"),
+    disputesOpen: integer("disputes_open"),
+    ptpOpen: integer("ptp_open"),
+    exposure: numeric("exposure"),                      // open AR + promised
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

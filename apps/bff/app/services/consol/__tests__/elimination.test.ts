@@ -10,9 +10,10 @@ describe("IC Elimination Engine", () => {
     const actor = "test-user";
 
     beforeEach(async () => {
-        // Clean up test data
+        // Clean up test data in correct order to respect foreign key constraints
         await pool.query('DELETE FROM ic_elim_run WHERE company_id = $1', [companyId]);
-        await pool.query('DELETE FROM ic_match_line WHERE match_id IN (SELECT id FROM ic_match WHERE company_id = $1)', [companyId]);
+        // Delete ic_match_line records that reference ic_link records for this company
+        await pool.query('DELETE FROM ic_match_line WHERE ic_link_id IN (SELECT id FROM ic_link WHERE company_id = $1)', [companyId]);
         await pool.query('DELETE FROM ic_match WHERE company_id = $1', [companyId]);
         await pool.query('DELETE FROM ic_link WHERE company_id = $1', [companyId]);
         await pool.query('DELETE FROM co_ownership WHERE company_id = $1', [companyId]);

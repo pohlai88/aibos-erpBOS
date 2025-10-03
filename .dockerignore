@@ -1,3 +1,4 @@
+**/node_modules
 node_modules
 npm-debug.log
 .git
@@ -9,3 +10,5 @@ coverage
 .dockerignore
 Dockerfile
 docker-compose.yml
+.turbo
+dist

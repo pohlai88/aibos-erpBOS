@@ -3,6 +3,7 @@ import { defineConfig } from "tsup";
 export default defineConfig({
   entry: [
     "src/index.ts",
+    "src/ar-credit.ts",
     "src/reports/cash.ts",
     "src/common/result.ts",
     "http/sales/sales-invoice.schema.ts",

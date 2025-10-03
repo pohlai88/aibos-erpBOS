@@ -32,7 +32,10 @@ export type Capability =
     | "ar:remit:import"
     | "ar:cashapp:run"
     | "ar:ptp"
-    | "ar:dispute";
+    | "ar:dispute"
+    | "ar:credit:policy"
+    | "ar:credit:customer"
+    | "ar:collect:workbench";
 
 export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
     admin: [
@@ -42,7 +45,8 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "forecasts:manage", "forecasts:approve",
         "cash:manage", "capex:manage", "fx:manage", "fx:read", "alloc:manage", "alloc:read", "tax:manage", "tax:read", "consol:manage", "consol:read",
         "pay:bank_profile", "pay:dispatch", "pay:discount:policy", "pay:discount:run", "pay:discount:offer",
-        "ar:dunning:policy", "ar:dunning:run", "ar:remit:import", "ar:cashapp:run", "ar:ptp", "ar:dispute"
+        "ar:dunning:policy", "ar:dunning:run", "ar:remit:import", "ar:cashapp:run", "ar:ptp", "ar:dispute",
+        "ar:credit:policy", "ar:credit:customer", "ar:collect:workbench"
     ],
     accountant: [
         "reports:read", "journals:post", "reversal:create", "inventory:move",
@@ -51,13 +55,15 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "forecasts:manage", "forecasts:approve",
         "cash:manage", "capex:manage", "fx:manage", "fx:read", "alloc:manage", "alloc:read", "tax:manage", "tax:read", "consol:manage", "consol:read",
         "pay:bank_profile", "pay:dispatch", "pay:discount:policy", "pay:discount:run", "pay:discount:offer",
-        "ar:dunning:policy", "ar:dunning:run", "ar:remit:import", "ar:cashapp:run", "ar:ptp", "ar:dispute"
+        "ar:dunning:policy", "ar:dunning:run", "ar:remit:import", "ar:cashapp:run", "ar:ptp", "ar:dispute",
+        "ar:credit:policy", "ar:credit:customer", "ar:collect:workbench"
     ],
     ops: [
         "reports:read", "inventory:move", "audit:read",
         "budgets:read", "forecasts:manage",
         "cash:manage", "capex:manage", "fx:manage", "fx:read", "alloc:manage", "alloc:read", "tax:manage", "tax:read", "consol:manage", "consol:read",
-        "pay:dispatch", "pay:discount:run", "pay:discount:offer"
+        "pay:dispatch", "pay:discount:run", "pay:discount:offer",
+        "ar:collect:workbench"
     ],
 };
 

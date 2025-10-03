@@ -306,9 +306,22 @@ export class ArDunningService {
         policy: DunningPolicyUpsertType,
         createdBy: string
     ): Promise<void> {
-        // Implementation would depend on the specific policy structure
-        // For now, this is a placeholder
-        console.log('Upserting dunning policy:', { companyId, policy, createdBy });
+        const policyId = ulid();
+
+        await this.dbInstance.insert(arDunningPolicy).values({
+            id: policyId,
+            companyId,
+            policyCode: policy.policy_code,
+            segment: policy.segment || null,
+            fromBucket: policy.from_bucket,
+            stepIdx: policy.step_idx,
+            waitDays: policy.wait_days,
+            channel: policy.channel,
+            templateId: policy.template_id,
+            throttleDays: policy.throttle_days,
+            createdBy,
+            updatedBy: createdBy,
+        });
     }
 
     /**
@@ -319,10 +332,18 @@ export class ArDunningService {
         template: TemplateUpsertType,
         createdBy: string
     ): Promise<string> {
-        // Implementation would depend on the specific template structure
-        // For now, this is a placeholder that returns a generated ID
         const templateId = ulid();
-        console.log('Upserting template:', { companyId, template, createdBy, templateId });
+
+        await this.dbInstance.insert(commTemplate).values({
+            id: templateId,
+            companyId,
+            kind: template.kind,
+            subject: template.subject,
+            body: template.body,
+            createdBy,
+            updatedBy: createdBy,
+        });
+
         return templateId;
     }
 
