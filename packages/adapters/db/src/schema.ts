@@ -7,6 +7,7 @@ export * from "./schema/tax_return.js";
 export * from "./schema/consol.js";
 export * from "./schema/payments.js";
 export * from "./schema/ar.js";
+export * from "./schema/rb.js";
 
 export const company = pgTable("company", {
     id: text("id").primaryKey(),
