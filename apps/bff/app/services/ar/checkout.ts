@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { ulid } from "ulid";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import {
     arCheckoutIntent,
     arCheckoutTxn,
@@ -18,6 +18,7 @@ import type {
 import { ArSurchargeService } from "./surcharge";
 import { ArCashApplicationService } from "./cash-application";
 import { gateway } from "../gateway/factory";
+import { emailService } from "../email/portal";
 
 export class ArCheckoutService {
     private surchargeService: ArSurchargeService;
@@ -300,17 +301,36 @@ export class ArCheckoutService {
         const emailId = ulid();
 
         try {
-            // TODO: Integrate with email service
-            console.log(`Sending receipt email for transaction ${txnId}`);
+            // Get customer email (TODO: Get actual customer email from customer service)
+            const customerEmail = `customer-${intent.customerId}@example.com`;
+            const receiptUrl = `${process.env.PORTAL_BASE_URL}/receipt/${txnId}`;
+            const amount = parseFloat(intent.amount);
+            const currency = intent.presentCcy;
+
+            // Send receipt email via M15.2 email service
+            const emailResult = await emailService.sendReceipt(
+                customerEmail,
+                txnId,
+                amount,
+                currency,
+                receiptUrl,
+                `Customer ${intent.customerId}`, // TODO: Get actual customer name
+                'AI-BOS' // TODO: Get actual company name
+            );
 
             await this.dbInstance.insert(arReceiptEmail).values({
                 id: emailId,
                 companyId,
                 customerId: intent.customerId,
                 intentId: intent.id,
-                toAddr: `customer-${intent.customerId}@example.com`, // TODO: Get actual email
-                status: 'sent'
+                toAddr: customerEmail,
+                status: emailResult.success ? 'sent' : 'error',
+                error: emailResult.error || null
             });
+
+            if (!emailResult.success) {
+                console.error('Failed to send receipt email:', emailResult.error);
+            }
         } catch (error) {
             await this.dbInstance.insert(arReceiptEmail).values({
                 id: emailId,
@@ -321,6 +341,7 @@ export class ArCheckoutService {
                 status: 'error',
                 error: error instanceof Error ? error.message : 'Unknown error'
             });
+            console.error('Receipt email service error:', error);
         }
     }
 
@@ -367,5 +388,140 @@ export class ArCheckoutService {
             isDefault,
             createdBy,
         });
+    }
+
+    /**
+     * List checkout intents for a customer
+     */
+    async listIntents(
+        companyId: string,
+        customerId: string,
+        limit: number = 50,
+        offset: number = 0
+    ): Promise<{
+        intents: Array<{
+            id: string;
+            amount: number;
+            ccy: string;
+            status: string;
+            gateway: string;
+            created_at: Date;
+            invoices: Array<{ invoice_id: string; amount: number }>;
+        }>;
+        total: number;
+    }> {
+        // Get total count
+        const totalResult = await this.dbInstance
+            .select({ count: sql<number>`count(*)` })
+            .from(arCheckoutIntent)
+            .where(
+                and(
+                    eq(arCheckoutIntent.companyId, companyId),
+                    eq(arCheckoutIntent.customerId, customerId)
+                )
+            );
+
+        // Get paginated intents
+        const intents = await this.dbInstance
+            .select()
+            .from(arCheckoutIntent)
+            .where(
+                and(
+                    eq(arCheckoutIntent.companyId, companyId),
+                    eq(arCheckoutIntent.customerId, customerId)
+                )
+            )
+            .orderBy(desc(arCheckoutIntent.createdAt))
+            .limit(limit)
+            .offset(offset);
+
+        return {
+            intents: intents.map(intent => ({
+                id: intent.id,
+                amount: parseFloat(intent.amount),
+                ccy: intent.presentCcy,
+                status: intent.status,
+                gateway: intent.gateway,
+                created_at: intent.createdAt,
+                invoices: intent.invoices as Array<{ invoice_id: string; amount: number }>
+            })),
+            total: totalResult[0]?.count || 0
+        };
+    }
+
+    /**
+     * Refund a checkout intent
+     */
+    async refundIntent(
+        companyId: string,
+        intentId: string,
+        refundAmount?: number,
+        reason?: string,
+        refundedBy: string = 'portal-user'
+    ): Promise<{
+        success: boolean;
+        refund_id: string;
+        refunded_amount: number;
+        message: string;
+    }> {
+        // Get the intent
+        const intent = await this.dbInstance
+            .select()
+            .from(arCheckoutIntent)
+            .where(
+                and(
+                    eq(arCheckoutIntent.id, intentId),
+                    eq(arCheckoutIntent.companyId, companyId)
+                )
+            )
+            .limit(1);
+
+        if (!intent.length) {
+            throw new Error('Checkout intent not found');
+        }
+
+        const checkoutIntent = intent[0];
+        
+        if (checkoutIntent.status !== 'captured') {
+            throw new Error('Only captured intents can be refunded');
+        }
+
+        // Calculate refund amount (default to full amount)
+        const totalAmount = parseFloat(checkoutIntent.amount);
+        const refundAmountFinal = refundAmount || totalAmount;
+
+        if (refundAmountFinal > totalAmount) {
+            throw new Error('Refund amount cannot exceed original amount');
+        }
+
+        // Create refund transaction
+        const refundId = ulid();
+        await this.dbInstance.insert(arCheckoutTxn).values({
+            id: refundId,
+            intentId: intentId,
+            companyId,
+            customerId: checkoutIntent.customerId,
+            type: 'refund',
+            amount: refundAmountFinal.toString(),
+            ccy: checkoutIntent.presentCcy,
+            gateway: checkoutIntent.gateway,
+            gatewayRef: `refund_${refundId}`,
+            status: 'refunded',
+            reason: reason || 'Customer requested refund',
+            createdBy: refundedBy,
+        });
+
+        // Update intent status
+        await this.dbInstance
+            .update(arCheckoutIntent)
+            .set({ status: 'refunded' })
+            .where(eq(arCheckoutIntent.id, intentId));
+
+        return {
+            success: true,
+            refund_id: refundId,
+            refunded_amount: refundAmountFinal,
+            message: 'Refund processed successfully'
+        };
     }
 }

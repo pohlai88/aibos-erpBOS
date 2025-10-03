@@ -15,6 +15,7 @@ import type {
 } from "@aibos/contracts";
 import { env } from "@/lib/env";
 import { randomBytes } from "crypto";
+import { emailService } from "../email/portal";
 
 export class ArPortalService {
     constructor(private dbInstance = db) { }
@@ -47,9 +48,23 @@ export class ArPortalService {
         const baseUrl = env.PORTAL_BASE_URL;
         const magicLink = `${baseUrl}?token=${token}`;
 
-        // TODO: Send email via M15.2 dispatcher
-        // For now, just log the link
-        console.log(`Magic link for ${req.email}: ${magicLink}`);
+        // Send magic link email via M15.2 email service
+        try {
+            const emailResult = await emailService.sendMagicLink(
+                req.email,
+                magicLink,
+                req.customer_name,
+                'AI-BOS' // TODO: Get actual company name
+            );
+
+            if (!emailResult.success) {
+                console.error('Failed to send magic link email:', emailResult.error);
+                // Don't fail the session creation, just log the error
+            }
+        } catch (error) {
+            console.error('Email service error:', error);
+            // Don't fail the session creation, just log the error
+        }
 
         return {
             success: true,
