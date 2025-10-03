@@ -6,6 +6,7 @@ export * from "./schema/alloc";
 export * from "./schema/tax_return";
 export * from "./schema/consol";
 export * from "./schema/payments";
+export * from "./schema/ar";
 
 export const company = pgTable("company", {
     id: text("id").primaryKey(),

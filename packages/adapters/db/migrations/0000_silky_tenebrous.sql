@@ -5,8 +5,7 @@ CREATE TABLE "account" (
 	"name" text NOT NULL,
 	"type" text NOT NULL,
 	"normal_balance" char(1) NOT NULL,
-	"parent_code" text,
-	CONSTRAINT "account_id_pk" PRIMARY KEY("id")
+	"parent_code" text
 );
 --> statement-breakpoint
 CREATE TABLE "company" (

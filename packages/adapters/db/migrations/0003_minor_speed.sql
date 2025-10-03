@@ -4,8 +4,7 @@ CREATE TABLE "accounting_period" (
 	"code" text NOT NULL,
 	"start_date" timestamp with time zone NOT NULL,
 	"end_date" timestamp with time zone NOT NULL,
-	"status" text NOT NULL,
-	CONSTRAINT "accounting_period_id_pk" PRIMARY KEY("id")
+	"status" text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "item_costs" (

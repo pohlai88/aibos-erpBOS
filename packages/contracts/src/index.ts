@@ -24,3 +24,4 @@ export * from './payments';
 export * from './payments-policy';
 export * from './payments-discount';
 export * from './bank-connect';
+export * from './ar';
