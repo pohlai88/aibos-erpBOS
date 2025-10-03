@@ -1,8 +1,8 @@
 import { Inngest } from "inngest";
-import { ArDunningService } from "@/app/services/ar/dunning";
-import { pool } from "@/lib/db";
+import { ArDunningService } from "@/services/ar/dunning";
+import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { company } from "@aibos/adapters-db/schema";
+import { company } from "@aibos/db-adapter/schema";
 
 export const inngest = new Inngest({ id: "aibos-erpBOS" });
 
@@ -32,7 +32,7 @@ export const arDunningDaily = inngest.createFunction(
         return await step.run("run-dunning-for-all-companies", async () => {
             try {
                 // Get all companies
-                const companies = await pool
+                const companies = await db
                     .select({ id: company.id })
                     .from(company);
 

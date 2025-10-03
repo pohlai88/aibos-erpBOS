@@ -3,21 +3,12 @@
   "compilerOptions": {
     "composite": true,
     "outDir": "./dist",
-    "types": ["node"],
-    "rootDir": "../../"
+    "types": ["node"]
   },
-  "include": [
-    "src",
-    "tests",
-    "drizzle",
-    "migrations",
-    "../bff/app/lib/reversal.ts",
-    "../bff/app/lib/db.ts",
-    "../../packages/adapters/db/src/repo.ts",
-    "../../packages/adapters/db/src/schema.ts",
-    "../../packages/adapters/db/src/schema/*.ts",
-    "../../packages/adapters/db/src/db-url.ts",
-    "../../packages/ports/src/index.ts"
-  ],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    { "path": "../../packages/adapters/db" },
+    { "path": "../../packages/ports" }
+  ]
 }

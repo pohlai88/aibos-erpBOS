@@ -11,8 +11,7 @@ export async function GET(req: NextRequest) {
         if (auth instanceof Response) return auth;
 
         const service = new ArDunningService();
-        // TODO: Implement getPolicies method
-        const policies = [];
+        const policies = await service.getAllDunningPolicies(auth.company_id);
 
         return Response.json({ policies }, {
             status: 200,

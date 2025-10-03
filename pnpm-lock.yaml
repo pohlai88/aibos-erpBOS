@@ -90,6 +90,9 @@ importers:
       '@aibos/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@aibos/db-adapter':
+        specifier: workspace:*
+        version: link:../../packages/adapters/db
       '@aibos/policies':
         specifier: workspace:*
         version: link:../../packages/policies
@@ -152,12 +155,24 @@ importers:
         specifier: 19.1.1
         version: 19.1.1(react@19.1.1)
     devDependencies:
+      '@types/node':
+        specifier: 24.6.0
+        version: 24.6.0
       '@types/react':
         specifier: 19.1.16
         version: 19.1.16
+      '@types/react-dom':
+        specifier: 19.1.9
+        version: 19.1.9(@types/react@19.1.16)
 
   apps/worker:
     dependencies:
+      '@aibos/db-adapter':
+        specifier: workspace:*
+        version: link:../../packages/adapters/db
+      '@aibos/services':
+        specifier: workspace:*
+        version: link:../../packages/services
       dotenv:
         specifier: ^16.4.5
         version: 16.6.1
@@ -170,8 +185,46 @@ importers:
       pg:
         specifier: ^8.16.3
         version: 8.16.3
+    devDependencies:
+      '@types/node':
+        specifier: 24.6.0
+        version: 24.6.0
 
-  packages/api-client: {}
+  packages/_probe: {}
+
+  packages/adapters/db:
+    dependencies:
+      '@aibos/ports':
+        specifier: workspace:*
+        version: link:../../ports
+      dotenv:
+        specifier: ^16.6.1
+        version: 16.6.1
+      drizzle-orm:
+        specifier: ^0.44.5
+        version: 0.44.5(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(pg@8.16.3)
+      pg:
+        specifier: ^8.16.3
+        version: 8.16.3
+    devDependencies:
+      '@types/node':
+        specifier: 24.6.0
+        version: 24.6.0
+      '@types/pg':
+        specifier: ^8.15.5
+        version: 8.15.5
+      drizzle-kit:
+        specifier: ^0.31.5
+        version: 0.31.5
+      tsx:
+        specifier: ^4.20.6
+        version: 4.20.6
+
+  packages/api-client:
+    devDependencies:
+      '@types/node':
+        specifier: 24.6.0
+        version: 24.6.0
 
   packages/contracts:
     devDependencies:
@@ -179,18 +232,33 @@ importers:
         specifier: 24.6.0
         version: 24.6.0
 
-  packages/policies: {}
+  packages/policies:
+    devDependencies:
+      '@types/node':
+        specifier: 24.6.0
+        version: 24.6.0
 
-  packages/ports: {}
+  packages/ports:
+    devDependencies:
+      '@types/node':
+        specifier: 24.6.0
+        version: 24.6.0
 
   packages/posting-rules:
     dependencies:
       json5:
         specifier: ^2.2.3
         version: 2.2.3
+    devDependencies:
+      '@types/node':
+        specifier: 24.6.0
+        version: 24.6.0
 
   packages/sdk:
     devDependencies:
+      '@types/node':
+        specifier: 24.6.0
+        version: 24.6.0
       typescript:
         specifier: 5.9.2
         version: 5.9.2
@@ -200,6 +268,9 @@ importers:
       '@aibos/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@aibos/db-adapter':
+        specifier: workspace:*
+        version: link:../adapters/db
       '@aibos/policies':
         specifier: workspace:*
         version: link:../policies
@@ -209,6 +280,21 @@ importers:
       '@aibos/posting-rules':
         specifier: workspace:*
         version: link:../posting-rules
+      '@aibos/utils':
+        specifier: workspace:*
+        version: link:../utils
+
+  packages/testing:
+    devDependencies:
+      '@types/node':
+        specifier: 24.6.0
+        version: 24.6.0
+
+  packages/utils:
+    devDependencies:
+      '@types/node':
+        specifier: 24.6.0
+        version: 24.6.0
 
 packages:
 

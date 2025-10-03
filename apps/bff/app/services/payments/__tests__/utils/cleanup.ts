@@ -26,4 +26,16 @@ export async function cleanCompany(companyId: string) {
     await pool.query(`DELETE FROM ap_invoice WHERE company_id = $1`, [companyId]);
 
     await pool.query(`DELETE FROM bank_conn_profile WHERE company_id = $1`, [companyId]);
+
+    // Clean up AR Collections tables
+    await pool.query(`DELETE FROM ar_cash_app_link WHERE cash_app_id IN (SELECT id FROM ar_cash_app WHERE company_id = $1)`, [companyId]);
+    await pool.query(`DELETE FROM ar_cash_app WHERE company_id = $1`, [companyId]);
+    await pool.query(`DELETE FROM ar_remittance_import WHERE company_id = $1`, [companyId]);
+    await pool.query(`DELETE FROM ar_ptp WHERE company_id = $1`, [companyId]);
+    await pool.query(`DELETE FROM ar_dispute WHERE company_id = $1`, [companyId]);
+    await pool.query(`DELETE FROM ar_dunning_log WHERE company_id = $1`, [companyId]);
+    await pool.query(`DELETE FROM ar_age_snapshot WHERE company_id = $1`, [companyId]);
+    await pool.query(`DELETE FROM cf_receipt_signal WHERE company_id = $1`, [companyId]);
+    await pool.query(`DELETE FROM comm_template WHERE company_id = $1`, [companyId]);
+    await pool.query(`DELETE FROM ar_dunning_policy WHERE company_id = $1`, [companyId]);
 }

@@ -32,8 +32,8 @@ describe('AR Dunning Service', () => {
             // Verify policy was created
             const policies = await service.getDunningPolicy(ids.companyId, 'customer-1', '1-30');
             expect(policies).toHaveLength(1);
-            expect(policies[0].policy_code).toBe('DEFAULT');
-            expect(policies[0].from_bucket).toBe('1-30');
+            expect(policies[0]?.policy_code).toBe('DEFAULT');
+            expect(policies[0]?.from_bucket).toBe('1-30');
         });
 
         it('should upsert a communication template', async () => {

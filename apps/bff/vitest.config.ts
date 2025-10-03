@@ -13,6 +13,7 @@ export default defineConfig({
             '@': resolve(__dirname, './app'),
             '@contracts': resolve(__dirname, '../../packages/contracts/src'),
             '@db': resolve(__dirname, '../../packages/adapters/db/src'),
+            '@aibos/db-adapter': resolve(__dirname, '../../packages/adapters/db/src'),
         },
     },
 });

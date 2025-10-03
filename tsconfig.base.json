@@ -12,6 +12,14 @@
     "noUncheckedIndexedAccess": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowJs": true,
+    "incremental": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "emitDeclarationOnly": false,
     "types": [],
     "baseUrl": ".",
     "paths": {
@@ -20,7 +28,7 @@
       "@aibos/policies/*": ["packages/policies/src/*"],
       "@aibos/db/*": ["packages/adapters/db/src/*"],
       "@aibos/utils/*": ["packages/utils/src/*"],
-      "@aibos/api-client/*": ["packages/api-client/*"],
+      "@aibos/api-client/*": ["packages/api-client/src/*"],
       "@aibos/posting-rules": ["packages/posting-rules/src/index.ts"],
       "@aibos/ports": ["packages/ports/src/index.ts"],
       "@contracts/*": ["packages/contracts/src/*"],
@@ -30,5 +38,6 @@
       "@/": ["apps/bff/app/", "apps/bff/src/"]
     }
   },
-  "include": ["packages", "apps"]
+  "include": ["packages", "apps"],
+  "exclude": ["node_modules", "dist", ".next", ".turbo"]
 }

@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { requireAuth } from "@/lib/auth";
-import { pool } from "@/lib/db";
-import { eq, desc } from "drizzle-orm";
-import { cfReceiptSignal } from "@aibos/adapters-db/schema";
+import { db } from "@/lib/db";
+import { eq, desc, and } from "drizzle-orm";
+import { cfReceiptSignal } from "@aibos/db-adapter/schema";
 
 // --- Cash Flow Receipt Signals Route (M24) ---------------------------------------
 
@@ -15,22 +15,23 @@ export async function GET(req: NextRequest) {
         const weekStart = url.searchParams.get('week_start');
         const source = url.searchParams.get('source') as 'AUTO_MATCH' | 'PTP' | 'MANUAL' | undefined;
 
-        let query = pool
-            .select()
-            .from(cfReceiptSignal)
-            .where(eq(cfReceiptSignal.companyId, auth.company_id));
+        const conditions = [eq(cfReceiptSignal.companyId, auth.company_id)];
 
         if (weekStart) {
-            query = query.where(eq(cfReceiptSignal.weekStart, weekStart));
+            conditions.push(eq(cfReceiptSignal.weekStart, weekStart));
         }
 
         if (source) {
-            query = query.where(eq(cfReceiptSignal.source, source));
+            conditions.push(eq(cfReceiptSignal.source, source));
         }
 
-        const signals = await query.orderBy(desc(cfReceiptSignal.createdAt));
+        const signals = await db
+            .select()
+            .from(cfReceiptSignal)
+            .where(and(...conditions))
+            .orderBy(desc(cfReceiptSignal.createdAt));
 
-        const results = signals.map(signal => ({
+        const results = signals.map((signal: any) => ({
             id: signal.id,
             week_start: signal.weekStart,
             ccy: signal.ccy,

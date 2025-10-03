@@ -2,11 +2,11 @@ import { pgTable, text, char, timestamp, numeric, pgEnum, primaryKey, integer, b
 import { relations } from "drizzle-orm";
 
 // Import allocation schemas
-export * from "./schema/alloc";
-export * from "./schema/tax_return";
-export * from "./schema/consol";
-export * from "./schema/payments";
-export * from "./schema/ar";
+export * from "./schema/alloc.js";
+export * from "./schema/tax_return.js";
+export * from "./schema/consol.js";
+export * from "./schema/payments.js";
+export * from "./schema/ar.js";
 
 export const company = pgTable("company", {
     id: text("id").primaryKey(),

@@ -1,17 +1,36 @@
 {
   "name": "@aibos/db-adapter",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "import": "./dist/schema.mjs",
+      "require": "./dist/schema.cjs",
+      "default": "./dist/schema.mjs"
+    }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "tsc -b",
+    "dev": "echo 'DB adapter - no dev server needed'",
     "migrate:generate": "drizzle-kit generate",
     "migrate:push": "drizzle-kit push",
     "seed": "tsx src/seed.ts",
     "type-check": "tsc --noEmit",
-    "lint": "echo 'No linting configured for db-adapter'"
+    "lint": "eslint . --ext .ts,.tsx",
+    "test": "echo 'No tests configured for db-adapter'"
   },
   "dependencies": {
     "@aibos/ports": "workspace:*",
@@ -20,8 +39,14 @@
     "pg": "^8.16.3"
   },
   "devDependencies": {
+    "@types/node": "24.6.0",
     "@types/pg": "^8.15.5",
     "drizzle-kit": "^0.31.5",
     "tsx": "^4.20.6"
+  },
+  "turbo": {
+    "pipeline": {
+      "build": "build#lib"
+    }
   }
 }

@@ -1,19 +1,36 @@
 {
   "name": "@aibos/api-client",
-  "version": "0.0.0",
-  "dependencies": {},
-  "devDependencies": {},
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -b",
     "dev": "echo 'API client - no dev server needed'",
     "gen:types": "openapi-typescript ../contracts/openapi/openapi.json -o src/types.gen.ts",
-    "lint": "echo 'No linting configured for api-client'",
-    "type-check": "tsc --noEmit"
+    "lint": "eslint . --ext .ts,.tsx",
+    "type-check": "tsc --noEmit",
+    "test": "echo 'No tests configured for api-client'"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "24.6.0"
   },
   "turbo": {
     "pipeline": {
       "build": "build#lib"
     }
-  },
-  "type": "module"
+  }
 }

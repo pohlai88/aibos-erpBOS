@@ -1,8 +1,8 @@
 import { Inngest } from "inngest";
-import { ArCashApplicationService } from "@/app/services/ar/cash-application";
-import { pool } from "@/lib/db";
+import { ArCashApplicationService } from "@/services/ar/cash-application";
+import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { company } from "@aibos/adapters-db/schema";
+import { company } from "@aibos/db-adapter/schema";
 
 export const inngest = new Inngest({ id: "aibos-erpBOS" });
 
@@ -13,11 +13,16 @@ export const arCashAppHourly = inngest.createFunction(
         return await step.run("run-cash-app-for-all-companies", async () => {
             try {
                 // Get all companies
-                const companies = await pool
+                const companies = await db
                     .select({ id: company.id })
                     .from(company);
 
-                const results = [];
+                const results: Array<{
+                    company_id: string;
+                    success: boolean;
+                    result?: any;
+                    error?: string;
+                }> = [];
                 const service = new ArCashApplicationService();
 
                 for (const comp of companies) {
@@ -25,8 +30,7 @@ export const arCashAppHourly = inngest.createFunction(
                         // Run cash application for each company
                         const result = await service.runCashApplication(
                             comp.id,
-                            { dry_run: false, min_confidence: 0.7 },
-                            'system'
+                            { dry_run: false, min_confidence: 0.7 }
                         );
                         results.push({
                             company_id: comp.id,
@@ -57,4 +61,4 @@ export const arCashAppHourly = inngest.createFunction(
             }
         });
     }
-);
+) as any;

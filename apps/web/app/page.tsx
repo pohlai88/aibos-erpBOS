@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { createSalesInvoice } from "@aibos/api-client/src/client";
-import { createPurchaseInvoice } from "@aibos/api-client/src/pi-client";
+import { createSalesInvoice, createPurchaseInvoice } from "@aibos/api-client";
 
 type Res = { ok: boolean; data?: any; replay?: boolean; message?: string };
 

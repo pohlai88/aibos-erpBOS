@@ -142,3 +142,18 @@ export const CfReceiptSignal = z.object({
     ref_id: z.string().optional(),
     created_at: z.string(),
 });
+
+// Type exports
+export type PtpCreateType = z.infer<typeof PtpCreate>;
+export type PtpResolveType = z.infer<typeof PtpResolve>;
+export type DisputeCreateType = z.infer<typeof DisputeCreate>;
+export type DisputeResolveType = z.infer<typeof DisputeResolve>;
+export type PtpRecordType = z.infer<typeof PtpRecord>;
+export type DisputeRecordType = z.infer<typeof DisputeRecord>;
+export type RemitImportReqType = z.infer<typeof RemitImportReq>;
+export type CashAppRunReqType = z.infer<typeof CashAppRunReq>;
+export type CashAppResultType = z.infer<typeof CashAppResult>;
+export type CashAppMatchType = z.infer<typeof CashAppMatch>;
+export type DunningPolicyUpsertType = z.infer<typeof DunningPolicyUpsert>;
+export type TemplateUpsertType = z.infer<typeof TemplateUpsert>;
+export type DunningRunResultType = z.infer<typeof DunningRunResult>;

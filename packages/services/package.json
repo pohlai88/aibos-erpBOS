@@ -1,16 +1,45 @@
 {
   "name": "@aibos/services",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs"
+    },
+    "./src/*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.mjs",
+      "require": "./dist/*.cjs",
+      "default": "./dist/*.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "echo 'Services - no dev server needed'",
+    "lint": "eslint . --ext .ts,.tsx",
+    "type-check": "tsc --noEmit",
+    "test": "echo 'No tests configured for services'"
+  },
   "dependencies": {
     "@aibos/contracts": "workspace:*",
+    "@aibos/db-adapter": "workspace:*",
     "@aibos/policies": "workspace:*",
     "@aibos/ports": "workspace:*",
-    "@aibos/posting-rules": "workspace:*"
+    "@aibos/posting-rules": "workspace:*",
+    "@aibos/utils": "workspace:*"
   },
-  "scripts": {
-    "dev": "echo 'Services - no dev server needed'",
-    "lint": "echo 'No linting configured for services'",
-    "type-check": "tsc --noEmit"
-  },
-  "type": "module"
+  "turbo": {
+    "pipeline": {
+      "build": "build#lib"
+    }
+  }
 }

@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
         const data = CashAppRunReq.parse(json);
 
         const service = new ArCashApplicationService();
-        const result = await service.runCashApplication(auth.company_id, data, auth.user_id);
+        const result = await service.runCashApplication(auth.company_id, data);
 
         return Response.json({
             result,

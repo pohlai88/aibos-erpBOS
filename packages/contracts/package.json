@@ -1,21 +1,54 @@
 {
   "name": "@aibos/contracts",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "require": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
+    },
+    "./http/sales/sales-invoice.schema": {
+      "types": "./dist/http/sales/sales-invoice.schema.d.ts",
+      "import": "./dist/http/sales/sales-invoice.schema.js",
+      "require": "./dist/http/sales/sales-invoice.schema.js"
+    },
+    "./http/purchase/purchase-invoice.schema": {
+      "types": "./dist/http/purchase/purchase-invoice.schema.d.ts",
+      "import": "./dist/http/purchase/purchase-invoice.schema.js",
+      "require": "./dist/http/purchase/purchase-invoice.schema.js"
+    },
+    "./http/ping/ping.schema": {
+      "types": "./dist/http/ping/ping.schema.d.ts",
+      "import": "./dist/http/ping/ping.schema.js",
+      "require": "./dist/http/ping/ping.schema.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "http",
+    "scripts",
+    "openapi"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "check": "pnpm gen:openapi && git diff --exit-code openapi/openapi.json || (echo 'Commit OpenAPI changes' && exit 1)",
+    "gen:openapi": "tsx ./scripts/build-openapi.ts",
+    "lint": "eslint . --ext .ts,.tsx",
+    "type-check": "tsc --noEmit",
+    "test": "echo 'No tests configured for contracts'"
+  },
   "devDependencies": {
     "@types/node": "24.6.0"
   },
-  "exports": {
-    ".": "./src/index.ts",
-    "./http/sales/sales-invoice.schema": "./http/sales/sales-invoice.schema.ts",
-    "./http/purchase/purchase-invoice.schema": "./http/purchase/purchase-invoice.schema.ts",
-    "./http/ping/ping.schema": "./http/ping/ping.schema.ts"
-  },
-  "scripts": {
-    "build": "pnpm gen:openapi",
-    "check": "pnpm gen:openapi && git diff --exit-code openapi/openapi.json || (echo 'Commit OpenAPI changes' && exit 1)",
-    "gen:openapi": "tsx ./scripts/build-openapi.ts",
-    "lint": "echo 'No linting configured for contracts'",
-    "type-check": "tsc --noEmit"
-  },
-  "type": "module"
+  "turbo": {
+    "pipeline": {
+      "build": "build#lib"
+    }
+  }
 }

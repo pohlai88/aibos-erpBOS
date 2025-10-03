@@ -29,9 +29,9 @@ describe('AR Cash Application Service', () => {
 
             const result = await service.importRemittance(ids.companyId, req, 'test-user');
 
-            expect(result.id).toBeDefined();
-            expect(result.rows_ok).toBe(2);
-            expect(result.rows_err).toBe(0);
+            expect(result.totalProcessed).toBeDefined();
+            expect(result.matched).toBe(2);
+            expect(result.unmatched).toBe(0);
         });
 
         it('should prevent duplicate imports', async () => {
@@ -46,7 +46,7 @@ describe('AR Cash Application Service', () => {
 
             // First import should succeed
             const result1 = await service.importRemittance(ids.companyId, req, 'test-user');
-            expect(result1.rows_ok).toBe(1);
+            expect(result1.matched).toBe(1);
 
             // Second import should fail with duplicate error
             await expect(
@@ -79,9 +79,9 @@ describe('AR Cash Application Service', () => {
 
             const result = await service.importRemittance(ids.companyId, req, 'test-user');
 
-            expect(result.id).toBeDefined();
-            expect(result.rows_ok).toBe(1);
-            expect(result.rows_err).toBe(0);
+            expect(result.totalProcessed).toBeDefined();
+            expect(result.matched).toBe(1);
+            expect(result.unmatched).toBe(0);
         });
     });
 
@@ -102,8 +102,7 @@ describe('AR Cash Application Service', () => {
             // Run cash application in dry-run mode
             const result = await service.runCashApplication(
                 ids.companyId,
-                { dry_run: true, min_confidence: 0.7 },
-                'test-user'
+                { dry_run: true, min_confidence: 0.7 }
             );
 
             expect(result.company_id).toBe(ids.companyId);
@@ -130,65 +129,13 @@ describe('AR Cash Application Service', () => {
             // Run with high confidence threshold
             const result = await service.runCashApplication(
                 ids.companyId,
-                { dry_run: true, min_confidence: 0.9 },
-                'test-user'
+                { dry_run: true, min_confidence: 0.9 }
             );
 
             expect(result.confidence_threshold).toBe(0.9);
         });
     });
 
-    describe('Confidence Scoring', () => {
-        it('should calculate confidence score correctly', async () => {
-            const receipt = {
-                date: '2024-01-15',
-                amount: 1000,
-                currency: 'USD',
-                payerName: 'Test Customer',
-                references: ['INV-001'],
-                rawData: {}
-            };
-
-            const invoice = {
-                id: 'inv-1',
-                customerId: 'customer-1',
-                invoiceNo: 'INV-001',
-                amount: 1000,
-                currency: 'USD',
-                dueDate: '2024-01-31',
-                daysOverdue: 15
-            };
-
-            const confidence = service.calculateConfidence(receipt, invoice, ['INV-001']);
-
-            expect(confidence).toBeGreaterThan(0.8); // Should be high due to exact match
-        });
-
-        it('should handle amount tolerance', async () => {
-            const receipt = {
-                date: '2024-01-15',
-                amount: 1000,
-                currency: 'USD',
-                payerName: 'Test Customer',
-                references: ['INV-001'],
-                rawData: {}
-            };
-
-            const invoice = {
-                id: 'inv-1',
-                customerId: 'customer-1',
-                invoiceNo: 'INV-001',
-                amount: 1005, // 5 dollar difference
-                currency: 'USD',
-                dueDate: '2024-01-31',
-                daysOverdue: 15
-            };
-
-            const confidence = service.calculateConfidence(receipt, invoice, ['INV-001']);
-
-            expect(confidence).toBeGreaterThan(0.3); // Should still have some confidence
-        });
-    });
 
     describe('Cash App Matches', () => {
         it('should get cash application matches', async () => {

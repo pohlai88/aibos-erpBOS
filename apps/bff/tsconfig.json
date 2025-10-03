@@ -4,15 +4,8 @@
     "composite": true,
     "outDir": "dist",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "exactOptionalPropertyTypes": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noEmit": true,
-    "incremental": true,
-    "isolatedModules": true,
     "jsx": "preserve",
-    "rootDir": "../../",
+    "noEmit": true,
     "plugins": [
       {
         "name": "next"
@@ -29,15 +22,16 @@
     "**/*.ts",
     "**/*.tsx",
     "app",
-    "src",
-    "../../packages/contracts/src",
-    "../../packages/contracts/http",
-    "../../packages/policies/src",
-    "../../packages/services/src",
-    "../../packages/posting-rules/src",
-    "../../packages/ports/src",
-    "../../packages/adapters/db/src",
-    "../../packages/utils/src"
+    "src"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    { "path": "../../packages/contracts" },
+    { "path": "../../packages/policies" },
+    { "path": "../../packages/services" },
+    { "path": "../../packages/posting-rules" },
+    { "path": "../../packages/ports" },
+    { "path": "../../packages/adapters/db" },
+    { "path": "../../packages/utils" }
+  ]
 }

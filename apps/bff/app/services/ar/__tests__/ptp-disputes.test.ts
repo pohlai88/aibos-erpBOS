@@ -25,16 +25,16 @@ describe('AR PTP & Disputes Service', () => {
                 reason: 'Cash flow issues'
             };
 
-            const ptpId = await service.createPtp(ids.companyId, ptpData, 'test-user');
+            const ptpRecord = await service.createPtp(ids.companyId, ptpData, 'test-user');
 
-            expect(ptpId).toBeDefined();
+            expect(ptpRecord.id).toBeDefined();
 
             // Verify PTP was created
             const records = await service.getPtpRecords(ids.companyId);
             expect(records).toHaveLength(1);
-            expect(records[0].id).toBe(ptpId);
-            expect(records[0].customer_id).toBe('customer-1');
-            expect(records[0].status).toBe('open');
+            expect(records[0]?.id).toBe(ptpRecord.id);
+            expect(records[0]?.customerId).toBe('customer-1');
+            expect(records[0]?.status).toBe('open');
         });
 
         it('should resolve a PTP as kept', async () => {
@@ -47,19 +47,19 @@ describe('AR PTP & Disputes Service', () => {
                 reason: 'Cash flow issues'
             };
 
-            const ptpId = await service.createPtp(ids.companyId, ptpData, 'test-user');
+            const ptpRecord = await service.createPtp(ids.companyId, ptpData, 'test-user');
 
             // Resolve as kept
             await service.resolvePtp(ids.companyId, {
-                id: ptpId,
+                id: ptpRecord.id,
                 outcome: 'kept'
             }, 'test-user');
 
             // Verify resolution
             const records = await service.getPtpRecords(ids.companyId);
             expect(records).toHaveLength(1);
-            expect(records[0].status).toBe('kept');
-            expect(records[0].decided_at).toBeDefined();
+            expect(records[0]?.status).toBe('kept');
+            expect(records[0]?.decidedAt).toBeDefined();
         });
 
         it('should resolve a PTP as broken', async () => {
@@ -72,18 +72,18 @@ describe('AR PTP & Disputes Service', () => {
                 reason: 'Cash flow issues'
             };
 
-            const ptpId = await service.createPtp(ids.companyId, ptpData, 'test-user');
+            const ptpRecord = await service.createPtp(ids.companyId, ptpData, 'test-user');
 
             // Resolve as broken
             await service.resolvePtp(ids.companyId, {
-                id: ptpId,
+                id: ptpRecord.id,
                 outcome: 'broken'
             }, 'test-user');
 
             // Verify resolution
             const records = await service.getPtpRecords(ids.companyId);
             expect(records).toHaveLength(1);
-            expect(records[0].status).toBe('broken');
+            expect(records[0]?.status).toBe('broken');
         });
 
         it('should get overdue PTPs', async () => {
@@ -94,7 +94,7 @@ describe('AR PTP & Disputes Service', () => {
             const ptpData = {
                 customer_id: 'customer-1',
                 invoice_id: 'invoice-1',
-                promised_date: pastDate.toISOString().split('T')[0],
+                promised_date: pastDate.toISOString().split('T')[0]!,
                 amount: 1000,
                 reason: 'Cash flow issues'
             };
@@ -104,7 +104,7 @@ describe('AR PTP & Disputes Service', () => {
             // Get overdue PTPs
             const overdue = await service.getOverduePtps(ids.companyId);
             expect(overdue).toHaveLength(1);
-            expect(overdue[0].status).toBe('open');
+            expect(overdue[0]?.status).toBe('open');
         });
     });
 
@@ -117,17 +117,17 @@ describe('AR PTP & Disputes Service', () => {
                 detail: 'Price discrepancy on line items'
             };
 
-            const disputeId = await service.createDispute(ids.companyId, disputeData, 'test-user');
+            const disputeRecord = await service.createDispute(ids.companyId, disputeData, 'test-user');
 
-            expect(disputeId).toBeDefined();
+            expect(disputeRecord.id).toBeDefined();
 
             // Verify dispute was created
             const records = await service.getDisputeRecords(ids.companyId);
             expect(records).toHaveLength(1);
-            expect(records[0].id).toBe(disputeId);
-            expect(records[0].customer_id).toBe('customer-1');
-            expect(records[0].status).toBe('open');
-            expect(records[0].reason_code).toBe('PRICING');
+            expect(records[0]?.id).toBe(disputeRecord.id);
+            expect(records[0]?.customerId).toBe('customer-1');
+            expect(records[0]?.status).toBe('open');
+            expect(records[0]?.reasonCode).toBe('PRICING');
         });
 
         it('should resolve a dispute', async () => {
@@ -139,11 +139,11 @@ describe('AR PTP & Disputes Service', () => {
                 detail: 'Price discrepancy on line items'
             };
 
-            const disputeId = await service.createDispute(ids.companyId, disputeData, 'test-user');
+            const disputeRecord = await service.createDispute(ids.companyId, disputeData, 'test-user');
 
             // Resolve the dispute
             await service.resolveDispute(ids.companyId, {
-                id: disputeId,
+                id: disputeRecord.id,
                 status: 'resolved',
                 detail: 'Price adjusted and customer satisfied'
             }, 'test-user');
@@ -151,8 +151,8 @@ describe('AR PTP & Disputes Service', () => {
             // Verify resolution
             const records = await service.getDisputeRecords(ids.companyId);
             expect(records).toHaveLength(1);
-            expect(records[0].status).toBe('resolved');
-            expect(records[0].resolved_at).toBeDefined();
+            expect(records[0]?.status).toBe('resolved');
+            expect(records[0]?.resolvedAt).toBeDefined();
         });
 
         it('should write off a dispute', async () => {
@@ -164,11 +164,11 @@ describe('AR PTP & Disputes Service', () => {
                 detail: 'Service quality issues'
             };
 
-            const disputeId = await service.createDispute(ids.companyId, disputeData, 'test-user');
+            const disputeRecord = await service.createDispute(ids.companyId, disputeData, 'test-user');
 
             // Write off the dispute
             await service.resolveDispute(ids.companyId, {
-                id: disputeId,
+                id: disputeRecord.id,
                 status: 'written_off',
                 detail: 'Dispute written off due to service issues'
             }, 'test-user');
@@ -176,7 +176,7 @@ describe('AR PTP & Disputes Service', () => {
             // Verify write-off
             const records = await service.getDisputeRecords(ids.companyId);
             expect(records).toHaveLength(1);
-            expect(records[0].status).toBe('written_off');
+            expect(records[0]?.status).toBe('written_off');
         });
     });
 
@@ -199,12 +199,12 @@ describe('AR PTP & Disputes Service', () => {
                 reason: 'Payment processing delay'
             };
 
-            const ptpId1 = await service.createPtp(ids.companyId, ptpData1, 'test-user');
-            const ptpId2 = await service.createPtp(ids.companyId, ptpData2, 'test-user');
+            const ptpRecord1 = await service.createPtp(ids.companyId, ptpData1, 'test-user');
+            const ptpRecord2 = await service.createPtp(ids.companyId, ptpData2, 'test-user');
 
             // Resolve one as kept
             await service.resolvePtp(ids.companyId, {
-                id: ptpId1,
+                id: ptpRecord1.id,
                 outcome: 'kept'
             }, 'test-user');
 
@@ -235,12 +235,12 @@ describe('AR PTP & Disputes Service', () => {
                 detail: 'Service quality issues'
             };
 
-            const disputeId1 = await service.createDispute(ids.companyId, disputeData1, 'test-user');
-            const disputeId2 = await service.createDispute(ids.companyId, disputeData2, 'test-user');
+            const disputeRecord1 = await service.createDispute(ids.companyId, disputeData1, 'test-user');
+            const disputeRecord2 = await service.createDispute(ids.companyId, disputeData2, 'test-user');
 
             // Resolve one dispute
             await service.resolveDispute(ids.companyId, {
-                id: disputeId1,
+                id: disputeRecord1.id,
                 status: 'resolved',
                 detail: 'Price adjusted'
             }, 'test-user');
@@ -275,12 +275,12 @@ describe('AR PTP & Disputes Service', () => {
                 reason: 'Payment processing delay'
             };
 
-            const ptpId1 = await service.createPtp(ids.companyId, ptpData1, 'test-user');
-            const ptpId2 = await service.createPtp(ids.companyId, ptpData2, 'test-user');
+            const ptpRecord1 = await service.createPtp(ids.companyId, ptpData1, 'test-user');
+            const ptpRecord2 = await service.createPtp(ids.companyId, ptpData2, 'test-user');
 
             // Resolve one as kept
             await service.resolvePtp(ids.companyId, {
-                id: ptpId1,
+                id: ptpRecord1.id,
                 outcome: 'kept'
             }, 'test-user');
 
@@ -290,8 +290,8 @@ describe('AR PTP & Disputes Service', () => {
 
             expect(openPtp).toHaveLength(1);
             expect(keptPtp).toHaveLength(1);
-            expect(openPtp[0].status).toBe('open');
-            expect(keptPtp[0].status).toBe('kept');
+            expect(openPtp[0]?.status).toBe('open');
+            expect(keptPtp[0]?.status).toBe('kept');
         });
 
         it('should filter disputes by reason code', async () => {
@@ -318,7 +318,7 @@ describe('AR PTP & Disputes Service', () => {
             expect(allDisputes).toHaveLength(2);
 
             // Verify reason codes
-            const reasonCodes = allDisputes.map(d => d.reason_code);
+            const reasonCodes = allDisputes.map(d => d.reasonCode);
             expect(reasonCodes).toContain('PRICING');
             expect(reasonCodes).toContain('SERVICE');
         });

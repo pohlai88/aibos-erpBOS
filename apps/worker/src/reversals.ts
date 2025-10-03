@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { pool } from "./db";
-import { reverseJournal } from "../../bff/app/lib/reversal.js"; // reuse helper
+import { reverseJournal } from "@aibos/services";
 
 export async function processDueReversals() {
   const { rows } = await pool.query(

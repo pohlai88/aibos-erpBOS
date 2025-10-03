@@ -1,8 +1,9 @@
 {
-  "name": "bff",
+  "name": "@aibos/bff",
   "version": "1.0.0",
   "dependencies": {
     "@aibos/contracts": "workspace:*",
+    "@aibos/db-adapter": "workspace:*",
     "@aibos/policies": "workspace:*",
     "@aibos/ports": "workspace:*",
     "@aibos/posting-rules": "workspace:*",

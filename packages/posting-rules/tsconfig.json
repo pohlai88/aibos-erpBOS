@@ -4,13 +4,8 @@
     "composite": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "module": "esnext",
-    "target": "ES2022",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
     "types": ["node"]
   },
-  "include": ["src/**/*"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }

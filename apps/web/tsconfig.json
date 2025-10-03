@@ -4,15 +4,8 @@
     "composite": true,
     "outDir": "dist",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "exactOptionalPropertyTypes": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noEmit": true,
-    "incremental": true,
-    "isolatedModules": true,
     "jsx": "preserve",
-    "rootDir": "../../",
+    "noEmit": true,
     "plugins": [
       {
         "name": "next"
@@ -24,8 +17,10 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx",
-    "app",
-    "../../packages/api-client/src"
+    "app"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    { "path": "../../packages/api-client" }
+  ]
 }

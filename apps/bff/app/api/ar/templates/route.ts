@@ -11,8 +11,7 @@ export async function GET(req: NextRequest) {
         if (auth instanceof Response) return auth;
 
         const service = new ArDunningService();
-        // TODO: Implement getTemplates method
-        const templates = [];
+        const templates = await service.getAllTemplates(auth.company_id);
 
         return Response.json({ templates }, {
             status: 200,
