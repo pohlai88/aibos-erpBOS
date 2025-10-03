@@ -2,21 +2,21 @@ import { z } from "zod";
 
 const Env = z.object({
     // Database
-    DATABASE_URL: z.string().url(),
+    DATABASE_URL: z.string().min(1),
 
     // Portal Configuration
     PORTAL_BASE_URL: z.string().url(),
     RECEIPTS_FROM_EMAIL: z.string().email(),
 
-    // Gateway Configuration
-    STRIPE_SECRET_KEY: z.string().min(1),
-    STRIPE_WEBHOOK_SECRET: z.string().min(1),
-    ADYEN_API_KEY: z.string().min(1),
-    ADYEN_HMAC_KEY: z.string().min(1),
-    PAYPAL_CLIENT_ID: z.string().min(1),
-    PAYPAL_SECRET: z.string().min(1),
+    // Gateway Configuration (optional - only required when using specific gateway)
+    STRIPE_SECRET_KEY: z.string().min(1).optional(),
+    STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
+    ADYEN_API_KEY: z.string().min(1).optional(),
+    ADYEN_HMAC_KEY: z.string().min(1).optional(),
+    PAYPAL_CLIENT_ID: z.string().min(1).optional(),
+    PAYPAL_SECRET: z.string().min(1).optional(),
 
-    // Optional Gateway Selection
+    // Gateway Selection
     PAY_GATEWAY: z.enum(["STRIPE", "ADYEN", "PAYPAL", "MOCK"]).default("MOCK"),
 
     // Optional Redis for event processing
