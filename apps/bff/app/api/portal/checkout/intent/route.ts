@@ -3,7 +3,7 @@ import { ok, badRequest, serverError, unauthorized } from "@/lib/http";
 import { CheckoutIntentReq } from "@aibos/contracts";
 import { ArPortalService } from "@/services/ar/portal";
 import { ArCheckoutService } from "@/services/ar/checkout";
-import { checkIdempotency, recordIdempotency, generateIdempotencyKey } from "@/lib/idempotency";
+import { checkIdempotency, recordIdempotency, getIdemKey } from "@/lib/idempotency";
 
 const portalService = new ArPortalService();
 const checkoutService = new ArCheckoutService();

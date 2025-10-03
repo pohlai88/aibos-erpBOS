@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ulid } from 'ulid';
 import { db } from '@/lib/db';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import {
     arPortalSession,
     arCheckoutIntent,
@@ -23,25 +23,29 @@ describe('AR Portal & Pay-Now Service (M24.2)', () => {
     const testUserId = 'test-user';
 
     beforeEach(async () => {
-        // Clean up test data
+        // Clean up test data - delete in correct order to avoid FK constraints
         await db.delete(arDispute).where(eq(arDispute.companyId, testCompanyId));
         await db.delete(arPtp).where(eq(arPtp.companyId, testCompanyId));
         await db.delete(arInvoice).where(eq(arInvoice.companyId, testCompanyId));
         await db.delete(arSurchargePolicy).where(eq(arSurchargePolicy.companyId, testCompanyId));
         await db.delete(arSavedMethod).where(eq(arSavedMethod.companyId, testCompanyId));
-        await db.delete(arCheckoutTxn).where(eq(arCheckoutTxn.intentId, 'test-intent'));
+        // Delete all checkout transactions first (child records) - delete by company_id through join
+        await db.execute(sql`DELETE FROM ar_checkout_txn WHERE intent_id IN (SELECT id FROM ar_checkout_intent WHERE company_id = ${testCompanyId})`);
+        // Then delete all checkout intents (parent records)
         await db.delete(arCheckoutIntent).where(eq(arCheckoutIntent.companyId, testCompanyId));
         await db.delete(arPortalSession).where(eq(arPortalSession.companyId, testCompanyId));
     });
 
     afterEach(async () => {
-        // Clean up after each test
+        // Clean up after each test - delete in correct order to avoid FK constraints
         await db.delete(arDispute).where(eq(arDispute.companyId, testCompanyId));
         await db.delete(arPtp).where(eq(arPtp.companyId, testCompanyId));
         await db.delete(arInvoice).where(eq(arInvoice.companyId, testCompanyId));
         await db.delete(arSurchargePolicy).where(eq(arSurchargePolicy.companyId, testCompanyId));
         await db.delete(arSavedMethod).where(eq(arSavedMethod.companyId, testCompanyId));
-        await db.delete(arCheckoutTxn).where(eq(arCheckoutTxn.intentId, 'test-intent'));
+        // Delete all checkout transactions first (child records) - delete by company_id through join
+        await db.execute(sql`DELETE FROM ar_checkout_txn WHERE intent_id IN (SELECT id FROM ar_checkout_intent WHERE company_id = ${testCompanyId})`);
+        // Then delete all checkout intents (parent records)
         await db.delete(arCheckoutIntent).where(eq(arCheckoutIntent.companyId, testCompanyId));
         await db.delete(arPortalSession).where(eq(arPortalSession.companyId, testCompanyId));
     });
@@ -53,6 +57,7 @@ describe('AR Portal & Pay-Now Service (M24.2)', () => {
             const result = await portalService.initSession(
                 testCompanyId,
                 {
+                    company_id: testCompanyId,
                     customer_id: testCustomerId,
                     email: 'test@example.com',
                     ttl_minutes: 60
@@ -86,6 +91,7 @@ describe('AR Portal & Pay-Now Service (M24.2)', () => {
             await portalService.initSession(
                 testCompanyId,
                 {
+                    company_id: testCompanyId,
                     customer_id: testCustomerId,
                     email: 'test@example.com',
                     ttl_minutes: 60

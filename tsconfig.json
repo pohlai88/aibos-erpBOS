@@ -1,3 +1,19 @@
 {
-  "files": []
+  "extends": "./tsconfig.base.json",
+  "files": [],
+  "references": [
+    { "path": "./apps/bff" },
+    { "path": "./apps/web" },
+    { "path": "./apps/worker" },
+    { "path": "./packages/adapters/db" },
+    { "path": "./packages/api-client" },
+    { "path": "./packages/contracts" },
+    { "path": "./packages/policies" },
+    { "path": "./packages/ports" },
+    { "path": "./packages/posting-rules" },
+    { "path": "./packages/sdk" },
+    { "path": "./packages/services" },
+    { "path": "./packages/testing" },
+    { "path": "./packages/utils" }
+  ]
 }

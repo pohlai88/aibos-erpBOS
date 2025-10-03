@@ -6,6 +6,7 @@ export * from "./tax_return";
 export * from "./ar";
 export * from "./ar-credit";
 export * from "./ar-portal";
+export * from "./ar-statements";
 export * from "./assets_import";
 export * from "./assets_prefs";
 export * from "./bank-connect";

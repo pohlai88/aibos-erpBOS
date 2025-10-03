@@ -12,8 +12,13 @@ export class AdyenGateway implements Gateway {
 
     constructor() {
         const config = new Config();
+
+        if (!env.ADYEN_API_KEY) {
+            throw new Error('ADYEN_API_KEY is required');
+        }
+
         config.apiKey = env.ADYEN_API_KEY;
-        config.environment = env.ADYEN_ENVIRONMENT || 'TEST';
+        config.environment = (env as any).ADYEN_ENVIRONMENT || 'TEST';
 
         this.client = new Client({ config });
         this.checkout = new CheckoutAPI(this.client);
@@ -80,6 +85,10 @@ export class AdyenGateway implements Gateway {
             }
 
             // Adyen HMAC verification
+            if (!env.ADYEN_HMAC_KEY) {
+                return { ok: false, reason: 'ADYEN_HMAC_KEY not configured' };
+            }
+
             const hmac = createHmac('sha256', env.ADYEN_HMAC_KEY);
             hmac.update(rawBody);
             const calculatedSignature = hmac.digest('base64');

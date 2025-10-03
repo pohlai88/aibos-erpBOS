@@ -39,7 +39,7 @@ export class ArCreditManagementService {
         // Calculate exposure: open AR + open PTP - recent cash applications
         const exposureResult = await this.dbInstance.execute(sql`
             WITH open_ar AS (
-                SELECT COALESCE(SUM(amount), 0) as ar_amount
+                SELECT COALESCE(SUM(gross_amount), 0) as ar_amount
                 FROM ar_invoice 
                 WHERE company_id = ${companyId} 
                 AND customer_id = ${customerId}
@@ -72,14 +72,14 @@ export class ArCreditManagementService {
         // Calculate DSO (simplified: rolling 90 days)
         const dsoResult = await this.dbInstance.execute(sql`
             WITH sales_90d AS (
-                SELECT COALESCE(SUM(amount), 0) as sales_amount
+                SELECT COALESCE(SUM(gross_amount), 0) as sales_amount
                 FROM ar_invoice 
                 WHERE company_id = ${companyId} 
                 AND customer_id = ${customerId}
                 AND invoice_date >= ${asOfDate}::date - INTERVAL '90 days'
             ),
             ar_balance AS (
-                SELECT COALESCE(SUM(amount), 0) as ar_amount
+                SELECT COALESCE(SUM(gross_amount), 0) as ar_amount
                 FROM ar_invoice 
                 WHERE company_id = ${companyId} 
                 AND customer_id = ${customerId}

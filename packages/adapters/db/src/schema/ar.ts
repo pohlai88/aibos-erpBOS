@@ -280,6 +280,83 @@ export const arGatewayWebhookDlq = pgTable("ar_gateway_webhook_dlq", {
     retryAt: timestamp("retry_at", { withTimezone: true }),
 });
 
+// --- AR Customer Statements & Portal Ledger (M24.3) -------------------------
+
+export const arFinanceChargePolicy = pgTable("ar_finance_charge_policy", {
+    companyId: text("company_id").primaryKey(),
+    enabled: boolean("enabled").notNull().default(false),
+    annualPct: numeric("annual_pct").notNull().default("0"), // APR, e.g., 0.18 = 18%
+    minFee: numeric("min_fee").notNull().default("0"),
+    graceDays: integer("grace_days").notNull().default(0), // days past due before accrual
+    compMethod: text("comp_method").notNull().default("simple"), // 'simple','daily'
+    presentCcy: text("present_ccy"), // if finance charge presented in this currency
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull(),
+});
+
+export const arStatementRun = pgTable("ar_statement_run", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    asOfDate: date("as_of_date").notNull(),
+    policyCode: text("policy_code"), // dunning/segment policy snapshot if used
+    presentCcy: text("present_ccy").notNull(), // statement currency
+    status: text("status").notNull().default("draft"), // 'draft','finalized','emailed','error'
+    totalsJson: jsonb("totals_json"), // summary metrics
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+export const arStatementLine = pgTable("ar_statement_line", {
+    id: text("id").primaryKey(),
+    runId: text("run_id").notNull().references(() => arStatementRun.id, { onDelete: "cascade" }),
+    companyId: text("company_id").notNull(),
+    customerId: text("customer_id").notNull(),
+    docType: text("doc_type").notNull(), // 'INVOICE','CREDIT_MEMO','PAYMENT','ADJ','FINANCE_CHARGE','DISPUTE_HOLD'
+    docId: text("doc_id"), // invoice id, cash_app id, etc.
+    docDate: date("doc_date").notNull(),
+    dueDate: date("due_date"),
+    ref: text("ref"),
+    memo: text("memo"),
+    debit: numeric("debit").notNull().default("0"), // + increases balance
+    credit: numeric("credit").notNull().default("0"), // - reduces balance
+    balance: numeric("balance").notNull(), // running customer balance in present ccy
+    bucket: text("bucket").notNull(), // CURRENT/1-30/31-60/61-90/90+
+    currency: text("currency").notNull(),
+    sortKey: text("sort_key"), // for stable rendering
+});
+
+export const arStatementArtifact = pgTable("ar_statement_artifact", {
+    id: text("id").primaryKey(),
+    runId: text("run_id").notNull().references(() => arStatementRun.id, { onDelete: "cascade" }),
+    customerId: text("customer_id").notNull(),
+    kind: text("kind").notNull(), // 'PDF','CSV'
+    filename: text("filename").notNull(),
+    sha256: text("sha256").notNull(),
+    bytes: integer("bytes").notNull(),
+    storageUri: text("storage_uri").notNull(), // e.g., s3://... or file://...
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const arStatementEmail = pgTable("ar_statement_email", {
+    id: text("id").primaryKey(),
+    runId: text("run_id").notNull().references(() => arStatementRun.id, { onDelete: "cascade" }),
+    customerId: text("customer_id").notNull(),
+    toAddr: text("to_addr").notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    status: text("status").notNull().default("queued"), // 'queued','sent','error'
+    error: text("error"),
+});
+
+export const arPortalLedgerToken = pgTable("ar_portal_ledger_token", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    customerId: text("customer_id").notNull(),
+    token: text("token").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
 // --- AR Invoice (for portal integration) ---------------------------------
 
 export const arInvoice = pgTable("ar_invoice", {

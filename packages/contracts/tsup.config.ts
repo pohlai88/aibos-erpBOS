@@ -4,6 +4,7 @@ export default defineConfig({
   entry: [
     "src/index.ts",
     "src/ar-credit.ts",
+    "src/ar-statements.ts",
     "src/reports/cash.ts",
     "src/common/result.ts",
     "http/sales/sales-invoice.schema.ts",

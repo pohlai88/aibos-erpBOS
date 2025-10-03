@@ -7,6 +7,9 @@ export default defineConfig({
         environment: 'node',
         include: ['**/*.{test,spec}.{js,ts,tsx}'],
         exclude: ['node_modules', '.next', 'dist'],
+        env: {
+            DATABASE_URL: 'postgresql://aibos:aibos@localhost:5432/aibos',
+        },
     },
     resolve: {
         alias: {

@@ -10,6 +10,10 @@ export class PayPalGateway implements Gateway {
     private client: PayPalApi;
 
     constructor() {
+        if (!env.PAYPAL_CLIENT_ID || !env.PAYPAL_SECRET) {
+            throw new Error('PAYPAL_CLIENT_ID and PAYPAL_SECRET are required');
+        }
+
         const environment = new PayPalApi.Environment.Sandbox(env.PAYPAL_CLIENT_ID, env.PAYPAL_SECRET);
         this.client = new PayPalApi(environment);
     }
@@ -112,6 +116,10 @@ export class PayPalGateway implements Gateway {
 
             // PayPal webhook signature verification
             // Note: This is a simplified version. Real implementation would use PayPal's webhook verification API
+            if (!env.PAYPAL_SECRET) {
+                return { ok: false, reason: 'PAYPAL_SECRET not configured' };
+            }
+
             const hmac = createHmac('sha256', env.PAYPAL_SECRET);
             hmac.update(rawBody);
             const calculatedSignature = hmac.digest('base64');
@@ -123,9 +131,9 @@ export class PayPalGateway implements Gateway {
             return { ok: true };
         } catch (error) {
             console.error('PayPal webhook verification error:', error);
-            return { 
-                ok: false, 
-                reason: error instanceof Error ? error.message : 'Webhook verification failed' 
+            return {
+                ok: false,
+                reason: error instanceof Error ? error.message : 'Webhook verification failed'
             };
         }
     }
@@ -133,7 +141,7 @@ export class PayPalGateway implements Gateway {
     parseWebhook(rawBody: string): GatewayWebhookEvent {
         try {
             const event = JSON.parse(rawBody);
-            
+
             let eventType: 'captured' | 'failed' | 'refunded' | 'voided';
             let extRef: string;
             let amount: number;

@@ -12,6 +12,9 @@ export function unprocessable(message: string, details?: unknown) {
 export function serverError(message = "Internal Server Error", details?: unknown) {
     return NextResponse.json({ ok: false, error: "InternalServerError", message, details }, { status: 500 });
 }
+export function notFound(message = "Not Found", details?: unknown) {
+    return NextResponse.json({ ok: false, error: "NotFound", message, details }, { status: 404 });
+}
 export function cors204() {
     const res = new NextResponse(null, { status: 204 });
     res.headers.set("Access-Control-Allow-Origin", "*");

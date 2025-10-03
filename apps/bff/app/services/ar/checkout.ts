@@ -245,7 +245,9 @@ export class ArCheckoutService {
         companyId: string,
         intent: any
     ) {
-        const invoices = JSON.parse(intent.invoices);
+        const invoices = typeof intent.invoices === 'string'
+            ? JSON.parse(intent.invoices)
+            : intent.invoices;
 
         // Create remittance entry for cash application
         const remittanceData = {

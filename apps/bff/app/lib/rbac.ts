@@ -37,7 +37,10 @@ export type Capability =
     | "ar:credit:customer"
     | "ar:collect:workbench"
     | "ar:portal:policy"
-    | "ar:portal:ops";
+    | "ar:portal:ops"
+    | "ar:stmt:policy"
+    | "ar:stmt:run"
+    | "ar:stmt:email";
 
 export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
     admin: [
@@ -49,7 +52,8 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "pay:bank_profile", "pay:dispatch", "pay:discount:policy", "pay:discount:run", "pay:discount:offer",
         "ar:dunning:policy", "ar:dunning:run", "ar:remit:import", "ar:cashapp:run", "ar:ptp", "ar:dispute",
         "ar:credit:policy", "ar:credit:customer", "ar:collect:workbench",
-        "ar:portal:policy", "ar:portal:ops"
+        "ar:portal:policy", "ar:portal:ops",
+        "ar:stmt:policy", "ar:stmt:run", "ar:stmt:email"
     ],
     accountant: [
         "reports:read", "journals:post", "reversal:create", "inventory:move",
@@ -60,7 +64,8 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "pay:bank_profile", "pay:dispatch", "pay:discount:policy", "pay:discount:run", "pay:discount:offer",
         "ar:dunning:policy", "ar:dunning:run", "ar:remit:import", "ar:cashapp:run", "ar:ptp", "ar:dispute",
         "ar:credit:policy", "ar:credit:customer", "ar:collect:workbench",
-        "ar:portal:policy", "ar:portal:ops"
+        "ar:portal:policy", "ar:portal:ops",
+        "ar:stmt:policy", "ar:stmt:run", "ar:stmt:email"
     ],
     ops: [
         "reports:read", "inventory:move", "audit:read",

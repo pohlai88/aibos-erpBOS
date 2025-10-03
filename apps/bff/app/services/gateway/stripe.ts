@@ -9,6 +9,10 @@ export class StripeGateway implements Gateway {
     private stripe: Stripe;
 
     constructor() {
+        if (!env.STRIPE_SECRET_KEY) {
+            throw new Error('STRIPE_SECRET_KEY is required');
+        }
+
         this.stripe = new Stripe(env.STRIPE_SECRET_KEY, {
             apiVersion: '2023-10-16',
         });
@@ -102,6 +106,10 @@ export class StripeGateway implements Gateway {
             const signature = headers['stripe-signature'];
             if (!signature) {
                 return { ok: false, reason: 'Missing stripe-signature header' };
+            }
+
+            if (!env.STRIPE_WEBHOOK_SECRET) {
+                return { ok: false, reason: 'STRIPE_WEBHOOK_SECRET not configured' };
             }
 
             const event = this.stripe.webhooks.constructEvent(
