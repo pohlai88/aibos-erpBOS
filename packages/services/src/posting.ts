@@ -1,8 +1,8 @@
-import type { SalesInvoice } from "./_temp/shims.js";
+import type { SalesInvoice } from "./_temp/shims";
 import type { LedgerRepo, TxManager } from "@aibos/ports";
-import { genId, type JournalLine, insertJournal } from "./ledger.js";
+import { genId, type JournalLine, insertJournal } from "./ledger";
 import { loadRule, get } from "@aibos/posting-rules";
-import { computeBaseAmounts } from "./fx.js";
+import { computeBaseAmounts } from "./fx";
 import { computeTax } from "@aibos/policies";
 
 // map rule lines → JournalLine using SI doc

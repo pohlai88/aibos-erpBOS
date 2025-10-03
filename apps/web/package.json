@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@aibos/api-client": "workspace:*",
-    "next": "15.5.4",
+    "next": "14.2.15",
     "react": "19.1.1",
     "react-dom": "19.1.1"
   },

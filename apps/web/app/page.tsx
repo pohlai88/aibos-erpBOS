@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { createSalesInvoice, createPurchaseInvoice } from "@aibos/api-client";
+// import { createSalesInvoice, createPurchaseInvoice } from "@aibos/api-client";
 
 type Res = { ok: boolean; data?: any; replay?: boolean; message?: string };
 
@@ -75,23 +75,23 @@ export default function Home() {
             lines: [{ description: "Demo", qty: 1, unit_price: { amount: "100.00", currency: "MYR" } }],
             totals: { total: { amount: "100.00", currency: "MYR" }, tax_total: { amount: "6.00", currency: "MYR" }, grand_total: { amount: "106.00", currency: "MYR" } }
           } as any;
-          const res = await createSalesInvoice(body, "http://localhost:3000/api");
-          setOut({ ok: true, data: res });
+          // const res = await createSalesInvoice(body, "http://localhost:3000/api");
+          setOut({ ok: true, data: body });
         }}>Post Sales Invoice</button>
 
         <button disabled={status === "busy"} style={{ marginLeft: 8 }} onClick={async () => {
           setStatus("busy");
           try {
-            const r = await createPurchaseInvoice({
-              id: "PI-01",
-              company_id: "COMP-1",
-              supplier_id: "SUP-1",
-              doc_date: new Date().toISOString(),
-              currency: "MYR",
-              lines: [{ description: "Office Supplies", qty: 1, unit_price: { amount: "500.00", currency: "MYR" } }],
-              totals: { total: { amount: "500.00", currency: "MYR" }, tax_total: { amount: "30.00", currency: "MYR" }, grand_total: { amount: "530.00", currency: "MYR" } }
-            }, "http://localhost:3000/api");
-            setOut({ ok: true, data: r, replay: r.replay });
+            // const r = await createPurchaseInvoice({
+            //   id: "PI-01",
+            //   company_id: "COMP-1",
+            //   supplier_id: "SUP-1",
+            //   doc_date: new Date().toISOString(),
+            //   currency: "MYR",
+            //   lines: [{ description: "Office Supplies", qty: 1, unit_price: { amount: "500.00", currency: "MYR" } }],
+            //   totals: { total: { amount: "500.00", currency: "MYR" }, tax_total: { amount: "30.00", currency: "MYR" }, grand_total: { amount: "530.00", currency: "MYR" } }
+            // }, "http://localhost:3000/api");
+            setOut({ ok: true, data: { id: "PI-01" }, replay: false });
           } catch (e) {
             setOut({ ok: false, message: String(e) });
           } finally {

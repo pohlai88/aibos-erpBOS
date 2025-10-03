@@ -1,4 +1,5 @@
 import { repo, tx } from "./db";
+import type { Tx } from "@aibos/db-adapter";
 import { loadRule, get } from "@aibos/posting-rules";
 import { computeBaseAmounts } from "./fx";
 import { ensureDimValid, ensureDimsMeetAccountPolicy } from "./dimensions";
@@ -77,7 +78,7 @@ export async function postByRule(doctype: string, id: string, currency: string, 
         line.txn_currency = line.currency;
     });
 
-    const idActual = await tx.run(async (t: TxManager) => {
+    const idActual = await tx.run(async (t: Tx) => {
         const existing = await repo.getIdByKey(key, t);
         if (existing) return existing;
         const res = await repo.insertJournal({

@@ -13,7 +13,7 @@
     "dependencies": {
         "@aibos/db-adapter": "workspace:*",
         "@aibos/services": "workspace:*",
-        "dotenv": "^16.4.5",
+        "dotenv": "^16.6.1",
         "drizzle-orm": "^0.44.5",
         "node-fetch": "^3.3.2",
         "pg": "^8.16.3"

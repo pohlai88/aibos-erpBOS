@@ -3,7 +3,12 @@ const nextConfig = {
     eslint: {
         ignoreDuringBuilds: true,
     },
-    transpilePackages: [],
+    transpilePackages: [
+        "@aibos/api-client",
+        "@aibos/contracts",
+        "@aibos/ports",
+        "@aibos/services"
+    ],
     async rewrites() {
         return [
             {

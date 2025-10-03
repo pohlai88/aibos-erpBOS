@@ -1,2 +1,2 @@
-export { createSalesInvoice } from "./client.js";
-export { createPurchaseInvoice } from "./pi-client.js";
+export { createSalesInvoice } from "./client";
+export { createPurchaseInvoice } from "./pi-client";
