@@ -1,7 +1,14 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: ["src/index.ts", "src/reports/cash.ts", "src/common/result.ts"],
+  entry: [
+    "src/index.ts",
+    "src/reports/cash.ts",
+    "src/common/result.ts",
+    "http/sales/sales-invoice.schema.ts",
+    "http/purchase/purchase-invoice.schema.ts",
+    "http/ping.schema.ts"
+  ],
   format: ["esm", "cjs"],
   dts: false,           // d.ts from tsc
   clean: false,               // Don't clean - preserve .d.ts files from tsc

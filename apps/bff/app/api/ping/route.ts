@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { PingRequest, PingResponse } from "@aibos/contracts";
+import { PingRequest, PingResponse } from "@aibos/contracts/http/ping.schema";
 import { pingService } from "@aibos/services/src/ping";
 
 export async function POST(req: NextRequest) {
