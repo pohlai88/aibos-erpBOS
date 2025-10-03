@@ -14,6 +14,7 @@ export default {
         // Alias for db-adapter to use built files
         config.resolve.alias = {
             ...config.resolve.alias,
+            '@': path.resolve(__dirname, 'app'),
             '@aibos/db-adapter': path.resolve(__dirname, '../../packages/adapters/db/dist'),
             '@aibos/db-adapter/schema': path.resolve(__dirname, '../../packages/adapters/db/dist/schema.js'),
         };
