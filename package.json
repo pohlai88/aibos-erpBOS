@@ -75,6 +75,7 @@
     "db:down": "docker compose stop db",
     "db:generate": "pnpm -w drizzle-kit generate",
     "db:migrate": "pnpm -w drizzle-kit migrate",
+    "db:push": "pnpm -w drizzle-kit push",
     "db:studio": "pnpm -w drizzle-kit studio",
     "db:up": "docker compose up -d db",
     "depcruise": "depcruise --config .dependency-cruiser.cjs . || exit 1",

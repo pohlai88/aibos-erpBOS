@@ -51,16 +51,16 @@ export class StripeGateway implements Gateway {
     }): Promise<GatewayCapture> {
         try {
             const paymentIntent = await this.stripe.paymentIntents.capture(params.extRef);
-            
+
             // Get the latest charge to calculate fees
             const charges = await this.stripe.charges.list({
                 payment_intent: params.extRef,
                 limit: 1
             });
-            
-            const fee = charges.data[0]?.balance_transaction ? 
+
+            const fee = charges.data[0]?.balance_transaction ?
                 await this.getStripeFee(charges.data[0].balance_transaction as string) : undefined;
-            
+
             return {
                 extRef: paymentIntent.id,
                 capturedAmount: paymentIntent.amount / 100, // Convert from cents
@@ -80,11 +80,11 @@ export class StripeGateway implements Gateway {
             const refundParams: any = {
                 payment_intent: params.extRef,
             };
-            
+
             if (params.amount) {
                 refundParams.amount = Math.round(params.amount * 100);
             }
-            
+
             const refund = await this.stripe.refunds.create(refundParams);
 
             return {
@@ -113,9 +113,9 @@ export class StripeGateway implements Gateway {
             return { ok: true };
         } catch (error) {
             console.error('Stripe webhook verification error:', error);
-            return { 
-                ok: false, 
-                reason: error instanceof Error ? error.message : 'Webhook verification failed' 
+            return {
+                ok: false,
+                reason: error instanceof Error ? error.message : 'Webhook verification failed'
             };
         }
     }
@@ -123,7 +123,7 @@ export class StripeGateway implements Gateway {
     parseWebhook(rawBody: string): GatewayWebhookEvent {
         try {
             const event = JSON.parse(rawBody);
-            
+
             let eventType: 'captured' | 'failed' | 'refunded' | 'voided';
             let extRef: string;
             let amount: number;

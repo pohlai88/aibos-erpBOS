@@ -4,6 +4,7 @@ import { z } from "zod";
 // --- Portal Session Management ---
 
 export const PortalInitReq = z.object({
+    company_id: z.string(),
     customer_id: z.string(),
     email: z.string().email(),
     ttl_minutes: z.number().int().min(10).max(1440).default(60)

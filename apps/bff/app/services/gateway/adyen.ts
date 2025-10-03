@@ -13,8 +13,8 @@ export class AdyenGateway implements Gateway {
     constructor() {
         const config = new Config();
         config.apiKey = env.ADYEN_API_KEY;
-        config.environment = 'TEST'; // TODO: Make configurable via env
-        
+        config.environment = env.ADYEN_ENVIRONMENT || 'TEST';
+
         this.client = new Client({ config });
         this.checkout = new CheckoutAPI(this.client);
     }
@@ -28,7 +28,7 @@ export class AdyenGateway implements Gateway {
         try {
             // Simplified Adyen implementation - in production, you'd use the full API
             const extRef = `adyen_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            
+
             return {
                 clientSecret: `adyen_client_secret_${extRef}`,
                 extRef,
@@ -91,9 +91,9 @@ export class AdyenGateway implements Gateway {
             return { ok: true };
         } catch (error) {
             console.error('Adyen webhook verification error:', error);
-            return { 
-                ok: false, 
-                reason: error instanceof Error ? error.message : 'Webhook verification failed' 
+            return {
+                ok: false,
+                reason: error instanceof Error ? error.message : 'Webhook verification failed'
             };
         }
     }
@@ -101,7 +101,7 @@ export class AdyenGateway implements Gateway {
     parseWebhook(rawBody: string): GatewayWebhookEvent {
         try {
             const event = JSON.parse(rawBody);
-            
+
             let eventType: 'captured' | 'failed' | 'refunded' | 'voided';
             let extRef: string;
             let amount: number;

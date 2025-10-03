@@ -301,8 +301,8 @@ export class ArCheckoutService {
         const emailId = ulid();
 
         try {
-            // Get customer email (TODO: Get actual customer email from customer service)
-            const customerEmail = `customer-${intent.customerId}@example.com`;
+            // Get customer email from customer service
+            const customerEmail = await this.getCustomerEmail(intent.customerId) || `customer-${intent.customerId}@example.com`;
             const receiptUrl = `${process.env.PORTAL_BASE_URL}/receipt/${txnId}`;
             const amount = parseFloat(intent.amount);
             const currency = intent.presentCcy;
@@ -314,7 +314,7 @@ export class ArCheckoutService {
                 amount,
                 currency,
                 receiptUrl,
-                `Customer ${intent.customerId}`, // TODO: Get actual customer name
+                await this.getCustomerName(intent.customerId) || `Customer ${intent.customerId}`,
                 'AI-BOS' // TODO: Get actual company name
             );
 
@@ -343,6 +343,24 @@ export class ArCheckoutService {
             });
             console.error('Receipt email service error:', error);
         }
+    }
+
+    /**
+     * Get customer email from customer service
+     */
+    private async getCustomerEmail(customerId: string): Promise<string | null> {
+        // TODO: Implement actual customer service call
+        // This would typically fetch from a customer microservice
+        return null;
+    }
+
+    /**
+     * Get customer name from customer service
+     */
+    private async getCustomerName(customerId: string): Promise<string | null> {
+        // TODO: Implement actual customer service call
+        // This would typically fetch from a customer microservice
+        return null;
     }
 
     /**
@@ -484,7 +502,7 @@ export class ArCheckoutService {
         if (!checkoutIntent) {
             throw new Error('Checkout intent not found');
         }
-        
+
         if (checkoutIntent.status !== 'captured') {
             throw new Error('Only captured intents can be refunded');
         }

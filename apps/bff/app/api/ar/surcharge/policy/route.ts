@@ -5,10 +5,10 @@ import { z } from "zod";
 import { ArSurchargeService } from "@/services/ar/surcharge";
 
 const SurchargePolicySchema = z.object({
-  enabled: z.boolean(),
-  pct: z.number().min(0).max(1),
-  min_fee: z.number().min(0),
-  cap_fee: z.number().min(0).optional().or(z.undefined())
+    enabled: z.boolean(),
+    pct: z.number().min(0).max(1),
+    min_fee: z.number().min(0),
+    cap_fee: z.number().min(0).optional().or(z.undefined())
 });
 
 const surchargeService = new ArSurchargeService();
