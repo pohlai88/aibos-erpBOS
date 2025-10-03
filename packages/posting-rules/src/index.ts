@@ -27,6 +27,6 @@ export function loadRule(name: string): PostingRule {
   return parsed;
 }
 
-export function get(obj: any, dot: string): any {
-  return dot.split(".").reduce((a, k) => (a == null ? undefined : a[k]), obj);
+export function get(obj: Record<string, unknown>, dot: string): unknown {
+  return dot.split(".").reduce<unknown>((a, k) => (a == null ? undefined : (a as Record<string, unknown>)[k]), obj);
 }

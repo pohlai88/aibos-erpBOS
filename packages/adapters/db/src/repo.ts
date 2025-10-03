@@ -1,8 +1,8 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool, PoolClient } from "pg";
 import * as schema from "./schema.js";
-import { eq, and } from "drizzle-orm";
-import type { LedgerRepo, RepoJournal, RepoJournalLine, Tx, TxManager } from "@aibos/ports";
+import { eq, and as _and } from "drizzle-orm";
+import type { LedgerRepo, RepoJournal, RepoJournalLine as _RepoJournalLine, Tx as _Tx, TxManager } from "@aibos/ports";
 import * as crypto from "node:crypto";
 
 export type DbTx = { client: PoolClient };

@@ -7,7 +7,7 @@ export class AibosClient {
         if (!r.ok) throw new Error(await r.text());
         return r.json();
     }
-    async post(path: string, body: any) {
+    async post(path: string, body: unknown) {
         const r = await fetch(`${this.base}${path}`, { method: "POST", headers: this.h({ "content-type": "application/json" }), body: JSON.stringify(body) });
         if (r.status === 429) throw new Error(`Rate limited. Retry-After: ${r.headers.get("Retry-After")}`);
         if (!r.ok) throw new Error(await r.text());

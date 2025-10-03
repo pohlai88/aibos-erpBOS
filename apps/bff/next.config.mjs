@@ -10,7 +10,7 @@ export default {
         // Disable ESLint during builds to avoid circular structure warnings
         ignoreDuringBuilds: true,
     },
-    webpack: (config, { isServer }) => {
+    webpack: (config, { isServer: _isServer }) => {
         // Alias for db-adapter to use built files
         config.resolve.alias = {
             ...config.resolve.alias,

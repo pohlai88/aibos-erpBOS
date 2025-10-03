@@ -13,18 +13,18 @@ export function mockQueryResult<T extends RowLike>(rows: T[]): QueryResult<T> {
 }
 
 export function createPoolMock<T extends RowLike>(fixtures: {
-    [sql: string]: T[] | ((...params: any[]) => T[]);
+    [sql: string]: T[] | ((...params: unknown[]) => T[]);
 }) {
     return {
-        query: async (text: string, params?: any[]) =>
+        query: async (text: string, params?: unknown[]) =>
             mockQueryResult(
-                typeof fixtures[text] === "function" ? (fixtures[text] as any)(...(params ?? [])) : (fixtures[text] ?? [])
+                typeof fixtures[text] === "function" ? (fixtures[text] as (...params: unknown[]) => T[])(...(params ?? [])) : (fixtures[text] ?? [])
             ),
         end: async () => undefined,
         connect: async () => ({
-            query: async (text: string, params?: any[]) =>
+            query: async (text: string, params?: unknown[]) =>
                 mockQueryResult(
-                    typeof fixtures[text] === "function" ? (fixtures[text] as any)(...(params ?? [])) : (fixtures[text] ?? [])
+                    typeof fixtures[text] === "function" ? (fixtures[text] as (...params: unknown[]) => T[])(...(params ?? [])) : (fixtures[text] ?? [])
                 ),
             release: () => undefined,
         }),

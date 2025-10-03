@@ -29,7 +29,7 @@
     "migrate:push": "drizzle-kit push",
     "seed": "tsx src/seed.ts",
     "type-check": "tsc --noEmit",
-    "lint": "eslint . --ext .ts,.tsx",
+    "lint": "eslint src --ext .ts,.tsx",
     "test": "echo 'No tests configured for db-adapter'"
   },
   "dependencies": {

@@ -190,8 +190,6 @@ importers:
         specifier: 24.6.0
         version: 24.6.0
 
-  packages/_probe: {}
-
   packages/adapters/db:
     dependencies:
       '@aibos/ports':

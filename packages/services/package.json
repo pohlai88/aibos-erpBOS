@@ -2,21 +2,21 @@
   "name": "@aibos/services",
   "version": "1.0.0",
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs",
-      "default": "./dist/index.mjs"
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./src/*": {
       "types": "./dist/*.d.ts",
-      "import": "./dist/*.mjs",
-      "require": "./dist/*.cjs",
-      "default": "./dist/*.mjs"
+      "import": "./dist/*.js",
+      "require": "./dist/*.js",
+      "default": "./dist/*.js"
     }
   },
   "files": [
@@ -25,7 +25,7 @@
   "scripts": {
     "build": "tsc -b",
     "dev": "echo 'Services - no dev server needed'",
-    "lint": "eslint . --ext .ts,.tsx",
+    "lint": "eslint src --ext .ts,.tsx",
     "type-check": "tsc --noEmit",
     "test": "echo 'No tests configured for services'"
   },

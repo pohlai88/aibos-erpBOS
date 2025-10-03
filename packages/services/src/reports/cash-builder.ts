@@ -12,7 +12,7 @@ export async function buildCashReport(args: { companyId: string; year: number; m
     if (!companyId) return err({ code: "ARG_MISSING", message: "companyId is required" });
     if (!Number.isInteger(year)) return err({ code: "ARG_INVALID", message: "year must be an integer" });
 
-    const rows: RawLine[] = await fetchLines(companyId, year, month).then(toCamel);
+    const rows: RawLine[] = await fetchLines(companyId, year, month).then(toCamel) as RawLine[];
     // Group by line id/name, allow multiple buckets (e.g., monthly columns)
     const map = new Map<string, { name: string; currency: string; values: CashMoney[] }>();
     for (const r of rows) {

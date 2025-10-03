@@ -26,7 +26,7 @@ export async function postByRule(doctype: string, id: string, currency: string, 
 
     const map = (kind: "debits" | "credits"): JLine[] =>
         rule[kind].map((l: any) => {
-            const m = get(doc, l.amountField);
+            const m = get(doc, l.amountField) as Money;
             if (!m) throw new Error(`Missing ${l.amountField}`);
             const jl: JLine = {
                 id: crypto.randomUUID(),
@@ -36,7 +36,7 @@ export async function postByRule(doctype: string, id: string, currency: string, 
                 currency
             };
             if (l.party?.field) {
-                const partyId = get(doc, l.party.field);
+                const partyId = get(doc, l.party.field) as string;
                 if (partyId) { jl.party_type = l.party.type as any; jl.party_id = partyId; }
             }
             return jl;
@@ -45,8 +45,8 @@ export async function postByRule(doctype: string, id: string, currency: string, 
     const lines = [...map("debits"), ...map("credits")];
 
     // Handle dimensions (M14) - apply doc-level defaults and validate
-    const docCostCenter = get(doc, "cost_center_id");
-    const docProject = get(doc, "project_id");
+    const docCostCenter = get(doc, "cost_center_id") as string | undefined;
+    const docProject = get(doc, "project_id") as string | undefined;
 
     for (const line of lines) {
         // Apply doc-level defaults if line doesn't have specific values
@@ -61,8 +61,8 @@ export async function postByRule(doctype: string, id: string, currency: string, 
         await ensureDimsMeetAccountPolicy(line.account_code, company_id, { cc, pr });
 
         // Update line with validated dimensions
-        line.cost_center_id = cc;
-        line.project_id = pr;
+        if (cc) line.cost_center_id = cc;
+        if (pr) line.project_id = pr;
     }
 
     // Compute base amounts for multi-currency support

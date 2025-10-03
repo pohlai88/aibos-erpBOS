@@ -9,7 +9,7 @@ import { computeTax } from "@aibos/policies";
 function mapLines(si: SalesInvoice, kind: "debits" | "credits"): JournalLine[] {
   const rule = loadRule("sales-invoice");
   const lines = rule[kind].map((l: any) => {
-    const money = get(si, l.amountField);
+    const money = get(si, l.amountField) as any;
     if (!money) throw new Error(`Missing amountField ${l.amountField}`);
     const jl: JournalLine = {
       id: genId("JRL"),
@@ -21,7 +21,7 @@ function mapLines(si: SalesInvoice, kind: "debits" | "credits"): JournalLine[] {
       txn_currency: si.currency,
     };
     if (l.party?.type && l.party.field) {
-      const partyId = get(si, l.party.field);
+      const partyId = get(si, l.party.field) as string;
       if (partyId) {
         jl.party_type = l.party.type as any;
         jl.party_id = partyId;
@@ -75,7 +75,7 @@ export async function postSalesInvoice(si: SalesInvoice, deps: Deps = {}) {
     try {
       const taxCodeId = (si as any).tax_code_id;
       const taxRule = await deps.resolveTaxRule(deps.pool, si.company_id, taxCodeId, si.doc_date);
-      
+
       if (taxRule) {
         // Calculate net amount (sum of non-tax lines)
         const netAmount = lines.reduce((sum, line) => {

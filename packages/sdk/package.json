@@ -19,7 +19,7 @@
   "scripts": {
     "build": "tsc -b",
     "dev": "echo 'SDK - no dev server needed'",
-    "lint": "eslint . --ext .ts,.tsx",
+    "lint": "eslint src --ext .ts,.tsx",
     "type-check": "tsc --noEmit",
     "test": "echo 'No tests configured for sdk'"
   },

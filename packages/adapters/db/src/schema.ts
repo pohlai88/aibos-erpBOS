@@ -1,5 +1,5 @@
-import { pgTable, text, char, timestamp, numeric, pgEnum, primaryKey, integer, boolean, jsonb, date } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { pgTable, text, char, timestamp, numeric, pgEnum as _pgEnum, primaryKey, integer, boolean, jsonb, date } from "drizzle-orm/pg-core";
+import { relations as _relations } from "drizzle-orm";
 
 // Import allocation schemas
 export * from "./schema/alloc.js";
