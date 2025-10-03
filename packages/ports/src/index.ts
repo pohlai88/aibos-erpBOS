@@ -44,3 +44,6 @@ export interface LedgerRepo {
     enqueueOutbox(event: unknown, tx?: Tx): Promise<void>;
     trialBalance?(companyId: string, currency: string, tx?: Tx): Promise<Array<{ account_code: string, debit: string, credit: string, currency: string }>>;
 }
+
+// Make sure they're exported as types for consumers:
+export type { LedgerRepo as LedgerRepoType, TxManager as TxManagerType };

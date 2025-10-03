@@ -98,7 +98,7 @@ export class LedgerService {
   async insertJournal(journal: Omit<RepoJournal, "id">): Promise<{ id: string; lines: RepoJournalLine[] }> {
     if (this.ledgerRepo && this.txManager) {
       // Use database implementation
-      return await this.txManager.run(async (tx) => {
+      return await this.txManager.run(async (tx: Tx) => {
         // Check for existing journal by idempotency key
         const exists = await this.ledgerRepo!.existsByKey(journal.idempotency_key, tx);
         if (exists) {
@@ -144,7 +144,7 @@ export class LedgerService {
         posting_date: journal.posting_date,
         currency: journal.currency,
         source: { doctype: journal.source_doctype, id: journal.source_id },
-        lines: journal.lines.map(l => ({
+        lines: journal.lines.map((l: RepoJournalLine) => ({
           id: genId("JRL"),
           account_code: l.account_code,
           dc: l.dc,

@@ -114,7 +114,7 @@ export declare const BudgetImportSummary: z.ZodObject<{
         row: number;
     }>, "many">>;
 }, "strip", z.ZodTypeAny, {
-    status: "committed" | "pending" | "dry_run_ok" | "failed";
+    status: "pending" | "dry_run_ok" | "committed" | "failed";
     importId: string;
     source_name: string;
     rows_total: number;
@@ -125,7 +125,7 @@ export declare const BudgetImportSummary: z.ZodObject<{
         row: number;
     }[] | undefined;
 }, {
-    status: "committed" | "pending" | "dry_run_ok" | "failed";
+    status: "pending" | "dry_run_ok" | "committed" | "failed";
     importId: string;
     source_name: string;
     rows_total: number;
@@ -155,7 +155,7 @@ export declare const BudgetImportResponse: z.ZodObject<{
             row: number;
         }>, "many">>;
     }, "strip", z.ZodTypeAny, {
-        status: "committed" | "pending" | "dry_run_ok" | "failed";
+        status: "pending" | "dry_run_ok" | "committed" | "failed";
         importId: string;
         source_name: string;
         rows_total: number;
@@ -166,7 +166,7 @@ export declare const BudgetImportResponse: z.ZodObject<{
             row: number;
         }[] | undefined;
     }, {
-        status: "committed" | "pending" | "dry_run_ok" | "failed";
+        status: "pending" | "dry_run_ok" | "committed" | "failed";
         importId: string;
         source_name: string;
         rows_total: number;
@@ -189,7 +189,7 @@ export declare const BudgetImportResponse: z.ZodObject<{
     }>, "many">>;
 }, "strip", z.ZodTypeAny, {
     summary: {
-        status: "committed" | "pending" | "dry_run_ok" | "failed";
+        status: "pending" | "dry_run_ok" | "committed" | "failed";
         importId: string;
         source_name: string;
         rows_total: number;
@@ -206,7 +206,7 @@ export declare const BudgetImportResponse: z.ZodObject<{
     }[] | undefined;
 }, {
     summary: {
-        status: "committed" | "pending" | "dry_run_ok" | "failed";
+        status: "pending" | "dry_run_ok" | "committed" | "failed";
         importId: string;
         source_name: string;
         rows_total: number;

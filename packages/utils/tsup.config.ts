@@ -2,12 +2,14 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: ["src/index.ts"],
-  format: ["esm", "cjs"],     // -> .mjs + .cjs
-  dts: false,                 // -> tsc -b handles types
-  sourcemap: true,            // -> .map
+  format: ["esm", "cjs"],
+  dts: false,
   clean: true,
-  treeshake: true,
-  target: "es2020",
   outDir: "dist",
-  splitting: false
+  splitting: false,
+  treeshake: true,
+  target: "es2022",
+  outExtension({ format }) {
+    return { js: format === "esm" ? ".js" : ".cjs" };
+  }
 });

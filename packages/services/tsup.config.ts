@@ -1,15 +1,23 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-    entry: ["src/index.ts"],
-    format: ["esm", "cjs"],     // -> .mjs + .cjs
-    dts: false,                  // -> index.d.ts
-    sourcemap: true,            // -> .map
-    clean: true,
-    treeshake: true,
-    target: "es2020",
-    outDir: "dist",
-    splitting: false,
-    external: ["@aibos/contracts", "@aibos/ports", "@aibos/posting-rules", "@aibos/policies", "@aibos/db-adapter", "@aibos/utils"],
-    tsconfig: "./tsconfig.json"
+  entry: [
+    "src/index.ts",
+    "src/ledger.ts",
+    "src/posting.ts",
+    "src/posting-pi.ts",
+    "src/ping.ts",
+    "src/reports/cash-builder.ts",
+    "src/reversal.ts"
+  ],
+  format: ["esm", "cjs"],
+  dts: false,           // d.ts from tsc
+  clean: true,
+  outDir: "dist",
+  splitting: false,
+  treeshake: true,
+  target: "es2022",
+  outExtension({ format }) {
+    return { js: format === "esm" ? ".js" : ".cjs" };
+  }
 });

@@ -1,14 +1,25 @@
-export type CashMoney = { currency: string; amount: number };
+import { z } from "zod";
 
-export type CashReportLine = {
-    id: string;
-    name: string;
-    values: CashMoney[];   // month buckets or segments
-    total: CashMoney;      // precomputed total
-};
+export const cashMoneySchema = z.object({
+    currency: z.string(),
+    amount: z.number(),
+});
+export type CashMoney = z.infer<typeof cashMoneySchema>;
 
-export type CashReport = {
-    companyId: string;
-    period: { year: number; month?: number };
-    lines: CashReportLine[];
-};
+export const cashReportLineSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    values: z.array(cashMoneySchema),   // month buckets or segments
+    total: cashMoneySchema,             // precomputed total
+});
+export type CashReportLine = z.infer<typeof cashReportLineSchema>;
+
+export const cashReportSchema = z.object({
+    companyId: z.string(),
+    period: z.object({
+        year: z.number(),
+        month: z.number().optional(),
+    }),
+    lines: z.array(cashReportLineSchema),
+});
+export type CashReport = z.infer<typeof cashReportSchema>;

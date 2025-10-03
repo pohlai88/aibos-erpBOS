@@ -2,77 +2,186 @@ import { z } from "zod";
 export declare const SalesInvoiceLine: z.ZodObject<{
     description: z.ZodString;
     qty: z.ZodNumber;
-    unit_price: any;
+    unit_price: z.ZodObject<{
+        amount: z.ZodString;
+        currency: z.ZodEffects<z.ZodString, string, string>;
+    }, "strip", z.ZodTypeAny, {
+        amount: string;
+        currency: string;
+    }, {
+        amount: string;
+        currency: string;
+    }>;
     tax_code: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
-    [x: string]: any;
-    description?: unknown;
-    qty?: unknown;
-    unit_price?: unknown;
-    tax_code?: unknown;
+    description: string;
+    qty: number;
+    unit_price: {
+        amount: string;
+        currency: string;
+    };
+    tax_code?: string | undefined;
 }, {
-    [x: string]: any;
-    description?: unknown;
-    qty?: unknown;
-    unit_price?: unknown;
-    tax_code?: unknown;
+    description: string;
+    qty: number;
+    unit_price: {
+        amount: string;
+        currency: string;
+    };
+    tax_code?: string | undefined;
 }>;
 export declare const SalesInvoice: z.ZodObject<{
     id: z.ZodString;
     company_id: z.ZodString;
     customer_id: z.ZodString;
-    doc_date: any;
-    currency: any;
+    doc_date: z.ZodString;
+    currency: z.ZodEffects<z.ZodString, string, string>;
     lines: z.ZodArray<z.ZodObject<{
         description: z.ZodString;
         qty: z.ZodNumber;
-        unit_price: any;
+        unit_price: z.ZodObject<{
+            amount: z.ZodString;
+            currency: z.ZodEffects<z.ZodString, string, string>;
+        }, "strip", z.ZodTypeAny, {
+            amount: string;
+            currency: string;
+        }, {
+            amount: string;
+            currency: string;
+        }>;
         tax_code: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        [x: string]: any;
-        description?: unknown;
-        qty?: unknown;
-        unit_price?: unknown;
-        tax_code?: unknown;
+        description: string;
+        qty: number;
+        unit_price: {
+            amount: string;
+            currency: string;
+        };
+        tax_code?: string | undefined;
     }, {
-        [x: string]: any;
-        description?: unknown;
-        qty?: unknown;
-        unit_price?: unknown;
-        tax_code?: unknown;
+        description: string;
+        qty: number;
+        unit_price: {
+            amount: string;
+            currency: string;
+        };
+        tax_code?: string | undefined;
     }>, "many">;
     totals: z.ZodObject<{
-        total: any;
-        tax_total: any;
-        grand_total: any;
+        total: z.ZodObject<{
+            amount: z.ZodString;
+            currency: z.ZodEffects<z.ZodString, string, string>;
+        }, "strip", z.ZodTypeAny, {
+            amount: string;
+            currency: string;
+        }, {
+            amount: string;
+            currency: string;
+        }>;
+        tax_total: z.ZodObject<{
+            amount: z.ZodString;
+            currency: z.ZodEffects<z.ZodString, string, string>;
+        }, "strip", z.ZodTypeAny, {
+            amount: string;
+            currency: string;
+        }, {
+            amount: string;
+            currency: string;
+        }>;
+        grand_total: z.ZodObject<{
+            amount: z.ZodString;
+            currency: z.ZodEffects<z.ZodString, string, string>;
+        }, "strip", z.ZodTypeAny, {
+            amount: string;
+            currency: string;
+        }, {
+            amount: string;
+            currency: string;
+        }>;
     }, "strip", z.ZodTypeAny, {
-        [x: string]: any;
-        total?: unknown;
-        tax_total?: unknown;
-        grand_total?: unknown;
+        total: {
+            amount: string;
+            currency: string;
+        };
+        tax_total: {
+            amount: string;
+            currency: string;
+        };
+        grand_total: {
+            amount: string;
+            currency: string;
+        };
     }, {
-        [x: string]: any;
-        total?: unknown;
-        tax_total?: unknown;
-        grand_total?: unknown;
+        total: {
+            amount: string;
+            currency: string;
+        };
+        tax_total: {
+            amount: string;
+            currency: string;
+        };
+        grand_total: {
+            amount: string;
+            currency: string;
+        };
     }>;
 }, "strip", z.ZodTypeAny, {
-    [x: string]: any;
-    id?: unknown;
-    company_id?: unknown;
-    customer_id?: unknown;
-    doc_date?: unknown;
-    currency?: unknown;
-    lines?: unknown;
-    totals?: unknown;
+    id: string;
+    company_id: string;
+    lines: {
+        description: string;
+        qty: number;
+        unit_price: {
+            amount: string;
+            currency: string;
+        };
+        tax_code?: string | undefined;
+    }[];
+    customer_id: string;
+    currency: string;
+    doc_date: string;
+    totals: {
+        total: {
+            amount: string;
+            currency: string;
+        };
+        tax_total: {
+            amount: string;
+            currency: string;
+        };
+        grand_total: {
+            amount: string;
+            currency: string;
+        };
+    };
 }, {
-    [x: string]: any;
-    id?: unknown;
-    company_id?: unknown;
-    customer_id?: unknown;
-    doc_date?: unknown;
-    currency?: unknown;
-    lines?: unknown;
-    totals?: unknown;
+    id: string;
+    company_id: string;
+    lines: {
+        description: string;
+        qty: number;
+        unit_price: {
+            amount: string;
+            currency: string;
+        };
+        tax_code?: string | undefined;
+    }[];
+    customer_id: string;
+    currency: string;
+    doc_date: string;
+    totals: {
+        total: {
+            amount: string;
+            currency: string;
+        };
+        tax_total: {
+            amount: string;
+            currency: string;
+        };
+        grand_total: {
+            amount: string;
+            currency: string;
+        };
+    };
 }>;
 export type SalesInvoice = z.infer<typeof SalesInvoice>;

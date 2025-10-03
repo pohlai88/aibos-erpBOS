@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { pool } from "./db";
+import { pool } from "./db.js";
 import { reverseJournal } from "@aibos/services";
 
 export async function processDueReversals() {

@@ -1,7 +1,7 @@
 import "dotenv/config";
-import { pool } from "./db";
-import { processDueReversals } from "./reversals";
-import { processWebhooksOnce } from "./webhooks";
+import { pool } from "./db.js";
+import { processDueReversals } from "./reversals.js";
+import { processWebhooksOnce } from "./webhooks.js";
 async function runOnce() {
     const client = await pool.connect();
     try {

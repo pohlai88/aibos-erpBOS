@@ -1,6 +1,6 @@
 {
   "name": "@aibos/contracts",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -11,40 +11,16 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs",
       "default": "./dist/index.js"
-    },
-    "./http/sales/sales-invoice.schema": {
-      "types": "./dist/http/sales/sales-invoice.schema.d.ts",
-      "import": "./dist/http/sales/sales-invoice.schema.js",
-      "require": "./dist/http/sales/sales-invoice.schema.js"
-    },
-    "./http/purchase/purchase-invoice.schema": {
-      "types": "./dist/http/purchase/purchase-invoice.schema.d.ts",
-      "import": "./dist/http/purchase/purchase-invoice.schema.js",
-      "require": "./dist/http/purchase/purchase-invoice.schema.js"
-    },
-    "./http/ping/ping.schema": {
-      "types": "./dist/http/ping/ping.schema.d.ts",
-      "import": "./dist/http/ping/ping.schema.js",
-      "require": "./dist/http/ping/ping.schema.js"
     }
   },
   "files": [
-    "dist",
-    "src",
-    "http",
-    "scripts",
-    "openapi"
+    "dist"
   ],
   "scripts": {
+    "clean": "rimraf dist",
     "build:types": "tsc -b",
     "build:js": "tsup",
-    "build": "pnpm run build:types && pnpm run build:js",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "check": "pnpm gen:openapi && git diff --exit-code openapi/openapi.json || (echo 'Commit OpenAPI changes' && exit 1)",
-    "gen:openapi": "tsx ./scripts/build-openapi.ts",
-    "lint": "eslint src http scripts --ext .ts,.tsx",
-    "test": "echo 'No tests configured for contracts'",
-    "clean": "rimraf dist"
+    "build": "pnpm run build:types && pnpm run build:js"
   },
   "devDependencies": {
     "@types/node": "24.6.0"

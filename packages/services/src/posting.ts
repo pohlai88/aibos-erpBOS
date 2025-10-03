@@ -1,4 +1,4 @@
-import type { SalesInvoice } from "@aibos/contracts";
+import type { SalesInvoice } from "./_temp/shims.js";
 import type { LedgerRepo, TxManager } from "@aibos/ports";
 import { genId, type JournalLine, insertJournal } from "./ledger.js";
 import { loadRule, get } from "@aibos/posting-rules";

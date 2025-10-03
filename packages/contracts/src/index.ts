@@ -1,27 +1,3 @@
-// Re-export all contract schemas and types
-export * from '../http/sales/sales-invoice.schema.js';
-export * from '../http/purchase/purchase-invoice.schema.js';
-export * from '../http/ping.schema.js';
-export * from '../http/shared/primitives.js';
-export * from '../http/budget-import.schema.js';
-export * from './cash.js';
-export * from './cash_alert_schedule.js';
-export * from './capex.js';
-export * from './intangibles.js';
-export * from './assets_import.js';
-export * from './assets_prefs.js';
-export * from './impairments.js';
-export * from './ui_drafts.js';
-export * from './fx.js';
-export * from './common/result.js';
-export * from './reports/cash.js';
-export * from './http/types.js';
-export * from './alloc.js';
-export * from './tax_return.js';
-export * from './consol.js';
-export * from './cashflow.js';
-export * from './payments.js';
-export * from './payments-policy.js';
-export * from './payments-discount.js';
-export * from './bank-connect.js';
-export * from './ar.js';
+// packages/contracts/src/index.ts
+export * from "./reports/cash.js";
+export * from "./common/result.js"; // ok/err

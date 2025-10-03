@@ -1,15 +1,17 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "rootDir": "src",
     "outDir": "dist",
+    "composite": true,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "composite": true,
+    "declarationMap": false,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "skipLibCheck": true,
-    "strict": true
+    "strict": true,
+    "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "http/**/*.ts", "scripts/**/*.ts"],
+  "include": ["src/**/*.ts"],
   "references": []
 }

@@ -1,31 +1,24 @@
 {
   "name": "@aibos/posting-rules",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "type": "module",
   "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
+      "import": "./dist/index.js",
       "require": "./dist/index.cjs",
-      "default": "./dist/index.mjs"
+      "default": "./dist/index.js"
     }
   },
-  "files": [
-    "dist",
-    "src"
-  ],
+  "files": ["dist"],
   "scripts": {
+    "clean": "rimraf dist",
     "build:types": "tsc -b",
     "build:js": "tsup",
-    "build": "pnpm run build:types && pnpm run build:js",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "dev": "echo 'Posting rules - no dev server needed'",
-    "lint": "eslint src --ext .ts,.tsx",
-    "test": "echo 'No tests configured for posting-rules'",
-    "clean": "rimraf dist"
+    "build": "pnpm run build:types && pnpm run build:js"
   },
   "dependencies": {
     "json5": "^2.2.3"

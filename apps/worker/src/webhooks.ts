@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import crypto from "node:crypto";
-import { pool } from "./db";
+import { pool } from "./db.js";
 
 // backoff schedule (minutes)
 const BACKOFF = [1, 5, 15, 60, 180]; // then dead
