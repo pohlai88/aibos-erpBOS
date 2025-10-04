@@ -39,6 +39,45 @@ services:
       retries: 3
       start_period: 30s
 
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: aibos-web
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3001:3001"
+    depends_on:
+      bff:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    container_name: aibos-worker
+    environment:
+      DATABASE_URL: postgresql://aibos:aibos@db:5432/aibos
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "worker"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
 volumes:
   dbdata:
     driver: local

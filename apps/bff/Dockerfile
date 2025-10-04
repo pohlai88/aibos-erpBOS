@@ -1,5 +1,5 @@
 # Optimized BFF Dockerfile with multi-stage build
-FROM node:18-alpine AS base
+FROM node:22-alpine AS base
 
 # Install pnpm globally
 RUN npm install -g pnpm
@@ -28,11 +28,10 @@ COPY apps/bff/tsconfig.json ./apps/bff/
 COPY apps/bff/src/ ./apps/bff/src/
 
 # Build the application
-ENV DATABASE_URL=postgresql://aibos:aibos@db:5432/aibos
 RUN pnpm --filter @aibos/bff build
 
 # Production stage
-FROM node:18-alpine AS production
+FROM node:22-alpine AS production
 
 # Install pnpm
 RUN npm install -g pnpm
@@ -43,18 +42,23 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY turbo.json tsconfig.base.json ./
 
-# Copy built packages
-COPY --from=builder /app/packages/ ./packages/
-COPY --from=builder /app/apps/bff/.next/ ./apps/bff/.next/
-COPY --from=builder /app/apps/bff/public/ ./apps/bff/public/
+# Copy workspace packages
+COPY packages/ ./packages/
 COPY apps/bff/package.json ./apps/bff/
-COPY apps/bff/next.config.mjs ./apps/bff/
 
 # Install production dependencies only
 RUN pnpm install --frozen-lockfile --prod
 
+# Copy built application from builder stage
+COPY --from=builder /app/apps/bff/.next/ ./apps/bff/.next/
+COPY --from=builder /app/apps/bff/public/ ./apps/bff/public/
+COPY apps/bff/next.config.mjs ./apps/bff/
+
 # Expose port
 EXPOSE 3000
+
+# Install curl for health checks
+RUN apk add --no-cache curl
 
 # Set environment variables
 ENV NODE_ENV=production
