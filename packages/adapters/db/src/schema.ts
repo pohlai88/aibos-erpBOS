@@ -16,6 +16,7 @@ export * from "./schema/evidence.js";
 export * from "./schema/sox.js";
 export * from "./schema/close-board.js";
 export * from "./schema/attest.js";
+export * from "./schema/audit.js";
 
 export const company = pgTable("company", {
     id: text("id").primaryKey(),
