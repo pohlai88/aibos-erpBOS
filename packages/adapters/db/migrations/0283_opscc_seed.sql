@@ -48,13 +48,13 @@ INSERT INTO kpi_tile_config (company_id, board, tile_id, kpi, viz, format, targe
 -- Insert default playbook actions
 INSERT INTO playbook_action (action_id, name, description, parameter_schema, required_capability) VALUES
 ('PAYRUN_DISPATCH', 'Dispatch Payment Run', 'Execute payment run with specified parameters', 
- '{"type": "object", "properties": {"run_id": {"type": "string"}, "dry_run": {"type": "boolean"}}}', 'pay:dispatch'),
+ '{"type": "object", "properties": {"run_id": {"type": "string"}, "dry_run": {"type": "boolean"}}, "required": ["run_id"]}', 'pay:dispatch'),
 ('RUN_DUNNING', 'Run Dunning Process', 'Execute dunning process for overdue accounts', 
- '{"type": "object", "properties": {"policy_code": {"type": "string"}, "segment": {"type": "string"}, "dry_run": {"type": "boolean"}}}', 'ar:dunning:run'),
+ '{"type": "object", "properties": {"policy_code": {"type": "string"}, "segment": {"type": "string"}, "dry_run": {"type": "boolean"}}, "required": ["policy_code", "segment"]}', 'ar:dunning:run'),
 ('FX_REVALUE', 'FX Revaluation', 'Execute FX revaluation for specified period', 
- '{"type": "object", "properties": {"year": {"type": "integer"}, "month": {"type": "integer"}, "ccy_pairs": {"type": "array"}, "dry_run": {"type": "boolean"}}}', 'fx:manage'),
+ '{"type": "object", "properties": {"year": {"type": "integer"}, "month": {"type": "integer"}, "ccy_pairs": {"type": "array"}, "dry_run": {"type": "boolean"}}, "required": ["year", "month", "ccy_pairs"]}', 'fx:manage'),
 ('ACCELERATE_COLLECTIONS', 'Accelerate Collections', 'Escalate collections for at-risk accounts', 
- '{"type": "object", "properties": {"customer_ids": {"type": "array"}, "escalation_level": {"type": "string"}}}', 'ar:collections:manage');
+ '{"type": "object", "properties": {"customer_ids": {"type": "array"}, "escalation_level": {"type": "string"}}, "required": ["customer_ids", "escalation_level"]}', 'ar:collections:manage');
 
 -- Insert default alert rules
 INSERT INTO alert_rule (company_id, board, kpi, rule_id, expr, severity, throttle_sec) VALUES

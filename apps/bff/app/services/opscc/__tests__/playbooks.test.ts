@@ -4,6 +4,9 @@ import { pool } from '@/lib/db';
 import { PlaybooksService } from '../playbooks';
 import { testIds } from '../../payments/__tests__/utils/ids';
 import { cleanCompany } from '../../payments/__tests__/utils/cleanup';
+import { db } from '@/lib/db';
+import { playbookAction } from '@aibos/db-adapter/schema';
+import { eq } from 'drizzle-orm';
 
 describe('Playbooks Service', () => {
     let ids: ReturnType<typeof testIds>;
@@ -12,6 +15,35 @@ describe('Playbooks Service', () => {
     beforeEach(async () => {
         ids = testIds(expect.getState().currentTestName!);
         await cleanCompany(ids.companyId);
+
+        // Update existing playbook actions to include required fields
+        await db.update(playbookAction)
+            .set({
+                parameter_schema: {
+                    type: 'object',
+                    properties: {
+                        run_id: { type: 'string' },
+                        dry_run: { type: 'boolean' }
+                    },
+                    required: ['run_id']
+                }
+            })
+            .where(eq(playbookAction.action_id, 'PAYRUN_DISPATCH'));
+
+        await db.update(playbookAction)
+            .set({
+                parameter_schema: {
+                    type: 'object',
+                    properties: {
+                        policy_code: { type: 'string' },
+                        segment: { type: 'string' },
+                        dry_run: { type: 'boolean' }
+                    },
+                    required: ['policy_code', 'segment']
+                }
+            })
+            .where(eq(playbookAction.action_id, 'RUN_DUNNING'));
+
         service = new PlaybooksService();
     });
 
@@ -141,15 +173,20 @@ describe('Playbooks Service', () => {
                 dry_run: true
             };
 
-            const result = await service.executePlaybook(ids.companyId, request);
-
-            expect(result).toBeDefined();
-            expect(result.action_id).toBe('UNKNOWN_ACTION');
-            expect(result.status).toBe('ERROR');
-            expect(result.error_message).toContain('Unknown action');
+            // Unknown actions should throw an error
+            await expect(
+                service.executePlaybook(ids.companyId, request)
+            ).rejects.toThrow('Playbook action not found: UNKNOWN_ACTION');
         });
 
         it('should validate required parameters', async () => {
+            // First, let's verify the action exists and has the right schema
+            const action = await service.getPlaybookAction('PAYRUN_DISPATCH');
+            expect(action).toBeDefined();
+            console.log('Action schema:', JSON.stringify(action?.parameter_schema, null, 2));
+            expect(action?.parameter_schema.required).toBeDefined();
+            expect(action?.parameter_schema.required).toContain('run_id');
+
             const request = {
                 action_id: 'PAYRUN_DISPATCH',
                 params: {
@@ -159,11 +196,10 @@ describe('Playbooks Service', () => {
                 dry_run: true
             };
 
-            const result = await service.executePlaybook(ids.companyId, request);
-
-            expect(result).toBeDefined();
-            expect(result.status).toBe('ERROR');
-            expect(result.error_message).toContain('Missing required parameter');
+            // The validation should throw an error
+            await expect(
+                service.executePlaybook(ids.companyId, request)
+            ).rejects.toThrow('Missing required parameter: run_id');
         });
 
         it('should handle parameter validation errors', async () => {
@@ -177,11 +213,10 @@ describe('Playbooks Service', () => {
                 dry_run: true
             };
 
-            const result = await service.executePlaybook(ids.companyId, request);
-
-            expect(result).toBeDefined();
-            expect(result.status).toBe('ERROR');
-            expect(result.error_message).toContain('Missing required parameter');
+            // The validation should throw an error
+            await expect(
+                service.executePlaybook(ids.companyId, request)
+            ).rejects.toThrow('Missing required parameter: segment');
         });
     });
 

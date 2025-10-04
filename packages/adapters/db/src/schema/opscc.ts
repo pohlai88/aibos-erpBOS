@@ -116,8 +116,10 @@ export const kpiRefreshLog = pgTable("kpi_refresh_log", {
     id: uuid("id").primaryKey().defaultRandom(),
     company_id: text("company_id").notNull(),
     mv_name: text("mv_name").notNull(),
-    status: text("status").notNull().$type<"SUCCESS" | "ERROR">(),
-    duration_ms: integer("duration_ms").notNull(),
+    refreshed_at: timestamp("refreshed_at", { withTimezone: true }).notNull().defaultNow(),
+    rows_affected: integer("rows_affected"),
+    duration_ms: integer("duration_ms"),
+    status: text("status").notNull().$type<"SUCCESS" | "ERROR">().default("SUCCESS"),
     error_message: text("error_message"),
     created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
 });

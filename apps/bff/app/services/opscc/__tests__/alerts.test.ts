@@ -4,6 +4,7 @@ import { pool } from '@/lib/db';
 import { AlertsService } from '../alerts';
 import { testIds } from '../../payments/__tests__/utils/ids';
 import { cleanCompany } from '../../payments/__tests__/utils/cleanup';
+import { randomUUID } from 'crypto';
 
 describe('Alerts Service', () => {
     let ids: ReturnType<typeof testIds>;
@@ -176,7 +177,7 @@ describe('Alerts Service', () => {
         it('should acknowledge an alert event', async () => {
             // This test would require creating an alert event first
             // For now, we'll test the method exists and doesn't throw
-            const eventId = ulid();
+            const eventId = randomUUID();
 
             // This should not throw even if the event doesn't exist
             await expect(
@@ -187,7 +188,7 @@ describe('Alerts Service', () => {
         it('should resolve an alert event', async () => {
             // This test would require creating an alert event first
             // For now, we'll test the method exists and doesn't throw
-            const eventId = ulid();
+            const eventId = randomUUID();
 
             // This should not throw even if the event doesn't exist
             await expect(

@@ -76,18 +76,19 @@ export class PlaybooksService {
         companyId: string,
         request: PlaybookExecuteReq
     ): Promise<PlaybookExecuteResponse> {
+        const executionId = crypto.randomUUID();
+        const executedAt = new Date().toISOString();
+
+        // Get and validate action first
+        const action = await this.getPlaybookAction(request.action_id);
+        if (!action) {
+            throw new Error(`Playbook action not found: ${request.action_id}`);
+        }
+
+        // Validate parameters against schema
+        await this.validateParameters(action.parameter_schema, request.params);
+
         try {
-            const action = await this.getPlaybookAction(request.action_id);
-            if (!action) {
-                throw new Error(`Playbook action not found: ${request.action_id}`);
-            }
-
-            const executionId = crypto.randomUUID();
-            const executedAt = new Date().toISOString();
-
-            // Validate parameters against schema
-            await this.validateParameters(action.parameter_schema, request.params);
-
             let result: Record<string, any> | null = null;
             let errorMessage: string | null = null;
             let status = "SUCCESS";
@@ -137,10 +138,34 @@ export class PlaybooksService {
     ): Promise<void> {
         // Simple validation - in production would use JSON Schema validator
         const requiredFields = schema.required || [];
+        const properties = schema.properties || {};
 
+        // Check required fields
         for (const field of requiredFields) {
             if (!(field in params)) {
                 throw new Error(`Missing required parameter: ${field}`);
+            }
+        }
+
+        // Check parameter types (basic validation)
+        for (const [key, value] of Object.entries(params)) {
+            if (properties[key]) {
+                const expectedType = properties[key].type;
+                const actualType = typeof value;
+
+                // Handle array type
+                if (expectedType === 'array' && !Array.isArray(value)) {
+                    throw new Error(`Parameter ${key} must be an array`);
+                }
+
+                // Handle other types (allow number for integer)
+                if (expectedType !== 'array' && expectedType !== actualType) {
+                    if (expectedType === 'integer' && actualType === 'number') {
+                        // Allow number for integer type
+                        continue;
+                    }
+                    throw new Error(`Parameter ${key} must be of type ${expectedType}, got ${actualType}`);
+                }
             }
         }
     }
