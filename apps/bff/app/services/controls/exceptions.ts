@@ -42,7 +42,10 @@ export class ControlsExceptionsService {
             throw new Error("Exception not found");
         }
 
-        const exception = exceptions[0].exception;
+        const exception = exceptions[0]?.exception;
+        if (!exception) {
+            throw new Error("Exception not found");
+        }
 
         // Update the exception
         const updateData: any = {
@@ -100,19 +103,22 @@ export class ControlsExceptionsService {
             throw new Error("Exception not found");
         }
 
-        const exception = exceptions[0].exception;
+        const exception = exceptions[0]?.exception;
+        if (!exception) {
+            throw new Error("Exception not found");
+        }
         return {
             id: exception.id,
             ctrl_run_id: exception.ctrlRunId,
             code: exception.code,
             message: exception.message,
-            item_ref: exception.itemRef,
+            item_ref: exception.itemRef || undefined,
             material: exception.material,
             remediation_state: exception.remediationState,
-            assignee: exception.assignee,
+            assignee: exception.assignee || undefined,
             due_at: exception.dueAt?.toISOString(),
             resolved_at: exception.resolvedAt?.toISOString(),
-            resolution_note: exception.resolutionNote,
+            resolution_note: exception.resolutionNote || undefined,
             created_at: exception.createdAt.toISOString(),
             created_by: exception.createdBy,
             updated_at: exception.updatedAt.toISOString(),
@@ -217,10 +223,11 @@ export class ControlsExceptionsService {
         const result = summary.rows[0] as any;
         if (!result) {
             return {
-                total_exceptions: 0,
-                material_exceptions: 0,
-                resolved_exceptions: 0,
-                overdue_exceptions: 0
+                total_open: 0,
+                material_open: 0,
+                sla_breaches: 0,
+                by_remediation_state: {},
+                by_severity: {}
             };
         }
         const severityCounts: Record<string, number> = {};

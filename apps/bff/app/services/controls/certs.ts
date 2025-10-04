@@ -8,10 +8,10 @@ import {
     outbox
 } from "@aibos/db-adapter/schema";
 import type {
-    CertTemplateUpsert,
-    CertTemplateQuery,
-    CertSignReq,
-    CertSignQuery,
+    CertTemplateUpsertType,
+    CertTemplateQueryType,
+    CertSignReqType,
+    CertSignQueryType,
     CertTemplateResponseType,
     CertSignoffResponseType
 } from "@aibos/contracts";
@@ -25,7 +25,7 @@ export class CertificationsService {
     async upsertCertTemplate(
         companyId: string,
         userId: string,
-        data: CertTemplateUpsert
+        data: CertTemplateUpsertType
     ): Promise<CertTemplateResponseType> {
         const templateId = ulid();
 
@@ -98,7 +98,7 @@ export class CertificationsService {
      */
     async queryCertTemplates(
         companyId: string,
-        query: CertTemplateQuery
+        query: CertTemplateQueryType
     ): Promise<CertTemplateResponseType[]> {
         const conditions = [eq(certStatement.companyId, companyId)];
 
@@ -170,7 +170,7 @@ export class CertificationsService {
             throw new Error("Certification statement not found");
         }
 
-        const certStatement = statements[0];
+        const certStatementRecord = statements[0];
 
         // Check if this sign-off already exists
         const existingSignoffs = await this.dbInstance
@@ -278,7 +278,7 @@ export class CertificationsService {
      */
     async queryCertSignoffs(
         companyId: string,
-        query: CertSignQuery
+        query: CertSignQueryType
     ): Promise<CertSignoffResponseType[]> {
         const conditions = [eq(certSignoff.companyId, companyId)];
 
@@ -363,15 +363,15 @@ export class CertificationsService {
             entity_level: {
                 manager_signed: !!managerSignoff,
                 controller_signed: !!controllerSignoff,
-                manager_signer: managerSignoff?.signerName,
-                controller_signer: controllerSignoff?.signerName,
-                manager_signed_at: managerSignoff?.signedAt.toISOString(),
-                controller_signed_at: controllerSignoff?.signedAt.toISOString()
+                ...(managerSignoff?.signerName && { manager_signer: managerSignoff.signerName }),
+                ...(controllerSignoff?.signerName && { controller_signer: controllerSignoff.signerName }),
+                ...(managerSignoff?.signedAt && { manager_signed_at: managerSignoff.signedAt.toISOString() }),
+                ...(controllerSignoff?.signedAt && { controller_signed_at: controllerSignoff.signedAt.toISOString() })
             },
             consolidated_level: {
                 cfo_signed: !!cfoSignoff,
-                cfo_signer: cfoSignoff?.signerName,
-                cfo_signed_at: cfoSignoff?.signedAt.toISOString()
+                ...(cfoSignoff?.signerName && { cfo_signer: cfoSignoff.signerName }),
+                ...(cfoSignoff?.signedAt && { cfo_signed_at: cfoSignoff.signedAt.toISOString() })
             },
             all_required_signed: !!(managerSignoff && controllerSignoff && cfoSignoff)
         };

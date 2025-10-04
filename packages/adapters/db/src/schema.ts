@@ -12,6 +12,7 @@ export * from "./schema/revenue.js";
 export * from "./schema/close.js";
 export * from "./schema/controls.js";
 export * from "./schema/insights.js";
+export * from "./schema/evidence.js";
 
 export const company = pgTable("company", {
     id: text("id").primaryKey(),
