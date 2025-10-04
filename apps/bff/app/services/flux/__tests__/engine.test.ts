@@ -115,7 +115,8 @@ describe("FluxEngineService", () => {
                 company_id: companyId,
                 base_year: 2024,
                 limit: 10,
-                offset: 0
+                offset: 0,
+                material_only: true
             };
 
             const runs = await service.queryFluxRuns(companyId, query);
@@ -178,8 +179,8 @@ describe("FluxEngineService", () => {
             const lines = await service.queryFluxLines(companyId, query);
 
             expect(lines.length).toBe(1);
-            expect(lines[0].material).toBe(true);
-            expect(lines[0].account_code).toBe("4000");
+            expect(lines[0]?.material).toBe(true);
+            expect(lines[0]?.account_code).toBe("4000");
         });
     });
 
@@ -304,8 +305,8 @@ describe("FluxEngineService", () => {
             const topMovers = await service.getTopMovers("run-1", 2);
 
             expect(topMovers.length).toBe(2);
-            expect(topMovers[0].delta).toBe(10000); // Largest absolute delta
-            expect(topMovers[1].delta).toBe(5000); // Second largest
+            expect(topMovers[0]?.delta).toBe(10000); // Largest absolute delta
+            expect(topMovers[1]?.delta).toBe(5000); // Second largest
         });
     });
 });

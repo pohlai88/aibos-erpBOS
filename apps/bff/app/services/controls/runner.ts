@@ -46,11 +46,12 @@ export class ControlsRunnerService {
                 .where(eq(ctrlAssignment.id, data.assignment_id))
                 .limit(1);
 
-            if (assignments.length === 0) {
+            const assignment = assignments[0];
+            if (!assignment) {
                 throw new Error("Assignment not found");
             }
-
-            controlId = assignments[0].controlId;
+            
+            controlId = assignment.controlId;
             assignmentId = data.assignment_id;
         } else {
             throw new Error("Either control_id or assignment_id must be provided");
@@ -91,7 +92,12 @@ export class ControlsRunnerService {
             // Execute the control based on auto_kind
             let result: ControlResult;
 
-            switch (control.autoKind) {
+            const control = controls[0];
+        if (!control) {
+            throw new Error("Control not found");
+        }
+        
+        switch (control.autoKind) {
                 case "SCRIPT":
                     result = await this.executeScriptControl(control, companyId);
                     break;
@@ -291,17 +297,21 @@ export class ControlsRunnerService {
         }
 
         const run = runs[0];
+        if (!run) {
+            throw new Error("Control run not found");
+        }
+        
         return {
             id: run.id,
             company_id: run.companyId,
             control_id: run.controlId,
-            assignment_id: run.assignmentId,
-            run_id: run.runId,
+            assignment_id: run.assignmentId || undefined,
+            run_id: run.runId || undefined,
             scheduled_at: run.scheduledAt.toISOString(),
             started_at: run.startedAt?.toISOString(),
             finished_at: run.finishedAt?.toISOString(),
             status: run.status,
-            notes: run.notes,
+            notes: run.notes || undefined,
             created_at: run.createdAt.toISOString(),
             created_by: run.createdBy
         };
@@ -312,7 +322,7 @@ export class ControlsRunnerService {
      */
     async queryControlRuns(
         companyId: string,
-        query: ControlRunQuery
+        query: any
     ): Promise<ControlRunResponseType[]> {
         const conditions = [eq(ctrlRun.companyId, companyId)];
 
@@ -347,13 +357,13 @@ export class ControlsRunnerService {
             id: run.id,
             company_id: run.companyId,
             control_id: run.controlId,
-            assignment_id: run.assignmentId,
-            run_id: run.runId,
+            assignment_id: run.assignmentId || undefined,
+            run_id: run.runId || undefined,
             scheduled_at: run.scheduledAt.toISOString(),
             started_at: run.startedAt?.toISOString(),
             finished_at: run.finishedAt?.toISOString(),
             status: run.status,
-            notes: run.notes,
+            notes: run.notes || undefined,
             created_at: run.createdAt.toISOString(),
             created_by: run.createdBy
         }));
@@ -365,7 +375,7 @@ export class ControlsRunnerService {
     async addEvidence(
         companyId: string,
         userId: string,
-        data: EvidenceAdd
+        data: any
     ): Promise<EvidenceResponseType> {
         const evidenceId = ulid();
 

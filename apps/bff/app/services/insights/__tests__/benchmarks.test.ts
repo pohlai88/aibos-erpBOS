@@ -124,11 +124,11 @@ describe("InsightsBenchmarksService", () => {
             ));
 
         expect(baselines).toHaveLength(1);
-        expect(baselines[0].granularity).toBe("MONTH");
-        expect(parseFloat(baselines[0].value)).toBe(5); // Latest value
-        expect(parseFloat(baselines[0].p50)).toBe(4); // Median
-        expect(parseFloat(baselines[0].p75)).toBe(4.5); // 75th percentile
-        expect(parseFloat(baselines[0].p90)).toBe(5); // 90th percentile
+        expect(baselines[0]?.granularity).toBe("MONTH");
+        expect(parseFloat(baselines[0]?.value || "0")).toBe(5); // Latest value
+        expect(parseFloat(baselines[0]?.p50 || "0")).toBe(4); // Median
+        expect(parseFloat(baselines[0]?.p75 || "0")).toBe(4.5); // 75th percentile
+        expect(parseFloat(baselines[0]?.p90 || "0")).toBe(5); // 90th percentile
     });
 
     it("should upsert targets correctly", async () => {
@@ -150,9 +150,9 @@ describe("InsightsBenchmarksService", () => {
             ));
 
         expect(targets).toHaveLength(1);
-        expect(parseFloat(targets[0].target)).toBe(3);
-        expect(targets[0].createdBy).toBe(userId);
-        expect(targets[0].updatedBy).toBe(userId);
+        expect(parseFloat(targets[0]?.target || "0")).toBe(3);
+        expect(targets[0]?.createdBy).toBe(userId);
+        expect(targets[0]?.updatedBy).toBe(userId);
     });
 
     it("should get benchmark deltas correctly", async () => {

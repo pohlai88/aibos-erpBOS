@@ -115,7 +115,7 @@ describe("MdnaService", () => {
             const templates = await service.queryTemplates(companyId, query);
 
             expect(templates.length).toBe(1);
-            expect(templates[0].status).toBe("APPROVED");
+            expect(templates[0]?.status).toBe("APPROVED");
         });
     });
 
@@ -144,7 +144,7 @@ describe("MdnaService", () => {
                 ))
                 .limit(1);
 
-            expect(template[0].status).toBe("APPROVED");
+            expect(template[0]?.status).toBe("APPROVED");
         });
     });
 
@@ -269,7 +269,7 @@ describe("MdnaService", () => {
             const drafts = await service.queryDrafts(companyId, query);
 
             expect(drafts.length).toBe(1);
-            expect(drafts[0].status).toBe("APPROVED");
+            expect(drafts[0]?.status).toBe("APPROVED");
         });
     });
 
@@ -306,7 +306,7 @@ describe("MdnaService", () => {
                 ))
                 .limit(1);
 
-            expect(updatedDraft[0].status).toBe("APPROVED");
+            expect(updatedDraft[0]?.status).toBe("APPROVED");
         });
     });
 
@@ -445,8 +445,8 @@ describe("MdnaService", () => {
             const published = await service.queryPublished(companyId, query);
 
             expect(published.length).toBe(1);
-            expect(published[0].run_id).toBe("run-1");
-            expect(published[0].draft_id).toBe(draft.id);
+            expect(published[0]?.run_id).toBe("run-1");
+            expect(published[0]?.draft_id).toBe(draft.id);
         });
     });
 });

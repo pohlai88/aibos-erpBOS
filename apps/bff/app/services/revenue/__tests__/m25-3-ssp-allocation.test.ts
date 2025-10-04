@@ -171,6 +171,7 @@ describe("M25.3: SSP Catalog, Bundles & Discounts Allocation", () => {
                     components: [
                         {
                             product_id: "product-1",
+                            min_qty: 1,
                             weight_pct: 0.6,
                             required: true
                         }
@@ -182,7 +183,7 @@ describe("M25.3: SSP Catalog, Bundles & Discounts Allocation", () => {
             expect(result.id).toBe("bundle-1");
             expect(result.bundle_sku).toBe("BUNDLE-A");
             expect(result.components).toHaveLength(1);
-            expect(result.components[0].weight_pct).toBe(0.6);
+            expect(result.components[0]?.weight_pct).toBe(0.6);
         });
 
         it("should validate bundle component weights sum to 1.0", async () => {
@@ -235,6 +236,7 @@ describe("M25.3: SSP Catalog, Bundles & Discounts Allocation", () => {
                     name: "Fall 10% Discount",
                     params: { pct: 0.10 },
                     effective_from: "2025-01-01",
+                    priority: 1,
                     active: true
                 }
             );
@@ -253,7 +255,7 @@ describe("M25.3: SSP Catalog, Bundles & Discounts Allocation", () => {
                 params: { pct: 0.10 },
                 active: true,
                 effective_from: "2025-01-01",
-                effective_to: null,
+                effective_to: undefined,
                 priority: 0,
                 created_at: "2025-01-01T00:00:00Z",
                 created_by: "user-1",
@@ -310,7 +312,7 @@ describe("M25.3: SSP Catalog, Bundles & Discounts Allocation", () => {
                 ssp: 100,
                 method: "OBSERVABLE",
                 effective_from: "2025-01-01",
-                effective_to: null,
+                effective_to: undefined,
                 status: "APPROVED",
                 created_at: "2025-01-01T00:00:00Z",
                 created_by: "user-1",
@@ -370,7 +372,7 @@ describe("M25.3: SSP Catalog, Bundles & Discounts Allocation", () => {
                     params: { pct: 0.10 },
                     active: true,
                     effective_from: "2025-01-01",
-                    effective_to: null,
+                    effective_to: undefined,
                     priority: 0,
                     created_at: "2025-01-01T00:00:00Z",
                     created_by: "user-1",
@@ -469,8 +471,8 @@ describe("M25.3: SSP Catalog, Bundles & Discounts Allocation", () => {
             const result = await alertsService.checkCorridorBreaches("company-1");
 
             expect(result.breaches).toHaveLength(1);
-            expect(result.breaches[0].product_id).toBe("product-2");
-            expect(result.breaches[0].variance_pct).toBeCloseTo(0.20, 2); // 20% variance
+            expect(result.breaches[0]?.product_id).toBe("product-2");
+            expect(result.breaches[0]?.variance_pct).toBeCloseTo(0.20, 2); // 20% variance
         });
 
         it("should generate SSP state snapshot", async () => {
@@ -556,10 +558,10 @@ describe("M25.3: SSP Catalog, Bundles & Discounts Allocation", () => {
             const result = await alertsService.checkSspPolicyCompliance("company-1");
 
             expect(result.issues).toHaveLength(2);
-            expect(result.issues[0].type).toBe("MISSING_SSP");
-            expect(result.issues[0].severity).toBe("MEDIUM");
-            expect(result.issues[1].type).toBe("STALE_DRAFTS");
-            expect(result.issues[1].severity).toBe("LOW");
+            expect(result.issues[0]?.type).toBe("MISSING_SSP");
+            expect(result.issues[0]?.severity).toBe("MEDIUM");
+            expect(result.issues[1]?.type).toBe("STALE_DRAFTS");
+            expect(result.issues[1]?.severity).toBe("LOW");
         });
     });
 
@@ -610,7 +612,7 @@ describe("M25.3: SSP Catalog, Bundles & Discounts Allocation", () => {
                 ssp: 100,
                 method: "OBSERVABLE",
                 effective_from: "2025-01-01",
-                effective_to: null,
+                effective_to: undefined,
                 status: "APPROVED",
                 created_at: "2025-01-01T00:00:00Z",
                 created_by: "user-1",

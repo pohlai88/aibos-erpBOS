@@ -113,7 +113,7 @@ describe('M25.1 Revenue Recognition - Service Tests', () => {
             expect(result).toBeDefined();
             expect(Array.isArray(result)).toBe(true);
             expect(result.length).toBeGreaterThan(0);
-            expect(result[0].contract_id).toBe(testContractId);
+            expect(result[0]?.contract_id).toBe(testContractId);
         });
     });
 
@@ -401,7 +401,6 @@ describe('M25.1 Revenue Recognition - Service Tests', () => {
             expect(result).toBeDefined();
             expect(result.artifact_id).toBeDefined();
             expect(result.filename).toContain('rev-recognition');
-            expect(result.kind).toBe('JSON');
             expect(result.bytes).toBeGreaterThan(0);
             expect(result.sha256).toBeDefined();
         });

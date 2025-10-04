@@ -261,11 +261,11 @@ describe("InsightsAnomalyService", () => {
             ));
 
         expect(anomalies).toHaveLength(1);
-        expect(anomalies[0].kind).toBe("TASK");
-        expect(anomalies[0].signal.taskCode).toBe("JE_CUTOFF");
-        expect(anomalies[0].signal.occurrenceCount).toBe(3);
-        expect(anomalies[0].signal.pattern).toBe("repeated_late");
-        expect(parseFloat(anomalies[0].score)).toBeGreaterThan(0);
+        expect(anomalies[0]?.kind).toBe("TASK");
+        expect((anomalies[0]?.signal as any)?.taskCode).toBe("JE_CUTOFF");
+        expect((anomalies[0]?.signal as any)?.occurrenceCount).toBe(3);
+        expect((anomalies[0]?.signal as any)?.pattern).toBe("repeated_late");
+        expect(parseFloat(anomalies[0]?.score || "0")).toBeGreaterThan(0);
     });
 
     it("should detect control anomalies correctly", async () => {
@@ -283,11 +283,11 @@ describe("InsightsAnomalyService", () => {
             ));
 
         expect(anomalies).toHaveLength(1);
-        expect(anomalies[0].kind).toBe("CONTROL");
-        expect(anomalies[0].signal.controlCode).toBe("BANK_REC_CTRL");
-        expect(anomalies[0].signal.failureCount).toBe(2);
-        expect(anomalies[0].signal.materialFailCount).toBe(2);
-        expect(anomalies[0].signal.pattern).toBe("recurring_failure");
+        expect(anomalies[0]?.kind).toBe("CONTROL");
+        expect((anomalies[0]?.signal as any)?.controlCode).toBe("BANK_REC_CTRL");
+        expect((anomalies[0]?.signal as any)?.failureCount).toBe(2);
+        expect((anomalies[0]?.signal as any)?.materialFailCount).toBe(2);
+        expect((anomalies[0]?.signal as any)?.pattern).toBe("recurring_failure");
     });
 
     it("should detect flux anomalies correctly", async () => {
@@ -305,9 +305,9 @@ describe("InsightsAnomalyService", () => {
             ));
 
         expect(anomalies).toHaveLength(1);
-        expect(anomalies[0].kind).toBe("FLUX");
-        expect(anomalies[0].signal.coverage).toBeLessThan(0.5);
-        expect(anomalies[0].signal.pattern).toBe("low_comment_coverage");
+        expect(anomalies[0]?.kind).toBe("FLUX");
+        expect((anomalies[0]?.signal as any)?.coverage).toBeLessThan(0.5);
+        expect((anomalies[0]?.signal as any)?.pattern).toBe("low_comment_coverage");
     });
 
     it("should detect duration anomalies correctly", async () => {
@@ -325,11 +325,11 @@ describe("InsightsAnomalyService", () => {
             ));
 
         expect(anomalies).toHaveLength(1);
-        expect(anomalies[0].kind).toBe("DURATION");
-        expect(anomalies[0].signal.currentDays).toBe(6);
-        expect(anomalies[0].signal.p90Baseline).toBe(5);
-        expect(anomalies[0].signal.deviation).toBe(1);
-        expect(anomalies[0].signal.pattern).toBe("duration_spike");
+        expect(anomalies[0]?.kind).toBe("DURATION");
+        expect((anomalies[0]?.signal as any)?.currentDays).toBe(6);
+        expect((anomalies[0]?.signal as any)?.p90Baseline).toBe(5);
+        expect((anomalies[0]?.signal as any)?.deviation).toBe(1);
+        expect((anomalies[0]?.signal as any)?.pattern).toBe("duration_spike");
     });
 
     it("should generate recommendations correctly", async () => {
@@ -376,7 +376,12 @@ describe("InsightsAnomalyService", () => {
 
         expect(recommendations).toHaveLength(1);
 
-        const recoId = recommendations[0].id;
+        const recoId = recommendations[0]?.id;
+        expect(recoId).toBeDefined();
+        
+        if (!recoId) {
+            throw new Error("Recommendation ID not found");
+        }
 
         // Action the recommendation
         await service.actionRecommendation(companyId, userId, {
@@ -392,8 +397,8 @@ describe("InsightsAnomalyService", () => {
             .where(eq(insReco.id, recoId))
             .limit(1);
 
-        expect(updatedReco[0].status).toBe("PLANNED");
-        expect(updatedReco[0].updatedBy).toBe(userId);
+        expect(updatedReco[0]?.status).toBe("PLANNED");
+        expect(updatedReco[0]?.updatedBy).toBe(userId);
     });
 
     it("should get open anomalies correctly", async () => {

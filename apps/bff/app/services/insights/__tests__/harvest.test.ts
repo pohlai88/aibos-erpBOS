@@ -228,12 +228,12 @@ describe("InsightsHarvestService", () => {
             .where(eq(insFactClose.runId, "run-1"));
 
         expect(closeFacts).toHaveLength(1);
-        expect(parseFloat(closeFacts[0].daysToClose)).toBe(4); // 4 days from Jan 1 to Jan 5
-        expect(parseFloat(closeFacts[0].onTimeRate)).toBe(100); // Both tasks completed on time
-        expect(closeFacts[0].lateTasks).toBe(0);
-        expect(closeFacts[0].exceptionsOpen).toBe(0);
-        expect(closeFacts[0].exceptionsMaterial).toBe(0);
-        expect(closeFacts[0].certsDone).toBe(1);
+        expect(parseFloat(closeFacts[0]?.daysToClose || "0")).toBe(4); // 4 days from Jan 1 to Jan 5
+        expect(parseFloat(closeFacts[0]?.onTimeRate || "0")).toBe(100); // Both tasks completed on time
+        expect(closeFacts[0]?.lateTasks).toBe(0);
+        expect(closeFacts[0]?.exceptionsOpen).toBe(0);
+        expect(closeFacts[0]?.exceptionsMaterial).toBe(0);
+        expect(closeFacts[0]?.certsDone).toBe(1);
     });
 
     it("should compute correct task facts", async () => {
@@ -267,14 +267,14 @@ describe("InsightsHarvestService", () => {
             .where(eq(insFactCtrl.ctrlRunId, "ctrl-run-1"));
 
         expect(ctrlFacts).toHaveLength(1);
-        expect(ctrlFacts[0].controlCode).toBe("BANK_REC_CTRL");
-        expect(ctrlFacts[0].status).toBe("PASS");
-        expect(ctrlFacts[0].severity).toBe("HIGH");
-        expect(ctrlFacts[0].exceptionsCount).toBe(0);
-        expect(ctrlFacts[0].waived).toBe(0);
-        expect(ctrlFacts[0].evidenceCount).toBe(0);
-        expect(ctrlFacts[0].durationMs).toBe(1800000); // 30 minutes
-        expect(ctrlFacts[0].materialFail).toBe(false);
+        expect(ctrlFacts[0]?.controlCode).toBe("BANK_REC_CTRL");
+        expect(ctrlFacts[0]?.status).toBe("PASS");
+        expect(ctrlFacts[0]?.severity).toBe("HIGH");
+        expect(ctrlFacts[0]?.exceptionsCount).toBe(0);
+        expect(ctrlFacts[0]?.waived).toBe(0);
+        expect(ctrlFacts[0]?.evidenceCount).toBe(0);
+        expect(ctrlFacts[0]?.durationMs).toBe(1800000); // 30 minutes
+        expect(ctrlFacts[0]?.materialFail).toBe(false);
     });
 
     it("should compute correct flux facts", async () => {
@@ -286,12 +286,12 @@ describe("InsightsHarvestService", () => {
             .where(eq(insFactFlux.fluxRunId, "flux-run-1"));
 
         expect(fluxFacts).toHaveLength(1);
-        expect(fluxFacts[0].scope).toBe("2024"); // Base year as scope
-        expect(fluxFacts[0].presentCcy).toBe("USD");
-        expect(fluxFacts[0].material).toBe(1); // One material line
-        expect(fluxFacts[0].commentMissing).toBe(1); // One missing comment
-        expect(parseFloat(fluxFacts[0].topDeltaAbs)).toBe(10000); // Largest absolute delta
-        expect(parseFloat(fluxFacts[0].topDeltaPct)).toBe(0.1); // Corresponding percentage
+        expect(fluxFacts[0]?.scope).toBe("2024"); // Base year as scope
+        expect(fluxFacts[0]?.presentCcy).toBe("USD");
+        expect(fluxFacts[0]?.material).toBe(1); // One material line
+        expect(fluxFacts[0]?.commentMissing).toBe(1); // One missing comment
+        expect(parseFloat(fluxFacts[0]?.topDeltaAbs || "0")).toBe(10000); // Largest absolute delta
+        expect(parseFloat(fluxFacts[0]?.topDeltaPct || "0")).toBe(0.1); // Corresponding percentage
     });
 
     it("should compute correct certification facts", async () => {
@@ -303,9 +303,9 @@ describe("InsightsHarvestService", () => {
             .where(eq(insFactCert.runId, "run-1"));
 
         expect(certFacts).toHaveLength(1);
-        expect(certFacts[0].level).toBe("ENTITY");
-        expect(certFacts[0].signerRole).toBe("MANAGER");
-        expect(certFacts[0].signedAt).toEqual(new Date("2025-01-05T00:00:00Z"));
+        expect(certFacts[0]?.level).toBe("ENTITY");
+        expect(certFacts[0]?.signerRole).toBe("MANAGER");
+        expect(certFacts[0]?.signedAt).toEqual(new Date("2025-01-05T00:00:00Z"));
     });
 
     it("should handle missing flux and certs gracefully", async () => {
