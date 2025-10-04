@@ -222,7 +222,7 @@ export default function Audit() {
                         <tbody>
                             {rows.map((r: JournalRow) => (
                                 <tr key={r.id} style={{ borderTop: "1px solid #f0f0f0" }}>
-                                    <td>{new Date(r.created_at).toLocaleString()}</td>
+                                    <td>{new Date(r.createdAt).toLocaleString()}</td>
                                     <td>{r.topic}</td>
                                     <td><pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>{typeof r.payload === "string" ? r.payload : JSON.stringify(r.payload, null, 2)}</pre></td>
                                 </tr>
