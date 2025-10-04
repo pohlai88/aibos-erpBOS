@@ -1,12 +1,12 @@
 // M25.1 Revenue Recognition Cron Route
 // Monthly processing of revenue recognition
 
-import { ok, badRequest, forbidden } from "../../../../../lib/http";
-import { requireAuth, requireCapability } from "../../../../../lib/auth";
-import { withRouteErrors, isResponse } from "../../../../../lib/route-utils";
-import { RevRecognitionService } from "../../../../../services/revenue/recognize";
-import { RevEventsService } from "../../../../../services/revenue/events";
-import { RevRpoService } from "../../../../../services/revenue/policy";
+import { ok, badRequest, forbidden } from "@/lib/http";
+import { requireAuth, requireCapability } from "@/lib/auth";
+import { withRouteErrors, isResponse } from "@/lib/route-utils";
+import { RevRecognitionService } from "@/services/revenue/recognize";
+import { RevEventsService } from "@/services/revenue/events";
+import { RevRpoService } from "@/services/revenue/policy";
 
 export const GET = withRouteErrors(async (req: Request) => {
     try {

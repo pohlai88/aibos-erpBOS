@@ -1,10 +1,10 @@
 // M25.2 Revenue Modifications Month-End Cron Route
 // Monthly processing of recognition runs and disclosures
 
-import { ok, badRequest, forbidden } from "../../../../../lib/http";
-import { requireAuth, requireCapability } from "../../../../../lib/auth";
-import { withRouteErrors, isResponse } from "../../../../../lib/route-utils";
-import { RevModificationService } from "../../../../../services/rb/modifications";
+import { ok, badRequest, forbidden } from "@/lib/http";
+import { requireAuth, requireCapability } from "@/lib/auth";
+import { withRouteErrors, isResponse } from "@/lib/route-utils";
+import { RevModificationService } from "@/services/rb/modifications";
 
 export const GET = withRouteErrors(async (req: Request) => {
     try {

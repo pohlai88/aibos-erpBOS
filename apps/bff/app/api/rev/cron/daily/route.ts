@@ -1,10 +1,10 @@
 // M25.1 Revenue Recognition Daily Cron Route
 // Daily processing of events and schedule updates
 
-import { ok, badRequest, forbidden } from "../../../../../lib/http";
-import { requireAuth, requireCapability } from "../../../../../lib/auth";
-import { withRouteErrors, isResponse } from "../../../../../lib/route-utils";
-import { RevEventsService } from "../../../../../services/revenue/events";
+import { ok, badRequest, forbidden } from "@/lib/http";
+import { requireAuth, requireCapability } from "@/lib/auth";
+import { withRouteErrors, isResponse } from "@/lib/route-utils";
+import { RevEventsService } from "@/services/revenue/events";
 
 export const GET = withRouteErrors(async (req: Request) => {
     try {

@@ -350,18 +350,4 @@ export const revVcRollforward = pgTable("rev_vc_rollforward", {
     createdBy: text("created_by").notNull(),
 });
 
-// RPO Snapshot (placeholder for M25.1)
-export const revRpoSnapshot = pgTable("rev_rpo_snapshot", {
-    id: text("id").primaryKey(),
-    companyId: text("company_id").notNull(),
-    contractId: text("contract_id").notNull().references(() => rbContract.id, { onDelete: "cascade" }),
-    pobId: text("pob_id").notNull(),                           // references future POB table
-    year: integer("year").notNull(),
-    month: integer("month").notNull(),                          // 1-12
-    rpoAmount: numeric("rpo_amount").notNull().default("0"),   // remaining performance obligation
-    deltaFromRevisions: numeric("delta_from_revisions").notNull().default("0"), // delta from contract modifications
-    deltaFromVc: numeric("delta_from_vc").notNull().default("0"),               // delta from variable consideration
-    notes: text("notes"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    createdBy: text("created_by").notNull(),
-});
+// RPO Snapshot moved to revenue.ts (M25.1)

@@ -1,5 +1,5 @@
 import { pgTable, text, timestamp, numeric, integer, boolean, jsonb, date, unique, index } from "drizzle-orm/pg-core";
-import { rbContract, rbSubscription, rbProduct } from "./rb";
+import { rbContract, rbSubscription, rbProduct } from "./rb.js";
 
 // Revenue Recognition Core Tables (M25.1)
 

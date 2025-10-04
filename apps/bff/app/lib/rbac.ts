@@ -50,7 +50,9 @@ export type Capability =
     | "rev:allocate"
     | "rev:schedule"
     | "rev:recognize"
-    | "rev:export";
+    | "rev:export"
+    | "rev:modify"
+    | "rev:vc";
 
 export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
     admin: [
@@ -65,7 +67,7 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "ar:portal:policy", "ar:portal:ops",
         "ar:stmt:policy", "ar:stmt:run", "ar:stmt:email",
         "rb:catalog", "rb:contract", "rb:usage:ingest", "rb:invoice:run", "rb:credit",
-        "rev:policy", "rev:allocate", "rev:schedule", "rev:recognize", "rev:export"
+        "rev:policy", "rev:allocate", "rev:schedule", "rev:recognize", "rev:export", "rev:modify", "rev:vc"
     ],
     accountant: [
         "reports:read", "journals:post", "reversal:create", "inventory:move",
@@ -79,7 +81,7 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "ar:portal:policy", "ar:portal:ops",
         "ar:stmt:policy", "ar:stmt:run", "ar:stmt:email",
         "rb:catalog", "rb:contract", "rb:usage:ingest", "rb:invoice:run", "rb:credit",
-        "rev:policy", "rev:allocate", "rev:schedule", "rev:recognize", "rev:export"
+        "rev:policy", "rev:allocate", "rev:schedule", "rev:recognize", "rev:export", "rev:modify", "rev:vc"
     ],
     ops: [
         "reports:read", "inventory:move", "audit:read",
