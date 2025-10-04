@@ -453,3 +453,242 @@ export type QuerySignals = z.infer<typeof QuerySignals>;
 export type QueryFires = z.infer<typeof QueryFires>;
 export type DryRunRequest = z.infer<typeof DryRunRequest>;
 export type DryRunResponse = z.infer<typeof DryRunResponse>;
+
+// M27.2: Playbook Studio + Guarded Autonomy Contracts
+
+// Playbook Versioning
+export const PlaybookVersionUpsert = z.object({
+    playbook_id: z.string().uuid(),
+    name: z.string().min(1),
+    description: z.string().optional(),
+    steps: z.array(z.object({
+        action_code: z.string().min(1),
+        payload: z.record(z.any()).default({}),
+        when: z.string().optional(),
+        retry: z.object({
+            max_attempts: z.number().int().positive().default(3),
+            backoff_ms: z.number().int().positive().default(1000)
+        }).optional(),
+        on_error: z.enum(["STOP", "CONTINUE", "RETRY"]).default("STOP")
+    })).min(1),
+    max_blast_radius: z.number().int().positive().default(100),
+    dry_run_default: z.boolean().default(true),
+    require_dual_control: z.boolean().default(false),
+    timeout_sec: z.number().int().positive().default(300),
+    change_summary: z.string().optional()
+});
+
+export const PlaybookVersionResponse = PlaybookVersionUpsert.extend({
+    id: z.string().uuid(),
+    company_id: z.string(),
+    version_no: z.number().int(),
+    is_active: z.boolean(),
+    created_by: z.string(),
+    created_at: z.string().datetime(),
+    updated_at: z.string().datetime()
+});
+
+// Rule Versioning
+export const RuleVersionUpsert = z.object({
+    rule_id: z.string().uuid(),
+    name: z.string().min(1),
+    enabled: z.boolean().default(true),
+    severity: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]).default("HIGH"),
+    when_expr: z.record(z.any()),
+    window_sec: z.number().int().positive().default(3600),
+    threshold: z.record(z.any()),
+    throttle_sec: z.number().int().nonnegative().default(3600),
+    approvals: z.number().int().nonnegative().default(0),
+    action_playbook_id: z.string().uuid().optional(),
+    change_summary: z.string().optional()
+});
+
+export const RuleVersionResponse = RuleVersionUpsert.extend({
+    id: z.string().uuid(),
+    company_id: z.string(),
+    version_no: z.number().int(),
+    is_active: z.boolean(),
+    created_by: z.string(),
+    created_at: z.string().datetime(),
+    updated_at: z.string().datetime()
+});
+
+// Visual Editor Contracts
+export const VisualEditorSave = z.object({
+    playbook_id: z.string().uuid().optional(),
+    rule_id: z.string().uuid().optional(),
+    name: z.string().min(1),
+    description: z.string().optional(),
+    definition: z.record(z.any()), // Visual editor JSON
+    auto_version: z.boolean().default(true),
+    change_summary: z.string().optional()
+});
+
+export const VisualEditorLoad = z.object({
+    playbook_id: z.string().uuid().optional(),
+    rule_id: z.string().uuid().optional(),
+    version_no: z.number().int().optional()
+});
+
+// Canary Mode Contracts
+export const CanaryExecutionRequest = z.object({
+    fire_id: z.string().uuid(),
+    playbook_id: z.string().uuid(),
+    canary_scope: z.object({
+        entity_type: z.string(),
+        filter_criteria: z.record(z.any()),
+        percentage: z.number().min(1).max(100).default(5),
+        max_entities: z.number().int().positive().default(100)
+    }),
+    dry_run: z.boolean().default(true)
+});
+
+export const CanaryExecutionResponse = z.object({
+    canary_id: z.string().uuid(),
+    execution_id: z.string().uuid(),
+    status: z.enum(["PENDING", "RUNNING", "COMPLETED", "FAILED", "ROLLED_BACK"]),
+    canary_scope: z.record(z.any()),
+    success_rate: z.number().nullable(),
+    impact_summary: z.record(z.any()).nullable(),
+    started_at: z.string().datetime().nullable(),
+    completed_at: z.string().datetime().nullable()
+});
+
+// Approval Workflow Contracts
+export const ApprovalRequestCreate = z.object({
+    fire_id: z.string().uuid(),
+    playbook_id: z.string().uuid(),
+    approval_type: z.enum(["DUAL_CONTROL", "BLAST_RADIUS", "CANARY_PROMOTION"]),
+    impact_estimate: z.record(z.any()),
+    diff_summary: z.record(z.any()),
+    blast_radius_count: z.number().int().nonnegative().default(0),
+    risk_score: z.number().min(0).max(1).default(0.0),
+    expires_in_hours: z.number().int().positive().default(24)
+});
+
+export const ApprovalRequestResponse = ApprovalRequestCreate.extend({
+    id: z.string().uuid(),
+    company_id: z.string(),
+    status: z.enum(["PENDING", "APPROVED", "REJECTED", "EXPIRED"]),
+    requested_by: z.string(),
+    approved_by: z.string().nullable(),
+    approved_at: z.string().datetime().nullable(),
+    rejection_reason: z.string().nullable(),
+    expires_at: z.string().datetime(),
+    created_at: z.string().datetime(),
+    updated_at: z.string().datetime()
+});
+
+export const ApprovalDecision = z.object({
+    approval_id: z.string().uuid(),
+    decision: z.enum(["APPROVE", "REJECT"]),
+    reason: z.string().optional()
+});
+
+// Action Verification Contracts
+export const ActionVerificationRequest = z.object({
+    fire_id: z.string().uuid(),
+    step_id: z.string().uuid(),
+    action_code: z.string(),
+    verification_type: z.enum(["OUTCOME_CHECK", "GUARDRAIL_CHECK", "ROLLBACK_TRIGGER"]),
+    expected_outcome: z.record(z.any()).optional(),
+    verification_rules: z.array(z.object({
+        rule_type: z.string(),
+        threshold: z.record(z.any()),
+        action: z.enum(["PASS", "FAIL", "WARNING", "ROLLBACK"])
+    }))
+});
+
+export const ActionVerificationResponse = z.object({
+    id: z.string().uuid(),
+    verification_result: z.enum(["PASS", "FAIL", "WARNING"]),
+    actual_outcome: z.record(z.any()).nullable(),
+    guardrail_violations: z.array(z.record(z.any())),
+    rollback_triggered: z.boolean(),
+    rollback_reason: z.string().nullable(),
+    verified_at: z.string().datetime(),
+    verified_by: z.string()
+});
+
+// Observability Contracts
+export const ExecutionMetricsQuery = z.object({
+    playbook_id: z.string().uuid().optional(),
+    from_date: z.string().datetime().optional(),
+    to_date: z.string().datetime().optional(),
+    group_by: z.enum(["day", "week", "month"]).default("day"),
+    limit: z.number().int().positive().default(30)
+});
+
+export const ExecutionMetricsResponse = z.object({
+    playbook_id: z.string().uuid(),
+    execution_date: z.string().datetime(),
+    total_executions: z.number().int(),
+    successful_executions: z.number().int(),
+    failed_executions: z.number().int(),
+    suppressed_executions: z.number().int(),
+    p50_duration_ms: z.number().int().nullable(),
+    p95_duration_ms: z.number().int().nullable(),
+    p99_duration_ms: z.number().int().nullable(),
+    avg_duration_ms: z.number().int().nullable(),
+    success_rate: z.number().nullable()
+});
+
+export const BlastRadiusQuery = z.object({
+    fire_id: z.string().uuid().optional(),
+    playbook_id: z.string().uuid().optional(),
+    entity_type: z.string().optional(),
+    from_date: z.string().datetime().optional(),
+    to_date: z.string().datetime().optional(),
+    limit: z.number().int().positive().default(100)
+});
+
+export const BlastRadiusResponse = z.object({
+    id: z.string().uuid(),
+    fire_id: z.string().uuid(),
+    playbook_id: z.string().uuid(),
+    entity_type: z.string(),
+    entity_count: z.number().int(),
+    entity_ids: z.array(z.string()),
+    blast_radius_percentage: z.number().nullable(),
+    created_at: z.string().datetime()
+});
+
+// Version History Contracts
+export const VersionHistoryQuery = z.object({
+    playbook_id: z.string().uuid().optional(),
+    rule_id: z.string().uuid().optional(),
+    limit: z.number().int().positive().default(20),
+    offset: z.number().int().nonnegative().default(0)
+});
+
+export const VersionHistoryResponse = z.object({
+    id: z.string().uuid(),
+    version_no: z.number().int(),
+    name: z.string(),
+    change_summary: z.string().nullable(),
+    is_active: z.boolean(),
+    created_by: z.string(),
+    created_at: z.string().datetime(),
+    updated_at: z.string().datetime()
+});
+
+// Type exports for M27.2
+export type PlaybookVersionUpsert = z.infer<typeof PlaybookVersionUpsert>;
+export type PlaybookVersionResponse = z.infer<typeof PlaybookVersionResponse>;
+export type RuleVersionUpsert = z.infer<typeof RuleVersionUpsert>;
+export type RuleVersionResponse = z.infer<typeof RuleVersionResponse>;
+export type VisualEditorSave = z.infer<typeof VisualEditorSave>;
+export type VisualEditorLoad = z.infer<typeof VisualEditorLoad>;
+export type CanaryExecutionRequest = z.infer<typeof CanaryExecutionRequest>;
+export type CanaryExecutionResponse = z.infer<typeof CanaryExecutionResponse>;
+export type ApprovalRequestCreate = z.infer<typeof ApprovalRequestCreate>;
+export type ApprovalRequestResponse = z.infer<typeof ApprovalRequestResponse>;
+export type ApprovalDecision = z.infer<typeof ApprovalDecision>;
+export type ActionVerificationRequest = z.infer<typeof ActionVerificationRequest>;
+export type ActionVerificationResponse = z.infer<typeof ActionVerificationResponse>;
+export type ExecutionMetricsQuery = z.infer<typeof ExecutionMetricsQuery>;
+export type ExecutionMetricsResponse = z.infer<typeof ExecutionMetricsResponse>;
+export type BlastRadiusQuery = z.infer<typeof BlastRadiusQuery>;
+export type BlastRadiusResponse = z.infer<typeof BlastRadiusResponse>;
+export type VersionHistoryQuery = z.infer<typeof VersionHistoryQuery>;
+export type VersionHistoryResponse = z.infer<typeof VersionHistoryResponse>;

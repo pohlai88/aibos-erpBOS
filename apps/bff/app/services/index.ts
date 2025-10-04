@@ -17,6 +17,11 @@ export {
     OpsPlaybookEngine
 } from "../services/opscc";
 
+// Playbook Studio + Guarded Autonomy services (M27.2)
+export {
+    PlaybookStudioService
+} from "../services/opscc";
+
 // Allocation services (M19)
 export { upsertAllocRule, getActiveAllocRules, deleteAllocRule } from "../services/alloc/rules";
 export { upsertAllocDriverValues, getAllocDriverValues } from "../services/alloc/rules";

@@ -9,3 +9,6 @@ export { WhatIfService } from "./whatif";
 export { OpsSignalService } from "./signals";
 export { OpsRuleEngine } from "./rule-engine";
 export { OpsPlaybookEngine } from "./playbook-engine";
+
+// M27.2: Playbook Studio + Guarded Autonomy Services
+export { PlaybookStudioService } from "./playbook-studio";

@@ -272,3 +272,153 @@ export const opsQuorumVote = pgTable("ops_quorum_vote", {
     reason: text("reason"),
     at: timestamp("at", { withTimezone: true }).notNull().defaultNow()
 });
+
+// M27.2: Playbook Studio + Guarded Autonomy Tables
+
+// Playbook versions for git-like history
+export const opsPlaybookVersion = pgTable("ops_playbook_version", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    company_id: text("company_id").notNull(),
+    playbook_id: uuid("playbook_id").notNull(),
+    version_no: integer("version_no").notNull(),
+    name: text("name").notNull(),
+    description: text("description"),
+    steps: jsonb("steps").notNull().default([]),
+    max_blast_radius: integer("max_blast_radius").notNull().default(100),
+    dry_run_default: boolean("dry_run_default").notNull().default(true),
+    require_dual_control: boolean("require_dual_control").notNull().default(false),
+    timeout_sec: integer("timeout_sec").notNull().default(300),
+    created_by: text("created_by").notNull(),
+    created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    is_active: boolean("is_active").notNull().default(false),
+    change_summary: text("change_summary")
+});
+
+// Rule versions for git-like history  
+export const opsRuleVersion = pgTable("ops_rule_version", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    company_id: text("company_id").notNull(),
+    rule_id: uuid("rule_id").notNull(),
+    version_no: integer("version_no").notNull(),
+    name: text("name").notNull(),
+    enabled: boolean("enabled").notNull().default(true),
+    severity: text("severity").notNull().$type<"LOW" | "MEDIUM" | "HIGH" | "CRITICAL">().default("HIGH"),
+    when_expr: jsonb("when_expr").notNull(),
+    window_sec: integer("window_sec").notNull().default(3600),
+    threshold: jsonb("threshold").notNull(),
+    throttle_sec: integer("throttle_sec").notNull().default(3600),
+    approvals: integer("approvals").notNull().default(0),
+    action_playbook_id: uuid("action_playbook_id"),
+    created_by: text("created_by").notNull(),
+    created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    is_active: boolean("is_active").notNull().default(false),
+    change_summary: text("change_summary")
+});
+
+// Dry-run sandbox executions
+export const opsDryRunExecution = pgTable("ops_dry_run_execution", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    company_id: text("company_id").notNull(),
+    playbook_id: uuid("playbook_id").notNull(),
+    version_no: integer("version_no"),
+    execution_id: uuid("execution_id").notNull(),
+    steps: jsonb("steps").notNull().default([]),
+    total_duration_ms: integer("total_duration_ms"),
+    executed_at: timestamp("executed_at", { withTimezone: true }).notNull().defaultNow(),
+    created_by: text("created_by").notNull(),
+    status: text("status").notNull().$type<"RUNNING" | "COMPLETED" | "FAILED">().default("COMPLETED"),
+    error_message: text("error_message"),
+    result_summary: jsonb("result_summary")
+});
+
+// Canary mode executions (scoped subset before global)
+export const opsCanaryExecution = pgTable("ops_canary_execution", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    company_id: text("company_id").notNull(),
+    fire_id: uuid("fire_id").notNull(),
+    playbook_id: uuid("playbook_id").notNull(),
+    canary_scope: jsonb("canary_scope").notNull(),
+    execution_id: uuid("execution_id").notNull(),
+    status: text("status").notNull().$type<"PENDING" | "RUNNING" | "COMPLETED" | "FAILED" | "ROLLED_BACK">().default("PENDING"),
+    started_at: timestamp("started_at", { withTimezone: true }),
+    completed_at: timestamp("completed_at", { withTimezone: true }),
+    rollback_at: timestamp("rollback_at", { withTimezone: true }),
+    success_rate: numeric("success_rate", { precision: 5, scale: 2 }),
+    impact_summary: jsonb("impact_summary"),
+    created_by: text("created_by").notNull(),
+    created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
+});
+
+// Human-in-the-loop approvals with premortem diffs
+export const opsApprovalRequest = pgTable("ops_approval_request", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    company_id: text("company_id").notNull(),
+    fire_id: uuid("fire_id").notNull(),
+    playbook_id: uuid("playbook_id").notNull(),
+    requested_by: text("requested_by").notNull(),
+    approval_type: text("approval_type").notNull().$type<"DUAL_CONTROL" | "BLAST_RADIUS" | "CANARY_PROMOTION">(),
+    impact_estimate: jsonb("impact_estimate").notNull(),
+    diff_summary: jsonb("diff_summary").notNull(),
+    blast_radius_count: integer("blast_radius_count").notNull().default(0),
+    risk_score: numeric("risk_score", { precision: 3, scale: 2 }).notNull().default("0.0"),
+    status: text("status").notNull().$type<"PENDING" | "APPROVED" | "REJECTED" | "EXPIRED">().default("PENDING"),
+    approved_by: text("approved_by"),
+    approved_at: timestamp("approved_at", { withTimezone: true }),
+    rejection_reason: text("rejection_reason"),
+    expires_at: timestamp("expires_at", { withTimezone: true }).notNull(),
+    created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
+});
+
+// Post-action verification and rollback hooks
+export const opsActionVerification = pgTable("ops_action_verification", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    company_id: text("company_id").notNull(),
+    fire_id: uuid("fire_id").notNull(),
+    step_id: uuid("step_id").notNull(),
+    action_code: text("action_code").notNull(),
+    verification_type: text("verification_type").notNull().$type<"OUTCOME_CHECK" | "GUARDRAIL_CHECK" | "ROLLBACK_TRIGGER">(),
+    expected_outcome: jsonb("expected_outcome"),
+    actual_outcome: jsonb("actual_outcome"),
+    verification_result: text("verification_result").notNull().$type<"PASS" | "FAIL" | "WARNING">(),
+    guardrail_violations: jsonb("guardrail_violations").default([]),
+    rollback_triggered: boolean("rollback_triggered").notNull().default(false),
+    rollback_reason: text("rollback_reason"),
+    verified_at: timestamp("verified_at", { withTimezone: true }).notNull().defaultNow(),
+    verified_by: text("verified_by").notNull()
+});
+
+// Observability metrics for success/failure rates and performance
+export const opsExecutionMetrics = pgTable("ops_execution_metrics", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    company_id: text("company_id").notNull(),
+    playbook_id: uuid("playbook_id").notNull(),
+    execution_date: timestamp("execution_date", { withTimezone: true }).notNull(),
+    total_executions: integer("total_executions").notNull().default(0),
+    successful_executions: integer("successful_executions").notNull().default(0),
+    failed_executions: integer("failed_executions").notNull().default(0),
+    suppressed_executions: integer("suppressed_executions").notNull().default(0),
+    p50_duration_ms: integer("p50_duration_ms"),
+    p95_duration_ms: integer("p95_duration_ms"),
+    p99_duration_ms: integer("p99_duration_ms"),
+    avg_duration_ms: integer("avg_duration_ms"),
+    success_rate: numeric("success_rate", { precision: 5, scale: 2 }),
+    created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
+});
+
+// Blast radius tracking for safety caps
+export const opsBlastRadiusLog = pgTable("ops_blast_radius_log", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    company_id: text("company_id").notNull(),
+    fire_id: uuid("fire_id").notNull(),
+    playbook_id: uuid("playbook_id").notNull(),
+    entity_type: text("entity_type").notNull(),
+    entity_count: integer("entity_count").notNull(),
+    entity_ids: jsonb("entity_ids").default([]),
+    blast_radius_percentage: numeric("blast_radius_percentage", { precision: 5, scale: 2 }),
+    created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
+});
