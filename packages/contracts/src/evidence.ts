@@ -178,3 +178,149 @@ export type EvidenceManifestResponseType = z.infer<typeof EvidenceManifestRespon
 export type EvidenceItemResponseType = z.infer<typeof EvidenceItemResponse>;
 export type EbinderResponseType = z.infer<typeof EbinderResponse>;
 export type EvidenceAttestationResponseType = z.infer<typeof EvidenceAttestationResponse>;
+
+// --- Enhanced Evidence Vault Contracts (M26.4 Enhanced) ---
+
+// Content-Addressed Evidence Upload
+export const EvidenceUploadReq = z.object({
+    source: z.enum(["CTRL", "CLOSE", "FLUX", "JOURNAL", "BANK", "OTHER"]),
+    source_id: z.string().min(1),
+    title: z.string().min(1),
+    note: z.string().optional(),
+    tags: z.array(z.string()).optional(),
+    pii_level: z.enum(["NONE", "LOW", "MEDIUM", "HIGH"]).default("NONE"),
+    mime: z.string().min(1),
+    size_bytes: z.number().int().min(0),
+    sha256_hex: z.string().min(1),
+    storage_hint: z.string().optional()
+});
+
+// Evidence Linking
+export const EvidenceLinkReq = z.object({
+    record_id: z.string().min(1),
+    kind: z.enum(["CTRL_RUN", "CLOSE_RUN", "EXCEPTION", "TASK"]),
+    ref_id: z.string().min(1)
+});
+
+// Redaction Rule Management
+export const RedactionRuleUpsert = z.object({
+    code: z.string().min(1),
+    description: z.string().optional(),
+    rule: z.record(z.any()), // JSONB rule definition
+    enabled: z.boolean().default(true)
+});
+
+// Manifest Building
+export const ManifestBuildReq = z.object({
+    scope_kind: z.enum(["CTRL_RUN", "CLOSE_RUN"]),
+    scope_id: z.string().min(1),
+    filters: z.object({
+        include_controls: z.array(z.string()).optional(),
+        exclude_tags: z.array(z.string()).optional(),
+        redaction_codes: z.array(z.string()).optional(),
+        pii_level_max: z.enum(["NONE", "LOW", "MEDIUM", "HIGH"]).optional()
+    }).optional()
+});
+
+// eBinder Building
+export const BinderBuildReq = z.object({
+    manifest_id: z.string().min(1),
+    format: z.literal("ZIP")
+});
+
+// eBinder Download
+export const BinderDownloadReq = z.object({
+    binder_id: z.string().min(1)
+});
+
+// Attestation
+export const AttestReq = z.object({
+    binder_id: z.string().min(1),
+    signer_role: z.enum(["MANAGER", "CONTROLLER", "CFO", "AUDITOR"]),
+    statement: z.string().min(1)
+});
+
+// Enhanced Response Types
+export const EvidenceObjectResponse = z.object({
+    id: z.string(),
+    sha256_hex: z.string(),
+    size_bytes: z.number(),
+    mime: z.string(),
+    storage_uri: z.string(),
+    uploaded_by: z.string(),
+    uploaded_at: z.string()
+});
+
+export const EvidenceRecordResponse = z.object({
+    id: z.string(),
+    object_id: z.string(),
+    source: z.string(),
+    source_id: z.string(),
+    title: z.string(),
+    note: z.string().optional(),
+    tags: z.array(z.string()),
+    pii_level: z.string(),
+    created_by: z.string(),
+    created_at: z.string()
+});
+
+export const RedactionRuleResponse = z.object({
+    id: z.string(),
+    code: z.string(),
+    description: z.string().optional(),
+    rule: z.record(z.any()),
+    enabled: z.boolean(),
+    updated_by: z.string(),
+    updated_at: z.string()
+});
+
+export const ManifestResponse = z.object({
+    id: z.string(),
+    scope_kind: z.string(),
+    scope_id: z.string(),
+    filters: z.record(z.any()),
+    object_count: z.number(),
+    total_bytes: z.number(),
+    sha256_hex: z.string(),
+    created_by: z.string(),
+    created_at: z.string()
+});
+
+export const BinderResponse = z.object({
+    id: z.string(),
+    scope_kind: z.string(),
+    scope_id: z.string(),
+    manifest_id: z.string(),
+    format: z.string(),
+    storage_uri: z.string(),
+    size_bytes: z.number(),
+    sha256_hex: z.string(),
+    built_by: z.string(),
+    built_at: z.string()
+});
+
+export const AttestationResponse = z.object({
+    id: z.string(),
+    binder_id: z.string(),
+    signer_id: z.string(),
+    signer_role: z.string(),
+    payload: z.record(z.any()),
+    sha256_hex: z.string(),
+    signed_at: z.string()
+});
+
+// Enhanced Type Exports
+export type EvidenceUploadReqType = z.infer<typeof EvidenceUploadReq>;
+export type EvidenceLinkReqType = z.infer<typeof EvidenceLinkReq>;
+export type RedactionRuleUpsertType = z.infer<typeof RedactionRuleUpsert>;
+export type ManifestBuildReqType = z.infer<typeof ManifestBuildReq>;
+export type BinderBuildReqType = z.infer<typeof BinderBuildReq>;
+export type BinderDownloadReqType = z.infer<typeof BinderDownloadReq>;
+export type AttestReqType = z.infer<typeof AttestReq>;
+
+export type EvidenceObjectResponseType = z.infer<typeof EvidenceObjectResponse>;
+export type EvidenceRecordResponseType = z.infer<typeof EvidenceRecordResponse>;
+export type RedactionRuleResponseType = z.infer<typeof RedactionRuleResponse>;
+export type ManifestResponseType = z.infer<typeof ManifestResponse>;
+export type BinderResponseType = z.infer<typeof BinderResponse>;
+export type AttestationResponseType = z.infer<typeof AttestationResponse>;

@@ -75,7 +75,17 @@ export type Capability =
     | "ctrl:assign"
     | "cert:report"
     | "cert:sign"
-    | "cert:manage";
+    | "cert:manage"
+    | "evidence:write"
+    | "evidence:read"
+    | "evidence:admin"
+    | "binder:build"
+    | "binder:sign"
+    | "sox:admin"
+    | "sox:test.plan"
+    | "sox:test.exec"
+    | "sox:deficiency"
+    | "sox:assert";
 
 export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
     admin: [
@@ -94,7 +104,9 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "close:manage", "close:run", "close:approve", "close:report", "flux:run", "mdna:edit", "mdna:approve", "mdna:publish",
         "insights:view", "insights:admin",
         "ctrl:report", "ctrl:run", "ctrl:remediate", "ctrl:manage", "ctrl:evidence", "ctrl:exceptions", "ctrl:assign",
-        "cert:report", "cert:sign", "cert:manage"
+        "cert:report", "cert:sign", "cert:manage",
+        "evidence:write", "evidence:read", "evidence:admin", "binder:build", "binder:sign",
+        "sox:admin", "sox:test.plan", "sox:test.exec", "sox:deficiency", "sox:assert"
     ],
     accountant: [
         "reports:read", "journals:post", "reversal:create", "inventory:move",
@@ -112,7 +124,9 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "close:run", "close:approve", "close:report", "flux:run", "mdna:edit", "mdna:approve", "mdna:publish",
         "insights:view", "insights:admin",
         "ctrl:report", "ctrl:run", "ctrl:remediate", "ctrl:manage", "ctrl:evidence", "ctrl:exceptions", "ctrl:assign",
-        "cert:report", "cert:sign", "cert:manage"
+        "cert:report", "cert:sign", "cert:manage",
+        "evidence:write", "evidence:read", "evidence:admin", "binder:build", "binder:sign",
+        "sox:admin", "sox:test.plan", "sox:test.exec", "sox:deficiency", "sox:assert"
     ],
     ops: [
         "reports:read", "inventory:move", "audit:read",
@@ -126,7 +140,9 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "close:run", "close:report", "flux:run", "mdna:edit",
         "insights:view",
         "ctrl:report", "ctrl:run", "ctrl:evidence", "ctrl:exceptions",
-        "cert:report"
+        "cert:report",
+        "evidence:write", "evidence:read", "binder:build",
+        "sox:test.exec", "sox:deficiency"
     ],
 };
 

@@ -1,4 +1,4 @@
-import { pgTable, text, integer, numeric, timestamp, date, primaryKey, boolean, jsonb, bigint } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, numeric, timestamp, date, primaryKey, boolean, jsonb, bigint, uuid } from "drizzle-orm/pg-core";
 
 // --- M26.4: Evidence Vault & eBinder Schema ---
 
@@ -71,4 +71,106 @@ export const ctrlEvidenceAttestation = pgTable("ctrl_evidence_attestation", {
     expiresAt: timestamp("expires_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     createdBy: text("created_by").notNull(),
+});
+
+// --- Enhanced Evidence Vault Tables (M26.4 Enhanced) ---
+
+// Evidence object store (content-addressed)
+export const evdObject = pgTable("evd_object", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    companyId: text("company_id").notNull(),
+    sha256Hex: text("sha256_hex").notNull(), // content hash
+    sizeBytes: bigint("size_bytes", { mode: "number" }).notNull(),
+    mime: text("mime").notNull(),
+    storageUri: text("storage_uri").notNull(), // e.g. s3://... or file://...
+    uploadedBy: text("uploaded_by").notNull(),
+    uploadedAt: timestamp("uploaded_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Logical evidence records referencing the object
+export const evdRecord = pgTable("evd_record", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    companyId: text("company_id").notNull(),
+    objectId: uuid("object_id").notNull().references(() => evdObject.id, { onDelete: "restrict" }),
+    source: text("source").notNull(), // CTRL|CLOSE|FLUX|JOURNAL|BANK|OTHER
+    sourceId: text("source_id").notNull(), // foreign id for cross-linking
+    title: text("title").notNull(),
+    note: text("note"),
+    tags: text("tags").array().default([]),
+    piiLevel: text("pii_level").notNull().default("NONE"), // NONE|LOW|MEDIUM|HIGH
+    createdBy: text("created_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Redaction rule catalog
+export const evdRedactionRule = pgTable("evd_redaction_rule", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    companyId: text("company_id").notNull(),
+    code: text("code").notNull(),
+    description: text("description"),
+    rule: jsonb("rule").notNull(), // jsonb of field patterns / regex / mime scopes
+    enabled: boolean("enabled").notNull().default(true),
+    updatedBy: text("updated_by").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Link evidence to control runs / close runs (many-to-many)
+export const evdLink = pgTable("evd_link", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    companyId: text("company_id").notNull(),
+    recordId: uuid("record_id").notNull().references(() => evdRecord.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull(), // CTRL_RUN|CLOSE_RUN|EXCEPTION|TASK
+    refId: text("ref_id").notNull(),
+    addedBy: text("added_by").notNull(),
+    addedAt: timestamp("added_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Frozen manifest for a control or close run
+export const evdManifest = pgTable("evd_manifest", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    companyId: text("company_id").notNull(),
+    scopeKind: text("scope_kind").notNull(), // CTRL_RUN|CLOSE_RUN
+    scopeId: text("scope_id").notNull(),
+    filters: jsonb("filters").notNull(), // selection + redaction rules resolved
+    objectCount: integer("object_count").notNull(),
+    totalBytes: bigint("total_bytes", { mode: "number" }).notNull(),
+    sha256Hex: text("sha256_hex").notNull(), // checksum of manifest JSON payload
+    createdBy: text("created_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const evdManifestLine = pgTable("evd_manifest_line", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    manifestId: uuid("manifest_id").notNull().references(() => evdManifest.id, { onDelete: "cascade" }),
+    recordId: uuid("record_id").notNull().references(() => evdRecord.id, { onDelete: "restrict" }),
+    objectSha256: text("object_sha256").notNull(),
+    objectBytes: bigint("object_bytes", { mode: "number" }).notNull(),
+    title: text("title").notNull(),
+    tags: text("tags").array().notNull().default([]),
+});
+
+// Built binder artifact (ZIP or PDF + ZIP)
+export const evdBinder = pgTable("evd_binder", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    companyId: text("company_id").notNull(),
+    scopeKind: text("scope_kind").notNull(), // CTRL_RUN|CLOSE_RUN
+    scopeId: text("scope_id").notNull(),
+    manifestId: uuid("manifest_id").notNull().references(() => evdManifest.id, { onDelete: "restrict" }),
+    format: text("format").notNull(), // ZIP
+    storageUri: text("storage_uri").notNull(),
+    sizeBytes: bigint("size_bytes", { mode: "number" }).notNull(),
+    sha256Hex: text("sha256_hex").notNull(),
+    builtBy: text("built_by").notNull(),
+    builtAt: timestamp("built_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const evdAttestation = pgTable("evd_attestation", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    companyId: text("company_id").notNull(),
+    binderId: uuid("binder_id").notNull().references(() => evdBinder.id, { onDelete: "cascade" }),
+    signerId: text("signer_id").notNull(),
+    signerRole: text("signer_role").notNull(), // MANAGER|CONTROLLER|CFO|AUDITOR
+    payload: jsonb("payload").notNull(), // statement + meta
+    sha256Hex: text("sha256_hex").notNull(), // checksum of payload
+    signedAt: timestamp("signed_at", { withTimezone: true }).notNull().defaultNow(),
 });
