@@ -266,6 +266,208 @@ export const BillingRunResponse = z.object({
     created_by: z.string()
 });
 
+// --- Revenue Recognition Modifications (M25.2) ------------------------------------------------
+
+// Change Order Contracts
+export const ChangeOrderCreate = z.object({
+    contract_id: z.string(),
+    effective_date: z.string(), // YYYY-MM-DD
+    reason: z.string().optional(),
+    lines: z.array(z.object({
+        pob_id: z.string().optional(),     // existing POB (modify) or undefined to add
+        product_id: z.string().optional(), // for new POB
+        qty_delta: z.number().optional(),
+        price_delta: z.number().optional(), // Δ to allocated or new TP element
+        term_delta_days: z.number().int().optional(),
+        new_method: z.enum(['POINT_IN_TIME', 'RATABLE_DAILY', 'RATABLE_MONTHLY', 'USAGE']).optional(),
+        new_ssp: z.number().optional()
+    }))
+});
+
+export const ApplyChangeOrderReq = z.object({
+    change_order_id: z.string(),
+    treatment: z.enum(['SEPARATE', 'TERMINATION_NEW', 'PROSPECTIVE', 'RETROSPECTIVE'])
+});
+
+// Variable Consideration Contracts
+export const VCUpsert = z.object({
+    contract_id: z.string(),
+    pob_id: z.string(),
+    year: z.number().int(),
+    month: z.number().int().min(1).max(12),
+    method: z.enum(['EXPECTED_VALUE', 'MOST_LIKELY']),
+    estimate: z.number(),       // raw estimate
+    confidence: z.number().min(0).max(1),
+    resolve: z.boolean().default(false)
+});
+
+export const VCPolicyUpsert = z.object({
+    default_method: z.enum(['EXPECTED_VALUE', 'MOST_LIKELY']),
+    constraint_probability_threshold: z.number().min(0).max(1).default(0.5),
+    volatility_lookback_months: z.number().int().min(1).max(24).default(12)
+});
+
+// Recognition Contracts
+export const RecognizeRevisedReq = z.object({
+    year: z.number().int(),
+    month: z.number().int().min(1).max(12),
+    dry_run: z.boolean().default(true)
+});
+
+// Query Contracts
+export const ChangeOrderQuery = z.object({
+    contract_id: z.string().optional(),
+    status: z.enum(['DRAFT', 'APPLIED', 'VOID']).optional(),
+    type: z.enum(['SEPARATE', 'TERMINATION_NEW', 'PROSPECTIVE', 'RETROSPECTIVE']).optional(),
+    effective_date_from: z.string().optional(),
+    effective_date_to: z.string().optional(),
+    limit: z.number().int().min(1).max(100).default(50),
+    offset: z.number().int().min(0).default(0)
+});
+
+export const VCQuery = z.object({
+    contract_id: z.string().optional(),
+    pob_id: z.string().optional(),
+    year: z.number().int().optional(),
+    month: z.number().int().min(1).max(12).optional(),
+    status: z.enum(['OPEN', 'RESOLVED']).optional(),
+    limit: z.number().int().min(1).max(100).default(50),
+    offset: z.number().int().min(0).default(0)
+});
+
+export const RevisionQuery = z.object({
+    contract_id: z.string().optional(),
+    pob_id: z.string().optional(),
+    year: z.number().int().optional(),
+    month: z.number().int().min(1).max(12).optional(),
+    cause: z.enum(['CO', 'VC_TRUEUP']).optional(),
+    limit: z.number().int().min(1).max(100).default(50),
+    offset: z.number().int().min(0).default(0)
+});
+
+// Response Types
+export const ChangeOrderResponse = z.object({
+    id: z.string(),
+    company_id: z.string(),
+    contract_id: z.string(),
+    effective_date: z.string(),
+    type: z.enum(['SEPARATE', 'TERMINATION_NEW', 'PROSPECTIVE', 'RETROSPECTIVE']),
+    reason: z.string().optional(),
+    status: z.enum(['DRAFT', 'APPLIED', 'VOID']),
+    created_at: z.string(),
+    created_by: z.string(),
+    lines: z.array(z.object({
+        id: z.string(),
+        pob_id: z.string().optional(),
+        product_id: z.string().optional(),
+        qty_delta: z.number().optional(),
+        price_delta: z.number().optional(),
+        term_delta_days: z.number().optional(),
+        new_method: z.string().optional(),
+        new_ssp: z.number().optional()
+    }))
+});
+
+export const VCResponse = z.object({
+    id: z.string(),
+    company_id: z.string(),
+    contract_id: z.string(),
+    pob_id: z.string(),
+    year: z.number(),
+    month: z.number(),
+    method: z.enum(['EXPECTED_VALUE', 'MOST_LIKELY']),
+    raw_estimate: z.number(),
+    constrained_amount: z.number(),
+    confidence: z.number(),
+    status: z.enum(['OPEN', 'RESOLVED']),
+    created_at: z.string(),
+    created_by: z.string()
+});
+
+export const VCPolicyResponse = z.object({
+    id: z.string(),
+    company_id: z.string(),
+    default_method: z.enum(['EXPECTED_VALUE', 'MOST_LIKELY']),
+    constraint_probability_threshold: z.number(),
+    volatility_lookback_months: z.number(),
+    updated_at: z.string(),
+    updated_by: z.string()
+});
+
+export const RevisionResponse = z.object({
+    id: z.string(),
+    company_id: z.string(),
+    pob_id: z.string(),
+    from_period_year: z.number(),
+    from_period_month: z.number(),
+    planned_before: z.number(),
+    planned_after: z.number(),
+    delta_planned: z.number(),
+    cause: z.enum(['CO', 'VC_TRUEUP']),
+    change_order_id: z.string().optional(),
+    vc_estimate_id: z.string().optional(),
+    created_at: z.string(),
+    created_by: z.string()
+});
+
+export const CatchupResponse = z.object({
+    id: z.string(),
+    run_id: z.string(),
+    pob_id: z.string(),
+    year: z.number(),
+    month: z.number(),
+    catchup_amount: z.number(),
+    dr_account: z.string(),
+    cr_account: z.string(),
+    memo: z.string().optional(),
+    created_at: z.string(),
+    created_by: z.string()
+});
+
+export const DisclosureResponse = z.object({
+    modification_register: z.array(z.object({
+        id: z.string(),
+        contract_id: z.string(),
+        change_order_id: z.string(),
+        effective_date: z.string(),
+        type: z.string(),
+        reason: z.string().optional(),
+        txn_price_before: z.number(),
+        txn_price_after: z.number(),
+        txn_price_delta: z.number(),
+        created_at: z.string(),
+        created_by: z.string()
+    })),
+    vc_rollforward: z.array(z.object({
+        id: z.string(),
+        contract_id: z.string(),
+        pob_id: z.string(),
+        year: z.number(),
+        month: z.number(),
+        opening_balance: z.number(),
+        additions: z.number(),
+        changes: z.number(),
+        releases: z.number(),
+        recognized: z.number(),
+        closing_balance: z.number(),
+        created_at: z.string(),
+        created_by: z.string()
+    })),
+    rpo_snapshot: z.array(z.object({
+        id: z.string(),
+        contract_id: z.string(),
+        pob_id: z.string(),
+        year: z.number(),
+        month: z.number(),
+        rpo_amount: z.number(),
+        delta_from_revisions: z.number(),
+        delta_from_vc: z.number(),
+        notes: z.string().optional(),
+        created_at: z.string(),
+        created_by: z.string()
+    }))
+});
+
 // Type exports
 export type ProductUpsertType = z.infer<typeof ProductUpsert>;
 export type PriceBookUpsertType = z.infer<typeof PriceBookUpsert>;
@@ -291,3 +493,19 @@ export type InvoiceResponseType = z.infer<typeof InvoiceResponse>;
 export type InvoiceLineResponseType = z.infer<typeof InvoiceLineResponse>;
 export type CreditMemoResponseType = z.infer<typeof CreditMemoResponse>;
 export type BillingRunResponseType = z.infer<typeof BillingRunResponse>;
+
+// M25.2 Revenue Recognition Modifications Types
+export type ChangeOrderCreateType = z.infer<typeof ChangeOrderCreate>;
+export type ApplyChangeOrderReqType = z.infer<typeof ApplyChangeOrderReq>;
+export type VCUpsertType = z.infer<typeof VCUpsert>;
+export type VCPolicyUpsertType = z.infer<typeof VCPolicyUpsert>;
+export type RecognizeRevisedReqType = z.infer<typeof RecognizeRevisedReq>;
+export type ChangeOrderQueryType = z.infer<typeof ChangeOrderQuery>;
+export type VCQueryType = z.infer<typeof VCQuery>;
+export type RevisionQueryType = z.infer<typeof RevisionQuery>;
+export type ChangeOrderResponseType = z.infer<typeof ChangeOrderResponse>;
+export type VCResponseType = z.infer<typeof VCResponse>;
+export type VCPolicyResponseType = z.infer<typeof VCPolicyResponse>;
+export type RevisionResponseType = z.infer<typeof RevisionResponse>;
+export type CatchupResponseType = z.infer<typeof CatchupResponse>;
+export type DisclosureResponseType = z.infer<typeof DisclosureResponse>;

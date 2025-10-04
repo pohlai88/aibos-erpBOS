@@ -215,3 +215,153 @@ export const rbInvoiceEmail = pgTable("rb_invoice_email", {
     status: text("status").notNull().default("queued"),     // 'queued','sent','error'
     error: text("error"),
 });
+
+// --- Revenue Recognition Modifications (M25.2) ------------------------------------------------
+
+// Change Order Header Table
+export const revChangeOrder = pgTable("rev_change_order", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    contractId: text("contract_id").notNull().references(() => rbContract.id, { onDelete: "cascade" }),
+    effectiveDate: date("effective_date").notNull(),
+    type: text("type").notNull(),                              // 'SEPARATE','TERMINATION_NEW','PROSPECTIVE','RETROSPECTIVE'
+    reason: text("reason"),
+    status: text("status").notNull().default("DRAFT"),        // 'DRAFT','APPLIED','VOID'
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+// Change Order Line Items
+export const revChangeLine = pgTable("rev_change_line", {
+    id: text("id").primaryKey(),
+    changeOrderId: text("change_order_id").notNull().references(() => revChangeOrder.id, { onDelete: "cascade" }),
+    pobId: text("pob_id"),                                     // existing POB (modify) or NULL to add new
+    productId: text("product_id").references(() => rbProduct.id), // for new POB
+    qtyDelta: numeric("qty_delta"),                            // quantity change
+    priceDelta: numeric("price_delta"),                        // price change
+    termDeltaDays: integer("term_delta_days"),                 // term change in days
+    newMethod: text("new_method"),                              // 'POINT_IN_TIME','RATABLE_DAILY','RATABLE_MONTHLY','USAGE'
+    newSsp: numeric("new_ssp"),                                 // new standalone selling price
+});
+
+// VC Policy per Company
+export const revVcPolicy = pgTable("rev_vc_policy", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    defaultMethod: text("default_method").notNull(),           // 'EXPECTED_VALUE','MOST_LIKELY'
+    constraintProbabilityThreshold: numeric("constraint_probability_threshold").notNull().default("0.5"),
+    volatilityLookbackMonths: integer("volatility_lookback_months").notNull().default(12),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull(),
+});
+
+// VC Estimates by Contract/POB/Month
+export const revVcEstimate = pgTable("rev_vc_estimate", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    contractId: text("contract_id").notNull().references(() => rbContract.id, { onDelete: "cascade" }),
+    pobId: text("pob_id").notNull(),                           // references future POB table
+    year: integer("year").notNull(),
+    month: integer("month").notNull(),                          // 1-12
+    method: text("method").notNull(),                           // 'EXPECTED_VALUE','MOST_LIKELY'
+    rawEstimate: numeric("raw_estimate").notNull(),             // unconstrained estimate
+    constrainedAmount: numeric("constrained_amount").notNull(), // after constraint applied
+    confidence: numeric("confidence").notNull(),              // 0-1
+    status: text("status").notNull().default("OPEN"),          // 'OPEN','RESOLVED'
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+// Transaction Price Revision
+export const revTxnPriceRev = pgTable("rev_txn_price_rev", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    changeOrderId: text("change_order_id").notNull().references(() => revChangeOrder.id, { onDelete: "cascade" }),
+    previousTotalTp: numeric("previous_total_tp").notNull(),    // total transaction price before
+    newTotalTp: numeric("new_total_tp").notNull(),             // total transaction price after
+    allocatedDeltas: jsonb("allocated_deltas").notNull(),      // per-POB allocation deltas
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+// Schedule Revision Tracking
+export const revSchedRev = pgTable("rev_sched_rev", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    pobId: text("pob_id").notNull(),                           // references future POB table
+    fromPeriodYear: integer("from_period_year").notNull(),
+    fromPeriodMonth: integer("from_period_month").notNull(),   // 1-12
+    plannedBefore: numeric("planned_before").notNull(),         // planned amount before revision
+    plannedAfter: numeric("planned_after").notNull(),          // planned amount after revision
+    deltaPlanned: numeric("delta_planned").notNull(),          // change in planned amount
+    cause: text("cause").notNull(),                             // 'CO','VC_TRUEUP'
+    changeOrderId: text("change_order_id").references(() => revChangeOrder.id),
+    vcEstimateId: text("vc_estimate_id").references(() => revVcEstimate.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+// Revenue Recognition Catch-up
+export const revRecCatchup = pgTable("rev_rec_catchup", {
+    id: text("id").primaryKey(),
+    runId: text("run_id").notNull(),                           // references future rev_rec_run table
+    pobId: text("pob_id").notNull(),                           // references future POB table
+    year: integer("year").notNull(),
+    month: integer("month").notNull(),                         // 1-12
+    catchupAmount: numeric("catchup_amount").notNull(),        // positive or negative catch-up
+    drAccount: text("dr_account").notNull(),                   // debit account
+    crAccount: text("cr_account").notNull(),                   // credit account
+    memo: text("memo"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+// Modification Register for audit/reporting
+export const revModRegister = pgTable("rev_mod_register", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    contractId: text("contract_id").notNull().references(() => rbContract.id, { onDelete: "cascade" }),
+    changeOrderId: text("change_order_id").notNull().references(() => revChangeOrder.id, { onDelete: "cascade" }),
+    effectiveDate: date("effective_date").notNull(),
+    type: text("type").notNull(),
+    reason: text("reason"),
+    txnPriceBefore: numeric("txn_price_before").notNull(),
+    txnPriceAfter: numeric("txn_price_after").notNull(),
+    txnPriceDelta: numeric("txn_price_delta").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+// VC Rollforward for period summaries
+export const revVcRollforward = pgTable("rev_vc_rollforward", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    contractId: text("contract_id").notNull().references(() => rbContract.id, { onDelete: "cascade" }),
+    pobId: text("pob_id").notNull(),                           // references future POB table
+    year: integer("year").notNull(),
+    month: integer("month").notNull(),                          // 1-12
+    openingBalance: numeric("opening_balance").notNull().default("0"),     // VC balance at start of period
+    additions: numeric("additions").notNull().default("0"),                // new VC estimates
+    changes: numeric("changes").notNull().default("0"),                    // changes to existing estimates
+    releases: numeric("releases").notNull().default("0"),                  // VC resolved and recognized
+    recognized: numeric("recognized").notNull().default("0"),               // VC recognized in revenue
+    closingBalance: numeric("closing_balance").notNull().default("0"),     // VC balance at end of period
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});
+
+// RPO Snapshot (placeholder for M25.1)
+export const revRpoSnapshot = pgTable("rev_rpo_snapshot", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    contractId: text("contract_id").notNull().references(() => rbContract.id, { onDelete: "cascade" }),
+    pobId: text("pob_id").notNull(),                           // references future POB table
+    year: integer("year").notNull(),
+    month: integer("month").notNull(),                          // 1-12
+    rpoAmount: numeric("rpo_amount").notNull().default("0"),   // remaining performance obligation
+    deltaFromRevisions: numeric("delta_from_revisions").notNull().default("0"), // delta from contract modifications
+    deltaFromVc: numeric("delta_from_vc").notNull().default("0"),               // delta from variable consideration
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+});

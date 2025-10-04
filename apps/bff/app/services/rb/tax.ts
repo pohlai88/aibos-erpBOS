@@ -85,40 +85,27 @@ export class RbTaxService {
     ): Promise<{ code: string; rate: number } | null> {
         // First try to get product-specific tax code
         if (productId) {
+            // Note: taxCode table doesn't have productId field yet
+            // For now, we'll skip product-specific tax codes
+            // TODO: Add product-specific tax mapping table
             const productTaxCode = await this.dbInstance
                 .select()
                 .from(taxCode)
                 .where(and(
                     eq(taxCode.companyId, companyId),
-                    eq(taxCode.productId, productId),
-                    eq(taxCode.active, true)
+                    eq(taxCode.status, "ACTIVE")
                 ))
                 .limit(1);
 
             if (productTaxCode.length > 0) {
-                return {
-                    code: productTaxCode[0].code,
-                    rate: productTaxCode[0].rate
-                };
+                const taxCode = productTaxCode[0];
+                if (taxCode) {
+                    return {
+                        code: taxCode.code,
+                        rate: Number(taxCode.rate)
+                    };
+                }
             }
-        }
-
-        // Fall back to customer default tax code
-        const customerTaxCode = await this.dbInstance
-            .select()
-            .from(taxCode)
-            .where(and(
-                eq(taxCode.companyId, companyId),
-                eq(taxCode.customerId, customerId),
-                eq(taxCode.active, true)
-            ))
-            .limit(1);
-
-        if (customerTaxCode.length > 0) {
-            return {
-                code: customerTaxCode[0].code,
-                rate: customerTaxCode[0].rate
-            };
         }
 
         // Fall back to company default tax code
@@ -127,16 +114,18 @@ export class RbTaxService {
             .from(taxCode)
             .where(and(
                 eq(taxCode.companyId, companyId),
-                eq(taxCode.isDefault, true),
-                eq(taxCode.active, true)
+                eq(taxCode.status, "ACTIVE")
             ))
             .limit(1);
 
         if (defaultTaxCode.length > 0) {
-            return {
-                code: defaultTaxCode[0].code,
-                rate: defaultTaxCode[0].rate
-            };
+            const taxCode = defaultTaxCode[0];
+            if (taxCode) {
+                return {
+                    code: taxCode.code,
+                    rate: Number(taxCode.rate)
+                };
+            }
         }
 
         return null; // No tax code found
@@ -155,7 +144,7 @@ export class RbTaxService {
             .where(and(
                 eq(taxCode.companyId, companyId),
                 eq(taxCode.code, code),
-                eq(taxCode.active, true)
+                eq(taxCode.status, "ACTIVE")
             ))
             .limit(1);
 
@@ -164,10 +153,14 @@ export class RbTaxService {
         }
 
         const tc = taxCodes[0];
-        return {
-            code: tc.code,
-            rate: tc.rate,
-            description: tc.description || ""
-        };
+        if (tc) {
+            return {
+                code: tc.code,
+                rate: Number(tc.rate),
+                description: tc.name || ""
+            };
+        }
+
+        return null;
     }
 }

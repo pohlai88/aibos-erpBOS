@@ -8,6 +8,7 @@ export * from "./ar-credit";
 export * from "./ar-portal";
 export * from "./ar-statements";
 export * from "./rb";
+export * from "./revenue";
 export * from "./assets_import";
 export * from "./assets_prefs";
 export * from "./bank-connect";
