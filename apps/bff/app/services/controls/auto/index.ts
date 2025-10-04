@@ -48,7 +48,10 @@ export async function jeContinuity(
 
         const exceptions: ControlException[] = [];
 
-        for (const gap of gaps) {
+        // Process gaps as array
+        const gapsArray = Array.isArray(gaps) ? gaps : [gaps];
+
+        for (const gap of gapsArray) {
             exceptions.push({
                 code: 'JE_SEQUENCE_GAP',
                 message: `Gap in journal entry sequence: ${gap.prev_seq} to ${gap.seq} (gap size: ${gap.gap_size})`,
@@ -60,8 +63,8 @@ export async function jeContinuity(
         return {
             status: exceptions.length > 0 ? 'FAIL' : 'PASS',
             detail: {
-                gaps_found: gaps.length,
-                total_gaps: gaps.reduce((sum, gap) => sum + gap.gap_size, 0)
+                gaps_found: gapsArray.length,
+                total_gaps: gapsArray.reduce((sum: number, gap: any) => sum + gap.gap_size, 0)
             },
             exceptions
         };

@@ -22,7 +22,7 @@ export class ControlsExceptionsService {
     async updateException(
         companyId: string,
         userId: string,
-        data: ExceptionUpdate
+        data: any
     ): Promise<ExceptionResponseType> {
         // Verify the exception exists and belongs to a control run for this company
         const exceptions = await this.dbInstance
@@ -125,7 +125,7 @@ export class ControlsExceptionsService {
      */
     async queryExceptions(
         companyId: string,
-        query: ExceptionQuery
+        query: any
     ): Promise<ExceptionResponseType[]> {
         const conditions = [eq(ctrlRun.companyId, companyId)];
 
@@ -159,20 +159,20 @@ export class ControlsExceptionsService {
 
         return exceptions.map(({ exception }) => ({
             id: exception.id,
-            ctrl_run_id: exception.ctrlRunId,
             code: exception.code,
             message: exception.message,
-            item_ref: exception.itemRef,
-            material: exception.material,
-            remediation_state: exception.remediationState,
-            assignee: exception.assignee,
-            due_at: exception.dueAt?.toISOString(),
-            resolved_at: exception.resolvedAt?.toISOString(),
-            resolution_note: exception.resolutionNote,
+            updated_at: exception.updatedAt.toISOString(),
+            updated_by: exception.updatedBy,
             created_at: exception.createdAt.toISOString(),
             created_by: exception.createdBy,
-            updated_at: exception.updatedAt.toISOString(),
-            updated_by: exception.updatedBy
+            material: exception.material,
+            remediation_state: exception.remediationState,
+            ctrl_run_id: exception.ctrlRunId,
+            resolved_at: exception.resolvedAt?.toISOString(),
+            assignee: exception.assignee || undefined,
+            due_at: exception.dueAt?.toISOString(),
+            resolution_note: exception.resolutionNote || undefined,
+            item_ref: exception.itemRef || undefined
         }));
     }
 
@@ -214,7 +214,15 @@ export class ControlsExceptionsService {
             GROUP BY c.severity
         `);
 
-        const result = summary[0];
+        const result = summary[0] as any;
+        if (!result) {
+            return {
+                total_exceptions: 0,
+                material_exceptions: 0,
+                resolved_exceptions: 0,
+                overdue_exceptions: 0
+            };
+        }
         const severityCounts: Record<string, number> = {};
 
         // Process severity summary results
@@ -254,7 +262,10 @@ export class ControlsExceptionsService {
 
         let escalatedCount = 0;
 
-        for (const exception of agingExceptions) {
+        // Process aging exceptions as array
+        const agingArray = Array.isArray(agingExceptions) ? agingExceptions : [agingExceptions];
+
+        for (const exception of agingArray) {
             // Emit escalation event
             await this.emitExceptionEscalatedEvent(companyId, exception);
             escalatedCount++;

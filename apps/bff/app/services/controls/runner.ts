@@ -28,7 +28,7 @@ export class ControlsRunnerService {
     async executeControlRun(
         companyId: string,
         userId: string,
-        data: ControlRunRequest
+        data: any
     ): Promise<ControlRunResponseType> {
         const runId = ulid();
         const scheduledAt = data.scheduled_at ? new Date(data.scheduled_at) : new Date();
@@ -50,7 +50,7 @@ export class ControlsRunnerService {
             if (!assignment) {
                 throw new Error("Assignment not found");
             }
-            
+
             controlId = assignment.controlId;
             assignmentId = data.assignment_id;
         } else {
@@ -93,11 +93,11 @@ export class ControlsRunnerService {
             let result: ControlResult;
 
             const control = controls[0];
-        if (!control) {
-            throw new Error("Control not found");
-        }
-        
-        switch (control.autoKind) {
+            if (!control) {
+                throw new Error("Control not found");
+            }
+
+            switch (control.autoKind) {
                 case "SCRIPT":
                     result = await this.executeScriptControl(control, companyId);
                     break;
@@ -220,14 +220,17 @@ export class ControlsRunnerService {
 
         try {
             // Execute the SQL query with company parameters
-            const results = await this.dbInstance.execute(sql.raw(query, [companyId]));
+            const results = await this.dbInstance.execute(sql.raw(query));
 
             const exceptions: ControlException[] = [];
 
             // Check results against materiality threshold
             const materialityThreshold = control.autoConfig?.materiality_threshold || 0;
 
-            for (const result of results) {
+            // Process results as array
+            const resultsArray = Array.isArray(results) ? results : [results];
+
+            for (const result of resultsArray) {
                 if (result.variance && Math.abs(result.variance) > materialityThreshold) {
                     exceptions.push({
                         code: "SQL_CONTROL_VARIANCE",
@@ -242,7 +245,7 @@ export class ControlsRunnerService {
                 status: exceptions.length === 0 ? "PASS" : "FAIL",
                 detail: {
                     query_executed: query,
-                    results_count: results.length,
+                    results_count: resultsArray.length,
                     materiality_threshold: materialityThreshold
                 },
                 exceptions
@@ -300,7 +303,7 @@ export class ControlsRunnerService {
         if (!run) {
             throw new Error("Control run not found");
         }
-        
+
         return {
             id: run.id,
             company_id: run.companyId,

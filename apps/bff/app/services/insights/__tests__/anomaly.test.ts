@@ -378,7 +378,7 @@ describe("InsightsAnomalyService", () => {
 
         const recoId = recommendations[0]?.id;
         expect(recoId).toBeDefined();
-        
+
         if (!recoId) {
             throw new Error("Recommendation ID not found");
         }

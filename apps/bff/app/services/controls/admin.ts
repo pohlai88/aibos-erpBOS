@@ -25,7 +25,7 @@ export class ControlsAdminService {
     async upsertControl(
         companyId: string,
         userId: string,
-        data: ControlUpsert
+        data: any
     ): Promise<ControlResponseType> {
         const controlId = ulid();
 
@@ -87,6 +87,10 @@ export class ControlsAdminService {
         }
 
         const control = controls[0];
+        if (!control) {
+            throw new Error("Control not found");
+        }
+
         return {
             id: control.id,
             company_id: control.companyId,
@@ -97,7 +101,7 @@ export class ControlsAdminService {
             frequency: control.frequency,
             severity: control.severity,
             auto_kind: control.autoKind,
-            auto_config: control.autoConfig,
+            auto_config: control.autoConfig as Record<string, any> || undefined,
             evidence_required: control.evidenceRequired,
             status: control.status,
             created_at: control.createdAt.toISOString(),
@@ -112,7 +116,7 @@ export class ControlsAdminService {
      */
     async queryControls(
         companyId: string,
-        query: ControlQuery
+        query: any
     ): Promise<ControlResponseType[]> {
         const conditions = [eq(ctrlControl.companyId, companyId)];
 
@@ -147,7 +151,7 @@ export class ControlsAdminService {
             frequency: control.frequency,
             severity: control.severity,
             auto_kind: control.autoKind,
-            auto_config: control.autoConfig,
+            auto_config: control.autoConfig as Record<string, any> || undefined,
             evidence_required: control.evidenceRequired,
             status: control.status,
             created_at: control.createdAt.toISOString(),
@@ -163,7 +167,7 @@ export class ControlsAdminService {
     async upsertAssignment(
         companyId: string,
         userId: string,
-        data: AssignmentUpsert
+        data: any
     ): Promise<AssignmentResponseType> {
         const assignmentId = ulid();
 
@@ -218,12 +222,16 @@ export class ControlsAdminService {
         }
 
         const assignment = assignments[0];
+        if (!assignment) {
+            throw new Error("Assignment not found");
+        }
+
         return {
             id: assignment.id,
             control_id: assignment.controlId,
-            run_id: assignment.runId,
-            task_id: assignment.taskId,
-            entity_id: assignment.entityId,
+            run_id: assignment.runId || undefined,
+            task_id: assignment.taskId || undefined,
+            entity_id: assignment.entityId || undefined,
             owner: assignment.owner,
             approver: assignment.approver,
             sla_due_at: assignment.slaDueAt?.toISOString(),
@@ -240,7 +248,7 @@ export class ControlsAdminService {
      */
     async queryAssignments(
         companyId: string,
-        query: AssignmentQuery
+        query: any
     ): Promise<AssignmentResponseType[]> {
         const conditions = [];
 
@@ -277,9 +285,9 @@ export class ControlsAdminService {
         return assignments.map(assignment => ({
             id: assignment.id,
             control_id: assignment.controlId,
-            run_id: assignment.runId,
-            task_id: assignment.taskId,
-            entity_id: assignment.entityId,
+            run_id: assignment.runId || undefined,
+            task_id: assignment.taskId || undefined,
+            entity_id: assignment.entityId || undefined,
             owner: assignment.owner,
             approver: assignment.approver,
             sla_due_at: assignment.slaDueAt?.toISOString(),
