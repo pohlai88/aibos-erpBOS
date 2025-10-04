@@ -16,6 +16,7 @@ export * from "./insights"; // M26.2: Close Insights & Benchmarks
 export * from "./evidence"; // M26.4: Evidence Vault & eBinder
 export * from "./sox"; // M26.5: SOX 302/404 Pack
 export * from "./close-board"; // M26.6: Close Cockpit & SLA Board
+export * from "./attest"; // M26.7: Attestations Portal
 export * from "./assets_import";
 export * from "./assets_prefs";
 export * from "./bank-connect";
