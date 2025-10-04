@@ -213,18 +213,20 @@ export class RevDiscountService {
         const params = rule.params as any;
 
         switch (rule.kind) {
-            case "PROP":
+            case "PROP": {
                 // Proportional discount across all lines
                 const discountPct = params.pct || 0;
                 return totalInvoiceAmount * discountPct;
+            }
 
-            case "RESIDUAL":
+            case "RESIDUAL": {
                 // Apply to residual-eligible products only
                 const residualProducts = params.residual_products || [];
                 const residualAmount = invoiceLines
                     .filter(line => residualProducts.includes(line.product_id))
                     .reduce((sum, line) => sum + line.amount, 0);
                 return residualAmount * (params.pct || 0);
+            }
 
             case "TIERED":
                 // Volume/term based discount

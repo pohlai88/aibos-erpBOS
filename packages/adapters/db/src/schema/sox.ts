@@ -88,7 +88,7 @@ export const soxTestResult = pgTable("sox_test_result", {
 }));
 
 // Deficiency Tables
-export const soxDeficiency = pgTable("sox_deficiency", {
+export const soxDeficiency: any = pgTable("sox_deficiency", {
     id: uuid("id").primaryKey().defaultRandom(),
     companyId: text("company_id").notNull(),
     controlId: uuid("control_id").references(() => soxKeyControl.id, { onDelete: "set null" }),
@@ -97,7 +97,7 @@ export const soxDeficiency = pgTable("sox_deficiency", {
     severity: text("severity").notNull(), // INCONSEQUENTIAL|SIGNIFICANT|MATERIAL
     description: text("description").notNull(),
     rootCause: text("root_cause"),
-    aggregationId: uuid("aggregation_id").references(() => soxDeficiency.id, { onDelete: "set null" }),
+    aggregationId: uuid("aggregation_id").references((): any => soxDeficiency.id, { onDelete: "set null" }),
     remOwnerId: text("rem_owner_id"),
     remediationPlan: text("remediation_plan"),
     remediationDue: date("remediation_due"),
@@ -217,4 +217,4 @@ export const soxAssertionRelations = relations(soxAssertion, ({ one }) => ({
 }));
 
 // Import evdRecord and evdBinder from evidence schema
-import { evdRecord, evdBinder } from "./evidence";
+import { evdRecord, evdBinder } from "./evidence.js";

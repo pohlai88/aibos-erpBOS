@@ -93,7 +93,7 @@ export class RevScheduleService {
                 });
                 break;
 
-            case 'RATABLE_DAILY':
+            case 'RATABLE_DAILY': {
                 // Daily ratable over the period
                 const dailyAmount = this.calculateDailyRatable(amount, startDate, endDate);
                 let currentDate = new Date(startDate);
@@ -119,13 +119,14 @@ export class RevScheduleService {
                     currentDate.setDate(currentDate.getDate() + 1);
                 }
                 break;
+            }
 
-            case 'RATABLE_MONTHLY':
+            case 'RATABLE_MONTHLY': {
                 // Monthly ratable over the period
                 const monthlyAmount = this.calculateMonthlyRatable(amount, startDate, endDate);
                 let currentMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
                 const endMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
-                remainingAmount = amount;
+                let remainingAmount = amount;
 
                 while (currentMonth <= endMonth && remainingAmount > 0.01) {
                     const monthlyAllocation = Math.min(monthlyAmount, remainingAmount);
@@ -147,6 +148,7 @@ export class RevScheduleService {
                     currentMonth.setMonth(currentMonth.getMonth() + 1);
                 }
                 break;
+            }
 
             case 'USAGE':
                 // Usage-based - no planned amounts, only recognized as usage occurs
