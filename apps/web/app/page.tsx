@@ -2,7 +2,60 @@
 import { useEffect, useState } from "react";
 // import { createSalesInvoice, createPurchaseInvoice } from "@aibos/api-client";
 
-type Res = { ok: boolean; data?: any; replay?: boolean; message?: string };
+type ApiResponse = {
+  ok: boolean;
+  data?: unknown;
+  replay?: boolean;
+  message?: string
+};
+
+type ItemSummary = {
+  item_id: string;
+  on_hand_qty: number;
+  moving_avg_cost: number;
+  total_value: number;
+  updated_at?: string;
+};
+
+type Money = {
+  amount: string;
+  currency: string;
+};
+
+type InvoiceLine = {
+  description: string;
+  qty: number;
+  unit_price: Money;
+};
+
+type InvoiceTotals = {
+  total: Money;
+  tax_total: Money;
+  grand_total: Money;
+};
+
+type SalesInvoice = {
+  id: string;
+  company_id: string;
+  customer_id: string;
+  doc_date: string;
+  currency: string;
+  lines: InvoiceLine[];
+  totals: InvoiceTotals;
+};
+
+type ReportRow = {
+  line: string;
+  value: string;
+};
+
+type ReportResponse = {
+  rows: ReportRow[];
+  total?: string;
+  equationOK?: boolean;
+};
+
+type RequestHeaders = Record<string, string>;
 
 function Pill({ kind, children }: { kind: "created" | "replay" | "error"; children: React.ReactNode }) {
   const bg = kind === "created" ? "#DCFCE7" : kind === "replay" ? "#E0E7FF" : "#FEE2E2";
@@ -10,17 +63,17 @@ function Pill({ kind, children }: { kind: "created" | "replay" | "error"; childr
   return <span style={{ background: bg, padding: "2px 8px", borderRadius: 12, marginLeft: 8, color, fontSize: 12 }}>{children}</span>;
 }
 
-function ItemSummary() {
-  const [sum, setSum] = useState<any>(null);
-  const [apiKey, setApiKey] = useState<string>("");
+function ItemSummaryComponent() {
+  const [sum, setSum] = useState<ItemSummary | null>(null);
+  const [_apiKey, _setApiKey] = useState<string>("");
 
   const load = async () => {
-    const headers: any = {};
-    if (apiKey) headers["X-API-Key"] = apiKey;
+    const headers: RequestHeaders = {};
+    if (_apiKey) headers["X-API-Key"] = _apiKey;
     const r = await fetch("/api/inventory/summary?company_id=COMP-1&item_id=ITEM-1", { headers });
     setSum(await r.json());
   };
-  useEffect(() => { load(); }, [apiKey]);
+  useEffect(() => { load(); }, [_apiKey]);
   return (
     <div style={{ border: "1px solid #ddd", padding: 12, borderRadius: 8, marginTop: 16, width: 380 }}>
       <h2 style={{ margin: 0, fontSize: 18 }}>Item Summary</h2>
@@ -39,18 +92,18 @@ function ItemSummary() {
 }
 
 export default function Home() {
-  const [out, setOut] = useState<Res | null>(null);
+  const [out, setOut] = useState<ApiResponse | null>(null);
   const [status, setStatus] = useState<"idle" | "busy">("idle");
   const [apiKey, setApiKey] = useState<string>("");
 
-  async function call(path: string, body: any) {
+  async function call(path: string, body: unknown) {
     setStatus("busy");
-    const headers: any = { "content-type": "application/json" };
+    const headers: RequestHeaders = { "content-type": "application/json" };
     if (apiKey) headers["X-API-Key"] = apiKey;
     const res = await fetch(path, { method: "POST", headers, body: JSON.stringify(body) });
     const json = await res.json();
     const replay = res.headers.get("X-Idempotent-Replay") === "true";
-    setOut({ ...(json as Res), replay });
+    setOut({ ...(json as ApiResponse), replay });
     setStatus("idle");
   }
 
@@ -74,7 +127,7 @@ export default function Home() {
             currency: "MYR",
             lines: [{ description: "Demo", qty: 1, unit_price: { amount: "100.00", currency: "MYR" } }],
             totals: { total: { amount: "100.00", currency: "MYR" }, tax_total: { amount: "6.00", currency: "MYR" }, grand_total: { amount: "106.00", currency: "MYR" } }
-          } as any;
+          } as SalesInvoice;
           // const res = await createSalesInvoice(body, "http://localhost:3000/api");
           setOut({ ok: true, data: body });
         }}>Post Sales Invoice</button>
@@ -124,22 +177,22 @@ export default function Home() {
         <div>
           <a href="/audit" style={{ textDecoration: "none", color: "#0066cc", marginRight: 16 }}>🔍 Audit Explorer</a>
           <button onClick={async () => {
-            const headers: any = {};
+            const headers: RequestHeaders = {};
             if (apiKey) headers["X-API-Key"] = apiKey;
             const res = await fetch("/api/reports/trial-balance", { headers });
             alert("TB loaded: " + res.status);
           }}>View Trial Balance</button>
           <button style={{ marginLeft: 8 }} onClick={async () => {
-            const headers: any = {};
+            const headers: RequestHeaders = {};
             if (apiKey) headers["X-API-Key"] = apiKey;
             const res = await fetch("/api/reports/pl", { headers }); const json = await res.json();
-            alert("P&L\n" + json.rows.map((r: any) => `${r.line}: ${r.value}`).join("\n") + `\nTotal: ${json.total}`);
+            alert("P&L\n" + json.rows.map((r: ReportRow) => `${r.line}: ${r.value}`).join("\n") + `\nTotal: ${json.total}`);
           }}>View P&L</button>
           <button style={{ marginLeft: 8 }} onClick={async () => {
-            const headers: any = {};
+            const headers: RequestHeaders = {};
             if (apiKey) headers["X-API-Key"] = apiKey;
             const res = await fetch("/api/reports/bs", { headers }); const json = await res.json();
-            alert("Balance Sheet\n" + json.rows.map((r: any) => `${r.line}: ${r.value}`).join("\n") + `\nEquation OK: ${json.equationOK}`);
+            alert("Balance Sheet\n" + json.rows.map((r: ReportRow) => `${r.line}: ${r.value}`).join("\n") + `\nEquation OK: ${json.equationOK}`);
           }}>View Balance Sheet</button>
         </div>
 
@@ -206,7 +259,7 @@ export default function Home() {
           }}>View Aging</button>
         </div>
 
-        <ItemSummary />
+        <ItemSummaryComponent />
       </div>
     </main>
   );

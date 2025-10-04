@@ -28,7 +28,7 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
         `);
 
         const executedRuns = [];
-        for (const run of transitionedRuns) {
+        for (const run of transitionedRuns.rows) {
             try {
                 const controlRun = await runnerService.executeControlRun(authCtx.company_id, authCtx.user_id, {
                     assignment_id: run.assignment_id,
@@ -45,7 +45,7 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
             trigger: "close_transition",
             result: {
                 executed_runs: executedRuns.length,
-                transitioned_runs: transitionedRuns.length,
+                transitioned_runs: transitionedRuns.rows.length,
                 runs: executedRuns
             },
             timestamp: new Date().toISOString()

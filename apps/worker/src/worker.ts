@@ -30,7 +30,6 @@ async function runOnce() {
 async function main() {
     console.log("Worker started");
     // simple poller
-    // eslint-disable-next-line no-constant-condition
     while (true) {
         await runOnce();               // existing outbox drain logs, etc.
         await processDueReversals();   // from M6

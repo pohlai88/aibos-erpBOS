@@ -69,7 +69,7 @@ async function fanoutNewOutboxRows() {
             [companyId]
         );
 
-        const targets = hooks.rows.filter((h: any) => Array.isArray(h.topics) && h.topics.includes(ev.topic));
+        const targets = hooks.rows.filter((h: { topics: string[] }) => Array.isArray(h.topics) && h.topics.includes(ev.topic));
         for (const h of targets) {
             const exist = await pool.query(
                 `select 1 from webhook_attempt where webhook_id=$1 and event_id=$2 limit 1`,
@@ -106,8 +106,8 @@ async function deliverPending() {
             status = res.status;
             ok = res.ok;
             if (!ok) errText = await res.text().catch(() => "");
-        } catch (e: any) {
-            status = 0; ok = false; errText = String(e?.message || e);
+        } catch (e: unknown) {
+            status = 0; ok = false; errText = String((e as Error)?.message || e);
         }
         const ms = Date.now() - t0;
 

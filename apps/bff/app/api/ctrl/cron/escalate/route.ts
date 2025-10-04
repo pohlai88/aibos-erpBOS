@@ -29,7 +29,7 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
         `);
 
         const escalatedExceptions = [];
-        for (const exception of overdueExceptions) {
+        for (const exception of overdueExceptions.rows) {
             try {
                 // Escalate to approver if not already assigned
                 if (!exception.assignee && exception.approver) {
@@ -51,7 +51,7 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
             trigger: "daily_escalation",
             result: {
                 escalated_exceptions: escalatedExceptions.length,
-                overdue_exceptions: overdueExceptions.length,
+                overdue_exceptions: overdueExceptions.rows.length,
                 escalated_ids: escalatedExceptions
             },
             timestamp: new Date().toISOString()

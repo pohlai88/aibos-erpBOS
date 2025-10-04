@@ -82,7 +82,7 @@ async function executeScheduledControls(companyId: string, userId: string, runne
     `);
 
     const executedRuns = [];
-    for (const assignment of dueAssignments) {
+    for (const assignment of dueAssignments.rows) {
         try {
             const run = await runnerService.executeControlRun(companyId, userId, {
                 assignment_id: assignment.id,
@@ -96,7 +96,7 @@ async function executeScheduledControls(companyId: string, userId: string, runne
 
     return {
         executed_runs: executedRuns.length,
-        assignments_processed: dueAssignments.length,
+        assignments_processed: dueAssignments.rows.length,
         runs: executedRuns
     };
 }
@@ -115,7 +115,7 @@ async function escalateExceptions(companyId: string, userId: string, exceptionsS
     `);
 
     const escalatedExceptions = [];
-    for (const exception of overdueExceptions) {
+    for (const exception of overdueExceptions.rows) {
         try {
             // Escalate to approver if not already assigned
             if (!exception.assignee && exception.approver) {
@@ -134,7 +134,7 @@ async function escalateExceptions(companyId: string, userId: string, exceptionsS
 
     return {
         escalated_exceptions: escalatedExceptions.length,
-        overdue_exceptions: overdueExceptions.length,
+        overdue_exceptions: overdueExceptions.rows.length,
         escalated_ids: escalatedExceptions
     };
 }
@@ -152,7 +152,7 @@ async function executeTransitionControls(companyId: string, userId: string, runn
     `);
 
     const executedRuns = [];
-    for (const run of transitionedRuns) {
+    for (const run of transitionedRuns.rows) {
         try {
             const controlRun = await runnerService.executeControlRun(companyId, userId, {
                 assignment_id: run.assignment_id,
@@ -166,7 +166,7 @@ async function executeTransitionControls(companyId: string, userId: string, runn
 
     return {
         executed_runs: executedRuns.length,
-        transitioned_runs: transitionedRuns.length,
+        transitioned_runs: transitionedRuns.rows.length,
         runs: executedRuns
     };
 }
@@ -205,8 +205,8 @@ async function generateSummaryReport(companyId: string, period: "week" | "month"
 
     return {
         period,
-        summary: summary[0],
-        exceptions: exceptions[0],
+        summary: summary.rows[0],
+        exceptions: exceptions.rows[0],
         generated_at: new Date().toISOString()
     };
 }

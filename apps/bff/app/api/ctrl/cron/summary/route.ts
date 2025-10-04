@@ -49,8 +49,8 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
 
         const result = {
             period,
-            summary: summary[0],
-            exceptions: exceptions[0],
+            summary: summary.rows[0],
+            exceptions: exceptions.rows[0],
             generated_at: new Date().toISOString()
         };
 

@@ -7,7 +7,7 @@
         "build": "tsc -b",
         "dev": "tsx src/worker.ts",
         "start": "node dist/worker.js",
-        "lint": "eslint . --ext .ts,.tsx",
+        "lint": "eslint src --ext .ts,.tsx",
         "type-check": "tsc --noEmit",
         "test": "echo 'No tests configured for worker'"
     },

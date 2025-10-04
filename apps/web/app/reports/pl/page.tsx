@@ -1,8 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 
+type ProfitLossRow = {
+    line: string;
+    value: string;
+};
+
 export default function PL() {
-    const [rows, setRows] = useState<any[]>([]);
+    const [rows, setRows] = useState<ProfitLossRow[]>([]);
     const [total, setTotal] = useState<string>("0.00");
     useEffect(() => {
         (async () => {
@@ -16,7 +21,7 @@ export default function PL() {
             <h1>P&amp;L</h1>
             <table cellPadding={6} style={{ borderCollapse: "collapse", border: "1px solid #ddd" }}>
                 <tbody>
-                    {rows.map((r: any) => (
+                    {rows.map((r: ProfitLossRow) => (
                         <tr key={r.line}>
                             <td style={{ border: "1px solid #eee", minWidth: 240 }}>{r.line}</td>
                             <td style={{ border: "1px solid #eee", textAlign: "right" }}>{r.value}</td>

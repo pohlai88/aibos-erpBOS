@@ -3,6 +3,7 @@ import { mdnaTemplate, mdnaDraft, mdnaPublish } from "@aibos/db-adapter/schema";
 import { eq, and, desc, asc } from "drizzle-orm";
 import { ulid } from "ulid";
 import { logLine } from "@/lib/log";
+import { createHash } from 'crypto';
 import type {
     MdnaTemplateUpsertType,
     MdnaTemplateQueryType,
@@ -428,8 +429,7 @@ export class MdnaService {
      * Generate SHA256 checksum for content
      */
     private generateChecksum(content: string): string {
-        const crypto = require('crypto');
-        return crypto.createHash('sha256').update(content).digest('hex');
+        return createHash('sha256').update(content).digest('hex');
     }
 
     /**

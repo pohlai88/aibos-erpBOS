@@ -13,7 +13,6 @@ import type {
     CertSignReq,
     CertSignQuery,
     CertTemplateResponseType,
-    CertSignResponseType,
     CertSignoffResponseType
 } from "@aibos/contracts";
 
@@ -26,8 +25,8 @@ export class CertificationsService {
     async upsertCertTemplate(
         companyId: string,
         userId: string,
-        data: CertStatementUpsert
-    ): Promise<CertStatementResponseType> {
+        data: CertTemplateUpsert
+    ): Promise<CertTemplateResponseType> {
         const templateId = ulid();
 
         const templateData = {
@@ -99,8 +98,8 @@ export class CertificationsService {
      */
     async queryCertTemplates(
         companyId: string,
-        query: CertStatementQuery
-    ): Promise<CertStatementResponseType[]> {
+        query: CertTemplateQuery
+    ): Promise<CertTemplateResponseType[]> {
         const conditions = [eq(certStatement.companyId, companyId)];
 
         if (query.level) {
@@ -171,7 +170,7 @@ export class CertificationsService {
             throw new Error("Certification statement not found");
         }
 
-        const statement = statements[0];
+        const certStatement = statements[0];
 
         // Check if this sign-off already exists
         const existingSignoffs = await this.dbInstance
@@ -192,8 +191,8 @@ export class CertificationsService {
         const snapshotUri = data.snapshot_uri || `snapshot://${data.run_id}/${data.level}/${data.signer_role}/${Date.now()}`;
 
         const signoffId = ulid();
-        const statement = statements[0];
-        if (!statement) {
+        const certStatementTemplate = statements[0];
+        if (!certStatementTemplate) {
             throw new Error("Statement not found");
         }
 
@@ -205,7 +204,7 @@ export class CertificationsService {
             signerRole: data.signer_role,
             signerName: data.signer_name,
             statementId: data.statement_id,
-            statementText: statement.text, // Snapshot of statement text at time of signing
+            statementText: certStatementTemplate.text, // Snapshot of statement text at time of signing
             snapshotUri: snapshotUri,
             checksum: data.checksum,
             createdBy: userId
@@ -227,7 +226,7 @@ export class CertificationsService {
             signer_name: data.signer_name,
             signed_at: new Date().toISOString(),
             statement_id: data.statement_id,
-            statement_text: statement.text,
+            statement_text: certStatementTemplate.text,
             snapshot_uri: snapshotUri,
             checksum: data.checksum,
             created_at: new Date().toISOString(),
@@ -279,7 +278,7 @@ export class CertificationsService {
      */
     async queryCertSignoffs(
         companyId: string,
-        query: CertSignoffQuery
+        query: CertSignQuery
     ): Promise<CertSignoffResponseType[]> {
         const conditions = [eq(certSignoff.companyId, companyId)];
 
@@ -364,15 +363,15 @@ export class CertificationsService {
             entity_level: {
                 manager_signed: !!managerSignoff,
                 controller_signed: !!controllerSignoff,
-                manager_signer: managerSignoff?.signerName || undefined,
-                controller_signer: controllerSignoff?.signerName || undefined,
-                manager_signed_at: managerSignoff?.signedAt.toISOString() || undefined,
-                controller_signed_at: controllerSignoff?.signedAt.toISOString() || undefined
+                manager_signer: managerSignoff?.signerName,
+                controller_signer: controllerSignoff?.signerName,
+                manager_signed_at: managerSignoff?.signedAt.toISOString(),
+                controller_signed_at: controllerSignoff?.signedAt.toISOString()
             },
             consolidated_level: {
                 cfo_signed: !!cfoSignoff,
-                cfo_signer: cfoSignoff?.signerName || undefined,
-                cfo_signed_at: cfoSignoff?.signedAt.toISOString() || undefined
+                cfo_signer: cfoSignoff?.signerName,
+                cfo_signed_at: cfoSignoff?.signedAt.toISOString()
             },
             all_required_signed: !!(managerSignoff && controllerSignoff && cfoSignoff)
         };

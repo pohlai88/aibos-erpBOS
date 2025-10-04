@@ -51,7 +51,7 @@ export const GET = withRouteErrors(async (request: NextRequest) => {
             WHERE company_id = ${authCtx.company_id}
         `);
 
-        const count = existingControls[0]?.count || 0;
+        const count = existingControls.rows[0]?.count || 0;
 
         return NextResponse.json({
             company_id: authCtx.company_id,

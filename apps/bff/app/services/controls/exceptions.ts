@@ -42,7 +42,7 @@ export class ControlsExceptionsService {
             throw new Error("Exception not found");
         }
 
-        const { exception } = exceptions[0];
+        const exception = exceptions[0].exception;
 
         // Update the exception
         const updateData: any = {
@@ -100,7 +100,7 @@ export class ControlsExceptionsService {
             throw new Error("Exception not found");
         }
 
-        const { exception } = exceptions[0];
+        const exception = exceptions[0].exception;
         return {
             id: exception.id,
             ctrl_run_id: exception.ctrlRunId,
@@ -214,7 +214,7 @@ export class ControlsExceptionsService {
             GROUP BY c.severity
         `);
 
-        const result = summary[0] as any;
+        const result = summary.rows[0] as any;
         if (!result) {
             return {
                 total_exceptions: 0,

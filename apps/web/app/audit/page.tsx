@@ -21,6 +21,27 @@ type Journal = {
     currency: string; debit: string; credit: string;
 };
 
+type JournalLine = {
+    id: string;
+    account: string;
+    account_code: string;
+    dc: string;
+    party: string | null;
+    party_type: string | null;
+    party_id: string | null;
+    debit: string;
+    credit: string;
+    amount: string;
+    currency: string;
+    description: string;
+};
+
+type JournalRow = Journal & {
+    total_debit: string;
+    total_credit: string;
+    line_count: number;
+};
+
 export default function Audit() {
     const { apiKey, setApiKey } = useApiKey();
     const [tab, setTab] = useState<"journals" | "events">("journals");
@@ -35,10 +56,10 @@ export default function Audit() {
     const [max, setMax] = useState<string>("");
 
     // Data
-    const [rows, setRows] = useState<any[]>([]);
+    const [rows, setRows] = useState<JournalRow[]>([]);
     const [next, setNext] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
-    const [lines, setLines] = useState<any[] | null>(null);
+    const [lines, setLines] = useState<JournalLine[] | null>(null);
     const [sel, setSel] = useState<Journal | null>(null);
 
     const q = useMemo(() => {
@@ -125,7 +146,7 @@ export default function Audit() {
                             </tr>
                         </thead>
                         <tbody>
-                            {rows.map((r: any) => (
+                            {rows.map((r: JournalRow) => (
                                 <tr key={r.id} style={{ borderTop: "1px solid #f0f0f0" }}>
                                     <td>{new Date(r.posting_date).toLocaleString()}</td>
                                     <td>{r.id}</td>
@@ -153,7 +174,7 @@ export default function Audit() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {lines.map((l: any, i: number) => (
+                                        {lines.map((l: JournalLine, i: number) => (
                                             <tr key={i} style={{ borderTop: "1px solid #f0f0f0" }}>
                                                 <td>{l.account_code}</td>
                                                 <td>{l.dc}</td>
@@ -199,7 +220,7 @@ export default function Audit() {
                             </tr>
                         </thead>
                         <tbody>
-                            {rows.map((r: any) => (
+                            {rows.map((r: JournalRow) => (
                                 <tr key={r.id} style={{ borderTop: "1px solid #f0f0f0" }}>
                                     <td>{new Date(r.created_at).toLocaleString()}</td>
                                     <td>{r.topic}</td>
