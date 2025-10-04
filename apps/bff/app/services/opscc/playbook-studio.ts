@@ -74,6 +74,7 @@ export class PlaybookStudioService {
         const [version] = await db
             .insert(opsPlaybookVersion)
             .values({
+                id: crypto.randomUUID(),
                 company_id: companyId,
                 playbook_id: data.playbook_id,
                 version_no: nextVersion,

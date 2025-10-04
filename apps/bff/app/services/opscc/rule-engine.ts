@@ -10,8 +10,8 @@ import {
     opsSignal
 } from "@aibos/db-adapter/schema";
 import type {
-    RuleUpsert,
-    RuleResponse,
+    RuleUpsertM27_2,
+    RuleResponseM27_2,
     RuleTestRequest,
     RuleTestResponse,
     FireResponse,
@@ -34,8 +34,8 @@ export class OpsRuleEngine {
     async upsertRule(
         companyId: string,
         userId: string,
-        data: RuleUpsert
-    ): Promise<RuleResponse> {
+        data: RuleUpsertM27_2
+    ): Promise<RuleResponseM27_2> {
         try {
             // Check if rule exists (by name for now)
             const existing = await this.dbInstance
@@ -72,6 +72,7 @@ export class OpsRuleEngine {
                 const [created] = await this.dbInstance
                     .insert(opsRule)
                     .values({
+                        id: crypto.randomUUID(),
                         company_id: companyId,
                         name: data.name,
                         enabled: data.enabled,
@@ -430,7 +431,7 @@ export class OpsRuleEngine {
     /**
      * Map database rule to response type
      */
-    private mapRuleToResponse(rule: any): RuleResponse {
+    private mapRuleToResponse(rule: any): RuleResponseM27_2 {
         return {
             id: rule.id,
             company_id: rule.company_id,

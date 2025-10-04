@@ -11,8 +11,8 @@ import {
     opsRule
 } from "@aibos/db-adapter/schema";
 import type {
-    PlaybookUpsert,
-    PlaybookResponse,
+    PlaybookUpsertM27_2,
+    PlaybookResponseM27_2,
     FireResponse,
     FireApprove,
     FireExecute,
@@ -30,8 +30,8 @@ export class OpsPlaybookEngine {
     async upsertPlaybook(
         companyId: string,
         userId: string,
-        data: PlaybookUpsert
-    ): Promise<PlaybookResponse> {
+        data: PlaybookUpsertM27_2
+    ): Promise<PlaybookResponseM27_2> {
         try {
             // Validate action codes exist in registry
             for (const step of data.steps) {
@@ -78,6 +78,7 @@ export class OpsPlaybookEngine {
                 const [created] = await this.dbInstance
                     .insert(opsPlaybook)
                     .values({
+                        id: crypto.randomUUID(),
                         company_id: companyId,
                         name: data.name,
                         steps: data.steps,
@@ -600,7 +601,7 @@ export class OpsPlaybookEngine {
     /**
      * Map database playbook to response type
      */
-    private mapPlaybookToResponse(playbook: any): PlaybookResponse {
+    private mapPlaybookToResponse(playbook: any): PlaybookResponseM27_2 {
         return {
             id: playbook.id,
             company_id: playbook.company_id,

@@ -8,19 +8,25 @@ export {
     AlertsService,
     PlaybooksService,
     WhatIfService
-} from "../services/opscc";
+} from "./opscc";
 
 // Real-Time Signals & Auto-Playbooks services (M27.1)
 export {
     OpsSignalService,
     OpsRuleEngine,
     OpsPlaybookEngine
-} from "../services/opscc";
+} from "./opscc";
 
 // Playbook Studio + Guarded Autonomy services (M27.2)
 export {
-    PlaybookStudioService
-} from "../services/opscc";
+    PlaybookStudioService,
+    RuleService,
+    PlaybookService,
+    GuardrailService,
+    ExecutionService,
+    ActionRegistry,
+    OutcomeManager
+} from "./opscc";
 
 // Allocation services (M19)
 export { upsertAllocRule, getActiveAllocRules, deleteAllocRule } from "../services/alloc/rules";

@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { RuleService } from "@/services";
-import { RuleUpsertM27_2, ListRulesQueryM27_2 } from "@aibos/contracts";
+import { ExecutionService } from "@/services";
+import { RunRequestM27_2, ListRunsQueryM27_2 } from "@aibos/contracts";
 
-const ruleService = new RuleService();
+const executionService = new ExecutionService();
 
 /**
- * M27.2: Rules API Routes
+ * M27.2: Runs API Routes
  * 
- * GET /api/ops/rules - List rules with filtering
- * POST /api/ops/rules - Create or update rule
+ * GET /api/ops/runs - List runs with filtering
+ * POST /api/ops/runs - Queue a run / dry-run
  */
 
 export async function GET(request: NextRequest) {
@@ -20,20 +20,22 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: "Missing company context" }, { status: 400 });
         }
 
-        const query: ListRulesQueryM27_2 = {
-            enabled: searchParams.get("enabled") ? searchParams.get("enabled") === "true" : undefined,
-            kind: searchParams.get("kind") as any,
+        const query: ListRunsQueryM27_2 = {
+            status: searchParams.get("status") as any,
+            code: searchParams.get("code") || undefined,
+            since: searchParams.get("since") || undefined,
+            until: searchParams.get("until") || undefined,
             limit: parseInt(searchParams.get("limit") || "50"),
             offset: parseInt(searchParams.get("offset") || "0")
         };
 
-        const result = await ruleService.listRules(companyId, query);
+        const result = await executionService.listRuns(companyId, query);
 
         return NextResponse.json(result);
     } catch (error) {
-        console.error("Error listing rules:", error);
+        console.error("Error listing runs:", error);
         return NextResponse.json(
-            { error: "Failed to list rules" },
+            { error: "Failed to list runs" },
             { status: 500 }
         );
     }
@@ -49,15 +51,19 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const data = RuleUpsertM27_2.parse(body);
+        const data = RunRequestM27_2.parse(body);
 
-        const result = await ruleService.upsertRule(companyId, userId, data);
+        // Plan the run
+        const plan = await executionService.planRun(companyId, userId, data);
+
+        // Request approval
+        const result = await executionService.requestApproval(companyId, userId, plan);
 
         return NextResponse.json(result);
     } catch (error) {
-        console.error("Error upserting rule:", error);
+        console.error("Error queuing run:", error);
         return NextResponse.json(
-            { error: "Failed to upsert rule" },
+            { error: "Failed to queue run" },
             { status: 500 }
         );
     }

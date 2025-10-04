@@ -1,52 +1,72 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth, AuthCtx } from "@/lib/auth";
-import { requireCapability } from "@/lib/rbac";
-import { withRouteErrors } from "@/lib/route-utils";
-import { OpsPlaybookEngine } from "@/services";
-import {
-    PlaybookUpsert,
-    DryRunRequest
-} from "@aibos/contracts";
+import { PlaybookService } from "@/services";
+import { PlaybookUpsertM27_2, ListPlaybooksQueryM27_2 } from "@aibos/contracts";
 
-// GET /api/ops/playbooks - Get playbooks
-export const GET = withRouteErrors(async (request: NextRequest) => {
-    const auth = await requireAuth(request);
-    await requireCapability(auth, "ops:playbooks:admin");
+const playbookService = new PlaybookService();
 
-    const authCtx = auth as AuthCtx;
+/**
+ * M27.2: Playbooks API Routes
+ * 
+ * GET /api/ops/playbooks - List playbooks with filtering
+ * POST /api/ops/playbooks - Create or update playbook
+ */
 
-    // TODO: Implement getPlaybooks method
-    const playbooks: any[] = []; // Placeholder
+export async function GET(request: NextRequest) {
+    try {
+        const companyId = request.headers.get("x-company-id");
+        const { searchParams } = new URL(request.url);
 
-    return NextResponse.json({ playbooks });
-});
+        if (!companyId) {
+            return NextResponse.json({ error: "Missing company context" }, { status: 400 });
+        }
 
-// POST /api/ops/playbooks - Create or update playbook
-export const POST = withRouteErrors(async (request: NextRequest) => {
-    const auth = await requireAuth(request);
-    await requireCapability(auth, "ops:playbooks:admin");
+        const query: ListPlaybooksQueryM27_2 = {
+            status: searchParams.get("status") as any,
+            limit: parseInt(searchParams.get("limit") || "50"),
+            offset: parseInt(searchParams.get("offset") || "0")
+        };
 
-    const authCtx = auth as AuthCtx;
-    const body = await request.json();
-    const validatedData = PlaybookUpsert.parse(body);
+        const result = await playbookService.listPlaybooks(companyId, query);
 
-    const service = new OpsPlaybookEngine();
-    const playbook = await service.upsertPlaybook(authCtx.company_id, authCtx.user_id, validatedData);
+        return NextResponse.json(result);
+    } catch (error) {
+        console.error("Error listing playbooks:", error);
+        return NextResponse.json(
+            { error: "Failed to list playbooks" },
+            { status: 500 }
+        );
+    }
+}
 
-    return NextResponse.json({ playbook });
-});
+export async function POST(request: NextRequest) {
+    try {
+        const companyId = request.headers.get("x-company-id");
+        const userId = request.headers.get("x-user-id");
 
-// POST /api/ops/playbooks/dry-run - Execute playbook in dry-run mode
-export const PUT = withRouteErrors(async (request: NextRequest) => {
-    const auth = await requireAuth(request);
-    await requireCapability(auth, "ops:actions:execute");
+        if (!companyId || !userId) {
+            return NextResponse.json({ error: "Missing company or user context" }, { status: 400 });
+        }
 
-    const authCtx = auth as AuthCtx;
-    const body = await request.json();
-    const validatedData = DryRunRequest.parse(body);
+        const body = await request.json();
+        const data = PlaybookUpsertM27_2.parse(body);
 
-    const service = new OpsPlaybookEngine();
-    const result = await service.executePlaybook(authCtx.company_id, authCtx.user_id, validatedData);
+        // Validate playbook spec
+        const validation = await playbookService.validateSpec(data.spec);
+        if (!validation.valid) {
+            return NextResponse.json(
+                { error: "Invalid playbook spec", details: validation.errors },
+                { status: 422 }
+            );
+        }
 
-    return NextResponse.json({ result });
-});
+        const result = await playbookService.upsertPlaybook(companyId, userId, data);
+
+        return NextResponse.json(result);
+    } catch (error) {
+        console.error("Error upserting playbook:", error);
+        return NextResponse.json(
+            { error: "Failed to upsert playbook" },
+            { status: 500 }
+        );
+    }
+}
