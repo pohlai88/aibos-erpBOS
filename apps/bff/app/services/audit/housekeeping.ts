@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { db, pool } from "@/lib/db";
 import { ulid } from "ulid";
 import { eq, and, desc, asc, sql, gte, lte } from "drizzle-orm";
 import {
@@ -21,7 +21,7 @@ export class AuditHousekeepingService {
         expired_keys: number;
         expired_grants: number;
     }> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             await client.query("BEGIN");
 
@@ -112,7 +112,7 @@ export class AuditHousekeepingService {
         grant_reminders: number;
         request_reminders: number;
     }> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             await client.query("BEGIN");
 
@@ -211,7 +211,7 @@ export class AuditHousekeepingService {
         open_requests: number;
         total_access_logs: number;
     }> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             const statsResult = await client.query(
                 `SELECT 
@@ -246,7 +246,7 @@ export class AuditHousekeepingService {
      * Clean up old access logs (keep last 90 days)
      */
     async cleanupOldAccessLogs(): Promise<number> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             const result = await client.query(
                 `DELETE FROM audit_access_log WHERE ts < now() - interval '90 days'`

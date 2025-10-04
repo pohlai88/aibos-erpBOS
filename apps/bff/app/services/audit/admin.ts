@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { db, pool } from "@/lib/db";
 import { ulid } from "ulid";
 import { eq, and, desc, asc, sql, gte, lte, inArray } from "drizzle-orm";
 import {
@@ -17,10 +17,10 @@ import type {
     GrantUpsert,
     GrantRevoke,
     AuditorQuery,
-    GrantQuery,
-    AuditorResponseType,
-    GrantResponseType
+    GrantQuery
 } from "@aibos/contracts";
+import { AuditorResponseType, GrantResponseType } from "@aibos/contracts";
+import { z } from "zod";
 import { logLine } from "@/lib/log";
 import { createHash } from "crypto";
 
@@ -34,8 +34,8 @@ export class AuditAdminService {
         companyId: string,
         userId: string,
         data: any
-    ): Promise<AuditorResponseType> {
-        const client = await this.dbInstance.connect();
+    ): Promise<z.infer<typeof AuditorResponseType>> {
+        const client = await pool.connect();
         try {
             await client.query("BEGIN");
 
@@ -105,8 +105,8 @@ export class AuditAdminService {
         companyId: string,
         userId: string,
         data: any
-    ): Promise<GrantResponseType> {
-        const client = await this.dbInstance.connect();
+    ): Promise<z.infer<typeof GrantResponseType>> {
+        const client = await pool.connect();
         try {
             await client.query("BEGIN");
 
@@ -207,7 +207,7 @@ export class AuditAdminService {
         grantId: string,
         userId: string
     ): Promise<void> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             await client.query("BEGIN");
 
@@ -264,8 +264,8 @@ export class AuditAdminService {
     async queryAuditors(
         companyId: string,
         query: any
-    ): Promise<AuditorResponseType[]> {
-        const client = await this.dbInstance.connect();
+    ): Promise<z.infer<typeof AuditorResponseType>[]> {
+        const client = await pool.connect();
         try {
             let whereClause = "WHERE company_id = $1";
             const params: any[] = [companyId];
@@ -291,7 +291,7 @@ export class AuditAdminService {
                 [...params, query.limit, query.offset]
             );
 
-            return result.rows.map(row => ({
+            return result.rows.map((row: any) => ({
                 id: row.id,
                 email: row.email,
                 display_name: row.display_name,
@@ -318,8 +318,8 @@ export class AuditAdminService {
     async queryGrants(
         companyId: string,
         query: any
-    ): Promise<GrantResponseType[]> {
-        const client = await this.dbInstance.connect();
+    ): Promise<z.infer<typeof GrantResponseType>[]> {
+        const client = await pool.connect();
         try {
             let whereClause = "WHERE ag.company_id = $1";
             const params: any[] = [companyId];
@@ -366,7 +366,7 @@ export class AuditAdminService {
                 [...params, query.limit, query.offset]
             );
 
-            return result.rows.map(row => ({
+            return result.rows.map((row: any) => ({
                 id: row.id,
                 auditor_id: row.auditor_id,
                 scope: row.scope,
@@ -396,7 +396,7 @@ export class AuditAdminService {
         userId: string,
         data: any
     ): Promise<any> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             await client.query("BEGIN");
 
@@ -466,7 +466,7 @@ export class AuditAdminService {
      * Get watermark policy for company
      */
     async getWatermarkPolicy(companyId: string): Promise<any> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             const result = await client.query(
                 `SELECT company_id, text_template, diagonal, opacity, font_size, font_color, created_at, updated_at

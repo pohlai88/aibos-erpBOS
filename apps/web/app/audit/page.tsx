@@ -42,6 +42,13 @@ type JournalRow = Journal & {
     line_count: number;
 };
 
+type EventRow = {
+    id: string;
+    createdAt: string;
+    topic: string;
+    payload: any;
+};
+
 export default function Audit() {
     const { apiKey, setApiKey } = useApiKey();
     const [tab, setTab] = useState<"journals" | "events">("journals");
@@ -56,7 +63,7 @@ export default function Audit() {
     const [max, setMax] = useState<string>("");
 
     // Data
-    const [rows, setRows] = useState<JournalRow[]>([]);
+    const [rows, setRows] = useState<(JournalRow | EventRow)[]>([]);
     const [next, setNext] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
     const [lines, setLines] = useState<JournalLine[] | null>(null);
@@ -146,16 +153,21 @@ export default function Audit() {
                             </tr>
                         </thead>
                         <tbody>
-                            {rows.map((r: JournalRow) => (
-                                <tr key={r.id} style={{ borderTop: "1px solid #f0f0f0" }}>
-                                    <td>{new Date(r.posting_date).toLocaleString()}</td>
-                                    <td>{r.id}</td>
-                                    <td>{r.source_doctype} / {r.source_id}</td>
-                                    <td align="right">{Number(r.debit).toFixed(2)}</td>
-                                    <td align="right">{Number(r.credit).toFixed(2)}</td>
-                                    <td><button onClick={() => openLines(r)}>Lines</button></td>
-                                </tr>
-                            ))}
+                            {rows.map((r) => {
+                                if ('posting_date' in r) {
+                                    return (
+                                        <tr key={r.id} style={{ borderTop: "1px solid #f0f0f0" }}>
+                                            <td>{new Date(r.posting_date).toLocaleString()}</td>
+                                            <td>{r.id}</td>
+                                            <td>{r.source_doctype} / {r.source_id}</td>
+                                            <td align="right">{Number(r.debit).toFixed(2)}</td>
+                                            <td align="right">{Number(r.credit).toFixed(2)}</td>
+                                            <td><button onClick={() => openLines(r)}>Lines</button></td>
+                                        </tr>
+                                    );
+                                }
+                                return null;
+                            })}
                         </tbody>
                     </table>
 
@@ -220,13 +232,18 @@ export default function Audit() {
                             </tr>
                         </thead>
                         <tbody>
-                            {rows.map((r: JournalRow) => (
-                                <tr key={r.id} style={{ borderTop: "1px solid #f0f0f0" }}>
-                                    <td>{new Date(r.createdAt).toLocaleString()}</td>
-                                    <td>{r.topic}</td>
-                                    <td><pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>{typeof r.payload === "string" ? r.payload : JSON.stringify(r.payload, null, 2)}</pre></td>
-                                </tr>
-                            ))}
+                            {rows.map((r) => {
+                                if ('createdAt' in r) {
+                                    return (
+                                        <tr key={r.id} style={{ borderTop: "1px solid #f0f0f0" }}>
+                                            <td>{new Date(r.createdAt).toLocaleString()}</td>
+                                            <td>{r.topic}</td>
+                                            <td><pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>{typeof r.payload === "string" ? r.payload : JSON.stringify(r.payload, null, 2)}</pre></td>
+                                        </tr>
+                                    );
+                                }
+                                return null;
+                            })}
                         </tbody>
                     </table>
                 </>

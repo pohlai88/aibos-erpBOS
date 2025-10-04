@@ -7,6 +7,20 @@ export type Capability =
     | "periods:manage"
     | "keys:manage"
     | "audit:read"
+    | "audit:admin"
+    | "audit:respond"
+    | "audit:view"
+    | "itgc:view"
+    | "itgc:admin"
+    | "itgc:breakglass"
+    | "itgc:campaigns"
+    | "itgc:ingest"
+    | "close:board:view"
+    | "close:board:manage"
+    | "close:board:export"
+    | "close:run"
+    | "close:report"
+    | "close:manage"
     | "budgets:manage"
     | "budgets:read"
     | "budgets:approve"
@@ -76,6 +90,10 @@ export type Capability =
     | "cert:report"
     | "cert:sign"
     | "cert:manage"
+    | "opscc:view"
+    | "opscc:admin"
+    | "opscc:whatif:run"
+    | "opscc:whatif:save"
     | "evidence:write"
     | "evidence:read"
     | "evidence:admin"
@@ -115,7 +133,8 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "evidence:write", "evidence:read", "evidence:admin", "binder:build", "binder:sign",
         "sox:admin", "sox:test.plan", "sox:test.exec", "sox:deficiency", "sox:assert",
         "attest:program", "attest:campaign", "attest:respond", "attest:approve", "attest:export",
-        "close:board:view", "close:board:manage"
+        "close:board:view", "close:board:manage",
+        "opscc:view", "opscc:admin", "opscc:whatif:run", "opscc:whatif:save"
     ],
     accountant: [
         "reports:read", "journals:post", "reversal:create", "inventory:move",
@@ -137,7 +156,8 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "evidence:write", "evidence:read", "evidence:admin", "binder:build", "binder:sign",
         "sox:admin", "sox:test.plan", "sox:test.exec", "sox:deficiency", "sox:assert",
         "attest:respond", "attest:approve", "attest:export",
-        "close:board:view"
+        "close:board:view",
+        "opscc:view", "opscc:whatif:run", "opscc:whatif:save"
     ],
     ops: [
         "reports:read", "inventory:move", "audit:read",
@@ -154,7 +174,8 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "cert:report",
         "evidence:write", "evidence:read", "binder:build",
         "sox:test.exec", "sox:deficiency",
-        "attest:respond"
+        "attest:respond",
+        "opscc:view"
     ],
 };
 

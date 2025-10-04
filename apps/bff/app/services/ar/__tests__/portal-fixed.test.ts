@@ -112,9 +112,9 @@ describe('AR Portal & Pay-Now Service (M24.2) - Fixed', () => {
             const policy = await db.insert(arSurchargePolicy).values({
                 companyId: testCompanyId,
                 enabled: true,
-                pct: 2.5,
-                minFee: 1.00,
-                capFee: 10.00,
+                pct: "2.5",
+                minFee: "1.00",
+                capFee: "10.00",
                 updatedAt: new Date(),
                 updatedBy: testUserId
             }).returning();
@@ -152,11 +152,10 @@ describe('AR Portal & Pay-Now Service (M24.2) - Fixed', () => {
             const intent = await db.insert(arCheckoutIntent).values({
                 id: intentId,
                 companyId: testCompanyId,
-                invoiceId,
                 customerId: testCustomerId,
                 presentCcy: 'USD',
                 amount: '1000.00',
-                invoices: [invoiceId],
+                invoices: [{ invoice_id: invoiceId, amount: '1000.00' }],
                 gateway: 'STRIPE',
                 status: 'created',
                 createdAt: new Date(),
@@ -238,17 +237,15 @@ describe('AR Portal & Pay-Now Service (M24.2) - Fixed', () => {
                 companyId: testCompanyId,
                 customerId: testCustomerId,
                 invoiceId,
-                amount: '1000.00',
-                currency: 'USD',
-                reasonCode: 'DUPLICATE',
+                reasonCode: 'PRICING',
+                detail: 'Dispute over pricing',
                 status: 'open',
-                meta: {},
                 createdAt: new Date(),
                 createdBy: testUserId
             }).returning();
 
             expect(dispute).toHaveLength(1);
-            expect(dispute[0]?.reasonCode).toBe('DUPLICATE');
+            expect(dispute[0]?.reasonCode).toBe('PRICING');
             expect(dispute[0]?.status).toBe('open');
         });
     });

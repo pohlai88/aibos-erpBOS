@@ -6,6 +6,7 @@ import { ITGCIngestService } from "@/services/itgc/ingest";
 import { ITGCSoDService } from "@/services/itgc/sod";
 import { ITGCBreakglassService } from "@/services/itgc/breakglass";
 import { ITGCUARService } from "@/services/itgc/uar";
+import { ITGCEvidenceService } from "@/services/itgc/evidence";
 import { db } from "@/lib/db";
 import { sql, eq, and, lt, gte } from "drizzle-orm";
 import { uarCampaign, uarItem } from "@aibos/db-adapter/schema";

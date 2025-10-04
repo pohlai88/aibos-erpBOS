@@ -67,7 +67,7 @@ export class SOXTestingService {
             };
         } catch (error) {
             await client.query("ROLLBACK");
-            logLine("error", `SOXTestingService.createTestPlan failed: ${error}`);
+            logLine({ level: "error", msg: `SOXTestingService.createTestPlan failed: ${error}` });
             throw error;
         } finally {
             client.release();
@@ -113,7 +113,7 @@ export class SOXTestingService {
             };
         } catch (error) {
             await client.query("ROLLBACK");
-            logLine("error", `SOXTestingService.approveTestPlan failed: ${error}`);
+            logLine({ level: "error", msg: `SOXTestingService.approveTestPlan failed: ${error}` });
             throw error;
         } finally {
             client.release();
@@ -141,7 +141,7 @@ export class SOXTestingService {
             await client.query("COMMIT");
         } catch (error) {
             await client.query("ROLLBACK");
-            logLine("error", `SOXTestingService.addTestSamples failed: ${error}`);
+            logLine({ level: "error", msg: `SOXTestingService.addTestSamples failed: ${error}` });
             throw error;
         } finally {
             client.release();
@@ -193,7 +193,7 @@ export class SOXTestingService {
             };
         } catch (error) {
             await client.query("ROLLBACK");
-            logLine("error", `SOXTestingService.recordTestResult failed: ${error}`);
+            logLine({ level: "error", msg: `SOXTestingService.recordTestResult failed: ${error}` });
             throw error;
         } finally {
             client.release();
@@ -245,7 +245,7 @@ export class SOXTestingService {
                 approved_at: row.approved_at?.toISOString() || null
             }));
         } catch (error) {
-            logLine("error", `SOXTestingService.listTestPlans failed: ${error}`);
+            logLine({ level: "error", msg: `SOXTestingService.listTestPlans failed: ${error}` });
             throw error;
         } finally {
             client.release();
@@ -290,7 +290,7 @@ export class SOXTestingService {
                 tested_at: row.tested_at.toISOString()
             }));
         } catch (error) {
-            logLine("error", `SOXTestingService.listTestResults failed: ${error}`);
+            logLine({ level: "error", msg: `SOXTestingService.listTestResults failed: ${error}` });
             throw error;
         } finally {
             client.release();

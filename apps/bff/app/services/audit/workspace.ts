@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { db, pool } from "@/lib/db";
 import { ulid } from "ulid";
 import { eq, and, desc, asc, sql, gte, lte } from "drizzle-orm";
 import {
@@ -10,9 +10,10 @@ import {
 import type {
     PackQuery,
     PackViewReq,
-    DlRequest,
-    AuditPackResponseType
+    DlRequest
 } from "@aibos/contracts";
+import { AuditPackResponseType } from "@aibos/contracts";
+import { z } from "zod";
 import { logLine } from "@/lib/log";
 import { createHash } from "crypto";
 
@@ -26,8 +27,8 @@ export class AuditWorkspaceService {
         companyId: string,
         auditorId: string,
         query: any
-    ): Promise<AuditPackResponseType[]> {
-        const client = await this.dbInstance.connect();
+    ): Promise<z.infer<typeof AuditPackResponseType>[]> {
+        const client = await pool.connect();
         try {
             let whereClause = `WHERE ag.company_id = $1 AND ag.auditor_id = $2 AND ag.expires_at > now()`;
             const params: any[] = [companyId, auditorId];
@@ -72,7 +73,7 @@ export class AuditWorkspaceService {
                 [...params, query.paging.limit, query.paging.offset]
             );
 
-            return result.rows.map(row => ({
+            return result.rows.map((row: any) => ({
                 id: row.id,
                 title: `${row.campaign_name} - ${row.task_title}`,
                 sha256: row.sha256,
@@ -104,7 +105,7 @@ export class AuditWorkspaceService {
         auditorId: string,
         packId: string
     ): Promise<any> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             // Verify auditor has access to this pack
             const grantResult = await client.query(
@@ -195,7 +196,7 @@ export class AuditWorkspaceService {
         grantId: string,
         objectId: string
     ): Promise<{ download_key: string; expires_at: string }> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             await client.query("BEGIN");
 
@@ -257,7 +258,7 @@ export class AuditWorkspaceService {
     async validateDownloadKey(
         downloadKey: string
     ): Promise<{ grant_id: string; object_id: string; file_path: string; company_id: string; auditor_email: string }> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             const keyHash = createHash('sha256').update(downloadKey).digest('hex');
 
@@ -337,7 +338,7 @@ export class AuditWorkspaceService {
      * Get watermark policy for company
      */
     async getWatermarkPolicy(companyId: string): Promise<any> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             const result = await client.query(
                 `SELECT company_id, text_template, diagonal, opacity, font_size, font_color, created_at, updated_at

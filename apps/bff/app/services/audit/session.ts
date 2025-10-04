@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { db, pool } from "@/lib/db";
 import { ulid } from "ulid";
 import { eq, and, desc, asc, sql, gte, lte } from "drizzle-orm";
 import {
@@ -25,7 +25,7 @@ export class AuditSessionService {
         ip?: string,
         userAgent?: string
     ): Promise<{ magic_code: string; expires_at: string }> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             await client.query("BEGIN");
 
@@ -108,7 +108,7 @@ export class AuditSessionService {
         ip?: string,
         userAgent?: string
     ): Promise<{ session_token: string; auditor: any; expires_at: string }> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             await client.query("BEGIN");
 
@@ -175,7 +175,7 @@ export class AuditSessionService {
         sessionToken: string,
         companyId: string
     ): Promise<{ auditor_id: string; session_id: string }> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             // For now, we'll use a simple validation
             // In production, you'd want to store session tokens in Redis or similar
@@ -224,7 +224,7 @@ export class AuditSessionService {
         action: string,
         meta: any = {}
     ): Promise<void> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             await client.query(
                 `INSERT INTO audit_access_log (company_id, auditor_id, session_id, scope, object_id, action, ts, meta)
@@ -253,7 +253,7 @@ export class AuditSessionService {
      * Clean up expired sessions
      */
     async cleanupExpiredSessions(): Promise<number> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             const result = await client.query(
                 `DELETE FROM audit_session WHERE expires_at < now()`

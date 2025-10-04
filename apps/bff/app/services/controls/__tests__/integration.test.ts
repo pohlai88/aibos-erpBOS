@@ -234,7 +234,7 @@ describe("M26.1 Auto-Controls & Certifications", () => {
                 const exception = exceptions[0];
 
                 const updateData = {
-                    id: exception.id,
+                    id: exception!.id,
                     remediation_state: "IN_PROGRESS" as const,
                     assignee: "test-user",
                     resolution_note: "Working on resolution"

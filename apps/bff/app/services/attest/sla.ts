@@ -80,11 +80,9 @@ export class AttestSlaService {
 
             // Check for escalation (tasks that have been late for more than 24 hours)
             if (task.slaState === "LATE" && hoursUntilDue < -24) {
-                if (task.slaState !== "ESCALATED") {
-                    newSlaState = "ESCALATED";
-                    shouldUpdate = true;
-                    escalated++;
-                }
+                newSlaState = "ESCALATED";
+                shouldUpdate = true;
+                escalated++;
             }
 
             if (shouldUpdate) {

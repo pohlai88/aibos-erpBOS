@@ -68,11 +68,11 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
             pending_approval_details: pendingApprovalResult.rows
         };
 
-        logLine("info", `SOX reminders check completed for company ${authCtx.company_id}: ${result.missing_302_signers} missing 302s, ${result.missing_404_signers} missing 404s, ${result.pending_test_approvals} pending approvals`);
+        logLine({ level: "info", msg: `SOX reminders check completed for company ${authCtx.company_id}: ${result.missing_302_signers} missing 302s, ${result.missing_404_signers} missing 404s, ${result.pending_test_approvals} pending approvals` });
 
         return NextResponse.json({ result });
     } catch (error) {
-        logLine("error", `SOX reminders check failed: ${error}`);
+        logLine({ level: "error", msg: `SOX reminders check failed: ${error}` });
         throw error;
     } finally {
         client.release();

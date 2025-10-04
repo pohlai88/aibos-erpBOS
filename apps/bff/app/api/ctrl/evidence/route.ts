@@ -25,7 +25,7 @@ export const GET = withRouteErrors(async (request: NextRequest) => {
 
     const service = new ControlsRunnerService();
     // Note: EvidenceQuery functionality would need to be implemented in the service
-    const evidence = []; // Placeholder - would implement evidence query in service
+    const evidence: any[] = []; // Placeholder - would implement evidence query in service
 
     return NextResponse.json({ evidence });
 });

@@ -58,7 +58,7 @@ describe("M26.7 Attestations Portal", () => {
             // List programs
             const programs = await programsService.listPrograms(testCompanyId);
             expect(programs.programs).toHaveLength(1);
-            expect(programs.programs[0].code).toBe("TEST-302");
+            expect(programs.programs[0]!.code).toBe("TEST-302");
         });
 
         it("should create and list attestation templates", async () => {
@@ -98,7 +98,7 @@ describe("M26.7 Attestations Portal", () => {
             // List templates
             const templates = await programsService.listTemplates(testCompanyId);
             expect(templates.templates).toHaveLength(1);
-            expect(templates.templates[0].code).toBe("TEST-TEMPLATE");
+            expect(templates.templates[0]!.code).toBe("TEST-TEMPLATE");
         });
 
         it("should create and list attestation assignments", async () => {
@@ -136,7 +136,7 @@ describe("M26.7 Attestations Portal", () => {
             // List assignments
             const assignments = await programsService.listAssignments(testCompanyId);
             expect(assignments.assignments).toHaveLength(1);
-            expect(assignments.assignments[0].scopeKey).toBe("PROCESS:R2R");
+            expect(assignments.assignments[0]!.scopeKey).toBe("PROCESS:R2R");
         });
     });
 
@@ -216,8 +216,8 @@ describe("M26.7 Attestations Portal", () => {
             });
 
             expect(tasks.tasks).toHaveLength(1);
-            expect(tasks.tasks[0].assigneeId).toBe(testAssigneeId);
-            expect(tasks.tasks[0].scopeKey).toBe("PROCESS:R2R");
+            expect(tasks.tasks[0]!.assigneeId).toBe(testAssigneeId);
+            expect(tasks.tasks[0]!.scopeKey).toBe("PROCESS:R2R");
         });
     });
 
@@ -281,13 +281,13 @@ describe("M26.7 Attestations Portal", () => {
 
             // Submit task response
             const submitData = {
-                taskId: task.id,
+                taskId: task!.id,
                 answers: { q1: "N" },
                 exceptions: [],
                 evidenceIds: [],
             };
 
-            await tasksService.submitTask(task.id, testCompanyId, testAssigneeId, submitData);
+            await tasksService.submitTask(task!.id, testCompanyId, testAssigneeId, submitData);
 
             // Verify task state changed
             const updatedTasks = await tasksService.listTasks(testCompanyId, {
@@ -296,8 +296,8 @@ describe("M26.7 Attestations Portal", () => {
                 offset: 0,
             });
 
-            expect(updatedTasks.tasks[0].state).toBe("SUBMITTED");
-            expect(updatedTasks.tasks[0].submittedAt).toBeDefined();
+            expect(updatedTasks.tasks[0]!.state).toBe("SUBMITTED");
+            expect(updatedTasks.tasks[0]!.submittedAt).toBeDefined();
         });
     });
 
@@ -335,7 +335,7 @@ describe("M26.7 Attestations Portal", () => {
                 .from(attestTask)
                 .where(eq(attestTask.id, taskId));
 
-            expect(updatedTask.slaState).toBe("LATE");
+            expect(updatedTask!.slaState).toBe("LATE");
         });
     });
 });

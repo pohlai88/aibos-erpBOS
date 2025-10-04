@@ -89,7 +89,7 @@ describe("ITGC & UAR Bridge Services", () => {
             // Retrieve systems
             const systems = await registryService.getSystems(testCompanyId);
             expect(systems).toHaveLength(1);
-            expect(systems[0].code).toBe("TEST-ERP");
+            expect(systems[0]!.code).toBe("TEST-ERP");
         });
 
         it("should create and retrieve connector profiles", async () => {
@@ -136,7 +136,7 @@ describe("ITGC & UAR Bridge Services", () => {
             // Retrieve connectors
             const connectors = await registryService.getConnectors(system.id);
             expect(connectors).toHaveLength(1);
-            expect(connectors[0].connector).toBe("SCIM");
+            expect(connectors[0]!.connector).toBe("SCIM");
         });
     });
 
@@ -169,7 +169,7 @@ describe("ITGC & UAR Bridge Services", () => {
             // Retrieve rules
             const rules = await sodService.getSoDRules(testCompanyId);
             expect(rules).toHaveLength(1);
-            expect(rules[0].code).toBe("SOD_TEST");
+            expect(rules[0]!.code).toBe("SOD_TEST");
 
             // Evaluate rules (should not find violations without test data)
             const result = await sodService.evaluateSoDRules(testCompanyId);
@@ -215,11 +215,11 @@ describe("ITGC & UAR Bridge Services", () => {
             });
 
             expect(violations).toHaveLength(1);
-            expect(violations[0].status).toBe("OPEN");
+            expect(violations[0]!.status).toBe("OPEN");
 
             // Take action on violation
             await sodService.takeViolationAction(testCompanyId, testUserId, {
-                violation_id: violations[0].id,
+                violation_id: violations[0]!.id,
                 action: "waive" as const,
                 note: "Test waiver"
             });
@@ -230,8 +230,8 @@ describe("ITGC & UAR Bridge Services", () => {
                 paging: { limit: 50, offset: 0 }
             });
 
-            expect(updatedViolations[0].status).toBe("WAIVED");
-            expect(updatedViolations[0].note).toBe("Test waiver");
+            expect(updatedViolations[0]!.status).toBe("WAIVED");
+            expect(updatedViolations[0]!.note).toBe("Test waiver");
         });
     });
 
@@ -261,7 +261,7 @@ describe("ITGC & UAR Bridge Services", () => {
             // Retrieve campaigns
             const campaigns = await uarService.getCampaigns(testCompanyId);
             expect(campaigns).toHaveLength(1);
-            expect(campaigns[0].code).toBe("UAR-2025Q1");
+            expect(campaigns[0]!.code).toBe("UAR-2025Q1");
 
             // Open campaign (this would normally create items, but we'll test the structure)
             try {
@@ -273,7 +273,7 @@ describe("ITGC & UAR Bridge Services", () => {
                 // Expected to fail without test users, but we can verify the campaign status change
                 const updatedCampaigns = await uarService.getCampaigns(testCompanyId);
                 // Campaign should still be DRAFT since opening failed
-                expect(updatedCampaigns[0].status).toBe("DRAFT");
+                expect(updatedCampaigns[0]!.status).toBe("DRAFT");
             }
         });
     });
@@ -304,7 +304,7 @@ describe("ITGC & UAR Bridge Services", () => {
             // Retrieve active break-glass records
             const activeBreakglass = await breakglassService.getActiveBreakglass(testCompanyId);
             expect(activeBreakglass).toHaveLength(1);
-            expect(activeBreakglass[0].ticket).toBe("INC-12345");
+            expect(activeBreakglass[0]!.ticket).toBe("INC-12345");
 
             // Close break-glass access
             await breakglassService.closeBreakglass(testCompanyId, testUserId, {
@@ -384,7 +384,7 @@ describe("ITGC & UAR Bridge Services", () => {
             // Retrieve snapshots
             const snapshots = await evidenceService.getSnapshots(testCompanyId);
             expect(snapshots).toHaveLength(1);
-            expect(snapshots[0].scope).toBe("USERS");
+            expect(snapshots[0]!.scope).toBe("USERS");
         });
 
         it("should build UAR evidence packs", async () => {
@@ -392,12 +392,11 @@ describe("ITGC & UAR Bridge Services", () => {
 
             // Create test campaign
             await db.insert(uarCampaign).values({
-                id: "test-campaign-123",
                 companyId: testCompanyId,
                 code: "UAR-TEST",
                 name: "Test UAR Campaign",
-                periodStart: new Date("2025-01-01"),
-                periodEnd: new Date("2025-03-31"),
+                periodStart: "2025-01-01",
+                periodEnd: "2025-03-31",
                 dueAt: new Date("2025-04-15T23:59:59Z"),
                 status: "CLOSED",
                 createdBy: testUserId,
@@ -431,7 +430,7 @@ describe("ITGC & UAR Bridge Services", () => {
             // Retrieve packs
             const packs = await evidenceService.getUARPacks(testCompanyId);
             expect(packs).toHaveLength(1);
-            expect(packs[0].campaign_id).toBe("test-campaign-123");
+            expect(packs[0]!.campaign_id).toBe("test-campaign-123");
         });
     });
 

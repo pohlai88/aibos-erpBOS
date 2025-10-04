@@ -178,9 +178,9 @@ export class ITGCRegistryService {
             company_id: row.companyId,
             system_id: row.systemId,
             connector: row.connector,
-            settings: row.settings,
-            secret_ref: row.secretRef,
-            schedule_cron: row.scheduleCron,
+            settings: row.settings as Record<string, any>,
+            secret_ref: row.secretRef ?? undefined,
+            schedule_cron: row.scheduleCron ?? undefined,
             is_enabled: row.isEnabled,
             created_at: row.createdAt.toISOString()
         }));
@@ -206,9 +206,9 @@ export class ITGCRegistryService {
             company_id: row.companyId,
             system_id: row.systemId,
             connector: row.connector,
-            settings: row.settings,
-            secret_ref: row.secretRef,
-            schedule_cron: row.scheduleCron,
+            settings: row.settings as Record<string, any>,
+            secret_ref: row.secretRef ?? undefined,
+            schedule_cron: row.scheduleCron ?? undefined,
             is_enabled: row.isEnabled,
             created_at: row.createdAt.toISOString()
         }));

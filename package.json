@@ -89,7 +89,7 @@
     "syncpack:check": "syncpack lint",
     "syncpack:fix": "syncpack fix-mismatches",
     "syncpack:list": "syncpack list-mismatches",
-    "typecheck": "turbo run build:types && turbo run typecheck",
+    "typecheck": "turbo run typecheck",
     "verify": "pnpm contracts:gen && pnpm rules:build",
     "worker": "pnpm --filter worker dev"
   }

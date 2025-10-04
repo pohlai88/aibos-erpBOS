@@ -1,5 +1,5 @@
 import { pgTable, text, timestamp, boolean, uuid, pgEnum, jsonb, date, index } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 // --- M26.9: ITGC & UAR Bridge Schema ---
 
@@ -72,7 +72,7 @@ export const itConnectorProfile = pgTable("it_connector_profile", {
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => ({
     systemIdx: index("idx_it_connector_profile_system").on(table.systemId),
-    scheduleIdx: index("idx_it_connector_profile_schedule").on(table.scheduleCron).where(table.isEnabled),
+    scheduleIdx: index("idx_it_connector_profile_schedule").on(table.scheduleCron).where(sql`${table.isEnabled} = true`),
 }));
 
 // IT Users from connected systems
@@ -89,7 +89,7 @@ export const itUser = pgTable("it_user", {
 }, (table) => ({
     companySystemExtIdx: index("idx_it_user_company_system_ext").on(table.companyId, table.systemId, table.extId),
     companySystemIdx: index("idx_it_user_company_system").on(table.companyId, table.systemId),
-    statusIdx: index("idx_it_user_status").on(table.status).where(table.status.ne("ACTIVE")),
+    statusIdx: index("idx_it_user_status").on(table.status).where(sql`${table.status} != 'ACTIVE'`),
     lastSeenIdx: index("idx_it_user_last_seen").on(table.lastSeen),
 }));
 
@@ -104,7 +104,7 @@ export const itRole = pgTable("it_role", {
 }, (table) => ({
     companySystemCodeIdx: index("idx_it_role_company_system_code").on(table.companyId, table.systemId, table.code),
     companySystemIdx: index("idx_it_role_company_system").on(table.companyId, table.systemId),
-    criticalIdx: index("idx_it_role_critical").on(table.critical).where(table.critical),
+    criticalIdx: index("idx_it_role_critical").on(table.critical).where(sql`${table.critical} = true`),
 }));
 
 // Entitlements (roles, groups, privileges, schemas, tables, actions)
@@ -138,7 +138,7 @@ export const itGrant = pgTable("it_grant", {
     companySystemIdx: index("idx_it_grant_company_system").on(table.companyId, table.systemId),
     userIdx: index("idx_it_grant_user").on(table.userId),
     entitlementIdx: index("idx_it_grant_entitlement").on(table.entitlementId),
-    expiresIdx: index("idx_it_grant_expires").on(table.expiresAt).where(table.expiresAt.isNotNull()),
+    expiresIdx: index("idx_it_grant_expires").on(table.expiresAt).where(sql`${table.expiresAt} IS NOT NULL`),
     sourceIdx: index("idx_it_grant_source").on(table.source),
 }));
 
@@ -215,7 +215,7 @@ export const uarItem = pgTable("uar_item", {
     campaignStateIdx: index("idx_uar_item_campaign_state").on(table.campaignId, table.state),
     ownerIdx: index("idx_uar_item_owner").on(table.ownerUserId),
     userSystemIdx: index("idx_uar_item_user_system").on(table.userId, table.systemId),
-    decidedAtIdx: index("idx_uar_item_decided_at").on(table.decidedAt).where(table.decidedAt.isNotNull()),
+    decidedAtIdx: index("idx_uar_item_decided_at").on(table.decidedAt).where(sql`${table.decidedAt} IS NOT NULL`),
 }));
 
 // Break-glass emergency access records
@@ -232,8 +232,8 @@ export const itBreakglass = pgTable("it_breakglass", {
     closedBy: text("closed_by"),
 }, (table) => ({
     companyOpenedIdx: index("idx_it_breakglass_company_opened").on(table.companyId, table.openedAt),
-    companyStatusIdx: index("idx_it_breakglass_company_status").on(table.companyId, table.closedAt).where(table.closedAt.isNull()),
-    expiresIdx: index("idx_it_breakglass_expires").on(table.expiresAt).where(table.closedAt.isNull()),
+    companyStatusIdx: index("idx_it_breakglass_company_status").on(table.companyId, table.closedAt).where(sql`${table.closedAt} IS NULL`),
+    expiresIdx: index("idx_it_breakglass_expires").on(table.expiresAt).where(sql`${table.closedAt} IS NULL`),
     userIdx: index("idx_it_breakglass_user").on(table.userId),
     systemIdx: index("idx_it_breakglass_system").on(table.systemId),
 }));

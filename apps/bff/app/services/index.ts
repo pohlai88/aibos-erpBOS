@@ -1,11 +1,14 @@
 // BFF-facing façade to avoid deep relative imports from route handlers.
 // This provides a stable interface to services without brittle relative paths.
 
-// Re-export commonly used services with stable paths
-export { bulkPostAssets } from "../services/assets/bulkPost";
-export { importCapexCsv } from "../services/capex/importCsv";
-export { importIntangiblesCsv } from "../services/intangibles/importCsv";
-export { revalueMonetaryAccounts } from "../services/fx/revalue";
+// Ops Command Center services (M27)
+export {
+    KpiFabricService,
+    BoardsService,
+    AlertsService,
+    PlaybooksService,
+    WhatIfService
+} from "../services/opscc";
 
 // Allocation services (M19)
 export { upsertAllocRule, getActiveAllocRules, deleteAllocRule } from "../services/alloc/rules";

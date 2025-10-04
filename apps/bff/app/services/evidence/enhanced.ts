@@ -60,7 +60,7 @@ export class EnhancedEvidenceService {
 
         let objectId: string;
         if (existingObjects.length > 0) {
-            objectId = existingObjects[0].id;
+            objectId = existingObjects[0]!.id;
         } else {
             // Create new object
             const newObject = await this.dbInstance
@@ -75,7 +75,7 @@ export class EnhancedEvidenceService {
                 })
                 .returning();
 
-            objectId = newObject[0].id;
+            objectId = newObject[0]!.id;
         }
 
         // Create evidence record
@@ -161,14 +161,15 @@ export class EnhancedEvidenceService {
             })
             .returning();
 
+        const ruleData = rule!;
         return {
-            id: rule.id,
-            code: rule.code,
-            description: rule.description,
-            rule: rule.rule,
-            enabled: rule.enabled,
-            updated_by: rule.updatedBy,
-            updated_at: rule.updatedAt.toISOString()
+            id: ruleData.id,
+            code: ruleData.code,
+            description: ruleData.description ?? undefined,
+            rule: ruleData.rule as Record<string, any>,
+            enabled: ruleData.enabled,
+            updated_by: ruleData.updatedBy,
+            updated_at: ruleData.updatedAt.toISOString()
         };
     }
 
@@ -210,7 +211,7 @@ export class EnhancedEvidenceService {
 
             if (data.filters.exclude_tags?.length) {
                 filteredRecords = filteredRecords.filter(record =>
-                    !record.tags.some(tag => data.filters!.exclude_tags!.includes(tag))
+                    !record.tags?.some(tag => data.filters!.exclude_tags!.includes(tag))
                 );
             }
         }
@@ -261,7 +262,7 @@ export class EnhancedEvidenceService {
                         objectSha256: link.object.sha256Hex,
                         objectBytes: link.object.sizeBytes,
                         title: record.title,
-                        tags: record.tags
+                        tags: record.tags ?? undefined
                     });
             }
         }
@@ -301,7 +302,7 @@ export class EnhancedEvidenceService {
             throw new Error("Manifest not found");
         }
 
-        const manifest = manifests[0];
+        const manifest = manifests[0]!;
         const lines = await this.dbInstance
             .select({
                 line: evdManifestLine,

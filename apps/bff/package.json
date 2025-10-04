@@ -34,7 +34,7 @@
     "start": "next start -p 3000",
     "test": "vitest",
     "test:run": "vitest run",
-    "type-check": "tsc --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "turbo": {
     "pipeline": {

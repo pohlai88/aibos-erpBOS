@@ -101,7 +101,7 @@ export class ITGCSoDService {
             code: row.code,
             name: row.name,
             severity: row.severity,
-            logic: row.logic,
+            logic: row.logic as Record<string, any>,
             active: row.active,
             created_at: row.createdAt.toISOString(),
             violation_count: Number(row.violationCount)
@@ -176,8 +176,8 @@ export class ITGCSoDService {
             for (const violation of entitlementViolations.rows) {
                 const explanation = await this.buildViolationExplanation(
                     companyId,
-                    violation.user_id,
-                    violation.system_id,
+                    violation.user_id as string,
+                    violation.system_id as string,
                     entitlements,
                     roles
                 );
@@ -214,8 +214,8 @@ export class ITGCSoDService {
             for (const violation of entitlementViolations.rows) {
                 const explanation = await this.buildViolationExplanation(
                     companyId,
-                    violation.user_id,
-                    violation.system_id,
+                    violation.user_id as string,
+                    violation.system_id as string,
                     entitlements,
                     roles
                 );
@@ -386,15 +386,15 @@ export class ITGCSoDService {
             user_id: row.userId,
             detected_at: row.detectedAt.toISOString(),
             status: row.status,
-            note: row.note,
-            explanation: row.explanation,
+            note: row.note ?? undefined,
+            explanation: row.explanation as Record<string, any> | undefined,
             rule: row.rule ? {
                 id: row.rule.id,
                 company_id: row.rule.companyId,
                 code: row.rule.code,
                 name: row.rule.name,
                 severity: row.rule.severity,
-                logic: row.rule.logic,
+                logic: row.rule.logic as Record<string, any>,
                 active: row.rule.active,
                 created_at: row.rule.createdAt.toISOString()
             } : undefined,
@@ -403,8 +403,8 @@ export class ITGCSoDService {
                 company_id: row.user.companyId,
                 system_id: row.user.systemId,
                 ext_id: row.user.extId,
-                email: row.user.email,
-                display_name: row.user.displayName,
+                email: row.user.email ?? undefined,
+                display_name: row.user.displayName ?? undefined,
                 status: row.user.status,
                 first_seen: row.user.firstSeen.toISOString(),
                 last_seen: row.user.lastSeen.toISOString()

@@ -5,6 +5,7 @@ import {
     itSnapshot,
     uarPack,
     uarCampaign,
+    uarItem,
     itUser,
     itRole,
     itEntitlement,
@@ -465,7 +466,7 @@ export class ITGCEvidenceService {
             taken_at: row.takenAt.toISOString(),
             scope: row.scope,
             sha256: row.sha256,
-            evd_record_id: row.evdRecordId
+            evd_record_id: row.evdRecordId ?? undefined
         }));
     }
 
@@ -502,15 +503,15 @@ export class ITGCEvidenceService {
             id: row.id,
             campaign_id: row.campaignId,
             sha256: row.sha256,
-            evd_record_id: row.evdRecordId,
+            evd_record_id: row.evdRecordId ?? undefined,
             created_at: row.createdAt.toISOString(),
             campaign: row.campaign ? {
                 id: row.campaign.id,
                 company_id: row.campaign.companyId,
                 code: row.campaign.code,
                 name: row.campaign.name,
-                period_start: row.campaign.periodStart.toISOString().split('T')[0],
-                period_end: row.campaign.periodEnd.toISOString().split('T')[0],
+                period_start: row.campaign.periodStart?.split('T')[0] ?? '',
+                period_end: row.campaign.periodEnd?.split('T')[0] ?? '',
                 due_at: row.campaign.dueAt.toISOString(),
                 status: row.campaign.status,
                 created_by: row.campaign.createdBy,

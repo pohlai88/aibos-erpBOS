@@ -86,9 +86,32 @@ export class CloseBoardService {
             .offset(query.offset);
 
         return {
-            items,
+            items: items.map(item => this.mapCloseItem(item)),
             total,
             hasMore: query.offset + query.limit < total,
+        };
+    }
+
+    /**
+     * Map database result to response type
+     */
+    private mapCloseItem(result: any) {
+        return {
+            id: result.id,
+            companyId: result.companyId,
+            period: result.period,
+            kind: result.kind,
+            refId: result.refId,
+            title: result.title,
+            process: result.process as "R2R" | "P2P" | "O2C" | "Treasury" | "Tax",
+            ownerId: result.ownerId,
+            dueAt: result.dueAt.toISOString(),
+            status: result.status as "OPEN" | "IN_PROGRESS" | "DONE" | "BLOCKED" | "DEFERRED",
+            severity: result.severity as "LOW" | "NORMAL" | "HIGH" | "CRITICAL",
+            agingDays: result.agingDays,
+            slaState: result.slaState as "OK" | "DUE_SOON" | "LATE" | "ESCALATED",
+            createdAt: result.createdAt.toISOString(),
+            updatedAt: result.updatedAt.toISOString(),
         };
     }
 
@@ -154,13 +177,13 @@ export class CloseBoardService {
             kind: result.kind,
             refId: result.refId,
             title: result.title,
-            process: result.process,
+            process: result.process as "R2R" | "P2P" | "O2C" | "Treasury" | "Tax",
             ownerId: result.ownerId,
             dueAt: result.dueAt.toISOString(),
-            status: result.status,
-            severity: result.severity,
+            status: result.status as "OPEN" | "IN_PROGRESS" | "DONE" | "BLOCKED" | "DEFERRED",
+            severity: result.severity as "LOW" | "NORMAL" | "HIGH" | "CRITICAL",
             agingDays: result.agingDays,
-            slaState: result.slaState,
+            slaState: result.slaState as "OK" | "DUE_SOON" | "LATE" | "ESCALATED",
             createdAt: result.createdAt.toISOString(),
             updatedAt: result.updatedAt.toISOString(),
         };
@@ -270,7 +293,7 @@ export class CloseBoardService {
             itemId: result.itemId,
             authorId: result.authorId,
             body: result.body,
-            mentions: result.mentions,
+            mentions: result.mentions ?? [],
             createdAt: result.createdAt.toISOString(),
         };
     }

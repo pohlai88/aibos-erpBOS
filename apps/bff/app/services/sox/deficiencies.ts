@@ -60,7 +60,7 @@ export class SOXDeficienciesService {
             };
         } catch (error) {
             await client.query("ROLLBACK");
-            logLine("error", `SOXDeficienciesService.createDeficiency failed: ${error}`);
+            logLine({ level: "error", msg: `SOXDeficienciesService.createDeficiency failed: ${error}` });
             throw error;
         } finally {
             client.release();
@@ -154,7 +154,7 @@ export class SOXDeficienciesService {
             };
         } catch (error) {
             await client.query("ROLLBACK");
-            logLine("error", `SOXDeficienciesService.updateDeficiency failed: ${error}`);
+            logLine({ level: "error", msg: `SOXDeficienciesService.updateDeficiency failed: ${error}` });
             throw error;
         } finally {
             client.release();
@@ -190,7 +190,7 @@ export class SOXDeficienciesService {
             await client.query("COMMIT");
         } catch (error) {
             await client.query("ROLLBACK");
-            logLine("error", `SOXDeficienciesService.linkDeficiency failed: ${error}`);
+            logLine({ level: "error", msg: `SOXDeficienciesService.linkDeficiency failed: ${error}` });
             throw error;
         } finally {
             client.release();
@@ -250,7 +250,7 @@ export class SOXDeficienciesService {
                 created_at: row.created_at.toISOString()
             }));
         } catch (error) {
-            logLine("error", `SOXDeficienciesService.listDeficiencies failed: ${error}`);
+            logLine({ level: "error", msg: `SOXDeficienciesService.listDeficiencies failed: ${error}` });
             throw error;
         } finally {
             client.release();
@@ -277,7 +277,7 @@ export class SOXDeficienciesService {
 
             return result.rows[0];
         } catch (error) {
-            logLine("error", `SOXDeficienciesService.getDeficiencySummary failed: ${error}`);
+            logLine({ level: "error", msg: `SOXDeficienciesService.getDeficiencySummary failed: ${error}` });
             throw error;
         } finally {
             client.release();

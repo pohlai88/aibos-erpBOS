@@ -14,7 +14,7 @@ import type {
     IngestRunReqType,
     UserResponseType,
     EntitlementResponseType,
-    GrantResponseType
+    ItGrantResponseType
 } from "@aibos/contracts";
 
 export class ITGCIngestService {

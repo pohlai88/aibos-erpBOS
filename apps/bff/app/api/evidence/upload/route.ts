@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Readable } from "stream";
 import { requireAuth, AuthCtx } from "@/lib/auth";
 import { requireCapability } from "@/lib/rbac";
 import { withRouteErrors } from "@/lib/route-utils";
@@ -29,11 +30,19 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
     const file = formData.get("file") as File | null;
 
     const service = new EnhancedEvidenceService();
+
+    // Convert ReadableStream to Readable
+    let fileStream: Readable | undefined;
+    if (file) {
+        const readableStream = file.stream();
+        fileStream = Readable.fromWeb(readableStream as any);
+    }
+
     const result = await service.uploadEvidence(
         authCtx.company_id,
         authCtx.user_id,
         validatedData,
-        file ? file.stream() : undefined
+        fileStream
     );
 
     return NextResponse.json({ result });

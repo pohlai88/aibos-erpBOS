@@ -15,7 +15,7 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
     const validatedData = PbcReply.parse(body);
 
     const service = new AuditPbcService();
-    const request = await service.reply(authCtx.company_id, authCtx.user_id, validatedData);
+    const requestResult = await service.reply(authCtx.company_id, authCtx.user_id, validatedData);
 
-    return NextResponse.json({ request });
+    return NextResponse.json({ request: requestResult });
 });

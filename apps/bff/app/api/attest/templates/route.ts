@@ -3,7 +3,7 @@ import { requireAuth, AuthCtx } from "@/lib/auth";
 import { requireCapability } from "@/lib/rbac";
 import { withRouteErrors } from "@/lib/route-utils";
 import { AttestProgramsService } from "@/services/attest";
-import { AttestTemplateUpsertSchema } from "@aibos/contracts";
+import { TemplateUpsertSchema } from "@aibos/contracts";
 
 export const GET = withRouteErrors(async (request: NextRequest) => {
     const auth = await requireAuth(request);
@@ -29,7 +29,7 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
     const body = await request.json();
 
     // Validate request body
-    const validatedData = AttestTemplateUpsertSchema.parse(body);
+    const validatedData = TemplateUpsertSchema.parse(body);
 
     const programsService = new AttestProgramsService();
     const result = await programsService.upsertTemplate(

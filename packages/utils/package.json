@@ -20,7 +20,8 @@
         "clean": "rimraf dist",
         "build:types": "tsc",
         "build:js": "tsup",
-        "build": "pnpm run build:types && pnpm run build:js"
+        "build": "pnpm run build:types && pnpm run build:js",
+        "typecheck": "tsc --noEmit"
     },
     "devDependencies": {
         "@types/node": "24.6.0"

@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { db, pool } from "@/lib/db";
 import { ulid } from "ulid";
 import { eq, and, desc, asc, sql, gte, lte } from "drizzle-orm";
 import {
@@ -9,9 +9,10 @@ import {
 import type {
     PbcOpen,
     PbcReply,
-    RequestQuery,
-    RequestResponseType
+    RequestQuery
 } from "@aibos/contracts";
+import { RequestResponseType } from "@aibos/contracts";
+import { z } from "zod";
 import { logLine } from "@/lib/log";
 
 export class AuditPbcService {
@@ -24,8 +25,8 @@ export class AuditPbcService {
         companyId: string,
         auditorId: string,
         data: any
-    ): Promise<RequestResponseType> {
-        const client = await this.dbInstance.connect();
+    ): Promise<z.infer<typeof RequestResponseType>> {
+        const client = await pool.connect();
         try {
             await client.query("BEGIN");
 
@@ -80,8 +81,8 @@ export class AuditPbcService {
         companyId: string,
         userId: string,
         data: any
-    ): Promise<RequestResponseType> {
-        const client = await this.dbInstance.connect();
+    ): Promise<z.infer<typeof RequestResponseType>> {
+        const client = await pool.connect();
         try {
             await client.query("BEGIN");
 
@@ -154,8 +155,8 @@ export class AuditPbcService {
     async queryRequests(
         companyId: string,
         query: any
-    ): Promise<RequestResponseType[]> {
-        const client = await this.dbInstance.connect();
+    ): Promise<z.infer<typeof RequestResponseType>[]> {
+        const client = await pool.connect();
         try {
             let whereClause = "WHERE ar.company_id = $1";
             const params: any[] = [companyId];
@@ -219,7 +220,7 @@ export class AuditPbcService {
     /**
      * Get request by ID with messages
      */
-    private async getRequestById(client: any, requestId: string): Promise<RequestResponseType> {
+    private async getRequestById(client: any, requestId: string): Promise<z.infer<typeof RequestResponseType>> {
         const requestResult = await client.query(
             `SELECT id, title, detail, state, due_at, created_at
              FROM audit_request WHERE id = $1`,
@@ -239,7 +240,7 @@ export class AuditPbcService {
             [requestId]
         );
 
-        const messages = messagesResult.rows.map(msg => ({
+        const messages = messagesResult.rows.map((msg: any) => ({
             id: msg.id,
             author_kind: msg.author_kind,
             author_id: msg.author_id,
@@ -267,7 +268,7 @@ export class AuditPbcService {
         requestId: string,
         userId: string
     ): Promise<void> {
-        const client = await this.dbInstance.connect();
+        const client = await pool.connect();
         try {
             await client.query("BEGIN");
 

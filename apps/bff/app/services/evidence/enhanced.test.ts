@@ -13,17 +13,19 @@ import {
 } from "@aibos/db-adapter/schema";
 
 // Mock the database
+const mockDb = {
+    select: vi.fn().mockReturnThis(),
+    from: vi.fn().mockReturnThis(),
+    where: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockResolvedValue([]),
+    insert: vi.fn().mockReturnThis(),
+    values: vi.fn().mockReturnThis(),
+    returning: vi.fn().mockResolvedValue([{ id: "test-id" }]),
+    innerJoin: vi.fn().mockReturnThis()
+};
+
 vi.mock("@/lib/db", () => ({
-    db: {
-        select: vi.fn().mockReturnThis(),
-        from: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockReturnThis(),
-        insert: vi.fn().mockReturnThis(),
-        values: vi.fn().mockReturnThis(),
-        returning: vi.fn().mockResolvedValue([{ id: "test-id" }]),
-        innerJoin: vi.fn().mockReturnThis()
-    }
+    db: mockDb
 }));
 
 describe("EnhancedEvidenceService", () => {
@@ -34,6 +36,10 @@ describe("EnhancedEvidenceService", () => {
     beforeEach(() => {
         service = new EnhancedEvidenceService();
         vi.clearAllMocks();
+
+        // Set up default mocks
+        mockDb.limit.mockResolvedValue([]);
+        mockDb.returning.mockResolvedValue([{ id: "test-id" }]);
     });
 
     describe("uploadEvidence", () => {
@@ -48,8 +54,7 @@ describe("EnhancedEvidenceService", () => {
                 pii_level: "NONE" as const
             };
 
-            // Mock existing object check (no existing object)
-            vi.mocked(db.select).mockResolvedValueOnce([]);
+            // Mock existing object check (no existing object) - this will be handled by the chain mock
 
             const result = await service.uploadEvidence(mockCompanyId, mockUserId, mockData);
 
@@ -73,8 +78,8 @@ describe("EnhancedEvidenceService", () => {
                 pii_level: "NONE" as const
             };
 
-            // Mock existing object found
-            vi.mocked(db.select).mockResolvedValueOnce([{ id: "existing-object-id" }]);
+            // Mock existing object found - handled by chain mock
+            mockDb.limit.mockResolvedValueOnce([{ id: "existing-object-id" }]);
 
             const result = await service.uploadEvidence(mockCompanyId, mockUserId, mockData);
 
@@ -118,7 +123,7 @@ describe("EnhancedEvidenceService", () => {
             };
 
             // Mock record exists
-            vi.mocked(db.select).mockResolvedValueOnce([{ id: "record-123" }]);
+            // Mock record check - handled by chain mock
 
             const result = await service.linkEvidence(mockCompanyId, mockUserId, mockData);
 
@@ -137,7 +142,7 @@ describe("EnhancedEvidenceService", () => {
             };
 
             // Mock no record found
-            vi.mocked(db.select).mockResolvedValueOnce([]);
+            // Mock empty result - handled by chain mock
 
             await expect(
                 service.linkEvidence(mockCompanyId, mockUserId, mockData)
@@ -186,7 +191,8 @@ describe("EnhancedEvidenceService", () => {
                 }
             ];
 
-            vi.mocked(db.select).mockResolvedValueOnce(mockLinks);
+            // Mock links result - handled by chain mock
+            mockDb.limit.mockResolvedValueOnce(mockLinks);
 
             const result = await service.buildManifest(mockCompanyId, mockUserId, mockData);
 
@@ -228,7 +234,8 @@ describe("EnhancedEvidenceService", () => {
                 }
             ];
 
-            vi.mocked(db.select)
+            // Mock manifest and lines results - handled by chain mock
+            mockDb.limit
                 .mockResolvedValueOnce([mockManifest])
                 .mockResolvedValueOnce(mockLines);
 
@@ -250,7 +257,7 @@ describe("EnhancedEvidenceService", () => {
                 format: "ZIP" as const
             };
 
-            vi.mocked(db.select).mockResolvedValueOnce([]);
+            // Mock empty result - handled by chain mock
 
             await expect(
                 service.buildBinder(mockCompanyId, mockUserId, mockData)
@@ -272,7 +279,8 @@ describe("EnhancedEvidenceService", () => {
                 scopeId: "ctrl-run-123"
             };
 
-            vi.mocked(db.select).mockResolvedValueOnce([mockBinder]);
+            // Mock binder result - handled by chain mock
+            mockDb.limit.mockResolvedValueOnce([mockBinder]);
 
             const result = await service.attestBinder(mockCompanyId, mockUserId, mockData);
 
@@ -292,7 +300,7 @@ describe("EnhancedEvidenceService", () => {
                 statement: "Test statement"
             };
 
-            vi.mocked(db.select).mockResolvedValueOnce([]);
+            // Mock empty result - handled by chain mock
 
             await expect(
                 service.attestBinder(mockCompanyId, mockUserId, mockData)

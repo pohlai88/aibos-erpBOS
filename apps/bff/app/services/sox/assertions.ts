@@ -81,7 +81,7 @@ export class SOXAssertionsService {
             };
         } catch (error) {
             await client.query("ROLLBACK");
-            logLine("error", `SOXAssertionsService.createAssertion failed: ${error}`);
+            logLine({ level: "error", msg: `SOXAssertionsService.createAssertion failed: ${error}` });
             throw error;
         } finally {
             client.release();
@@ -132,7 +132,7 @@ export class SOXAssertionsService {
                 signed_at: row.signed_at.toISOString()
             }));
         } catch (error) {
-            logLine("error", `SOXAssertionsService.listAssertions failed: ${error}`);
+            logLine({ level: "error", msg: `SOXAssertionsService.listAssertions failed: ${error}` });
             throw error;
         } finally {
             client.release();
@@ -161,7 +161,7 @@ export class SOXAssertionsService {
                 q404_pending: row.q404_total - row.q404_signed
             };
         } catch (error) {
-            logLine("error", `SOXAssertionsService.getAssertionStatus failed: ${error}`);
+            logLine({ level: "error", msg: `SOXAssertionsService.getAssertionStatus failed: ${error}` });
             throw error;
         } finally {
             client.release();
@@ -191,7 +191,7 @@ export class SOXAssertionsService {
                 ]
             );
         } catch (error) {
-            logLine("error", `SOXAssertionsService.emitAssertionSignedEvent failed: ${error}`);
+            logLine({ level: "error", msg: `SOXAssertionsService.emitAssertionSignedEvent failed: ${error}` });
             // Don't throw - this is not critical for the main operation
         } finally {
             client.release();

@@ -13,9 +13,9 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
     const validatedData = PbcOpen.parse(body);
 
     const service = new AuditPbcService();
-    const request = await service.openRequest(companyId, auditorId, validatedData);
+    const requestResult = await service.openRequest(companyId, auditorId, validatedData);
 
-    return NextResponse.json({ request });
+    return NextResponse.json({ request: requestResult });
 });
 
 // GET /api/audit/requests - Query PBC requests

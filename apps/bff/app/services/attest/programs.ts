@@ -86,7 +86,7 @@ export class AttestProgramsService {
         companyId: string,
         limit: number = 100,
         offset: number = 0
-    ): Promise<{ programs: ProgramResponseType[]; total: number; hasMore: boolean }> {
+    ): Promise<{ programs: AttestProgramResponseType[]; total: number; hasMore: boolean }> {
         // Get total count
         const [totalResult] = await this.dbInstance
             .select({ count: count() })
@@ -104,7 +104,7 @@ export class AttestProgramsService {
             .limit(limit)
             .offset(offset);
 
-        const programResponses: ProgramResponseType[] = programs.map(program => ({
+        const programResponses: AttestProgramResponseType[] = programs.map(program => ({
             id: program.id,
             companyId: program.companyId,
             code: program.code,

@@ -54,11 +54,11 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
             aging_details: agingResult.rows
         };
 
-        logLine("info", `SOX SLA check completed for company ${authCtx.company_id}: ${result.overdue_deficiencies} overdue, ${result.approaching_due} approaching, ${result.aging_deficiencies} aging`);
+        logLine({ level: "info", msg: `SOX SLA check completed for company ${authCtx.company_id}: ${result.overdue_deficiencies} overdue, ${result.approaching_due} approaching, ${result.aging_deficiencies} aging` });
 
         return NextResponse.json({ result });
     } catch (error) {
-        logLine("error", `SOX SLA monitoring failed: ${error}`);
+        logLine({ level: "error", msg: `SOX SLA monitoring failed: ${error}` });
         throw error;
     } finally {
         client.release();

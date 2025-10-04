@@ -156,7 +156,7 @@ export class CloseActionsService {
             id: action.id,
             itemId: action.itemId,
             action: action.action as any,
-            payload: action.payload,
+            payload: action.payload as Record<string, any> | null,
             actorId: action.actorId,
             createdAt: action.createdAt.toISOString(),
         }));
@@ -178,7 +178,7 @@ export class CloseActionsService {
             id: action.id,
             itemId: action.itemId,
             action: action.action as any,
-            payload: action.payload,
+            payload: action.payload as Record<string, any> | null,
             actorId: action.actorId,
             createdAt: action.createdAt.toISOString(),
         }));

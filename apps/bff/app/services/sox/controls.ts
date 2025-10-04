@@ -81,7 +81,7 @@ export class SOXControlsService {
             };
         } catch (error) {
             await client.query("ROLLBACK");
-            logLine("error", `SOXControlsService.upsertKeyControl failed: ${error}`);
+            logLine({ level: "error", msg: `SOXControlsService.upsertKeyControl failed: ${error}` });
             throw error;
         } finally {
             client.release();
@@ -134,7 +134,7 @@ export class SOXControlsService {
                 created_at: row.created_at.toISOString()
             }));
         } catch (error) {
-            logLine("error", `SOXControlsService.listKeyControls failed: ${error}`);
+            logLine({ level: "error", msg: `SOXControlsService.listKeyControls failed: ${error}` });
             throw error;
         } finally {
             client.release();
@@ -199,7 +199,7 @@ export class SOXControlsService {
             };
         } catch (error) {
             await client.query("ROLLBACK");
-            logLine("error", `SOXControlsService.upsertControlScope failed: ${error}`);
+            logLine({ level: "error", msg: `SOXControlsService.upsertControlScope failed: ${error}` });
             throw error;
         } finally {
             client.release();
@@ -241,7 +241,7 @@ export class SOXControlsService {
                 updated_at: row.updated_at.toISOString()
             }));
         } catch (error) {
-            logLine("error", `SOXControlsService.listControlScopes failed: ${error}`);
+            logLine({ level: "error", msg: `SOXControlsService.listControlScopes failed: ${error}` });
             throw error;
         } finally {
             client.release();

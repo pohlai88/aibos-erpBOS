@@ -80,7 +80,7 @@ async function tickSlaForAllCampaigns(companyId: string, slaService: AttestSlaSe
     let totalEscalated = 0;
 
     for (const campaign of campaigns.rows) {
-        const slaResult = await slaService.tickSla(campaign.id, companyId);
+        const slaResult = await slaService.tickSla(campaign.id as string, companyId);
         totalUpdated += slaResult.updated;
         totalDueSoon += slaResult.dueSoon;
         totalLate += slaResult.late;
@@ -181,7 +181,7 @@ async function escalateLateTasks(companyId: string) {
                     escalateTo,
                     dueAt: task.due_at,
                     programName: task.program_name,
-                    hoursOverdue: Math.floor((Date.now() - new Date(task.due_at).getTime()) / (1000 * 60 * 60))
+                    hoursOverdue: Math.floor((Date.now() - new Date(task.due_at as string).getTime()) / (1000 * 60 * 60))
                 })
             });
             escalationsSent.push(task.id);
@@ -219,18 +219,18 @@ async function syncWithCloseBoard(companyId: string, boardService: CloseBoardSer
     for (const task of tasksNeedingBoardItems.rows) {
         try {
             const boardItem = await boardService.upsertItem(companyId, "system", {
-                period: task.period,
+                period: task.period as string,
                 kind: "CERT",
-                refId: task.id,
-                title: `Attestation: ${task.program_name} - ${task.scope_key}`,
-                process: task.scope_key.startsWith("PROCESS:")
-                    ? task.scope_key.replace("PROCESS:", "")
-                    : "General",
-                ownerId: task.assignee_id,
-                dueAt: task.due_at.toISOString(),
-                status: task.state === "SUBMITTED" ? "DONE" : "OPEN",
-                severity: task.sla_state === "ESCALATED" ? "HIGH" :
-                    task.sla_state === "LATE" ? "NORMAL" : "LOW"
+                refId: task.id as string,
+                title: `Attestation: ${task.program_name as string} - ${task.scope_key as string}`,
+                process: (task.scope_key as string).startsWith("PROCESS:")
+                    ? (task.scope_key as string).replace("PROCESS:", "") as "R2R" | "P2P" | "O2C" | "Treasury" | "Tax"
+                    : "General" as "R2R" | "P2P" | "O2C" | "Treasury" | "Tax",
+                ownerId: task.assignee_id as string,
+                dueAt: task.due_at as string,
+                status: (task.state as string) === "SUBMITTED" ? "DONE" : "OPEN",
+                severity: (task.sla_state as string) === "ESCALATED" ? "HIGH" :
+                    (task.sla_state as string) === "LATE" ? "NORMAL" : "LOW"
             });
             boardItemsCreated.push(boardItem.id);
         } catch (error) {
@@ -255,16 +255,16 @@ async function syncWithCloseBoard(companyId: string, boardService: CloseBoardSer
                 item.state === "SUBMITTED" ? "DONE" : "OPEN";
 
             await boardService.upsertItem(companyId, "system", {
-                period: item.period,
+                period: item.period as string,
                 kind: "CERT",
-                refId: item.ref_id,
-                title: item.title,
-                process: item.process,
-                ownerId: item.owner_id,
-                dueAt: item.due_at,
+                refId: item.ref_id as string,
+                title: item.title as string,
+                process: item.process as "R2R" | "P2P" | "O2C" | "Treasury" | "Tax",
+                ownerId: item.owner_id as string,
+                dueAt: item.due_at as string,
                 status: newStatus,
-                severity: item.sla_state === "ESCALATED" ? "HIGH" :
-                    item.sla_state === "LATE" ? "NORMAL" : "LOW"
+                severity: (item.sla_state as string) === "ESCALATED" ? "HIGH" :
+                    (item.sla_state as string) === "LATE" ? "NORMAL" : "LOW"
             });
             boardItemsUpdated.push(item.id);
         } catch (error) {

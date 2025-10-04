@@ -18,7 +18,7 @@
     "dev": "next dev -p 3001",
     "lint": "eslint app --ext .ts,.tsx",
     "start": "next start -p 3001",
-    "type-check": "tsc --noEmit"
+    "typecheck": "tsc --noEmit"
   },
   "turbo": {
     "pipeline": {

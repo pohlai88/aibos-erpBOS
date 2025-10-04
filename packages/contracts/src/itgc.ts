@@ -134,7 +134,7 @@ export const EntitlementQuery = z.object({
     }).default({ limit: 50, offset: 0 })
 });
 
-export const GrantQuery = z.object({
+export const ItGrantQuery = z.object({
     company_id: z.string().optional(),
     system_id: z.string().uuid().optional(),
     user_id: z.string().uuid().optional(),
@@ -210,7 +210,7 @@ export const EntitlementResponse = z.object({
     grant_count: z.number().int().optional()
 });
 
-export const GrantResponse = z.object({
+export const ItGrantResponse = z.object({
     id: z.string().uuid(),
     company_id: z.string(),
     system_id: z.string().uuid(),
@@ -335,14 +335,14 @@ export type BreakglassCloseType = z.infer<typeof BreakglassClose>;
 export type SnapshotReqType = z.infer<typeof SnapshotReq>;
 export type PackBuildReqType = z.infer<typeof PackBuildReq>;
 export type EntitlementQueryType = z.infer<typeof EntitlementQuery>;
-export type GrantQueryType = z.infer<typeof GrantQuery>;
+export type ItGrantQueryType = z.infer<typeof ItGrantQuery>;
 export type UserQueryType = z.infer<typeof UserQuery>;
 
 export type SystemResponseType = z.infer<typeof SystemResponse>;
 export type ConnectorResponseType = z.infer<typeof ConnectorResponse>;
 export type UserResponseType = z.infer<typeof UserResponse>;
 export type EntitlementResponseType = z.infer<typeof EntitlementResponse>;
-export type GrantResponseType = z.infer<typeof GrantResponse>;
+export type ItGrantResponseType = z.infer<typeof ItGrantResponse>;
 export type SoDRuleResponseType = z.infer<typeof SoDRuleResponse>;
 export type SoDViolationResponseType = z.infer<typeof SoDViolationResponse>;
 export type UarCampaignResponseType = z.infer<typeof UarCampaignResponse>;

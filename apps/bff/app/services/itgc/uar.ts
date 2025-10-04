@@ -40,10 +40,10 @@ export class ITGCUARService {
             companyId,
             code: data.code,
             name: data.name,
-            periodStart: new Date(data.period_start),
-            periodEnd: new Date(data.period_end),
+            periodStart: data.period_start,
+            periodEnd: data.period_end,
             dueAt: new Date(data.due_at),
-            status: 'DRAFT',
+            status: 'DRAFT' as const,
             createdBy: userId,
             createdAt: new Date()
         };
@@ -58,7 +58,7 @@ export class ITGCUARService {
             period_start: data.period_start,
             period_end: data.period_end,
             due_at: data.due_at,
-            status: 'DRAFT',
+            status: 'DRAFT' as const,
             created_by: userId,
             created_at: campaignData.createdAt.toISOString()
         };
@@ -160,7 +160,7 @@ export class ITGCUARService {
             userId: user.id,
             ownerUserId,
             snapshot: grants,
-            state: 'PENDING',
+            state: 'PENDING' as const,
             createdAt: new Date()
         };
 
@@ -283,8 +283,8 @@ export class ITGCUARService {
                 )
             );
 
-        if (pendingItems[0].count > 0) {
-            throw new Error(`Cannot close campaign: ${pendingItems[0].count} items still pending`);
+        if (pendingItems[0]!.count > 0) {
+            throw new Error(`Cannot close campaign: ${pendingItems[0]!.count} items still pending`);
         }
 
         // Update campaign status
@@ -307,7 +307,7 @@ export class ITGCUARService {
 
         return {
             campaign_id: data.campaign_id,
-            pack_id: packId
+            ...(packId && { pack_id: packId })
         };
     }
 
@@ -417,8 +417,8 @@ export class ITGCUARService {
             company_id: row.companyId,
             code: row.code,
             name: row.name,
-            period_start: row.periodStart.toISOString().split('T')[0],
-            period_end: row.periodEnd.toISOString().split('T')[0],
+            period_start: row.periodStart?.split('T')[0] ?? '',
+            period_end: row.periodEnd?.split('T')[0] ?? '',
             due_at: row.dueAt.toISOString(),
             status: row.status,
             created_by: row.createdBy,
@@ -487,19 +487,19 @@ export class ITGCUARService {
             system_id: row.systemId,
             user_id: row.userId,
             owner_user_id: row.ownerUserId,
-            snapshot: row.snapshot,
+            snapshot: row.snapshot as Record<string, any>,
             state: row.state,
-            decided_by: row.decidedBy,
+            decided_by: row.decidedBy ?? undefined,
             decided_at: row.decidedAt?.toISOString(),
-            exception_note: row.exceptionNote,
+            exception_note: row.exceptionNote ?? undefined,
             created_at: row.createdAt.toISOString(),
             user: row.user ? {
                 id: row.user.id,
                 company_id: row.user.companyId,
                 system_id: row.user.systemId,
                 ext_id: row.user.extId,
-                email: row.user.email,
-                display_name: row.user.displayName,
+                email: row.user.email ?? undefined,
+                display_name: row.user.displayName ?? undefined,
                 status: row.user.status,
                 first_seen: row.user.firstSeen.toISOString(),
                 last_seen: row.user.lastSeen.toISOString()

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuth, AuthCtx } from "next/server";
+import { requireAuth, AuthCtx } from "@/lib/auth";
 import { requireCapability } from "@/lib/rbac";
 import { withRouteErrors } from "@/lib/route-utils";
 import { AuditHousekeepingService } from "@/services/audit/housekeeping";
