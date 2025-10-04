@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { RevAllocationService } from "@/services/revenue/allocate";
+import { RevAllocationEngineService } from "@/services/revenue/allocation-engine";
 import { requireAuth, requireCapability } from "@/lib/auth";
 import { ok, badRequest, serverError } from "@/api/_lib/http";
-import { AllocFromInvoiceReq } from "@aibos/contracts";
+import { AllocateFromInvoiceReq } from "@aibos/contracts";
 
-const allocationService = new RevAllocationService();
+const allocationEngineService = new RevAllocationEngineService();
 
-// POST /api/rev/allocate/from-invoice - Allocate from invoice
+// POST /api/rev/allocate/from-invoice - Enhanced allocation from invoice using SSP catalog and discount rules
 export async function POST(request: NextRequest) {
     try {
         const auth = await requireAuth(request);
@@ -16,9 +16,9 @@ export async function POST(request: NextRequest) {
         if (cap instanceof Response) return cap;
 
         const body = await request.json();
-        const validatedData = AllocFromInvoiceReq.parse(body);
+        const validatedData = AllocateFromInvoiceReq.parse(body);
 
-        const result = await allocationService.allocateFromInvoice(
+        const result = await allocationEngineService.allocateFromInvoice(
             auth.company_id,
             auth.user_id,
             validatedData

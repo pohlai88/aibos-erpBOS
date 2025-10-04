@@ -52,7 +52,18 @@ export type Capability =
     | "rev:recognize"
     | "rev:export"
     | "rev:modify"
-    | "rev:vc";
+    | "rev:vc"
+    | "rev:ssp"
+    | "rev:bundles"
+    | "rev:discounts"
+    | "close:manage"
+    | "close:run"
+    | "close:approve"
+    | "close:report"
+    | "flux:run"
+    | "mdna:edit"
+    | "mdna:approve"
+    | "mdna:publish";
 
 export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
     admin: [
@@ -67,7 +78,8 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "ar:portal:policy", "ar:portal:ops",
         "ar:stmt:policy", "ar:stmt:run", "ar:stmt:email",
         "rb:catalog", "rb:contract", "rb:usage:ingest", "rb:invoice:run", "rb:credit",
-        "rev:policy", "rev:allocate", "rev:schedule", "rev:recognize", "rev:export", "rev:modify", "rev:vc"
+        "rev:policy", "rev:allocate", "rev:schedule", "rev:recognize", "rev:export", "rev:modify", "rev:vc", "rev:ssp", "rev:bundles", "rev:discounts",
+        "close:manage", "close:run", "close:approve", "close:report", "flux:run", "mdna:edit", "mdna:approve", "mdna:publish"
     ],
     accountant: [
         "reports:read", "journals:post", "reversal:create", "inventory:move",
@@ -81,7 +93,8 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "ar:portal:policy", "ar:portal:ops",
         "ar:stmt:policy", "ar:stmt:run", "ar:stmt:email",
         "rb:catalog", "rb:contract", "rb:usage:ingest", "rb:invoice:run", "rb:credit",
-        "rev:policy", "rev:allocate", "rev:schedule", "rev:recognize", "rev:export", "rev:modify", "rev:vc"
+        "rev:policy", "rev:allocate", "rev:schedule", "rev:recognize", "rev:export", "rev:modify", "rev:vc", "rev:ssp",
+        "close:run", "close:approve", "close:report", "flux:run", "mdna:edit", "mdna:approve", "mdna:publish"
     ],
     ops: [
         "reports:read", "inventory:move", "audit:read",
@@ -91,7 +104,8 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "ar:collect:workbench",
         "ar:portal:ops",
         "rb:catalog", "rb:contract", "rb:usage:ingest", "rb:invoice:run", "rb:credit",
-        "rev:schedule", "rev:recognize", "rev:export"
+        "rev:schedule", "rev:recognize", "rev:export", "rev:ssp",
+        "close:run", "close:report", "flux:run", "mdna:edit"
     ],
 };
 

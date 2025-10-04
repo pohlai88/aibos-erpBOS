@@ -9,6 +9,8 @@ export * from "./ar-portal";
 export * from "./ar-statements";
 export * from "./rb";
 export * from "./revenue";
+export * from "./revenue-ssp"; // M25.3: SSP Catalog, Bundles & Discounts
+export * from "./close"; // M26: Close Orchestrator & Narrative Reporting
 export * from "./assets_import";
 export * from "./assets_prefs";
 export * from "./bank-connect";

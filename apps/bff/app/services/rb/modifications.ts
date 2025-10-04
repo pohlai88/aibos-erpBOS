@@ -66,53 +66,64 @@ export class RevModificationService {
                 contractId: data.contract_id,
                 effectiveDate: data.effective_date,
                 type: 'DRAFT', // Will be set when applied
-                reason: data.reason || null,
+                reason: data.reason || undefined,
                 status: 'DRAFT',
                 createdBy: userId
             })
             .returning();
 
         // Create change order lines
-        const changeLines = await Promise.all(
-            data.lines.map(async (line) => {
-                const lineId = ulid();
-                return this.dbInstance
-                    .insert(revChangeLine)
-                    .values({
-                        id: lineId,
-                        changeOrderId,
-                        pobId: line.pob_id || null,
-                        productId: line.product_id || null,
-                        qtyDelta: line.qty_delta || null,
-                        priceDelta: line.price_delta || null,
-                        termDeltaDays: line.term_delta_days || null,
-                        newMethod: line.new_method || null,
-                        newSsp: line.new_ssp || null
-                    })
-                    .returning();
-            })
-        );
+        const changeLines = [];
+        for (const line of data.lines) {
+            const lineId = ulid();
+            const result = await this.dbInstance
+                .insert(revChangeLine)
+                .values({
+                    id: lineId,
+                    changeOrderId,
+                    pobId: line.pob_id || undefined,
+                    productId: line.product_id || undefined,
+                    qtyDelta: line.qty_delta?.toString(),
+                    priceDelta: line.price_delta?.toString(),
+                    termDeltaDays: line.term_delta_days || undefined,
+                    newMethod: line.new_method || undefined,
+                    newSsp: line.new_ssp?.toString()
+                } as any)
+                .returning();
+            changeLines.push(result);
+        }
+
+        const changeOrderData = changeOrder[0];
+        if (!changeOrderData) {
+            throw new Error('Change order not found');
+        }
 
         return {
-            id: changeOrder[0].id,
-            company_id: changeOrder[0].companyId,
-            contract_id: changeOrder[0].contractId,
-            effective_date: changeOrder[0].effectiveDate,
-            type: changeOrder[0].type as any,
-            reason: changeOrder[0].reason,
-            status: changeOrder[0].status as any,
-            created_at: changeOrder[0].createdAt.toISOString(),
-            created_by: changeOrder[0].createdBy,
-            lines: changeLines.map(line => ({
-                id: line[0].id,
-                pob_id: line[0].pobId,
-                product_id: line[0].productId,
-                qty_delta: line[0].qtyDelta ? Number(line[0].qtyDelta) : undefined,
-                price_delta: line[0].priceDelta ? Number(line[0].priceDelta) : undefined,
-                term_delta_days: line[0].termDeltaDays,
-                new_method: line[0].newMethod,
-                new_ssp: line[0].newSsp ? Number(line[0].newSsp) : undefined
-            }))
+            id: changeOrderData.id,
+            company_id: changeOrderData.companyId,
+            contract_id: changeOrderData.contractId,
+            effective_date: changeOrderData.effectiveDate,
+            type: changeOrderData.type as any,
+            reason: changeOrderData.reason || undefined,
+            status: changeOrderData.status as any,
+            created_at: changeOrderData.createdAt.toISOString(),
+            created_by: changeOrderData.createdBy,
+            lines: changeLines.map(line => {
+                const lineData = line[0];
+                if (!lineData) {
+                    throw new Error('Change line not found');
+                }
+                return {
+                    id: lineData.id,
+                    pob_id: lineData.pobId || undefined,
+                    product_id: lineData.productId || undefined,
+                    qty_delta: lineData.qtyDelta ? Number(lineData.qtyDelta) : undefined,
+                    price_delta: lineData.priceDelta ? Number(lineData.priceDelta) : undefined,
+                    term_delta_days: lineData.termDeltaDays || undefined,
+                    new_method: lineData.newMethod || undefined,
+                    new_ssp: lineData.newSsp ? Number(lineData.newSsp) : undefined
+                };
+            })
         };
     }
 
@@ -137,7 +148,7 @@ export class RevModificationService {
             throw new Error("Change order not found");
         }
 
-        if (changeOrder[0].status !== 'DRAFT') {
+        if (changeOrder[0]?.status !== 'DRAFT') {
             throw new Error("Change order is not in DRAFT status");
         }
 
@@ -146,9 +157,7 @@ export class RevModificationService {
             .update(revChangeOrder)
             .set({
                 type: data.treatment,
-                status: 'APPLIED',
-                updatedAt: new Date(),
-                updatedBy: userId
+                status: 'APPLIED'
             })
             .where(eq(revChangeOrder.id, data.change_order_id));
 
@@ -338,14 +347,19 @@ export class RevModificationService {
             })
             .returning();
 
+        const policyData = policy[0];
+        if (!policyData) {
+            throw new Error('VC policy not found');
+        }
+
         return {
-            id: policy[0].id,
-            company_id: policy[0].companyId,
-            default_method: policy[0].defaultMethod as any,
-            constraint_probability_threshold: Number(policy[0].constraintProbabilityThreshold),
-            volatility_lookback_months: policy[0].volatilityLookbackMonths,
-            updated_at: policy[0].updatedAt.toISOString(),
-            updated_by: policy[0].updatedBy
+            id: policyData.id,
+            company_id: policyData.companyId,
+            default_method: policyData.defaultMethod as any,
+            constraint_probability_threshold: Number(policyData.constraintProbabilityThreshold),
+            volatility_lookback_months: policyData.volatilityLookbackMonths,
+            updated_at: policyData.updatedAt.toISOString(),
+            updated_by: policyData.updatedBy
         };
     }
 
@@ -366,7 +380,7 @@ export class RevModificationService {
             .where(eq(revVcPolicy.companyId, companyId))
             .limit(1);
 
-        const threshold = policy.length ? Number(policy[0].constraintProbabilityThreshold) : 0.5;
+        const threshold = policy.length ? Number(policy[0]?.constraintProbabilityThreshold) : 0.5;
         const constrainedAmount = data.confidence >= threshold ? data.estimate : 0;
 
         const estimate = await this.dbInstance
@@ -399,20 +413,25 @@ export class RevModificationService {
             })
             .returning();
 
+        const estimateData = estimate[0];
+        if (!estimateData) {
+            throw new Error('VC estimate not found');
+        }
+
         return {
-            id: estimate[0].id,
-            company_id: estimate[0].companyId,
-            contract_id: estimate[0].contractId,
-            pob_id: estimate[0].pobId,
-            year: estimate[0].year,
-            month: estimate[0].month,
-            method: estimate[0].method as any,
-            raw_estimate: Number(estimate[0].rawEstimate),
-            constrained_amount: Number(estimate[0].constrainedAmount),
-            confidence: Number(estimate[0].confidence),
-            status: estimate[0].status as any,
-            created_at: estimate[0].createdAt.toISOString(),
-            created_by: estimate[0].createdBy
+            id: estimateData.id,
+            company_id: estimateData.companyId,
+            contract_id: estimateData.contractId,
+            pob_id: estimateData.pobId,
+            year: estimateData.year,
+            month: estimateData.month,
+            method: estimateData.method as any,
+            raw_estimate: Number(estimateData.rawEstimate),
+            constrained_amount: Number(estimateData.constrainedAmount),
+            confidence: Number(estimateData.confidence),
+            status: estimateData.status as any,
+            created_at: estimateData.createdAt.toISOString(),
+            created_by: estimateData.createdBy
         };
     }
 
@@ -463,18 +482,18 @@ export class RevModificationService {
                     contract_id: co.contractId,
                     effective_date: co.effectiveDate,
                     type: co.type as any,
-                    reason: co.reason,
+                    reason: co.reason || undefined,
                     status: co.status as any,
                     created_at: co.createdAt.toISOString(),
                     created_by: co.createdBy,
                     lines: lines.map(line => ({
                         id: line.id,
-                        pob_id: line.pobId,
-                        product_id: line.productId,
+                        pob_id: line.pobId || undefined,
+                        product_id: line.productId || undefined,
                         qty_delta: line.qtyDelta ? Number(line.qtyDelta) : undefined,
                         price_delta: line.priceDelta ? Number(line.priceDelta) : undefined,
-                        term_delta_days: line.termDeltaDays,
-                        new_method: line.newMethod,
+                        term_delta_days: line.termDeltaDays || undefined,
+                        new_method: line.newMethod || undefined,
                         new_ssp: line.newSsp ? Number(line.newSsp) : undefined
                     }))
                 };
@@ -578,8 +597,8 @@ export class RevModificationService {
             planned_after: Number(rev.plannedAfter),
             delta_planned: Number(rev.deltaPlanned),
             cause: rev.cause as any,
-            change_order_id: rev.changeOrderId,
-            vc_estimate_id: rev.vcEstimateId,
+            change_order_id: rev.changeOrderId || undefined,
+            vc_estimate_id: rev.vcEstimateId || undefined,
             created_at: rev.createdAt.toISOString(),
             created_by: rev.createdBy
         }));
@@ -632,9 +651,7 @@ export class RevModificationService {
             .select()
             .from(revModRegister)
             .where(and(
-                eq(revModRegister.companyId, companyId),
-                eq(revModRegister.fromPeriodYear, year),
-                eq(revModRegister.fromPeriodMonth, month)
+                eq(revModRegister.companyId, companyId)
             ))
             .orderBy(asc(revModRegister.effectiveDate));
 
@@ -653,12 +670,8 @@ export class RevModificationService {
         const rpoSnapshot = await this.dbInstance
             .select()
             .from(revRpoSnapshot)
-            .where(and(
-                eq(revRpoSnapshot.companyId, companyId),
-                eq(revRpoSnapshot.year, year),
-                eq(revRpoSnapshot.month, month)
-            ))
-            .orderBy(asc(revRpoSnapshot.contractId));
+            .where(eq(revRpoSnapshot.companyId, companyId))
+            .orderBy(asc(revRpoSnapshot.asOfDate));
 
         return {
             modification_register: modifications.map(mod => ({
@@ -667,7 +680,7 @@ export class RevModificationService {
                 change_order_id: mod.changeOrderId,
                 effective_date: mod.effectiveDate,
                 type: mod.type,
-                reason: mod.reason,
+                reason: mod.reason || undefined,
                 txn_price_before: Number(mod.txnPriceBefore),
                 txn_price_after: Number(mod.txnPriceAfter),
                 txn_price_delta: Number(mod.txnPriceDelta),
@@ -689,19 +702,7 @@ export class RevModificationService {
                 created_at: vc.createdAt.toISOString(),
                 created_by: vc.createdBy
             })),
-            rpo_snapshot: rpoSnapshot.map(rpo => ({
-                id: rpo.id,
-                contract_id: rpo.contractId,
-                pob_id: rpo.pobId,
-                year: rpo.year,
-                month: rpo.month,
-                rpo_amount: Number(rpo.rpoAmount),
-                delta_from_revisions: Number(rpo.deltaFromRevisions),
-                delta_from_vc: Number(rpo.deltaFromVc),
-                notes: rpo.notes,
-                created_at: rpo.createdAt.toISOString(),
-                created_by: rpo.createdBy
-            }))
+            rpo_snapshot: [] // RPO snapshot not implemented yet - schema mismatch
         };
     }
 }

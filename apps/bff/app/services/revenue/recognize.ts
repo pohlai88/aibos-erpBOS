@@ -245,7 +245,7 @@ export class RevRecognitionService {
         }
 
         // Import posting service
-        const { postJournal } = await import("@/lib/posting");
+        const { repo } = await import("@/lib/db");
         const { ensurePostingAllowed } = await import("@/lib/policy");
 
         // Check period guard
@@ -256,25 +256,41 @@ export class RevRecognitionService {
         }
 
         // Create journal entries
-        const journalLines = lines.map(line => ({
-            accountCode: line.drAccount,
-            dc: 'D' as const,
-            amount: Number(line.amount),
-            description: line.memo || 'Revenue recognition'
-        })).concat(lines.map(line => ({
-            accountCode: line.crAccount,
-            dc: 'C' as const,
-            amount: Number(line.amount),
-            description: line.memo || 'Revenue recognition'
-        })));
+        const journalLines = [
+            ...lines.map(line => ({
+                accountCode: line.drAccount,
+                dc: 'D' as const,
+                amount: Number(line.amount),
+                description: line.memo || 'Revenue recognition'
+            })),
+            ...lines.map(line => ({
+                accountCode: line.crAccount,
+                dc: 'C' as const,
+                amount: Number(line.amount),
+                description: line.memo || 'Revenue recognition'
+            }))
+        ];
 
-        await postJournal({
-            companyId,
-            date: postingDate,
-            memo: `Revenue Recognition Run ${runId}`,
-            lines: journalLines,
-            sourceDoctype: 'REV_RECOGNITION',
-            sourceId: runId
+        await repo.insertJournal({
+            company_id: companyId,
+            posting_date: postingDate.toISOString(),
+            currency: 'USD',
+            source_doctype: 'REV_RECOGNITION',
+            source_id: runId,
+            idempotency_key: `rev-recognition-${runId}`,
+            base_currency: 'USD',
+            rate_used: 1.0,
+            lines: journalLines.map(line => ({
+                id: crypto.randomUUID(),
+                account_code: line.accountCode,
+                dc: line.dc,
+                amount: { amount: line.amount.toString(), currency: 'USD' },
+                currency: 'USD',
+                base_amount: { amount: line.amount.toString(), currency: 'USD' },
+                base_currency: 'USD',
+                txn_amount: { amount: line.amount.toString(), currency: 'USD' },
+                txn_currency: 'USD'
+            }))
         });
     }
 
@@ -343,7 +359,7 @@ export class RevRecognitionService {
             amount: Number(line.amount),
             dr_account: line.drAccount,
             cr_account: line.crAccount,
-            memo: line.memo,
+            memo: line.memo || undefined,
             created_at: line.createdAt.toISOString()
         }));
     }

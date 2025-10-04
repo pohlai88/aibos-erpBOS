@@ -262,7 +262,7 @@ export class RevScheduleService {
             .update(revSchedule)
             .set({
                 recognized: newRecognized.toString(),
-                status,
+                status: status as 'PLANNED' | 'PARTIAL' | 'DONE',
                 updatedAt: new Date()
             })
             .where(eq(revSchedule.id, schedule.id));

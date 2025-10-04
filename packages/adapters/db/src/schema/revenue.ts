@@ -192,3 +192,172 @@ export const revArtifact = pgTable("rev_artifact", {
     runIdx: index("rev_artifact_run_idx").on(table.runId),
     kindIdx: index("rev_artifact_kind_idx").on(table.kind, table.createdAt)
 }));
+
+// M25.3: SSP Catalog & Evidence Tables
+export const revSspCatalog = pgTable("rev_ssp_catalog", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    productId: text("product_id").notNull().references(() => rbProduct.id, { onDelete: "cascade" }),
+    currency: text("currency").notNull(),
+    ssp: numeric("ssp").notNull(),
+    method: text("method", { enum: ["OBSERVABLE", "BENCHMARK", "ADJ_COST", "RESIDUAL"] }).notNull(),
+    effectiveFrom: date("effective_from").notNull(),
+    effectiveTo: date("effective_to"),
+    corridorMinPct: numeric("corridor_min_pct"),
+    corridorMaxPct: numeric("corridor_max_pct"),
+    status: text("status", { enum: ["DRAFT", "REVIEWED", "APPROVED"] }).notNull().default("DRAFT"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull()
+}, (table) => ({
+    companyProductIdx: index("rev_ssp_catalog_company_product_idx").on(table.companyId, table.productId, table.currency, table.effectiveFrom),
+    statusIdx: index("rev_ssp_catalog_status_idx").on(table.companyId, table.status, table.effectiveFrom),
+    effectiveIdx: index("rev_ssp_catalog_effective_idx").on(table.companyId, table.effectiveFrom, table.effectiveTo),
+    uniqueActive: unique("rev_ssp_catalog_unique_active").on(table.companyId, table.productId, table.currency, table.effectiveFrom)
+}));
+
+export const revSspEvidence = pgTable("rev_ssp_evidence", {
+    id: text("id").primaryKey(),
+    catalogId: text("catalog_id").notNull().references(() => revSspCatalog.id, { onDelete: "cascade" }),
+    source: text("source", { enum: ["OBSERVABLE", "BENCHMARK", "ADJ_COST", "RESIDUAL"] }).notNull(),
+    note: text("note"),
+    value: numeric("value"),
+    docUri: text("doc_uri"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull()
+}, (table) => ({
+    catalogIdx: index("rev_ssp_evidence_catalog_idx").on(table.catalogId)
+}));
+
+// SSP Policy Table
+export const revSspPolicy = pgTable("rev_ssp_policy", {
+    companyId: text("company_id").primaryKey(),
+    rounding: text("rounding", { enum: ["HALF_UP", "BANKERS"] }).notNull().default("HALF_UP"),
+    residualAllowed: boolean("residual_allowed").notNull().default(true),
+    residualEligibleProducts: jsonb("residual_eligible_products").default([]),
+    defaultMethod: text("default_method", { enum: ["OBSERVABLE", "BENCHMARK", "ADJ_COST", "RESIDUAL"] }).notNull().default("OBSERVABLE"),
+    corridorTolerancePct: numeric("corridor_tolerance_pct").default("0.20"),
+    alertThresholdPct: numeric("alert_threshold_pct").default("0.15"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull()
+});
+
+// Bundle Tables
+export const revBundle = pgTable("rev_bundle", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    bundleSku: text("bundle_sku").notNull(),
+    name: text("name").notNull(),
+    effectiveFrom: date("effective_from").notNull(),
+    effectiveTo: date("effective_to"),
+    status: text("status", { enum: ["ACTIVE", "INACTIVE", "ARCHIVED"] }).notNull().default("ACTIVE"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull()
+}, (table) => ({
+    companySkuIdx: index("rev_bundle_company_sku_idx").on(table.companyId, table.bundleSku, table.effectiveFrom),
+    statusIdx: index("rev_bundle_status_idx").on(table.companyId, table.status, table.effectiveFrom),
+    uniqueActive: unique("rev_bundle_unique_active").on(table.companyId, table.bundleSku, table.effectiveFrom)
+}));
+
+export const revBundleComponent = pgTable("rev_bundle_component", {
+    id: text("id").primaryKey(),
+    bundleId: text("bundle_id").notNull().references(() => revBundle.id, { onDelete: "cascade" }),
+    productId: text("product_id").notNull().references(() => rbProduct.id, { onDelete: "cascade" }),
+    weightPct: numeric("weight_pct").notNull(),
+    required: boolean("required").notNull().default(true),
+    minQty: numeric("min_qty").default("1"),
+    maxQty: numeric("max_qty"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull()
+}, (table) => ({
+    bundleIdx: index("rev_bundle_component_bundle_idx").on(table.bundleId),
+    productIdx: index("rev_bundle_component_product_idx").on(table.productId)
+}));
+
+// Discount Rule Tables
+export const revDiscountRule = pgTable("rev_discount_rule", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    kind: text("kind", { enum: ["PROP", "RESIDUAL", "TIERED", "PROMO", "PARTNER"] }).notNull(),
+    code: text("code").notNull(),
+    name: text("name"),
+    params: jsonb("params").notNull().default({}),
+    active: boolean("active").notNull().default(true),
+    effectiveFrom: date("effective_from").notNull(),
+    effectiveTo: date("effective_to"),
+    priority: integer("priority").default(0),
+    maxUsageCount: integer("max_usage_count"),
+    maxUsageAmount: numeric("max_usage_amount"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull()
+}, (table) => ({
+    companyCodeIdx: index("rev_discount_rule_company_code_idx").on(table.companyId, table.code, table.effectiveFrom),
+    activeIdx: index("rev_discount_rule_active_idx").on(table.companyId, table.active, table.effectiveFrom),
+    kindIdx: index("rev_discount_rule_kind_idx").on(table.companyId, table.kind, table.priority),
+    uniqueActive: unique("rev_discount_rule_unique_active").on(table.companyId, table.code, table.effectiveFrom)
+}));
+
+export const revDiscountApplied = pgTable("rev_discount_applied", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    invoiceId: text("invoice_id").notNull(),
+    ruleId: text("rule_id").notNull().references(() => revDiscountRule.id),
+    computedAmount: numeric("computed_amount").notNull(),
+    detail: jsonb("detail").notNull().default({}),
+    appliedAt: timestamp("applied_at", { withTimezone: true }).notNull().defaultNow(),
+    appliedBy: text("applied_by").notNull()
+}, (table) => ({
+    invoiceIdx: index("rev_discount_applied_invoice_idx").on(table.companyId, table.invoiceId),
+    ruleIdx: index("rev_discount_applied_rule_idx").on(table.companyId, table.ruleId)
+}));
+
+// Allocation Audit Table
+export const revAllocAudit = pgTable("rev_alloc_audit", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    invoiceId: text("invoice_id").notNull(),
+    runId: text("run_id").notNull(),
+    method: text("method", { enum: ["RELATIVE_SSP", "RESIDUAL", "ADJ_COST", "AUTO"] }).notNull(),
+    strategy: text("strategy", { enum: ["RELATIVE_SSP", "RESIDUAL", "AUTO"] }).notNull(),
+    inputs: jsonb("inputs").notNull().default({}),
+    results: jsonb("results").notNull().default({}),
+    corridorFlag: boolean("corridor_flag").notNull().default(false),
+    totalInvoiceAmount: numeric("total_invoice_amount").notNull(),
+    totalAllocatedAmount: numeric("total_allocated_amount").notNull(),
+    roundingAdjustment: numeric("rounding_adjustment").default("0"),
+    processingTimeMs: integer("processing_time_ms"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdBy: text("created_by").notNull()
+}, (table) => ({
+    invoiceIdx: index("rev_alloc_audit_invoice_idx").on(table.companyId, table.invoiceId),
+    runIdx: index("rev_alloc_audit_run_idx").on(table.companyId, table.runId),
+    methodIdx: index("rev_alloc_audit_method_idx").on(table.companyId, table.method, table.createdAt),
+    corridorIdx: index("rev_alloc_audit_corridor_idx").on(table.companyId, table.corridorFlag, table.createdAt),
+    createdIdx: index("rev_alloc_audit_created_idx").on(table.companyId, table.createdAt)
+}));
+
+// SSP Change Governance Table
+export const revSspChange = pgTable("rev_ssp_change", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    requestor: text("requestor").notNull(),
+    reason: text("reason").notNull(),
+    diff: jsonb("diff").notNull().default({}),
+    status: text("status", { enum: ["DRAFT", "REVIEWED", "APPROVED", "REJECTED"] }).notNull().default("DRAFT"),
+    decidedBy: text("decided_by"),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    decisionNotes: text("decision_notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
+}, (table) => ({
+    companyStatusIdx: index("rev_ssp_change_company_status_idx").on(table.companyId, table.status, table.createdAt),
+    requestorIdx: index("rev_ssp_change_requestor_idx").on(table.companyId, table.requestor, table.createdAt),
+    decidedIdx: index("rev_ssp_change_decided_idx").on(table.companyId, table.decidedBy, table.decidedAt)
+}));

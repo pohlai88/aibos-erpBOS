@@ -152,7 +152,7 @@ export class RevPolicyService {
             company_id: policy.companyId,
             product_id: policy.productId,
             method: policy.method,
-            rev_account: policy.revAccount,
+            rev_account: policy.revAccount || undefined,
             updated_at: policy.updatedAt.toISOString(),
             updated_by: policy.updatedBy
         }));

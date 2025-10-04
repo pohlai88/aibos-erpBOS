@@ -9,6 +9,7 @@ export * from "./schema/payments.js";
 export * from "./schema/ar.js";
 export * from "./schema/rb.js";
 export * from "./schema/revenue.js";
+export * from "./schema/close.js";
 
 export const company = pgTable("company", {
     id: text("id").primaryKey(),
