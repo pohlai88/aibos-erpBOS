@@ -217,6 +217,197 @@ export const RefreshLogResponse = z.object({
     error_message: z.string().nullable()
 });
 
+// M27.1: Real-Time Signals & Auto-Playbooks Contracts
+
+// Signal Ingestion
+export const SignalIngest = z.object({
+    source: z.enum(["AR", "AP", "TREASURY", "CLOSE", "REV", "FX", "BANK", "CASHFLOW"]),
+    kind: z.string().min(1),
+    kpi: z.string().optional(),
+    value: z.number().optional(),
+    unit: z.string().optional(),
+    ts: z.string().datetime().optional().default(() => new Date().toISOString()),
+    key: z.string().min(1),
+    tags: z.array(z.string()).default([]),
+    payload: z.record(z.any()).default({})
+});
+
+export const SignalIngestBatch = z.object({
+    signals: z.array(SignalIngest).min(1).max(100)
+});
+
+export const SignalResponse = z.object({
+    id: z.string().uuid(),
+    company_id: z.string(),
+    source: z.string(),
+    kind: z.string(),
+    key: z.string(),
+    ts: z.string().datetime(),
+    payload: z.record(z.any()),
+    hash: z.string(),
+    dedup_until: z.string().datetime().nullable(),
+    severity: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+    kpi: z.string().nullable(),
+    value: z.number().nullable(),
+    unit: z.string().nullable(),
+    tags: z.array(z.string()),
+    inserted_at: z.string().datetime()
+});
+
+// Rule Management
+export const RuleUpsert = z.object({
+    name: z.string().min(1),
+    enabled: z.boolean().default(true),
+    severity: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]).default("HIGH"),
+    when_expr: z.record(z.any()), // JSON expression
+    window_sec: z.number().int().positive().default(3600),
+    threshold: z.record(z.any()),
+    throttle_sec: z.number().int().nonnegative().default(3600),
+    approvals: z.number().int().nonnegative().default(0),
+    action_playbook_id: z.string().uuid().optional()
+});
+
+export const RuleResponse = RuleUpsert.extend({
+    id: z.string().uuid(),
+    company_id: z.string(),
+    updated_by: z.string(),
+    updated_at: z.string().datetime(),
+    created_at: z.string().datetime()
+});
+
+export const RuleTestRequest = z.object({
+    rule_id: z.string().uuid().optional(),
+    when_expr: z.record(z.any()),
+    window_sec: z.number().int().positive(),
+    threshold: z.record(z.any()),
+    test_period_hours: z.number().int().positive().default(24)
+});
+
+export const RuleTestResponse = z.object({
+    prospective_fires: z.array(z.object({
+        window_from: z.string().datetime(),
+        window_to: z.string().datetime(),
+        reason: z.string(),
+        signal_count: z.number().int(),
+        matching_signals: z.array(SignalResponse)
+    })),
+    test_period: z.object({
+        from: z.string().datetime(),
+        to: z.string().datetime()
+    })
+});
+
+// Playbook Management
+export const PlaybookUpsert = z.object({
+    name: z.string().min(1),
+    steps: z.array(z.object({
+        action_code: z.string().min(1),
+        payload: z.record(z.any()).default({}),
+        when: z.string().optional(), // condition for step execution
+        retry: z.object({
+            max_attempts: z.number().int().positive().default(3),
+            backoff_ms: z.number().int().positive().default(1000)
+        }).optional(),
+        on_error: z.enum(["STOP", "CONTINUE", "RETRY"]).default("STOP")
+    })).min(1),
+    max_blast_radius: z.number().int().positive().default(100),
+    dry_run_default: z.boolean().default(true),
+    require_dual_control: z.boolean().default(false),
+    timeout_sec: z.number().int().positive().default(300)
+});
+
+export const PlaybookResponse = PlaybookUpsert.extend({
+    id: z.string().uuid(),
+    company_id: z.string(),
+    created_by: z.string(),
+    created_at: z.string().datetime(),
+    updated_by: z.string(),
+    updated_at: z.string().datetime()
+});
+
+// Fire Management
+export const FireApprove = z.object({
+    fire_id: z.string().uuid(),
+    decision: z.enum(["APPROVE", "REJECT"]),
+    reason: z.string().optional()
+});
+
+export const FireExecute = z.object({
+    fire_id: z.string().uuid(),
+    dry_run: z.boolean().default(true)
+});
+
+export const FireResponse = z.object({
+    id: z.string().uuid(),
+    company_id: z.string(),
+    rule_id: z.string().uuid(),
+    window_from: z.string().datetime(),
+    window_to: z.string().datetime(),
+    reason: z.string(),
+    status: z.enum(["PENDING", "APPROVED", "EXECUTING", "COMPLETED", "FAILED", "SUPPRESSED"]),
+    approvals_needed: z.number().int(),
+    approvals_got: z.number().int(),
+    created_by: z.string(),
+    created_at: z.string().datetime(),
+    updated_at: z.string().datetime(),
+    steps: z.array(z.object({
+        id: z.string().uuid(),
+        step_no: z.number().int(),
+        action_code: z.string(),
+        dry_run: z.boolean(),
+        payload: z.record(z.any()),
+        attempt: z.number().int(),
+        status: z.enum(["PENDING", "OK", "FAILED", "RETRIED", "SKIPPED"]),
+        duration_ms: z.number().int().nullable(),
+        error_message: z.string().nullable(),
+        result: z.record(z.any()).nullable(),
+        executed_at: z.string().datetime().nullable()
+    })).optional()
+});
+
+// Query Contracts
+export const QuerySignals = z.object({
+    source: z.string().optional(),
+    kind: z.string().optional(),
+    kpi: z.string().optional(),
+    from_ts: z.string().datetime().optional(),
+    to_ts: z.string().datetime().optional(),
+    severity: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]).optional(),
+    tags: z.array(z.string()).optional(),
+    limit: z.number().int().positive().default(100),
+    offset: z.number().int().nonnegative().default(0)
+});
+
+export const QueryFires = z.object({
+    rule_id: z.string().uuid().optional(),
+    status: z.enum(["PENDING", "APPROVED", "EXECUTING", "COMPLETED", "FAILED", "SUPPRESSED"]).optional(),
+    from_ts: z.string().datetime().optional(),
+    to_ts: z.string().datetime().optional(),
+    limit: z.number().int().positive().default(50),
+    offset: z.number().int().nonnegative().default(0)
+});
+
+export const DryRunRequest = z.object({
+    playbook_id: z.string().uuid(),
+    payload: z.record(z.any()).default({}),
+    dry_run: z.boolean().default(true)
+});
+
+export const DryRunResponse = z.object({
+    execution_id: z.string().uuid(),
+    playbook_id: z.string().uuid(),
+    steps: z.array(z.object({
+        step_no: z.number().int(),
+        action_code: z.string(),
+        payload: z.record(z.any()),
+        result: z.record(z.any()).nullable(),
+        error_message: z.string().nullable(),
+        duration_ms: z.number().int().nullable()
+    })),
+    total_duration_ms: z.number().int(),
+    executed_at: z.string().datetime()
+});
+
 // Type exports
 export type BoardType = z.infer<typeof BoardTypeSchema>;
 export type VizType = z.infer<typeof VizTypeSchema>;
@@ -244,3 +435,21 @@ export type BoardTileResponse = z.infer<typeof BoardTileResponse>;
 export type BoardSummaryResponse = z.infer<typeof BoardSummaryResponse>;
 export type OutboxEventResponse = z.infer<typeof OutboxEventResponse>;
 export type RefreshLogResponse = z.infer<typeof RefreshLogResponse>;
+
+// M27.1 Type exports
+export type SignalIngest = z.infer<typeof SignalIngest>;
+export type SignalIngestBatch = z.infer<typeof SignalIngestBatch>;
+export type SignalResponse = z.infer<typeof SignalResponse>;
+export type RuleUpsert = z.infer<typeof RuleUpsert>;
+export type RuleResponse = z.infer<typeof RuleResponse>;
+export type RuleTestRequest = z.infer<typeof RuleTestRequest>;
+export type RuleTestResponse = z.infer<typeof RuleTestResponse>;
+export type PlaybookUpsert = z.infer<typeof PlaybookUpsert>;
+export type PlaybookResponse = z.infer<typeof PlaybookResponse>;
+export type FireApprove = z.infer<typeof FireApprove>;
+export type FireExecute = z.infer<typeof FireExecute>;
+export type FireResponse = z.infer<typeof FireResponse>;
+export type QuerySignals = z.infer<typeof QuerySignals>;
+export type QueryFires = z.infer<typeof QueryFires>;
+export type DryRunRequest = z.infer<typeof DryRunRequest>;
+export type DryRunResponse = z.infer<typeof DryRunResponse>;

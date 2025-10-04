@@ -94,6 +94,12 @@ export type Capability =
     | "opscc:admin"
     | "opscc:whatif:run"
     | "opscc:whatif:save"
+    | "ops:signals:ingest"
+    | "ops:rules:admin"
+    | "ops:playbooks:admin"
+    | "ops:actions:execute"
+    | "ops:fires:approve"
+    | "ops:observability:read"
     | "evidence:write"
     | "evidence:read"
     | "evidence:admin"
@@ -134,7 +140,8 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "sox:admin", "sox:test.plan", "sox:test.exec", "sox:deficiency", "sox:assert",
         "attest:program", "attest:campaign", "attest:respond", "attest:approve", "attest:export",
         "close:board:view", "close:board:manage",
-        "opscc:view", "opscc:admin", "opscc:whatif:run", "opscc:whatif:save"
+        "opscc:view", "opscc:admin", "opscc:whatif:run", "opscc:whatif:save",
+        "ops:signals:ingest", "ops:rules:admin", "ops:playbooks:admin", "ops:actions:execute", "ops:fires:approve", "ops:observability:read"
     ],
     accountant: [
         "reports:read", "journals:post", "reversal:create", "inventory:move",
@@ -157,7 +164,8 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "sox:admin", "sox:test.plan", "sox:test.exec", "sox:deficiency", "sox:assert",
         "attest:respond", "attest:approve", "attest:export",
         "close:board:view",
-        "opscc:view", "opscc:whatif:run", "opscc:whatif:save"
+        "opscc:view", "opscc:whatif:run", "opscc:whatif:save",
+        "ops:observability:read"
     ],
     ops: [
         "reports:read", "inventory:move", "audit:read",
@@ -175,7 +183,8 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "evidence:write", "evidence:read", "binder:build",
         "sox:test.exec", "sox:deficiency",
         "attest:respond",
-        "opscc:view"
+        "opscc:view",
+        "ops:actions:execute", "ops:fires:approve", "ops:observability:read"
     ],
 };
 

@@ -10,6 +10,13 @@ export {
     WhatIfService
 } from "../services/opscc";
 
+// Real-Time Signals & Auto-Playbooks services (M27.1)
+export {
+    OpsSignalService,
+    OpsRuleEngine,
+    OpsPlaybookEngine
+} from "../services/opscc";
+
 // Allocation services (M19)
 export { upsertAllocRule, getActiveAllocRules, deleteAllocRule } from "../services/alloc/rules";
 export { upsertAllocDriverValues, getAllocDriverValues } from "../services/alloc/rules";

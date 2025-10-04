@@ -31,6 +31,14 @@
         {
             "path": "/api/close/ingest",
             "schedule": "0 1 * * *"
+        },
+        {
+            "path": "/api/ops/cron/evaluate",
+            "schedule": "*/2 * * * *"
+        },
+        {
+            "path": "/api/ops/cron/backoff",
+            "schedule": "*/5 * * * *"
         }
     ]
 }

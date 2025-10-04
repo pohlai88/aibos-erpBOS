@@ -69,6 +69,9 @@ export class KpiFabricService {
             }).returning();
 
             const result = snapshot[0];
+            if (!result) {
+                throw new Error('Failed to create KPI snapshot');
+            }
             return {
                 ...result,
                 value: result.value ? parseFloat(result.value) : null,
@@ -352,7 +355,7 @@ export class KpiFabricService {
                 AND bb.balance > 0
             `);
 
-            const totalCash = parseFloat(cashResult.rows[0]?.total_cash || '0');
+            const totalCash = parseFloat((cashResult.rows[0] as any)?.total_cash || '0');
 
             // Get average weekly net outflow from last 4 weeks
             const outflowResult = await this.dbInstance.execute(sql`
@@ -368,7 +371,7 @@ export class KpiFabricService {
                 ) weekly_data
             `);
 
-            const avgWeeklyOutflow = parseFloat(outflowResult.rows[0]?.avg_weekly_outflow || '1');
+            const avgWeeklyOutflow = parseFloat((outflowResult.rows[0] as any)?.avg_weekly_outflow || '1');
 
             // Calculate runway in weeks
             const runwayWeeks = avgWeeklyOutflow > 0 ? totalCash / avgWeeklyOutflow : null;
@@ -399,8 +402,8 @@ export class KpiFabricService {
                 ) weekly_data
             `);
 
-            const avgWeeklyBurn = burnResult.rows[0]?.avg_weekly_burn || 0;
-            return Math.round(avgWeeklyBurn);
+            const avgWeeklyBurn = (burnResult.rows[0] as any)?.avg_weekly_burn || 0;
+            return Math.round(Number(avgWeeklyBurn));
         } catch (error) {
             logLine({
                 msg: "KpiFabricService.computeCashBurn error",
@@ -446,7 +449,7 @@ export class KpiFabricService {
                 AND pr.due_date <= CURRENT_DATE + INTERVAL '${days} days'
             `);
 
-            const totalCommitted = parseFloat(result.rows[0]?.total_committed || '0');
+            const totalCommitted = parseFloat((result.rows[0] as any)?.total_committed || '0');
             return Math.round(totalCommitted);
         } catch (error) {
             logLine({
