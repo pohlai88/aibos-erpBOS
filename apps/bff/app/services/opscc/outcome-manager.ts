@@ -112,7 +112,7 @@ export class OutcomeManager {
         const successRate = totalRuns > 0 ? (successfulRuns / totalRuns) * 100 : 0;
 
         // Get average duration
-        const avgDuration = runStats.reduce((sum, stat) => sum + (stat.avgDuration || 0), 0) / runStats.length;
+        const avgDuration = runStats.reduce((sum, stat) => sum + (Number(stat.avgDuration) || 0), 0) / runStats.length;
 
         // Get metrics by playbook (placeholder - would join with playbook table)
         const metricsByPlaybook: Record<string, any> = {};
@@ -294,7 +294,7 @@ export class OutcomeManager {
         companyId: string,
         topics?: string[],
         limit: number = 100
-    ): Promise<OutboxEvent[]> {
+    ): Promise<OutboxEventM27_2[]> {
         const conditions = [eq(opsOutbox.topic, 'ops.*')]; // Would filter by company_id if available
 
         if (topics && topics.length > 0) {
@@ -311,7 +311,7 @@ export class OutcomeManager {
         return events.map(event => ({
             topic: event.topic,
             key: event.key,
-            payload_jsonb: event.payload_jsonb,
+            payload_jsonb: event.payload_jsonb as Record<string, any>,
             created_at: event.created_at.toISOString()
         }));
     }
@@ -319,7 +319,7 @@ export class OutcomeManager {
     /**
      * Calculate run metrics from steps
      */
-    calculateRunMetrics(steps: any[]): RunMetrics {
+    calculateRunMetrics(steps: any[]): RunMetricsM27_2 {
         const durations = steps.map(s => s.duration_ms || 0).filter(d => d > 0);
         const successfulSteps = steps.filter(s => s.status === 'succeeded').length;
         const failedSteps = steps.filter(s => s.status === 'failed').length;

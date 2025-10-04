@@ -9,7 +9,15 @@ export const RunTriggerSchema = z.enum(["cron", "signal", "manual", "canary"]);
 export const RunStatusSchema = z.enum(["queued", "approved", "running", "rolled_back", "succeeded", "failed", "cancelled", "cooling_down"]);
 export const StepStatusSchema = z.enum(["pending", "running", "succeeded", "failed", "rolled_back"]);
 export const RollbackStatusSchema = z.enum(["pending", "running", "succeeded", "failed"]);
-export const CapabilitySchema = z.enum(["ops:playbook:approve", "ops:playbook:execute", "ops:run:read"]);
+export const CapabilitySchema = z.enum([
+    "ops:playbook:approve",
+    "ops:playbook:execute",
+    "ops:run:read",
+    "lease:read",
+    "lease:manage",
+    "lease:post",
+    "lease:disclose"
+]);
 export const ApprovalDecisionSchema = z.enum(["approve", "reject"]);
 export const RollbackPolicySchema = z.enum(["inverse_action", "custom", "none"]);
 export const OutcomeCheckOpSchema = z.enum(["gt", "lt", "eq", "between"]);

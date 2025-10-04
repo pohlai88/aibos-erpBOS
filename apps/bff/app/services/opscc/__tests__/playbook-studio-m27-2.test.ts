@@ -1,7 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { RuleService, PlaybookService, GuardrailService, ExecutionService, ActionRegistry, OutcomeManager } from '../services/opscc';
+import { RuleService } from '../rule-service';
+import { OpsPlaybookEngine } from '../playbook-engine';
+import { GuardrailService } from '../guardrail-service';
+import { ExecutionService } from '../execution-service';
+import { ActionRegistry } from '../action-registry';
+import { OutcomeManager } from '../outcome-manager';
 import { db } from '@/lib/db';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import {
     opsRule,
     opsPlaybook,
@@ -22,9 +27,9 @@ import {
 describe('M27.2: Playbook Studio + Guarded Autonomy', () => {
     const companyId = 'test-company-123';
     const userId = 'test-user-456';
-    
+
     let ruleService: RuleService;
-    let playbookService: PlaybookService;
+    let playbookService: OpsPlaybookEngine;
     let guardrailService: GuardrailService;
     let executionService: ExecutionService;
     let actionRegistry: ActionRegistry;
@@ -32,7 +37,7 @@ describe('M27.2: Playbook Studio + Guarded Autonomy', () => {
 
     beforeEach(() => {
         ruleService = new RuleService();
-        playbookService = new PlaybookService();
+        playbookService = new OpsPlaybookEngine();
         guardrailService = new GuardrailService();
         executionService = new ExecutionService();
         actionRegistry = new ActionRegistry();
@@ -98,7 +103,7 @@ describe('M27.2: Playbook Studio + Guarded Autonomy', () => {
 
             const enabledRules = await ruleService.listRules(companyId, { enabled: true, limit: 10, offset: 0 });
             expect(enabledRules.rules).toHaveLength(1);
-            expect(enabledRules.rules[0].code).toBe('rule-1');
+            expect(enabledRules.rules[0]!.code).toBe('rule-1');
 
             const allRules = await ruleService.listRules(companyId, { limit: 10, offset: 0 });
             expect(allRules.rules).toHaveLength(2);
@@ -172,8 +177,7 @@ describe('M27.2: Playbook Studio + Guarded Autonomy', () => {
                 companyId,
                 'version-test',
                 { steps: [{ id: 'step-1', action: 'payments.run.select', input: {} }] },
-                userId,
-                'Initial version'
+                userId
             );
 
             expect(version.version).toBe(1);
@@ -218,17 +222,17 @@ describe('M27.2: Playbook Studio + Guarded Autonomy', () => {
             });
 
             const scope = { company_ids: ['c1', 'c2', 'c3'] }; // 3 entities
-            const eval = await guardrailService.evaluateBlastRadius(companyId, scope, 'test-playbook');
+            const blastRadiusEval = await guardrailService.evaluateBlastRadius(companyId, scope, 'test-playbook');
 
-            expect(eval.allowed).toBe(true);
-            expect(eval.entityCount).toBe(3);
+            expect(blastRadiusEval.allowed).toBe(true);
+            expect(blastRadiusEval.entityCount).toBe(3);
 
             // Test exceeding limit
             const largeScope = { company_ids: Array.from({ length: 15 }, (_, i) => `c${i}`) };
-            const largeEval = await guardrailService.evaluateBlastRadius(companyId, largeScope, 'test-playbook');
+            const largeBlastRadiusEval = await guardrailService.evaluateBlastRadius(companyId, largeScope, 'test-playbook');
 
-            expect(largeEval.allowed).toBe(false);
-            expect(largeEval.reason).toContain('exceeds maximum');
+            expect(largeBlastRadiusEval.allowed).toBe(false);
+            expect(largeBlastRadiusEval.reason).toContain('exceeds maximum');
         });
 
         it('should check concurrency limits', async () => {
@@ -343,6 +347,7 @@ describe('M27.2: Playbook Studio + Guarded Autonomy', () => {
 
             const plan = await executionService.planRun(companyId, userId, {
                 playbook_code: 'execution-test',
+                dry_run: false,
                 scope: { company_ids: ['c1', 'c2'] }
             });
 
@@ -471,7 +476,7 @@ describe('M27.2: Playbook Studio + Guarded Autonomy', () => {
 
         it('should check breaches zero', async () => {
             const breachCheck = await outcomeManager.checkBreachesZero(companyId, 'cash', 0);
-            
+
             expect(breachCheck).toBeDefined();
             expect(typeof breachCheck.passed).toBe('boolean');
             expect(typeof breachCheck.currentBreaches).toBe('number');
@@ -480,7 +485,7 @@ describe('M27.2: Playbook Studio + Guarded Autonomy', () => {
 
         it('should check error count below threshold', async () => {
             const errorCheck = await outcomeManager.checkErrorCountBelow(companyId, 'payment', 5);
-            
+
             expect(errorCheck).toBeDefined();
             expect(typeof errorCheck.passed).toBe('boolean');
             expect(typeof errorCheck.currentErrors).toBe('number');
@@ -582,6 +587,7 @@ describe('M27.2: Playbook Studio + Guarded Autonomy', () => {
             // Create first run
             const plan1 = await executionService.planRun(companyId, userId, {
                 playbook_code: 'idempotency-test',
+                dry_run: false,
                 scope: { test_id: 'same-scope' }
             });
 
@@ -590,6 +596,7 @@ describe('M27.2: Playbook Studio + Guarded Autonomy', () => {
             // Try to create second run with same scope (should be handled by idempotency logic)
             const plan2 = await executionService.planRun(companyId, userId, {
                 playbook_code: 'idempotency-test',
+                dry_run: false,
                 scope: { test_id: 'same-scope' }
             });
 

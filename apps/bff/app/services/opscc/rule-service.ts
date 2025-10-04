@@ -74,7 +74,7 @@ export class RuleService {
                     updated_by: userId,
                     updated_at: new Date()
                 })
-                .where(eq(opsRule.id, existingRule[0].id))
+                .where(eq(opsRule.id, existingRule[0]!.id))
                 .returning();
 
             return this.mapRuleToResponse(updatedRule);
@@ -135,7 +135,7 @@ export class RuleService {
 
         return {
             rules: rules.map(this.mapRuleToResponse),
-            total: totalResult[0].count
+            total: totalResult[0]!.count
         };
     }
 
@@ -259,7 +259,7 @@ export class PlaybookService {
                     updated_by: userId,
                     updated_at: new Date()
                 })
-                .where(eq(opsPlaybook.id, existingPlaybook[0].id))
+                .where(eq(opsPlaybook.id, existingPlaybook[0]!.id))
                 .returning();
 
             return this.mapPlaybookToResponse(updatedPlaybook);
@@ -308,7 +308,7 @@ export class PlaybookService {
             throw new Error(`Playbook ${playbookCode} not found`);
         }
 
-        const nextVersion = playbook[0].latest_version + 1;
+        const nextVersion = playbook[0]!.latest_version + 1;
         const hash = this.computeSpecHash(spec);
 
         // Create new version
@@ -316,10 +316,19 @@ export class PlaybookService {
             .insert(opsPlaybookVersion)
             .values({
                 id: crypto.randomUUID(),
-                playbook_id: playbook[0].id,
-                version: nextVersion,
+                company_id: playbook[0]!.company_id,
+                playbook_id: playbook[0]!.id,
+                version_no: nextVersion,
+                version: nextVersion, // Add the required version field
+                name: `Version ${nextVersion}`,
+                description: `Auto-generated version ${nextVersion}`,
+                steps: spec.steps,
+                max_blast_radius: spec.guards?.blastRadius?.maxEntities || 100,
+                dry_run_default: spec.guards?.canary?.samplePercent ? true : false,
+                require_dual_control: spec.guards?.requiresDualControl || false,
+                timeout_sec: spec.guards?.timeoutSec || 300,
                 spec_jsonb: spec,
-                hash,
+                hash: hash || '',
                 created_by: userId
             })
             .returning();
@@ -333,14 +342,18 @@ export class PlaybookService {
                 updated_by: userId,
                 updated_at: new Date()
             })
-            .where(eq(opsPlaybook.id, playbook[0].id));
+            .where(eq(opsPlaybook.id, playbook[0]!.id));
+
+        if (!version) {
+            throw new Error('Failed to create playbook version');
+        }
 
         return {
             id: version.id,
             playbook_id: version.playbook_id,
-            version: version.version,
-            spec_jsonb: version.spec_jsonb,
-            hash: version.hash,
+            version: version.version_no,
+            spec_jsonb: version.spec_jsonb as any,
+            hash: version.hash || '',
             created_by: version.created_by,
             created_at: version.created_at.toISOString()
         };
@@ -405,7 +418,7 @@ export class PlaybookService {
 
         return {
             playbooks: playbooks.map(this.mapPlaybookToResponse),
-            total: totalResult[0].count
+            total: totalResult[0]!.count
         };
     }
 
@@ -440,8 +453,8 @@ export class PlaybookService {
             id: v.id,
             playbook_id: v.playbook_id,
             version: v.version,
-            spec_jsonb: v.spec_jsonb,
-            hash: v.hash,
+            spec_jsonb: v.spec_jsonb as any,
+            hash: v.hash || '',
             created_by: v.created_by,
             created_at: v.created_at.toISOString()
         }));
@@ -491,7 +504,8 @@ export class PlaybookService {
             created_by: playbook.created_by,
             updated_by: playbook.updated_by,
             created_at: playbook.created_at.toISOString(),
-            updated_at: playbook.updated_at.toISOString()
+            updated_at: playbook.updated_at.toISOString(),
+            spec: { steps: [] } // Default empty spec
         };
     }
 }

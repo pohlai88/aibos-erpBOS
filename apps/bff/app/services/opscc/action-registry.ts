@@ -89,7 +89,7 @@ export class ActionRegistry {
     /**
      * Get inverse action for rollback
      */
-    getInverseAction(code: string, stepOutput: any): ActionDescriptor | undefined {
+    getInverseAction(code: string, stepOutput: any): ActionDescriptorM27_2 | undefined {
         const action = this.getAction(code);
         if (!action?.inverse) {
             return undefined;

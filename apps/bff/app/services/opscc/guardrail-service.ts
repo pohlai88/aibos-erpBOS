@@ -53,7 +53,7 @@ export class GuardrailService {
                     updated_by: userId,
                     updated_at: new Date()
                 })
-                .where(eq(opsGuardPolicy.id, existingPolicy[0].id))
+                .where(eq(opsGuardPolicy.id, existingPolicy[0]!.id))
                 .returning();
 
             return this.mapPolicyToResponse(updatedPolicy);
@@ -199,7 +199,7 @@ export class GuardrailService {
                 )
             );
 
-        const currentRunning = runningCount[0].count;
+        const currentRunning = runningCount[0]!.count;
         const maxConcurrent = guards.max_concurrent || 1;
 
         if (currentRunning >= maxConcurrent) {
@@ -280,8 +280,8 @@ export class GuardrailService {
 
         return {
             required: !!guards.canary,
-            samplePercent: guards.canary?.samplePercent,
-            minEntities: guards.canary?.minEntities
+            ...(guards.canary?.samplePercent !== undefined && { samplePercent: guards.canary.samplePercent }),
+            ...(guards.canary?.minEntities !== undefined && { minEntities: guards.canary.minEntities })
         };
     }
 

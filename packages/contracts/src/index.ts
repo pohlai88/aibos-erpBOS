@@ -21,6 +21,7 @@ export * from "./audit"; // M26.8: Auditor Workspace
 export * from "./itgc"; // M26.9: ITGC & UAR Bridge
 export * from "./opscc"; // M27: Ops Command Center
 export * from "./opscc-m27-2"; // M27.2: Playbook Studio + Guarded Autonomy
+export * from "./lease"; // M28: Lease Accounting (MFRS 16)
 export * from "./assets_import";
 export * from "./assets_prefs";
 export * from "./bank-connect";

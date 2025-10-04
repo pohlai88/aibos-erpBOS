@@ -78,6 +78,7 @@ export class PlaybookStudioService {
                 company_id: companyId,
                 playbook_id: data.playbook_id,
                 version_no: nextVersion,
+                version: nextVersion, // Add the required version field
                 name: data.name,
                 description: data.description,
                 steps: data.steps,

@@ -45,6 +45,25 @@ aibos-erpBOS/
 - **Docker**: For database and containerized builds
 - **Git**: For version control
 
+### Database Setup
+
+**⚠️ Important:** This project uses two different database approaches:
+
+- **Development**: Schema-first with `db:push` (fast iteration)
+- **Production**: Migration-based with `db:migrate` (safe deployment)
+
+**Quick Start (Development):**
+
+```powershell
+# Fresh database with current schema
+pnpm db:reset -Confirm
+```
+
+**📚 Database Documentation:**
+
+- [Database Workflow Guide](./DATABASE_WORKFLOW.md) - Complete guide
+- [Database Commands Reference](./DB_COMMANDS.md) - Quick reference
+
 ### Installation
 
 1. **Clone the repository**
@@ -381,7 +400,7 @@ docker-compose ps
 
 #### Type Errors
 
-   ```bash
+```bash
 # Regenerate types
 pnpm --filter @aibos/api-client build:types
 ```

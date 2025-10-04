@@ -66,13 +66,13 @@ export class ExecutionService {
             throw new Error(`Playbook ${request.playbook_code} not found`);
         }
 
-        const version = request.version || playbook[0].latest_version;
+        const version = request.version || playbook[0]!.latest_version;
         const playbookVersion = await db
             .select()
             .from(opsPlaybookVersion)
             .where(
                 and(
-                    eq(opsPlaybookVersion.playbook_id, playbook[0].id),
+                    eq(opsPlaybookVersion.playbook_id, playbook[0]!.id),
                     eq(opsPlaybookVersion.version, version)
                 )
             )
@@ -82,7 +82,7 @@ export class ExecutionService {
             throw new Error(`Playbook version ${version} not found`);
         }
 
-        const spec = playbookVersion[0].spec_jsonb;
+        const spec = playbookVersion[0]!.spec_jsonb as any;
 
         // Evaluate blast radius
         const blastRadiusEval = await this.guardrailService.evaluateBlastRadius(
@@ -166,6 +166,10 @@ export class ExecutionService {
             })
             .returning();
 
+        if (!run) {
+            throw new Error('Failed to create run');
+        }
+
         // Create run steps
         const steps = await db
             .insert(opsRunStep)
@@ -221,7 +225,7 @@ export class ExecutionService {
                 .set({
                     status: 'cancelled',
                     approvals_jsonb: {
-                        ...run[0].approvals_jsonb,
+                        ...(run[0]!.approvals_jsonb as any || {}),
                         rejected_by: userId,
                         rejected_at: new Date().toISOString(),
                         rejection_reason: data.reason
@@ -240,7 +244,7 @@ export class ExecutionService {
         }
 
         // Check dual control requirement
-        const approvals = run[0].approvals_jsonb as any;
+        const approvals = run[0]!.approvals_jsonb as any;
         if (approvals.required && approvals.requested_by === userId) {
             throw new Error('Requester cannot approve their own run (dual control required)');
         }
@@ -383,7 +387,7 @@ export class ExecutionService {
             )
             .returning();
 
-        if (updatedRun.length === 0) {
+        if (!updatedRun) {
             throw new Error(`Run ${data.run_id} not found or cannot be cancelled`);
         }
 
@@ -393,7 +397,7 @@ export class ExecutionService {
             reason: data.reason
         });
 
-        return this.mapRunToResponse(updatedRun[0]);
+        return this.mapRunToResponse(updatedRun);
     }
 
     /**
@@ -449,7 +453,7 @@ export class ExecutionService {
 
         return {
             runs: runsWithSteps,
-            total: totalResult[0].count
+            total: totalResult[0]!.count
         };
     }
 
@@ -586,7 +590,7 @@ export class ExecutionService {
     }
 
     private async finalizeRun(runId: string, steps: any[]): Promise<any> {
-        const metrics: RunMetrics = {
+        const metrics: RunMetricsM27_2 = {
             entities_count: steps.reduce((sum, step) => sum + (step.output_jsonb?.count || 0), 0),
             checks_pass: steps.filter(s => s.status === 'succeeded').length,
             checks_failed: steps.filter(s => s.status === 'failed').length,
@@ -661,7 +665,7 @@ export class ExecutionService {
             });
     }
 
-    private mapRunToResponse(run: any, steps?: any[]): RunResponse {
+    private mapRunToResponse(run: any, steps?: any[]): RunResponseM27_2 {
         return {
             id: run.id,
             company_id: run.company_id,

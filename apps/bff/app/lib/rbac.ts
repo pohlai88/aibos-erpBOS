@@ -116,7 +116,13 @@ export type Capability =
     | "attest:approve"
     | "attest:export"
     | "close:board:view"
-    | "close:board:manage";
+    | "close:board:manage"
+    | "lease:read"
+    | "lease:manage"
+    | "lease:post"
+    | "lease:disclose"
+    | "lease:component"
+    | "lease:impair";
 
 export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
     admin: [
@@ -140,6 +146,7 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "sox:admin", "sox:test.plan", "sox:test.exec", "sox:deficiency", "sox:assert",
         "attest:program", "attest:campaign", "attest:respond", "attest:approve", "attest:export",
         "close:board:view", "close:board:manage",
+        "lease:read", "lease:manage", "lease:post", "lease:disclose", "lease:component", "lease:impair",
         "opscc:view", "opscc:admin", "opscc:whatif:run", "opscc:whatif:save",
         "ops:signals:ingest", "ops:rules:admin", "ops:playbooks:admin", "ops:actions:execute", "ops:fires:approve", "ops:observability:read"
     ],
@@ -164,6 +171,7 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "sox:admin", "sox:test.plan", "sox:test.exec", "sox:deficiency", "sox:assert",
         "attest:respond", "attest:approve", "attest:export",
         "close:board:view",
+        "lease:read", "lease:manage", "lease:post", "lease:disclose", "lease:component", "lease:impair",
         "opscc:view", "opscc:whatif:run", "opscc:whatif:save",
         "ops:observability:read"
     ],
@@ -183,6 +191,7 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "evidence:write", "evidence:read", "binder:build",
         "sox:test.exec", "sox:deficiency",
         "attest:respond",
+        "lease:read",
         "opscc:view",
         "ops:actions:execute", "ops:fires:approve", "ops:observability:read"
     ],

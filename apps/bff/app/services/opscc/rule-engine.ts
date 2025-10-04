@@ -52,14 +52,13 @@ export class OpsRuleEngine {
                 const [updated] = await this.dbInstance
                     .update(opsRule)
                     .set({
+                        name: data.name,
+                        kind: data.kind,
                         enabled: data.enabled,
-                        severity: data.severity,
-                        when_expr: data.when_expr,
-                        window_sec: data.window_sec,
-                        threshold: data.threshold,
-                        throttle_sec: data.throttle_sec,
-                        approvals: data.approvals,
-                        action_playbook_id: data.action_playbook_id,
+                        source: data.source,
+                        where_jsonb: data.where,
+                        schedule_cron: data.schedule_cron,
+                        priority: data.priority,
                         updated_by: userId,
                         updated_at: new Date()
                     })
@@ -74,15 +73,15 @@ export class OpsRuleEngine {
                     .values({
                         id: crypto.randomUUID(),
                         company_id: companyId,
+                        code: data.code,
                         name: data.name,
+                        kind: data.kind,
                         enabled: data.enabled,
-                        severity: data.severity,
-                        when_expr: data.when_expr,
-                        window_sec: data.window_sec,
-                        threshold: data.threshold,
-                        throttle_sec: data.throttle_sec,
-                        approvals: data.approvals,
-                        action_playbook_id: data.action_playbook_id,
+                        source: data.source,
+                        where_jsonb: data.where,
+                        schedule_cron: data.schedule_cron,
+                        priority: data.priority,
+                        created_by: userId,
                         updated_by: userId
                     })
                     .returning();
@@ -435,18 +434,18 @@ export class OpsRuleEngine {
         return {
             id: rule.id,
             company_id: rule.company_id,
+            code: rule.code,
             name: rule.name,
+            kind: rule.kind,
             enabled: rule.enabled,
-            severity: rule.severity,
-            when_expr: rule.when_expr,
-            window_sec: rule.window_sec,
-            threshold: rule.threshold,
-            throttle_sec: rule.throttle_sec,
-            approvals: rule.approvals,
-            action_playbook_id: rule.action_playbook_id,
+            source: rule.source,
+            where: rule.where_jsonb,
+            schedule_cron: rule.schedule_cron,
+            priority: rule.priority,
+            created_by: rule.created_by,
             updated_by: rule.updated_by,
-            updated_at: rule.updated_at.toISOString(),
-            created_at: rule.created_at.toISOString()
+            created_at: rule.created_at.toISOString(),
+            updated_at: rule.updated_at.toISOString()
         };
     }
 }

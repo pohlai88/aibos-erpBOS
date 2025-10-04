@@ -290,7 +290,15 @@ export const opsRule = pgTable("ops_rule", {
     created_by: text("created_by").notNull(),
     updated_by: text("updated_by").notNull(),
     created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
+    updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    // Additional columns expected by the code
+    severity: text("severity").$type<"LOW" | "MEDIUM" | "HIGH" | "CRITICAL">().default("HIGH"),
+    when_expr: jsonb("when_expr"), // Rule condition expression
+    window_sec: integer("window_sec").default(3600), // Time window for rule evaluation
+    threshold: jsonb("threshold"), // Threshold configuration
+    throttle_sec: integer("throttle_sec").default(3600), // Throttling period
+    approvals: integer("approvals").default(0), // Required approvals
+    action_playbook_id: text("action_playbook_id") // Reference to playbook to execute
 });
 
 // ops_playbook — versioned playbook definition (M27.2)
@@ -324,7 +332,11 @@ export const opsPlaybookVersion = pgTable("ops_playbook_version", {
     created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
     is_active: boolean("is_active").notNull().default(false),
-    change_summary: text("change_summary")
+    change_summary: text("change_summary"),
+    // Additional columns expected by the code
+    version: integer("version_no").notNull(), // Alias for version_no for code compatibility
+    spec_jsonb: jsonb("spec_jsonb"), // Playbook specification
+    hash: text("hash") // Content hash for versioning
 }, (table) => ({
     uniquePlaybookVersion: unique("unique_playbook_version").on(table.company_id, table.playbook_id, table.version_no)
 }));
