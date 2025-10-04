@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { MdnaService } from "@/services/mdna/templates";
 import { db } from "@/lib/db";
-import { mdnaTemplate, mdnaDraft, mdnaPublish } from "@aibos/db-adapter/schema";
+import { mdnaTemplate, mdnaDraft, mdnaPublish, closeRun } from "@aibos/db-adapter/schema";
 import { eq, and } from "drizzle-orm";
 
 describe("MdnaService", () => {
@@ -15,6 +15,35 @@ describe("MdnaService", () => {
         await db.delete(mdnaPublish);
         await db.delete(mdnaDraft);
         await db.delete(mdnaTemplate);
+        await db.delete(closeRun);
+
+        // Create test close runs
+        await db.insert(closeRun).values([
+            {
+                id: "run-1",
+                companyId,
+                year: 2025,
+                month: 1,
+                status: "PUBLISHED",
+                startedAt: new Date("2025-01-01T00:00:00Z"),
+                closedAt: new Date("2025-01-05T00:00:00Z"),
+                owner: "ops",
+                createdBy: userId,
+                updatedBy: userId
+            },
+            {
+                id: "run-2",
+                companyId,
+                year: 2025,
+                month: 2,
+                status: "PUBLISHED",
+                startedAt: new Date("2025-02-01T00:00:00Z"),
+                closedAt: new Date("2025-02-03T00:00:00Z"),
+                owner: "ops",
+                createdBy: userId,
+                updatedBy: userId
+            }
+        ]);
     });
 
     afterEach(async () => {
@@ -22,6 +51,7 @@ describe("MdnaService", () => {
         await db.delete(mdnaPublish);
         await db.delete(mdnaDraft);
         await db.delete(mdnaTemplate);
+        await db.delete(closeRun);
     });
 
     describe("upsertTemplate", () => {

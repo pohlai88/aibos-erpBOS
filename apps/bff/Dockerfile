@@ -10,6 +10,7 @@ WORKDIR /app
 # Copy package files for dependency resolution
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY turbo.json tsconfig.base.json ./
+COPY scripts/ ./scripts/
 
 # Copy workspace packages
 COPY packages/ ./packages/
@@ -41,6 +42,7 @@ WORKDIR /app
 # Copy package files
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY turbo.json tsconfig.base.json ./
+COPY scripts/ ./scripts/
 
 # Copy workspace packages
 COPY packages/ ./packages/

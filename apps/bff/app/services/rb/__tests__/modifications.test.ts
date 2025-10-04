@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { RevModificationService } from '../modifications';
 import { db } from '@/lib/db';
 import { ulid } from 'ulid';
+import { rbContract, rbPriceBook, rbProduct } from '@aibos/db-adapter/schema';
 
 describe('M25.2 Revenue Modifications - Service Tests', () => {
     let modificationService: RevModificationService;
@@ -9,8 +10,42 @@ describe('M25.2 Revenue Modifications - Service Tests', () => {
     const testUserId = 'test-user-' + ulid();
     const testContractId = 'test-contract-' + ulid();
 
-    beforeEach(() => {
+    beforeEach(async () => {
         modificationService = new RevModificationService();
+
+        // Create test price book first
+        const testBookId = 'test-book-' + ulid();
+        await db.insert(rbPriceBook).values({
+            id: testBookId,
+            companyId: testCompanyId,
+            code: 'TEST-BOOK-001',
+            currency: 'USD',
+            active: true,
+            updatedBy: testUserId
+        });
+
+        // Create test contract
+        await db.insert(rbContract).values({
+            id: testContractId,
+            companyId: testCompanyId,
+            customerId: 'test-customer-' + ulid(),
+            bookId: testBookId,
+            startDate: '2025-01-01',
+            endDate: '2025-12-31',
+            status: 'ACTIVE',
+            updatedBy: testUserId
+        });
+
+        // Create test product
+        await db.insert(rbProduct).values({
+            id: 'test-product-1',
+            companyId: testCompanyId,
+            sku: 'TEST-SKU-001',
+            name: 'Test Product',
+            kind: 'SERVICE',
+            status: 'ACTIVE',
+            updatedBy: testUserId
+        });
     });
 
     afterEach(async () => {
@@ -47,8 +82,8 @@ describe('M25.2 Revenue Modifications - Service Tests', () => {
             expect(result.effective_date).toBe('2025-01-15');
             expect(result.status).toBe('DRAFT');
             expect(result.lines).toHaveLength(1);
-            expect(result.lines[0].qty_delta).toBe(10);
-            expect(result.lines[0].price_delta).toBe(100.00);
+            expect(result.lines[0]?.qty_delta).toBe(10);
+            expect(result.lines[0]?.price_delta).toBe(100.00);
         });
 
         it('should apply a change order with PROSPECTIVE treatment', async () => {

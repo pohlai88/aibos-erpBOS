@@ -10,6 +10,7 @@ WORKDIR /app
 # Copy package files for dependency resolution
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY turbo.json tsconfig.base.json ./
+COPY scripts/ ./scripts/
 
 # Copy workspace packages
 COPY packages/ ./packages/
@@ -25,7 +26,7 @@ FROM base AS builder
 COPY apps/web/app/ ./apps/web/app/
 COPY apps/web/next.config.mjs ./apps/web/
 COPY apps/web/tsconfig.json ./apps/web/
-COPY apps/web/src/ ./apps/web/src/
+COPY apps/web/lib/ ./apps/web/lib/
 
 # Build the application
 RUN pnpm --filter @aibos/web build
@@ -41,6 +42,7 @@ WORKDIR /app
 # Copy package files for dependency resolution
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY turbo.json tsconfig.base.json ./
+COPY scripts/ ./scripts/
 
 # Copy workspace packages
 COPY packages/ ./packages/

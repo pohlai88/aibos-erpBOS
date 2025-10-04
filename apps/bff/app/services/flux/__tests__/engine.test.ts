@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { FluxEngineService } from "@/services/flux/engine";
 import { db } from "@/lib/db";
-import { fluxRun, fluxLine, fluxComment, fluxRule } from "@db/client";
+import { fluxRun, fluxLine, fluxComment, fluxRule } from "@aibos/db-adapter/schema";
 import { eq, and } from "drizzle-orm";
 
 describe("FluxEngineService", () => {
@@ -72,7 +72,7 @@ describe("FluxEngineService", () => {
 
             // Mock an error in the flux analysis
             const originalGenerateFluxLines = (service as any).generateFluxLines;
-            (service as any).generateFluxLines = jest.fn().mockRejectedValue(new Error("Mock error"));
+            (service as any).generateFluxLines = vi.fn().mockRejectedValue(new Error("Mock error"));
 
             await expect(
                 service.runFluxAnalysis(companyId, userId, data)

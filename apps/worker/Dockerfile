@@ -10,6 +10,7 @@ WORKDIR /app
 # Copy package files for dependency resolution
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY turbo.json tsconfig.base.json ./
+COPY scripts/ ./scripts/
 
 # Copy workspace packages
 COPY packages/ ./packages/
@@ -39,6 +40,7 @@ WORKDIR /app
 # Copy package files for dependency resolution
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY turbo.json tsconfig.base.json ./
+COPY scripts/ ./scripts/
 
 # Copy workspace packages
 COPY packages/ ./packages/
@@ -48,7 +50,7 @@ COPY apps/worker/package.json ./apps/worker/
 RUN pnpm install --prod --frozen-lockfile
 
 # Copy built application from builder stage
-COPY --from=builder /app/apps/worker/dist ./apps/worker/dist
+COPY --from=builder /app/apps/worker/dist/src ./apps/worker/dist
 COPY --from=builder /app/apps/worker/node_modules ./apps/worker/node_modules
 COPY --from=builder /app/apps/worker/package.json ./apps/worker/package.json
 

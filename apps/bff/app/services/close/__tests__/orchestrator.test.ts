@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { CloseOrchestratorService } from "@/services/close/orchestrator";
 import { db } from "@/lib/db";
-import { closeRun, closeTask, closeDep, closeEvidence, closePolicy, closeLock } from "@db/client";
+import { closeRun, closeTask, closeDep, closeEvidence, closePolicy, closeLock } from "@aibos/db-adapter/schema";
 import { eq, and } from "drizzle-orm";
 
 describe("CloseOrchestratorService", () => {
@@ -34,7 +34,7 @@ describe("CloseOrchestratorService", () => {
         it("should create a new close run", async () => {
             const data = {
                 year: 2025,
-                month: 1,
+                month: 2, // Changed from 1 to 2 to avoid conflicts
                 owner: "ops",
                 notes: "Test close run"
             };
@@ -43,7 +43,7 @@ describe("CloseOrchestratorService", () => {
 
             expect(run.company_id).toBe(companyId);
             expect(run.year).toBe(2025);
-            expect(run.month).toBe(1);
+            expect(run.month).toBe(2); // Updated expectation
             expect(run.status).toBe("DRAFT");
             expect(run.owner).toBe("ops");
             expect(run.notes).toBe("Test close run");
@@ -90,7 +90,7 @@ describe("CloseOrchestratorService", () => {
             // Create a close run first
             const data = {
                 year: 2025,
-                month: 1,
+                month: 3, // Changed from 1 to 3 to avoid conflicts
                 owner: "ops"
             };
             const run = await service.createCloseRun(companyId, userId, data);
@@ -104,8 +104,8 @@ describe("CloseOrchestratorService", () => {
                 .where(eq(closeRun.id, run.id))
                 .limit(1);
 
-            expect(updatedRun[0].status).toBe("IN_PROGRESS");
-            expect(updatedRun[0].startedAt).toBeDefined();
+            expect(updatedRun[0]?.status).toBe("IN_PROGRESS");
+            expect(updatedRun[0]?.startedAt).toBeDefined();
 
             // Check that default tasks were created
             const tasks = await db
@@ -132,6 +132,7 @@ describe("CloseOrchestratorService", () => {
                 title: "Custom Task",
                 owner: "accountant",
                 priority: 5,
+                tags: [],
                 evidence_required: true
             };
 
@@ -156,6 +157,7 @@ describe("CloseOrchestratorService", () => {
                 title: "Custom Task",
                 owner: "accountant",
                 priority: 5,
+                tags: [],
                 evidence_required: true
             };
 
@@ -166,6 +168,7 @@ describe("CloseOrchestratorService", () => {
                 title: "Updated Custom Task",
                 owner: "ops",
                 priority: 8,
+                tags: [],
                 evidence_required: false
             };
 
@@ -190,7 +193,9 @@ describe("CloseOrchestratorService", () => {
                 code: "TEST_TASK",
                 title: "Test Task",
                 owner: "ops",
-                priority: 5
+                priority: 5,
+                tags: [],
+                evidence_required: false
             };
 
             const task = await service.upsertCloseTask(companyId, run.id, userId, taskData);
@@ -206,7 +211,7 @@ describe("CloseOrchestratorService", () => {
                 .where(eq(closeTask.id, task.id))
                 .limit(1);
 
-            expect(updatedTask[0].status).toBe("DONE");
+            expect(updatedTask[0]?.status).toBe("DONE");
         });
     });
 
@@ -222,7 +227,9 @@ describe("CloseOrchestratorService", () => {
                 code: "TEST_TASK",
                 title: "Test Task",
                 owner: "ops",
-                priority: 5
+                priority: 5,
+                tags: [],
+                evidence_required: false
             };
 
             const task = await service.upsertCloseTask(companyId, run.id, userId, taskData);

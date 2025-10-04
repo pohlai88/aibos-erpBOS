@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { ClosePolicyService } from "@/services/close/policy";
 import { db } from "@/lib/db";
-import { closePolicy } from "@db/client";
+import { closePolicy } from "@aibos/db-adapter/schema";
 import { eq } from "drizzle-orm";
 
 describe("ClosePolicyService", () => {

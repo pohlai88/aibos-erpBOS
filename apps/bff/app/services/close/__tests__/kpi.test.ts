@@ -15,6 +15,34 @@ describe("KpiService", () => {
         await db.delete(closeKpi);
         await db.delete(closeTask);
         await db.delete(closeRun);
+
+        // Create test close runs
+        await db.insert(closeRun).values([
+            {
+                id: "run-1",
+                companyId,
+                year: 2025,
+                month: 1,
+                status: "PUBLISHED",
+                startedAt: new Date("2025-01-01T00:00:00Z"),
+                closedAt: new Date("2025-01-05T00:00:00Z"),
+                owner: "ops",
+                createdBy: userId,
+                updatedBy: userId
+            },
+            {
+                id: "run-2",
+                companyId,
+                year: 2025,
+                month: 2,
+                status: "PUBLISHED",
+                startedAt: new Date("2025-02-01T00:00:00Z"),
+                closedAt: new Date("2025-02-03T00:00:00Z"),
+                owner: "ops",
+                createdBy: userId,
+                updatedBy: userId
+            }
+        ]);
     });
 
     afterEach(async () => {
@@ -178,9 +206,9 @@ describe("KpiService", () => {
             const kpis = await service.queryKpis(companyId, query);
 
             expect(kpis.length).toBe(1);
-            expect(kpis[0].run_id).toBe("run-1");
-            expect(kpis[0].metric).toBe("DAYS_TO_CLOSE");
-            expect(kpis[0].value).toBe(5);
+            expect(kpis[0]?.run_id).toBe("run-1");
+            expect(kpis[0]?.metric).toBe("DAYS_TO_CLOSE");
+            expect(kpis[0]?.value).toBe(5);
         });
     });
 
@@ -221,9 +249,9 @@ describe("KpiService", () => {
             const trends = await service.getKpiTrends(companyId, "DAYS_TO_CLOSE", 3);
 
             expect(trends.length).toBe(3);
-            expect(trends[0].value).toBe(5); // Oldest first
-            expect(trends[1].value).toBe(4);
-            expect(trends[2].value).toBe(3); // Newest last
+            expect(trends[0]?.value).toBe(5); // Oldest first
+            expect(trends[1]?.value).toBe(4);
+            expect(trends[2]?.value).toBe(3); // Newest last
         });
     });
 

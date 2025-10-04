@@ -11,6 +11,18 @@
         {
             "path": "/api/payments/bank/process?action=fetch",
             "schedule": "*/5 * * * *"
+        },
+        {
+            "path": "/api/insights/harvest",
+            "schedule": "5 2 * * *"
+        },
+        {
+            "path": "/api/insights/benchmarks/run",
+            "schedule": "15 2 * * *"
+        },
+        {
+            "path": "/api/insights/anomalies",
+            "schedule": "0 * * * *"
         }
     ]
 }
