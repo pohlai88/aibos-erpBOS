@@ -21,9 +21,17 @@ import type {
     InvoiceResponseType,
     InvoiceLineResponseType
 } from "@aibos/contracts";
+import { RbTaxService } from "./tax";
+import { getFxQuotesForDateOrBefore } from "@/lib/fx";
+import { DefaultFxPolicy } from "@aibos/policies";
+import { RbError, RbValidationError, RbBusinessLogicError, RbValidator, withErrorHandling } from "./errors";
 
 export class RbBillingService {
-    constructor(private dbInstance = db) { }
+    private taxService: RbTaxService;
+
+    constructor(private dbInstance = db) {
+        this.taxService = new RbTaxService(dbInstance);
+    }
 
     /**
      * Run billing for a period
@@ -191,6 +199,35 @@ export class RbBillingService {
             return null; // No charges
         }
 
+        // Get FX rate for present currency
+        let fxRate = 1.0;
+        if (presentCcy !== "USD") { // Assuming USD is base currency
+            try {
+                const quotes = await getFxQuotesForDateOrBefore("USD", presentCcy, new Date().toISOString().split('T')[0]!);
+                const rate = DefaultFxPolicy.selectRate(quotes, "USD", presentCcy, new Date().toISOString().split('T')[0]!);
+                if (rate) {
+                    fxRate = rate;
+                }
+            } catch (error) {
+                console.warn(`Failed to get FX rate for ${presentCcy}:`, error);
+            }
+        }
+
+        // Calculate tax for the line item
+        const taxResult = await this.taxService.calculateTaxForLine(
+            companyId,
+            subscription.customer_id || "",
+            {
+                productId: subscription.product_id,
+                amount: amount,
+                customerId: subscription.customer_id || "",
+                companyId: companyId
+            }
+        );
+
+        const taxAmount = taxResult.taxAmount;
+        const totalAmount = amount + taxAmount;
+
         // Create invoice
         const invoiceId = ulid();
         const invoice = await this.dbInstance
@@ -204,9 +241,9 @@ export class RbBillingService {
                 dueDate: this.calculateDueDate(new Date()),
                 status: "DRAFT",
                 subtotal: amount.toString(),
-                taxTotal: "0", // TODO: Calculate tax
-                total: amount.toString(),
-                fxPresentRate: null, // TODO: Get FX rate
+                taxTotal: taxAmount.toString(),
+                total: totalAmount.toString(),
+                fxPresentRate: fxRate.toString(),
                 meta: { billing_run_id: runId },
                 createdBy: userId
             })
@@ -228,9 +265,9 @@ export class RbBillingService {
                 unit: price.unit || "unit",
                 unitPrice: price.unitAmount?.toString() || "0",
                 lineSubtotal: amount.toString(),
-                taxCode: null, // TODO: Get tax code
-                taxAmount: "0",
-                lineTotal: amount.toString()
+                taxCode: taxResult.taxCode,
+                taxAmount: taxAmount.toString(),
+                lineTotal: totalAmount.toString()
             });
 
         return {
@@ -432,12 +469,89 @@ export class RbBillingService {
             throw new Error(`Invoice ${invoiceId} must be FINAL to post`);
         }
 
-        // TODO: Implement actual GL posting logic
-        // This would typically involve:
-        // 1. Creating AR journal entries
-        // 2. Creating revenue journal entries
-        // 3. Respecting period guard (M17)
-        // 4. Handling FX presentation (M17/M18)
+        // Get invoice lines for posting
+        const invoiceLines = await this.dbInstance
+            .select()
+            .from(rbInvoiceLine)
+            .where(and(
+                eq(rbInvoiceLine.companyId, companyId),
+                eq(rbInvoiceLine.invoiceId, invoiceId)
+            ));
+
+        // Import posting service
+        const { postByRule } = await import("@/lib/posting");
+        const { ensurePostingAllowed } = await import("@/lib/policy");
+
+        // Check period guard
+        const postingCheck = await ensurePostingAllowed(companyId, invoice.issueDate);
+        if (postingCheck) {
+            throw new Error(`Posting not allowed: ${await postingCheck.text()}`);
+        }
+
+        // Create journal entries for invoice posting
+        const journalLines = [];
+
+        // AR Debit (Customer owes us)
+        journalLines.push({
+            account_code: "ACC-AR", // Accounts Receivable
+            dc: "D",
+            amount: {
+                amount: invoice.total,
+                currency: invoice.presentCcy
+            },
+            party_type: "customer",
+            party_id: invoice.customerId,
+            description: `Invoice ${invoiceId} - ${invoice.customerId}`
+        });
+
+        // Revenue Credits (for each line item)
+        for (const line of invoiceLines) {
+            if (line.productId) {
+                // Get product to determine revenue account
+                const products = await this.dbInstance
+                    .select()
+                    .from(rbProduct)
+                    .where(and(
+                        eq(rbProduct.companyId, companyId),
+                        eq(rbProduct.id, line.productId)
+                    ))
+                    .limit(1);
+
+                const product = products[0];
+                const revenueAccount = product?.glRevAcct || "ACC-REV"; // Default revenue account
+
+                journalLines.push({
+                    account_code: revenueAccount,
+                    dc: "C",
+                    amount: {
+                        amount: line.lineSubtotal,
+                        currency: invoice.presentCcy
+                    },
+                    description: `${line.description} - Revenue`
+                });
+            }
+        }
+
+        // Tax Credit (if applicable)
+        if (Number(invoice.taxTotal) > 0) {
+            journalLines.push({
+                account_code: "ACC-TAX-PAYABLE", // Tax Payable
+                dc: "C",
+                amount: {
+                    amount: invoice.taxTotal,
+                    currency: invoice.presentCcy
+                },
+                description: `Invoice ${invoiceId} - Tax`
+            });
+        }
+
+        // Post to GL using the posting service
+        await postByRule("SalesInvoice", invoiceId, invoice.presentCcy, companyId, {
+            doc_date: invoice.issueDate,
+            lines: journalLines,
+            customer_id: invoice.customerId,
+            invoice_id: invoiceId
+        });
 
         // Create post lock
         await this.dbInstance

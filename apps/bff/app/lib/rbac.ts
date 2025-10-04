@@ -40,7 +40,12 @@ export type Capability =
     | "ar:portal:ops"
     | "ar:stmt:policy"
     | "ar:stmt:run"
-    | "ar:stmt:email";
+    | "ar:stmt:email"
+    | "rb:catalog"
+    | "rb:contract"
+    | "rb:usage:ingest"
+    | "rb:invoice:run"
+    | "rb:credit";
 
 export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
     admin: [
@@ -53,7 +58,8 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "ar:dunning:policy", "ar:dunning:run", "ar:remit:import", "ar:cashapp:run", "ar:ptp", "ar:dispute",
         "ar:credit:policy", "ar:credit:customer", "ar:collect:workbench",
         "ar:portal:policy", "ar:portal:ops",
-        "ar:stmt:policy", "ar:stmt:run", "ar:stmt:email"
+        "ar:stmt:policy", "ar:stmt:run", "ar:stmt:email",
+        "rb:catalog", "rb:contract", "rb:usage:ingest", "rb:invoice:run", "rb:credit"
     ],
     accountant: [
         "reports:read", "journals:post", "reversal:create", "inventory:move",
@@ -65,7 +71,8 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "ar:dunning:policy", "ar:dunning:run", "ar:remit:import", "ar:cashapp:run", "ar:ptp", "ar:dispute",
         "ar:credit:policy", "ar:credit:customer", "ar:collect:workbench",
         "ar:portal:policy", "ar:portal:ops",
-        "ar:stmt:policy", "ar:stmt:run", "ar:stmt:email"
+        "ar:stmt:policy", "ar:stmt:run", "ar:stmt:email",
+        "rb:catalog", "rb:contract", "rb:usage:ingest", "rb:invoice:run", "rb:credit"
     ],
     ops: [
         "reports:read", "inventory:move", "audit:read",
@@ -73,7 +80,8 @@ export const ROLE_CAPS: Record<"admin" | "accountant" | "ops", Capability[]> = {
         "cash:manage", "capex:manage", "fx:manage", "fx:read", "alloc:manage", "alloc:read", "tax:manage", "tax:read", "consol:manage", "consol:read",
         "pay:dispatch", "pay:discount:run", "pay:discount:offer",
         "ar:collect:workbench",
-        "ar:portal:ops"
+        "ar:portal:ops",
+        "rb:catalog", "rb:contract", "rb:usage:ingest", "rb:invoice:run", "rb:credit"
     ],
 };
 

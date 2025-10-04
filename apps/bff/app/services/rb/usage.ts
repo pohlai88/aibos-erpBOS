@@ -33,7 +33,7 @@ export class RbUsageService {
                         companyId,
                         customerId: "", // Will be populated from subscription
                         subscriptionId: data.subscription_id,
-                        eventTime: event.event_time,
+                        eventTime: new Date(event.event_time),
                         quantity: event.quantity.toString(),
                         unit: event.unit,
                         uniqHash: event.uniq_hash,
@@ -87,8 +87,8 @@ export class RbUsageService {
                 eq(rbUsageEvent.companyId, companyId),
                 eq(rbUsageEvent.subscriptionId, data.subscription_id),
                 eq(rbUsageEvent.unit, data.unit),
-                gte(rbUsageEvent.eventTime, data.window_start),
-                lte(rbUsageEvent.eventTime, data.window_end)
+                gte(rbUsageEvent.eventTime, new Date(data.window_start)),
+                lte(rbUsageEvent.eventTime, new Date(data.window_end))
             ))
             .groupBy(rbUsageEvent.unit);
 
@@ -105,8 +105,8 @@ export class RbUsageService {
                 id: ulid(),
                 companyId,
                 subscriptionId: data.subscription_id,
-                windowStart: data.window_start,
-                windowEnd: data.window_end,
+                windowStart: new Date(data.window_start),
+                windowEnd: new Date(data.window_end),
                 unit: data.unit,
                 qty: rollup.totalQty.toString(),
                 meta: null
@@ -134,8 +134,8 @@ export class RbUsageService {
             .where(and(
                 eq(rbUsageRollup.companyId, companyId),
                 eq(rbUsageRollup.subscriptionId, subscriptionId),
-                gte(rbUsageRollup.windowStart, windowStart),
-                lte(rbUsageRollup.windowEnd, windowEnd)
+                gte(rbUsageRollup.windowStart, new Date(windowStart)),
+                lte(rbUsageRollup.windowEnd, new Date(windowEnd))
             ));
 
         return rollups.map(r => ({

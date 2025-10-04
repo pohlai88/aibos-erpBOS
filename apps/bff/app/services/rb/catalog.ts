@@ -315,12 +315,98 @@ export class RbCatalogService {
 
         const price = prices[0]!;
 
-        // For now, implement FLAT pricing only
-        // TODO: Implement TIERED, STAIR, VOLUME pricing models
-        if (price.model === "FLAT" && price.unitAmount) {
-            return Number(price.unitAmount) * quantity;
+        switch (price.model) {
+            case "FLAT":
+                if (!price.unitAmount) {
+                    throw new Error("FLAT pricing requires unit_amount");
+                }
+                return Number(price.unitAmount) * quantity;
+
+            case "TIERED":
+                return this.calculateTieredPrice(price, quantity);
+
+            case "STAIR":
+                return this.calculateStairPrice(price, quantity);
+
+            case "VOLUME":
+                return this.calculateVolumePrice(price, quantity);
+
+            default:
+                throw new Error(`Unsupported pricing model: ${price.model}`);
+        }
+    }
+
+    /**
+     * Calculate tiered pricing (each tier applies to quantity within that tier)
+     */
+    private calculateTieredPrice(price: any, quantity: number): number {
+        if (!price.meta?.tiers || !Array.isArray(price.meta.tiers)) {
+            throw new Error("TIERED pricing requires tiers in meta");
         }
 
-        throw new Error(`Pricing model ${price.model} not implemented yet`);
+        const tiers = price.meta.tiers.sort((a: any, b: any) => a.from - b.from);
+        let totalAmount = 0;
+        let remainingQty = quantity;
+
+        for (const tier of tiers) {
+            if (remainingQty <= 0) break;
+
+            const tierQty = Math.min(remainingQty, tier.to - tier.from + 1);
+            totalAmount += tierQty * tier.price;
+            remainingQty -= tierQty;
+        }
+
+        return totalAmount;
+    }
+
+    /**
+     * Calculate stair pricing (entire quantity uses highest applicable tier)
+     */
+    private calculateStairPrice(price: any, quantity: number): number {
+        if (!price.meta?.tiers || !Array.isArray(price.meta.tiers)) {
+            throw new Error("STAIR pricing requires tiers in meta");
+        }
+
+        const tiers = price.meta.tiers.sort((a: any, b: any) => a.from - b.from);
+
+        // Find the highest tier that applies to this quantity
+        let applicableTier = null;
+        for (const tier of tiers) {
+            if (quantity >= tier.from && quantity <= tier.to) {
+                applicableTier = tier;
+            }
+        }
+
+        if (!applicableTier) {
+            throw new Error(`No stair tier found for quantity ${quantity}`);
+        }
+
+        return quantity * applicableTier.price;
+    }
+
+    /**
+     * Calculate volume pricing (cumulative discounts)
+     */
+    private calculateVolumePrice(price: any, quantity: number): number {
+        if (!price.unitAmount) {
+            throw new Error("VOLUME pricing requires unit_amount");
+        }
+
+        const baseAmount = Number(price.unitAmount) * quantity;
+
+        if (!price.meta?.discounts || !Array.isArray(price.meta.discounts)) {
+            return baseAmount; // No discounts configured
+        }
+
+        const discounts = price.meta.discounts.sort((a: any, b: any) => b.threshold - a.threshold);
+
+        // Find the highest applicable discount
+        for (const discount of discounts) {
+            if (quantity >= discount.threshold) {
+                return baseAmount * (1 - discount.percentage / 100);
+            }
+        }
+
+        return baseAmount;
     }
 }

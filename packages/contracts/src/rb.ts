@@ -27,7 +27,19 @@ export const PriceUpsert = z.object({
     interval_count: z.number().int().min(1).default(1),
     min_qty: z.number().min(0).default(0),
     max_qty: z.number().optional(),
-    meta: z.any().optional()
+    meta: z.object({
+        // For TIERED pricing: tiers array with from, to, price
+        tiers: z.array(z.object({
+            from: z.number().int().min(0),
+            to: z.number().int().min(0),
+            price: z.number().positive()
+        })).optional(),
+        // For VOLUME pricing: discounts array with threshold, percentage
+        discounts: z.array(z.object({
+            threshold: z.number().int().min(0),
+            percentage: z.number().min(0).max(100)
+        })).optional()
+    }).optional()
 });
 
 // Contract Contracts

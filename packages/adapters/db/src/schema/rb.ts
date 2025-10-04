@@ -2,6 +2,19 @@ import { pgTable, text, integer, numeric, timestamp, date, primaryKey, boolean, 
 
 // --- Revenue & Billing (M25) ------------------------------------------------
 
+// Tax Code table for tax calculation
+export const taxCode = pgTable("tax_code", {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull(),
+    code: text("code").notNull(),
+    name: text("name").notNull(),
+    rate: numeric("rate").notNull().default("0"), // Tax rate as decimal (e.g., 0.20 for 20%)
+    type: text("type").notNull(), // 'SALES', 'PURCHASE', 'VAT', etc.
+    status: text("status").notNull().default("ACTIVE"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedBy: text("updated_by").notNull(),
+});
+
 // Catalog Tables
 export const rbProduct = pgTable("rb_product", {
     id: text("id").primaryKey(),

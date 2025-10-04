@@ -248,13 +248,38 @@ export class RbContractsService {
         // Calculate proration if needed
         const effectiveDate = new Date(data.effective_date);
         const startDate = new Date(currentSub.startDate);
+        const nextBillDate = new Date(currentSub.billAnchor);
 
         let proratedQty = Number(currentSub.qty);
+        let creditAmount = 0;
+        let proratedAmount = 0;
+
         if (data.proration === "DAILY" && effectiveDate > startDate) {
-            // Calculate days remaining in current period
-            const daysInPeriod = this.getDaysInPeriod(startDate, effectiveDate);
-            const totalDays = this.getDaysInPeriod(startDate, new Date(currentSub.billAnchor));
-            proratedQty = (Number(currentSub.qty) * daysInPeriod) / totalDays;
+            // Calculate proration for the change
+            const daysInPeriod = this.getDaysInPeriod(startDate, nextBillDate);
+            const daysUsed = this.getDaysInPeriod(startDate, effectiveDate);
+            const daysRemaining = daysInPeriod - daysUsed;
+
+            // Calculate credit for unused portion of current period
+            if (daysRemaining > 0) {
+                const catalogService = new (await import("./catalog")).RbCatalogService(this.dbInstance);
+                const currentAmount = await catalogService.calculatePrice(
+                    companyId,
+                    currentSub.productId,
+                    currentSub.priceId,
+                    Number(currentSub.qty)
+                );
+                creditAmount = (currentAmount * daysRemaining) / daysInPeriod;
+
+                // Calculate prorated amount for new pricing
+                const newAmount = await catalogService.calculatePrice(
+                    companyId,
+                    currentSub.productId,
+                    data.new_price_id,
+                    Number(currentSub.qty)
+                );
+                proratedAmount = (newAmount * daysRemaining) / daysInPeriod;
+            }
         }
 
         // Update subscription
@@ -264,7 +289,14 @@ export class RbContractsService {
                 priceId: data.new_price_id,
                 qty: proratedQty.toString(),
                 startDate: data.effective_date,
-                proration: data.proration
+                proration: data.proration,
+                meta: {
+                    ...(currentSub.meta as Record<string, any> || {}),
+                    upgrade_date: data.effective_date,
+                    proration: data.proration,
+                    credit_amount: creditAmount,
+                    prorated_amount: proratedAmount
+                }
             })
             .where(eq(rbSubscription.id, data.subscription_id))
             .returning();
