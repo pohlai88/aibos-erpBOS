@@ -8,9 +8,8 @@ import { requireAuth, requireCapability } from "../../../../lib/auth";
 import { postAmortization } from "../../../../services/intangibles/post";
 import { withRouteErrors } from "@/api/_kit";
 
-export { POST };
-
-export const POST = withRouteErrors(async (req: NextRequest) => { const auth = await requireAuth(req);
+export const POST = withRouteErrors(async (req: NextRequest) => {
+    const auth = await requireAuth(req);
     if (auth instanceof Response) return auth;
 
     const capCheck = requireCapability(auth, "capex:manage");
@@ -37,4 +36,5 @@ export const POST = withRouteErrors(async (req: NextRequest) => { const auth = a
             return badRequest(`Amortization posting failed: ${error.message}`);
         }
         return badRequest("Amortization posting failed");
-    } });
+    }
+});

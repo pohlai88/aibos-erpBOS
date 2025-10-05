@@ -127,3 +127,16 @@ export function tooManyRequests(message = "Too many requests"): Response {
         { status: 429 }
     );
 }
+
+/**
+ * Success response helper
+ */
+export function ok(data: any, status = 200): Response {
+    return NextResponse.json(
+        {
+            ok: true,
+            data
+        },
+        { status }
+    );
+}

@@ -39,7 +39,8 @@
     "build:types": "tsc",
     "build:js": "tsup",
     "build": "pnpm run build:types && pnpm run build:js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "gen:openapi": "tsx scripts/build-openapi.ts"
   },
   "devDependencies": {
     "@types/node": "24.6.0"

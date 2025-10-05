@@ -21,7 +21,8 @@
     "build:types": "tsc",
     "build:js": "tsup",
     "build": "pnpm run build:types && pnpm run build:js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "gen:types": "openapi-typescript ../../packages/contracts/openapi/openapi.json -o src/types.gen.ts"
   },
   "dependencies": {},
   "devDependencies": {

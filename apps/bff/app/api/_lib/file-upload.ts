@@ -37,11 +37,11 @@ export async function validateFileUpload(
 
         // Extract form data
         const data: Record<string, string> = {};
-        for (const [key, value] of formData.entries()) {
+        formData.forEach((value, key) => {
             if (key !== "file" && typeof value === "string") {
                 data[key] = value;
             }
-        }
+        });
 
         // Validate required fields
         for (const field of requiredFields) {

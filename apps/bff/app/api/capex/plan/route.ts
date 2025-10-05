@@ -8,9 +8,8 @@ import { requireAuth, requireCapability } from "../../../lib/auth";
 import { upsertPlan } from "../../../services/capex/plan";
 import { withRouteErrors } from "@/api/_kit";
 
-export { POST };
-
-export const POST = withRouteErrors(async (req: NextRequest) => { const auth = await requireAuth(req);
+export const POST = withRouteErrors(async (req: NextRequest) => {
+    const auth = await requireAuth(req);
     if (auth instanceof Response) return auth;
 
     const capCheck = requireCapability(auth, "capex:manage");
@@ -25,4 +24,5 @@ export const POST = withRouteErrors(async (req: NextRequest) => { const auth = a
             return badRequest(`Invalid capex plan data: ${error.message}`);
         }
         return badRequest("Invalid capex plan data");
-    } });
+    }
+});
