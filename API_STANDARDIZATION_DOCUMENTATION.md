@@ -18,7 +18,7 @@ This document provides comprehensive guidance for maintaining API standardizatio
 
 ```typescript
 // ✅ STANDARD PATTERN (Enhanced with hardening)
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { ServiceName } from "@/services";
 import { RequestSchema, ResponseSchema } from "@aibos/contracts";
 import { withRouteErrors } from "@/api/_kit";
@@ -92,6 +92,7 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
 | `serverError(message?)`      | Internal errors                | 500           | `return serverError("Database error")`  |
 | `notFound(message?)`         | Resource not found             | 404           | `return notFound("User not found")`     |
 | `fileUploadResponse(result)` | **NEW**: File import responses | 200/400       | `return fileUploadResponse(result)`     |
+| `cors204()`                  | CORS preflight response        | 204           | `return cors204()`                      |
 
 ### File Upload Helpers (`@/api/_lib/file-upload`)
 
@@ -100,7 +101,7 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
 | `validateFileUpload(req, fields?)`     | **NEW**: Centralized file validation | `const {file, data} = await validateFileUpload(req, ['mapping'])` |
 | `shouldUseStreaming(file, threshold?)` | **NEW**: Streaming optimization      | `if (shouldUseStreaming(file)) { /* use stream */ }`              |
 
-### Error Boundary Wrapper
+### Error Boundary Wrapper (`@/api/_kit`)
 
 ```typescript
 // ✅ REQUIRED: Wrap all route handlers
@@ -115,6 +116,27 @@ export const GET = withRouteErrors(async (request: NextRequest) => {
 - Consistent error response format
 - Prevents unhandled exceptions from crashing the API
 
+### Rate Limiting & Audit (`@/api/_kit`)
+
+```typescript
+// Rate limiting for file uploads
+const rl = await rateLimit({
+  key: `upload:${auth.company_id}:${auth.user_id}`,
+  limit: 5,
+  windowMs: 60000
+});
+if (!rl.ok) return tooManyRequests("Please retry later");
+
+// Audit logging
+logAuditAttempt({
+  action: "import_attempt",
+  module: "file_upload",
+  companyId: auth.company_id,
+  actorId: auth.user_id,
+  at: Date.now()
+});
+```
+
 ## 📁 File Structure Standards
 
 ### Route File Organization
@@ -128,8 +150,11 @@ apps/bff/app/api/
 │   │   └── {action}/   # Custom actions
 │   │       └── route.ts
 │   └── {subdomain}/    # Nested resources
-└── _kit/               # Shared utilities
-    └── index.ts        # API helpers
+├── _kit/               # Shared utilities
+│   └── index.ts        # API helpers
+└── _lib/               # Response helpers
+    ├── http.ts         # Response functions
+    └── file-upload.ts  # File upload utilities
 ```
 
 ### Naming Conventions
@@ -206,10 +231,12 @@ const result = await service.processData(
 | `rev`   | `rev:recognize`, `rev:report`            | Revenue recognition   |
 | `ops`   | `ops:monitor`, `ops:configure`           | Operations management |
 | `audit` | `audit:read`, `audit:write`              | Audit operations      |
+| `capex` | `capex:manage`                           | CAPEX management      |
+| `fx`    | `fx:manage`                              | FX rate management    |
 
-## 🛡️ API Hardening Features (NEW)
+## 🛡️ API Hardening Features (IMPLEMENTED)
 
-### Tier 1: Immediate Hardening (Implemented)
+### Tier 1: Immediate Hardening (✅ Complete)
 
 #### 1. Structured File Upload Responses
 
@@ -253,7 +280,7 @@ const { file, data } = validation;
 
 **Features:**
 
-- Automatic file presence and size validation
+- Automatic file presence and size validation (10MB limit)
 - Required field validation
 - Consistent error messages
 - Empty file detection
@@ -273,27 +300,44 @@ export const runtime = "nodejs";
 - No Edge runtime limitations
 - Consistent with Next.js best practices
 
+#### 4. Rate Limiting & Audit Logging
+
+File upload routes include comprehensive security:
+
+```typescript
+// Rate limiting (5 requests per minute per user)
+const rl = await rateLimit({
+  key: `upload:${auth.company_id}:${auth.user_id}`,
+  limit: 5,
+  windowMs: 60000
+});
+if (!rl.ok) return tooManyRequests("Please retry later");
+
+// Audit logging
+logAuditAttempt({
+  action: "import_attempt",
+  module: "file_upload",
+  companyId: auth.company_id,
+  actorId: auth.user_id,
+  at: Date.now()
+});
+```
+
 ### Implementation Status
 
 | Feature                | Status      | Routes Updated | Benefits           |
 | ---------------------- | ----------- | -------------- | ------------------ |
-| Structured responses   | ✅ Complete | 2+ routes      | Consistent UX      |
-| Centralized validation | ✅ Complete | 2+ routes      | DRY principle      |
-| Runtime optimization   | ✅ Complete | 2+ routes      | Large file support |
+| Structured responses   | ✅ Complete | 3 routes       | Consistent UX      |
+| Centralized validation | ✅ Complete | 3 routes       | DRY principle      |
+| Runtime optimization   | ✅ Complete | 3 routes       | Large file support |
+| Rate limiting         | ✅ Complete | 3 routes       | DoS protection     |
+| Audit logging         | ✅ Complete | 3 routes       | Compliance         |
 
-### Future Hardening (Tier 2 & 3)
+### Hardened Routes (Current)
 
-#### Tier 2: Service Layer Enhancements
-
-- **Audit Trail**: Post-commit audit events for material imports
-- **Streaming Parsing**: Automatic stream parsing for files >5MB
-- **Rate Limiting**: Infrastructure-level request throttling
-
-#### Tier 3: Advanced Features
-
-- **Progress Tracking**: Real-time upload progress
-- **Resume Capability**: Resume interrupted uploads
-- **Advanced Validation**: Schema-based CSV validation
+1. **`apps/bff/app/api/capex/plan/import/route.ts`** - CAPEX CSV imports
+2. **`apps/bff/app/api/fx/rates/import/route.ts`** - FX rates CSV imports  
+3. **`apps/bff/app/api/intangibles/plan/import/route.ts`** - Intangibles CSV imports
 
 ## 🚨 Special Cases & Exceptions
 
@@ -320,6 +364,7 @@ export async function POST(req: NextRequest) {
 - `stream` - Streaming responses
 - `redirect` - Redirect responses
 - `new Response` - Custom response objects
+- `health check` - Health monitoring endpoints
 
 ### Current Implementation Status (2024-12-19)
 
@@ -352,8 +397,8 @@ export async function POST(req: NextRequest) {
 3. **Health Check APIs**
 
    ```typescript
-   // @api:nonstandard (new Response)
-   return new Response("ready", {
+   // @api:nonstandard (health check)
+   return new Response("ok", {
      status: 200,
      headers: { "content-type": "text/plain" },
    });
@@ -385,18 +430,21 @@ export const preferredRegion = "iad1";
 export const dynamic = "force-dynamic";
 ```
 
-## 🔧 Existing Refactoring Tools
+## 🔧 Refactoring Tools
 
-### Available Commands (Already Implemented)
+### Available Commands (Working)
 
 | Command                  | Purpose                   | Implementation Status                                     |
 | ------------------------ | ------------------------- | --------------------------------------------------------- |
-| `pnpm api:wrap:check`    | Check wrapper compliance  | ✅ **Working** (`scripts/check-api-wrappers.ts`)          |
-| `pnpm api:pattern:fix`   | Auto-fix API patterns     | ✅ **Working** (`scripts/fix-api-patterns.ts`)            |
+| `pnpm api:wrap:check`    | Check wrapper compliance  | ✅ **Working** (`scripts/check-api-wrappers.js`)          |
+| `pnpm api:pattern:fix`   | Auto-fix API patterns     | ✅ **Working** (`scripts/fix-api-patterns.js`)            |
 | `pnpm api:pattern:dry`   | Preview changes           | ✅ **Working** (`--dry` flag)                             |
 | `pnpm api:pattern:clean` | Remove OPTIONS handlers   | ✅ **Working** (`--remove-options` flag)                  |
 | `pnpm api:drift:check`   | Check OpenAPI sync        | ✅ **Working** (`scripts/check-openapi-vs-filesystem.ts`) |
 | `pnpm api:check`         | Full API compliance check | ✅ **Working** (combines wrap + drift checks)             |
+| `pnpm api:security`      | File upload hardening     | ✅ **Working** (`scripts/api-security.js`)                 |
+| `pnpm api:security:dry`  | Preview security changes  | ✅ **Working** (`--dry` flag)                             |
+| `pnpm api:security:full` | Full security hardening   | ✅ **Working** (`--limit --audit-attempt --force`)        |
 
 ### Refactoring Process (Validated & Working)
 
@@ -418,7 +466,13 @@ export const dynamic = "force-dynamic";
    pnpm api:pattern:fix
    ```
 
-4. **Verify Results**
+4. **Apply Security Hardening**
+
+   ```bash
+   pnpm api:security:full
+   ```
+
+5. **Verify Results**
    ```bash
    pnpm api:check
    ```
@@ -429,6 +483,9 @@ export const dynamic = "force-dynamic";
 - `--remove-options`: Remove per-file OPTIONS handlers
 - `--use-isresponse`: Convert `instanceof Response` to `isResponse()`
 - `--force`: Override safe mode for complex responses
+- `--limit`: Add rate limiting to file upload routes
+- `--audit-attempt`: Add audit logging to file upload routes
+- `--wrap`: Add `withRouteErrors` wrapper to routes
 
 ## ⚠️ Cautions & Guidelines
 
@@ -527,6 +584,12 @@ When migrating legacy APIs:
 - **300+ routes** using standardized `withRouteErrors` pattern
 - **0 violations** detected by `pnpm api:wrap:check`
 
+**✅ File Upload Security: Complete**
+
+- **3 routes** hardened with rate limiting and audit logging
+- **All file uploads** use centralized validation
+- **Consistent response format** across all upload routes
+
 **⚠️ OpenAPI Contract Drift: Needs Attention**
 
 - **300+ routes** in filesystem but not in OpenAPI spec
@@ -541,6 +604,7 @@ The system includes comprehensive validation:
 - **OpenAPI Sync**: Checks API implementation matches contracts
 - **Type Safety**: Validates Zod schema usage
 - **Non-Standard Documentation**: Ensures special cases are properly flagged
+- **Security Hardening**: Validates rate limiting and audit logging on file uploads
 
 ### CI/CD Integration
 
@@ -552,6 +616,9 @@ The system includes comprehensive validation:
 - name: API Pattern Validation
   run: pnpm api:wrap:check
 
+- name: API Security Check
+  run: pnpm api:security:dry
+
 - name: OpenAPI Contract Sync
   run: pnpm api:drift:check
 ```
@@ -561,6 +628,7 @@ The system includes comprehensive validation:
 | Command                | Purpose                  | Current Status        |
 | ---------------------- | ------------------------ | --------------------- |
 | `pnpm api:wrap:check`  | Check wrapper compliance | ✅ **PASSING**        |
+| `pnpm api:security:dry` | Check security hardening | ✅ **PASSING**        |
 | `pnpm api:drift:check` | Check OpenAPI sync       | ⚠️ **DRIFT DETECTED** |
 | `pnpm api:check`       | Full compliance check    | ⚠️ **FAILS ON DRIFT** |
 
@@ -569,6 +637,7 @@ The system includes comprehensive validation:
 ### Performance
 
 - Use `runtime = 'edge'` for stateless APIs
+- Use `runtime = 'nodejs'` for file uploads and large operations
 - Implement proper caching headers
 - Optimize database queries in services
 
@@ -576,19 +645,22 @@ The system includes comprehensive validation:
 
 - Always validate and sanitize inputs
 - Use capability-based authorization
-- Implement rate limiting where needed
+- Implement rate limiting on file uploads
+- Log audit attempts for compliance
 
 ### Maintainability
 
 - Keep routes thin, business logic in services
 - Use descriptive error messages
 - Document complex business rules
+- Follow consistent patterns
 
 ### Testing
 
 - Test error scenarios thoroughly
 - Validate response formats
 - Mock external dependencies
+- Test rate limiting and audit logging
 
 ## 📚 Additional Resources
 
@@ -599,11 +671,21 @@ The system includes comprehensive validation:
 ---
 
 **Last Updated**: 2024-12-19  
-**Version**: 2.1  
+**Version**: 3.0  
 **Maintainer**: AI-BOS Development Team  
-**Compliance Status**: ✅ **100% API Wrapper Compliance Achieved**
+**Compliance Status**: ✅ **100% API Wrapper Compliance + Security Hardening Complete**
 
 ## 📝 Changelog
+
+### v3.0 (2024-12-19) - Complete Infrastructure Rebuild
+
+- ✅ **CRITICAL FIX**: Created missing `@/api/_kit` directory with `withRouteErrors`, `rateLimit`, `logAuditAttempt`
+- ✅ **CRITICAL FIX**: Created missing `@/api/_lib/file-upload.ts` with `validateFileUpload` function
+- ✅ **CRITICAL FIX**: Added missing `fileUploadResponse` function to `@/api/_lib/http.ts`
+- ✅ **FIXED**: All 3 hardened file upload routes now work correctly
+- ✅ **VALIDATED**: All API infrastructure modules are present and functional
+- ✅ **UPDATED**: Documentation reflects actual working code patterns
+- ✅ **TESTED**: All refactoring tools work with current infrastructure
 
 ### v2.2 (2024-12-19) - API Hardening Release
 

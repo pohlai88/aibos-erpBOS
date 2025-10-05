@@ -22,3 +22,9 @@ export function cors204() {
     res.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
     return res;
 }
+
+export function fileUploadResponse<T>(data: T, init?: ResponseInit) {
+    const response = NextResponse.json({ ok: true, data }, init);
+    response.headers.set("Access-Control-Allow-Origin", "*");
+    return response;
+}
