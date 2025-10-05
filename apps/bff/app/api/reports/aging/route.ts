@@ -1,3 +1,5 @@
+// @api:nonstandard (CORS headers)
+
 import { pool } from "../../../lib/db";
 import { ok } from "../../../lib/http";
 

@@ -1,3 +1,5 @@
+// @api:nonstandard (CORS headers)
+
 import { NextRequest } from "next/server";
 import { PayRunCreate } from "@aibos/contracts";
 import { createPayRun } from "@/services/payments/payments";

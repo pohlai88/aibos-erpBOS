@@ -1,3 +1,5 @@
+// @api:nonstandard (CORS headers)
+
 import { NextRequest } from "next/server";
 import { getJournal } from "@aibos/services/src/ledger";
 

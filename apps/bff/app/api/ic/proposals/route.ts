@@ -1,3 +1,5 @@
+// @api:nonstandard (CORS headers)
+
 import { NextRequest } from "next/server";
 import { getMatchProposals } from "@/services/consol/ic-workbench";
 import { requireAuth } from "@/lib/auth";

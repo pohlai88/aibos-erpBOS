@@ -1,3 +1,5 @@
+// @api:nonstandard (CORS headers)
+
 import { NextRequest } from "next/server";
 import { importBankData } from "@/services/cashflow/importers";
 import { requireAuth } from "@/lib/auth";

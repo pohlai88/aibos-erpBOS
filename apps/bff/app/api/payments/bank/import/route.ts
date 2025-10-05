@@ -1,3 +1,5 @@
+// @api:nonstandard (CORS headers)
+
 import { NextRequest } from "next/server";
 import { BankFileImport } from "@aibos/contracts";
 import { importBankFile } from "@/services/payments/bank-ingest";

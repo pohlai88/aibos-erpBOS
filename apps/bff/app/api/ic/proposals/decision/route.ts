@@ -1,3 +1,5 @@
+// @api:nonstandard (CORS headers)
+
 import { NextRequest } from "next/server";
 import { IcProposalDecision } from "@aibos/contracts";
 import { makeProposalDecision } from "@/services/consol/ic-workbench";

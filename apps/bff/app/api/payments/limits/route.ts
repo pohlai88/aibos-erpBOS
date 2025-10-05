@@ -1,3 +1,5 @@
+// @api:nonstandard (CORS headers)
+
 import { NextRequest } from "next/server";
 import { SupplierLimitUpsert } from "@aibos/contracts";
 import { upsertSupplierLimit } from "@/services/payments/policy";

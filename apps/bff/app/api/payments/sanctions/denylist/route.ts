@@ -1,3 +1,5 @@
+// @api:nonstandard (CORS headers)
+
 import { NextRequest } from "next/server";
 import { DenylistUpsert, SanctionScreenRequest, SanctionDecision } from "@aibos/contracts";
 import {

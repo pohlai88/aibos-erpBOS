@@ -1,3 +1,5 @@
+// @api:nonstandard (CORS headers)
+
 import { NextRequest } from "next/server";
 import { PingRequest, PingResponse } from "@aibos/contracts/http/ping.schema";
 import { pingService } from "@aibos/services/src/ping";

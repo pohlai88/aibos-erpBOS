@@ -1,3 +1,5 @@
+// @api:nonstandard (CORS headers)
+
 import { NextRequest } from "next/server";
 import { IcAutoMatchRequest } from "@aibos/contracts";
 import { generateAutoMatchProposals } from "@/services/consol/ic-workbench";

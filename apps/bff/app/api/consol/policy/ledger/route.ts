@@ -1,3 +1,5 @@
+// @api:nonstandard (CORS headers)
+
 import { NextRequest } from "next/server";
 import { ConsolLedgerOptionUpsert } from "@aibos/contracts";
 import { upsertLedgerOption, getLedgerOption } from "@/services/consol/policy";

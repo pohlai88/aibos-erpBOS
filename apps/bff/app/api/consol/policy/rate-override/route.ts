@@ -1,3 +1,5 @@
+// @api:nonstandard (CORS headers)
+
 import { NextRequest } from "next/server";
 import { ConsolRateOverrideUpsert } from "@aibos/contracts";
 import { upsertRateOverride, getRateOverrides } from "@/services/consol/policy";

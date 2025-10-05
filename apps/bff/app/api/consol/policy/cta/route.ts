@@ -1,3 +1,5 @@
+// @api:nonstandard (CORS headers)
+
 import { NextRequest } from "next/server";
 import { ConsolCtaPolicyUpsert } from "@aibos/contracts";
 import { upsertCtaPolicy, getCtaPolicy } from "@/services/consol/policy";

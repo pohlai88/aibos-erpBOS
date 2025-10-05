@@ -1,3 +1,5 @@
+// @api:nonstandard (CORS headers)
+
 import { NextRequest } from "next/server";
 import { CfRunDirectReq } from "@aibos/contracts";
 import { runDirect13WeekCashFlow } from "@/services/cashflow/cashflow";

@@ -1,3 +1,5 @@
+// @api:nonstandard (CORS headers)
+
 import { NextRequest } from "next/server";
 import { IcElimRuleUpsert, IcAutoMatchRequest, IcProposalDecision } from "@aibos/contracts";
 import {
