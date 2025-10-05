@@ -1,0 +1,63 @@
+{
+  "name": "@aibos/services",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./src/ledger": {
+      "types": "./dist/ledger.d.ts",
+      "import": "./dist/ledger.js",
+      "require": "./dist/ledger.cjs",
+      "default": "./dist/ledger.js"
+    },
+    "./src/ping": {
+      "types": "./dist/ping.d.ts",
+      "import": "./dist/ping.js",
+      "require": "./dist/ping.cjs",
+      "default": "./dist/ping.js"
+    },
+    "./src/posting-pi": {
+      "types": "./dist/posting-pi.d.ts",
+      "import": "./dist/posting-pi.js",
+      "require": "./dist/posting-pi.cjs",
+      "default": "./dist/posting-pi.js"
+    },
+    "./src/posting": {
+      "types": "./dist/posting.d.ts",
+      "import": "./dist/posting.js",
+      "require": "./dist/posting.cjs",
+      "default": "./dist/posting.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rimraf dist",
+    "build:types": "tsc",
+    "build:js": "tsup",
+    "build": "pnpm run build:types && pnpm run build:js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aibos/contracts": "workspace:*",
+    "@aibos/db-adapter": "workspace:*",
+    "@aibos/policies": "workspace:*",
+    "@aibos/ports": "workspace:*",
+    "@aibos/posting-rules": "workspace:*",
+    "@aibos/utils": "workspace:*"
+  },
+  "turbo": {
+    "pipeline": {
+      "build": "build#lib"
+    }
+  }
+}

@@ -1,0 +1,55 @@
+# Dependencies
+**/node_modules
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Testing
+.nyc_output
+coverage
+test-results/
+playwright-report/
+
+# Build artifacts
+dist
+build
+.next
+.turbo
+
+# Docker files
+.dockerignore
+Dockerfile*
+docker-compose*.yml
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/

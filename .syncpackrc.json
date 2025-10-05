@@ -1,0 +1,139 @@
+{
+    "$schema": "https://jamiemason.github.io/syncpack/schema.json",
+    "versionGroups": [
+        {
+            "label": "Workspace packages",
+            "packages": [
+                "@aibos/*"
+            ],
+            "dependencies": [
+                "@aibos/*"
+            ],
+            "isIgnored": true
+        },
+        {
+            "label": "TypeScript",
+            "packages": [
+                "**"
+            ],
+            "dependencies": [
+                "typescript"
+            ],
+            "range": "^5.9.2"
+        },
+        {
+            "label": "React ecosystem",
+            "packages": [
+                "**"
+            ],
+            "dependencies": [
+                "react",
+                "react-dom",
+                "@types/react",
+                "@types/react-dom"
+            ],
+            "range": "19.1.1"
+        },
+        {
+            "label": "Next.js",
+            "packages": [
+                "**"
+            ],
+            "dependencies": [
+                "next"
+            ],
+            "range": "15.5.4"
+        },
+        {
+            "label": "Node types",
+            "packages": [
+                "**"
+            ],
+            "dependencies": [
+                "@types/node"
+            ],
+            "range": "24.6.0"
+        },
+        {
+            "label": "Drizzle ORM",
+            "packages": [
+                "**"
+            ],
+            "dependencies": [
+                "drizzle-orm",
+                "drizzle-kit"
+            ],
+            "range": "^0.44.5"
+        },
+        {
+            "label": "ESLint",
+            "packages": [
+                "**"
+            ],
+            "dependencies": [
+                "eslint",
+                "@typescript-eslint/eslint-plugin",
+                "@typescript-eslint/parser"
+            ],
+            "range": "9.36.0"
+        },
+        {
+            "label": "Turbo",
+            "packages": [
+                "**"
+            ],
+            "dependencies": [
+                "turbo"
+            ],
+            "range": "2.5.8"
+        }
+    ],
+    "semverGroups": [
+        {
+            "label": "Exact versions for critical packages",
+            "packages": [
+                "**"
+            ],
+            "dependencies": [
+                "react",
+                "react-dom",
+                "next",
+                "typescript",
+                "@types/node"
+            ],
+            "range": ""
+        },
+        {
+            "label": "Caret ranges for most packages",
+            "packages": [
+                "**"
+            ],
+            "dependencies": [
+                "*"
+            ],
+            "range": "^"
+        }
+    ],
+    "lintRules": {
+        "forbidden": [],
+        "required": []
+    },
+    "lintSemverRanges": {
+        "default": "semver",
+        "exceptions": [
+            {
+                "packages": [
+                    "**"
+                ],
+                "dependencies": [
+                    "react",
+                    "react-dom",
+                    "next",
+                    "typescript",
+                    "@types/node"
+                ],
+                "range": ""
+            }
+        ]
+    }
+}

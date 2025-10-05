@@ -1,0 +1,23 @@
+# M26.8: Auditor Workspace - Cron Jobs Configuration
+# These cron jobs handle housekeeping and reminder notifications
+
+# Clean up expired auditor data (daily at 2 AM)
+0 2 * * * curl -X POST -H "X-API-Key: <api-key>" -H "content-type: application/json" -d '{"dry_run":false}' http://localhost:3000/api/audit/cron/expire
+
+# Send reminder notifications (daily at 9 AM)
+0 9 * * * curl -X POST -H "X-API-Key: <api-key>" -H "content-type: application/json" -d '{"grant_hours_ahead":24,"request_hours_overdue":24}' http://localhost:3000/api/audit/cron/remind
+
+# Clean up old access logs (weekly on Sunday at 3 AM)
+0 3 * * 0 curl -X POST -H "X-API-Key: <api-key>" -H "content-type: application/json" -d '{"dry_run":false}' http://localhost:3000/api/audit/cron/cleanup-logs
+
+# Send weekly audit workspace statistics (Mondays at 8 AM)
+0 8 * * 1 curl -X POST -H "X-API-Key: <api-key>" -H "content-type: application/json" -d '{"report_type":"weekly"}' http://localhost:3000/api/audit/cron/stats
+
+# Additional cron jobs for different environments:
+
+# Development environment (more frequent for testing)
+# */5 * * * * curl -X POST -H "X-API-Key: <dev-api-key>" -H "content-type: application/json" -d '{"dry_run":true}' http://localhost:3000/api/audit/cron/expire
+
+# Production environment (less frequent, more conservative)
+# 0 1 * * * curl -X POST -H "X-API-Key: <prod-api-key>" -H "content-type: application/json" -d '{"dry_run":false}' http://localhost:3000/api/audit/cron/expire
+# 0 8 * * * curl -X POST -H "X-API-Key: <prod-api-key>" -H "content-type: application/json" -d '{"grant_hours_ahead":48,"request_hours_overdue":48}' http://localhost:3000/api/audit/cron/remind

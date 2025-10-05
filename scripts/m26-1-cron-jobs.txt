@@ -1,0 +1,42 @@
+# M26.1 Auto-Controls & Certifications - Cron Scheduling
+# This file contains cron job definitions for automated control execution
+
+# Control Execution (every 15 minutes)
+# Runs all scheduled controls for active close runs
+*/15 * * * * /usr/bin/curl -X POST "http://localhost:3000/api/ctrl/cron/execute" \
+  -H "X-API-Key: ${CTRL_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{"trigger": "scheduled"}' \
+  >> /var/log/aibos/controls-execution.log 2>&1
+
+# Exception Aging & Escalation (daily at 9 AM)
+# Checks for SLA breaches and escalates overdue exceptions
+0 9 * * * /usr/bin/curl -X POST "http://localhost:3000/api/ctrl/cron/escalate" \
+  -H "X-API-Key: ${CTRL_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{"trigger": "daily_escalation"}' \
+  >> /var/log/aibos/controls-escalation.log 2>&1
+
+# Close Transition Controls (every hour during business hours)
+# Runs controls when close runs transition to REVIEW/APPROVED states
+0 9-17 * * 1-5 /usr/bin/curl -X POST "http://localhost:3000/api/ctrl/cron/transition" \
+  -H "X-API-Key: ${CTRL_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{"trigger": "close_transition"}' \
+  >> /var/log/aibos/controls-transition.log 2>&1
+
+# Weekly Control Summary Report (Mondays at 8 AM)
+# Generates weekly summary of control performance and exceptions
+0 8 * * 1 /usr/bin/curl -X POST "http://localhost:3000/api/ctrl/cron/summary" \
+  -H "X-API-Key: ${CTRL_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{"trigger": "weekly_summary", "period": "week"}' \
+  >> /var/log/aibos/controls-summary.log 2>&1
+
+# Monthly Control Performance Report (1st of month at 7 AM)
+# Generates monthly performance metrics and trends
+0 7 1 * * /usr/bin/curl -X POST "http://localhost:3000/api/ctrl/cron/summary" \
+  -H "X-API-Key: ${CTRL_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{"trigger": "monthly_summary", "period": "month"}' \
+  >> /var/log/aibos/controls-summary.log 2>&1

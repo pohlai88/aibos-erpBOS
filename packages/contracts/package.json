@@ -1,0 +1,52 @@
+{
+  "name": "@aibos/contracts",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./http/sales/sales-invoice.schema": {
+      "types": "./dist/http/sales/sales-invoice.schema.d.ts",
+      "import": "./dist/http/sales/sales-invoice.schema.js",
+      "require": "./dist/http/sales/sales-invoice.schema.cjs",
+      "default": "./dist/http/sales/sales-invoice.schema.js"
+    },
+    "./http/purchase/purchase-invoice.schema": {
+      "types": "./dist/http/purchase/purchase-invoice.schema.d.ts",
+      "import": "./dist/http/purchase/purchase-invoice.schema.js",
+      "require": "./dist/http/purchase/purchase-invoice.schema.cjs",
+      "default": "./dist/http/purchase/purchase-invoice.schema.js"
+    },
+    "./http/ping.schema": {
+      "types": "./dist/http/ping.schema.d.ts",
+      "import": "./dist/http/ping.schema.js",
+      "require": "./dist/http/ping.schema.cjs",
+      "default": "./dist/http/ping.schema.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rimraf dist",
+    "build:types": "tsc",
+    "build:js": "tsup",
+    "build": "pnpm run build:types && pnpm run build:js",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "24.6.0"
+  },
+  "turbo": {
+    "pipeline": {
+      "build": "build#lib"
+    }
+  }
+}

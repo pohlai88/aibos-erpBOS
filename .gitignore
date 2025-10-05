@@ -1,0 +1,174 @@
+# =============================================================================
+# DEPENDENCIES & PACKAGE MANAGERS
+# =============================================================================
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+pnpm-lock.yaml.bak
+
+# Block non-pnpm lockfiles
+package-lock.json
+yarn.lock
+.yarn-integrity
+
+# =============================================================================
+# BUILD OUTPUTS & CACHE
+# =============================================================================
+# Next.js
+.next/
+out/
+
+# Turborepo
+.turbo/
+
+# General build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Package outputs
+packages/*/dist/
+packages/*/build/
+
+# =============================================================================
+# ENVIRONMENT & CONFIGURATION
+# =============================================================================
+.env
+.env.*
+!.env.example
+!.env.template
+
+# =============================================================================
+# LOGS & DEBUGGING
+# =============================================================================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# =============================================================================
+# TESTING & COVERAGE
+# =============================================================================
+coverage/
+*.lcov
+.nyc_output
+test-results/
+playwright-report/
+playwright/.cache/
+
+# =============================================================================
+# CACHE DIRECTORIES
+# =============================================================================
+# Various caches
+.cache/
+.parcel-cache/
+.eslintcache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional npm cache
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# =============================================================================
+# PACKAGE MANAGER ARTIFACTS
+# =============================================================================
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Dependency directories
+jspm_packages/
+
+# =============================================================================
+# FRAMEWORK SPECIFIC
+# =============================================================================
+# Nuxt.js
+.nuxt/
+
+# Gatsby
+public/
+
+# Storybook
+.out/
+.storybook-out/
+
+# =============================================================================
+# DEVELOPMENT TOOLS
+# =============================================================================
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary folders
+tmp/
+temp/
+.tmp/
+
+# =============================================================================
+# OPERATING SYSTEM
+# =============================================================================
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# =============================================================================
+# PROJECT SPECIFIC
+# =============================================================================
+# Generated types (keep template)
+packages/api-client/src/types.gen.ts
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+.dockerignore.bak
+
+# =============================================================================
+# SECURITY & SENSITIVE FILES
+# =============================================================================
+# API keys and secrets
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+.secrets/
+
+# =============================================================================
+# BACKUP FILES
+# =============================================================================
+*.bak
+*.backup
+*.old
+*.orig

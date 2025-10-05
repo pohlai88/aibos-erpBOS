@@ -1,0 +1,71 @@
+import { z } from "zod";
+import { pool } from "../../../../../lib/db";
+import { requireAuth, requireCapability } from "../../../../../lib/auth";
+import { ok, badRequest, notFound } from "../../../../../lib/http";
+import { withRouteErrors, isResponse } from "../../../../../lib/route-utils";
+
+// Schema for version actions
+const VersionActionSchema = z.object({
+    comment: z.string().optional(),
+});
+
+export const POST = withRouteErrors(async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
+    try {
+        const { id: versionId } = await params;
+        const auth = await requireAuth(req);
+        if (isResponse(auth)) return auth;
+
+        const capCheck = requireCapability(auth, "budgets:approve");
+        if (isResponse(capCheck)) return capCheck;
+
+        // Get current version
+        const versionResult = await pool.query(
+            `SELECT * FROM budget_version WHERE id = $1 AND company_id = $2`,
+            [versionId, auth.company_id]
+        );
+
+        if (versionResult.rows.length === 0) {
+            return notFound("Budget version not found");
+        }
+
+        const version = versionResult.rows[0];
+
+        // Validate state transition
+        if (version.status !== "submitted") {
+            return badRequest(`Cannot approve version in ${version.status} status. Must be submitted.`);
+        }
+
+        // Parse request body for comment
+        const body = await req.json().catch(() => ({}));
+        const { comment } = VersionActionSchema.parse(body);
+
+        // Update version status
+        await pool.query(
+            `UPDATE budget_version 
+       SET status = 'approved', updated_at = now(), updated_by = $1
+       WHERE id = $2`,
+            [auth.user_id, versionId]
+        );
+
+        // Record approval action
+        const approvalId = `ba_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        await pool.query(
+            `INSERT INTO budget_approval 
+       (id, company_id, version_id, action, actor, comment)
+       VALUES ($1, $2, $3, 'approve', $4, $5)`,
+            [approvalId, auth.company_id, versionId, auth.user_id, comment]
+        );
+
+        return ok({
+            message: "Version approved successfully",
+            versionId,
+            approvalId,
+        });
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return badRequest("Invalid request data", error.errors);
+        }
+        console.error("Error approving budget version:", error);
+        return badRequest("Failed to approve budget version");
+    }
+});

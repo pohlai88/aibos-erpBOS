@@ -1,0 +1,191 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "NODE_ENV",
+    "NEXT_PUBLIC_*",
+    "BUILD_*"
+  ],
+  "globalDependencies": [
+    "pnpm-lock.yaml",
+    "tsconfig.base.json",
+    "packages/*/tsconfig.json",
+    "packages/*/tsup.config.ts"
+  ],
+  "tasks": {
+    "gen:openapi": {
+      "outputs": [
+        "packages/contracts/openapi/**"
+      ],
+      "cache": true
+    },
+    "gen:types": {
+      "dependsOn": [
+        "packages/contracts#gen:openapi"
+      ],
+      "outputs": [
+        "packages/api-client/src/types.gen.ts"
+      ],
+      "cache": true
+    },
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "!.next/cache/**"
+      ],
+      "cache": true
+    },
+    "build:types": {
+      "dependsOn": [
+        "^build:types"
+      ],
+      "outputs": [
+        "dist/**/*.d.ts"
+      ],
+      "inputs": [
+        "src/**",
+        "tsconfig.json"
+      ],
+      "cache": true
+    },
+    "build:js": {
+      "dependsOn": [
+        "build:types"
+      ],
+      "outputs": [
+        "dist/**/*.js",
+        "dist/**/*.cjs",
+        "dist/**/*.map"
+      ],
+      "inputs": [
+        "src/**",
+        "tsup.config.ts",
+        "package.json"
+      ],
+      "cache": true
+    },
+    "build#lib": {
+      "dependsOn": [
+        "build:types",
+        "build:js"
+      ],
+      "outputs": [
+        "dist/**"
+      ],
+      "inputs": [
+        "src/**",
+        "tsconfig.json",
+        "tsup.config.ts"
+      ],
+      "cache": true
+    },
+    "build#next": {
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "app/**",
+        "pages/**",
+        "src/**",
+        "public/**",
+        "package.json",
+        "next.config.*",
+        "tsconfig*.json",
+        "next-env.d.ts"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "public/build/**"
+      ],
+      "cache": true
+    },
+    "typecheck": {
+      "dependsOn": [
+        "^typecheck"
+      ],
+      "inputs": [
+        "src/**",
+        "app/**",
+        "pages/**",
+        "tsconfig*.json",
+        "package.json"
+      ],
+      "outputs": [],
+      "cache": true
+    },
+    "lint": {
+      "dependsOn": [
+        "^lint"
+      ],
+      "inputs": [
+        "src/**",
+        "app/**",
+        "pages/**",
+        ".eslintrc.*",
+        "package.json",
+        "tsconfig*.json"
+      ],
+      "outputs": [],
+      "cache": true
+    },
+    "test": {
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "src/**",
+        "app/**",
+        "pages/**",
+        "tests/**",
+        "**/*.test.*",
+        "**/*.spec.*",
+        "package.json",
+        "tsconfig*.json"
+      ],
+      "outputs": [
+        "coverage/**",
+        ".vitest/**",
+        ".jest/**"
+      ],
+      "cache": true
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "clean": {
+      "cache": false
+    },
+    "impl:coverage": {
+      "dependsOn": [
+        "build",
+        "typecheck"
+      ],
+      "outputs": [
+        "impl-coverage.json",
+        "impl-coverage.html"
+      ],
+      "cache": true
+    },
+    "impl:report": {
+      "dependsOn": [
+        "impl:coverage"
+      ],
+      "outputs": [
+        "README.md"
+      ],
+      "cache": true
+    },
+    "impl:gate": {
+      "dependsOn": [
+        "impl:coverage",
+        "impl:report"
+      ],
+      "cache": true
+    }
+  }
+}

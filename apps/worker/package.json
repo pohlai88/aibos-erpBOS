@@ -1,0 +1,30 @@
+{
+    "name": "@aibos/worker",
+    "version": "1.0.0",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "build": "tsc -b",
+        "dev": "tsx src/worker.ts",
+        "start": "node dist/worker.js",
+        "lint": "eslint src --ext .ts,.tsx",
+        "typecheck": "tsc --noEmit",
+        "test": "echo 'No tests configured for worker'"
+    },
+    "dependencies": {
+        "@aibos/db-adapter": "workspace:*",
+        "@aibos/services": "workspace:*",
+        "dotenv": "^16.6.1",
+        "drizzle-orm": "^0.44.5",
+        "node-fetch": "^3.3.2",
+        "pg": "^8.16.3"
+    },
+    "devDependencies": {
+        "@types/node": "24.6.0"
+    },
+    "turbo": {
+        "pipeline": {
+            "build": "build#lib"
+        }
+    }
+}

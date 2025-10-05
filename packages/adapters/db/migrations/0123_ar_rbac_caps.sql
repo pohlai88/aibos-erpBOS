@@ -1,0 +1,8 @@
+-- Capabilities tracked in code; keep for ops docs.
+-- AR capabilities:
+-- ar:dunning:policy - manage dunning policies and templates
+-- ar:dunning:run - execute dunning runs
+-- ar:remit:import - import remittance files
+-- ar:cashapp:run - run cash application
+-- ar:ptp - manage promise-to-pay
+-- ar:dispute - manage disputes

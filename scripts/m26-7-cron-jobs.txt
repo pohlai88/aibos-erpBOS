@@ -1,0 +1,21 @@
+# M26.7: Attestations Portal - Cron Job Configuration
+# These cron jobs should be configured in your deployment environment
+
+# SLA Tick - Every 15 minutes
+# */15 * * * * curl -X POST -H "X-API-Key: <id>:<secret>" -H "Content-Type: application/json" -d '{"trigger":"sla_tick"}' http://localhost:3000/api/attest/cron/execute
+
+# Due Soon Notifications - Every hour
+# 0 * * * * curl -X POST -H "X-API-Key: <id>:<secret>" -H "Content-Type: application/json" -d '{"trigger":"due_soon_notifications"}' http://localhost:3000/api/attest/cron/execute
+
+# Late Escalations - Every 4 hours
+# 0 */4 * * * curl -X POST -H "X-API-Key: <id>:<secret>" -H "Content-Type: application/json" -d '{"trigger":"late_escalations"}' http://localhost:3000/api/attest/cron/execute
+
+# Close Board Sync - Every 30 minutes
+# */30 * * * * curl -X POST -H "X-API-Key: <id>:<secret>" -H "Content-Type: application/json" -d '{"trigger":"close_board_sync"}' http://localhost:3000/api/attest/cron/execute
+
+# Campaign Cleanup - Daily at 2 AM
+# 0 2 * * * curl -X POST -H "X-API-Key: <id>:<secret>" -H "Content-Type: application/json" -d '{"trigger":"campaign_cleanup"}' http://localhost:3000/api/attest/cron/execute
+
+# Note: Replace <id>:<secret> with actual API key credentials
+# Note: Replace localhost:3000 with actual deployment URL
+# Note: These jobs require the attest:campaign capability

@@ -1,0 +1,29 @@
+{
+  "name": "@aibos/web",
+  "version": "1.0.0",
+  "dependencies": {
+    "@aibos/api-client": "workspace:*",
+    "next": "14.2.15",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.6.0",
+    "@types/react": "19.1.16",
+    "@types/react-dom": "19.1.9"
+  },
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev -p 3001",
+    "lint": "eslint app --ext .ts,.tsx",
+    "start": "next start -p 3001",
+    "typecheck": "tsc --noEmit"
+  },
+  "turbo": {
+    "pipeline": {
+      "build": "build#next"
+    }
+  },
+  "type": "module"
+}
