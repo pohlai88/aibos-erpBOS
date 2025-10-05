@@ -123,7 +123,7 @@ export const GET = withRouteErrors(async (request: NextRequest) => {
 const rl = await rateLimit({
   key: `upload:${auth.company_id}:${auth.user_id}`,
   limit: 5,
-  windowMs: 60000
+  windowMs: 60000,
 });
 if (!rl.ok) return tooManyRequests("Please retry later");
 
@@ -133,7 +133,7 @@ logAuditAttempt({
   module: "file_upload",
   companyId: auth.company_id,
   actorId: auth.user_id,
-  at: Date.now()
+  at: Date.now(),
 });
 ```
 
@@ -309,7 +309,7 @@ File upload routes include comprehensive security:
 const rl = await rateLimit({
   key: `upload:${auth.company_id}:${auth.user_id}`,
   limit: 5,
-  windowMs: 60000
+  windowMs: 60000,
 });
 if (!rl.ok) return tooManyRequests("Please retry later");
 
@@ -319,7 +319,7 @@ logAuditAttempt({
   module: "file_upload",
   companyId: auth.company_id,
   actorId: auth.user_id,
-  at: Date.now()
+  at: Date.now(),
 });
 ```
 
@@ -330,13 +330,13 @@ logAuditAttempt({
 | Structured responses   | ✅ Complete | 3 routes       | Consistent UX      |
 | Centralized validation | ✅ Complete | 3 routes       | DRY principle      |
 | Runtime optimization   | ✅ Complete | 3 routes       | Large file support |
-| Rate limiting         | ✅ Complete | 3 routes       | DoS protection     |
-| Audit logging         | ✅ Complete | 3 routes       | Compliance         |
+| Rate limiting          | ✅ Complete | 3 routes       | DoS protection     |
+| Audit logging          | ✅ Complete | 3 routes       | Compliance         |
 
 ### Hardened Routes (Current)
 
 1. **`apps/bff/app/api/capex/plan/import/route.ts`** - CAPEX CSV imports
-2. **`apps/bff/app/api/fx/rates/import/route.ts`** - FX rates CSV imports  
+2. **`apps/bff/app/api/fx/rates/import/route.ts`** - FX rates CSV imports
 3. **`apps/bff/app/api/intangibles/plan/import/route.ts`** - Intangibles CSV imports
 
 ## 🚨 Special Cases & Exceptions
@@ -442,7 +442,7 @@ export const dynamic = "force-dynamic";
 | `pnpm api:pattern:clean` | Remove OPTIONS handlers   | ✅ **Working** (`--remove-options` flag)                  |
 | `pnpm api:drift:check`   | Check OpenAPI sync        | ✅ **Working** (`scripts/check-openapi-vs-filesystem.ts`) |
 | `pnpm api:check`         | Full API compliance check | ✅ **Working** (combines wrap + drift checks)             |
-| `pnpm api:security`      | File upload hardening     | ✅ **Working** (`scripts/api-security.js`)                 |
+| `pnpm api:security`      | File upload hardening     | ✅ **Working** (`scripts/api-security.js`)                |
 | `pnpm api:security:dry`  | Preview security changes  | ✅ **Working** (`--dry` flag)                             |
 | `pnpm api:security:full` | Full security hardening   | ✅ **Working** (`--limit --audit-attempt --force`)        |
 
@@ -625,12 +625,12 @@ The system includes comprehensive validation:
 
 ### Compliance Commands
 
-| Command                | Purpose                  | Current Status        |
-| ---------------------- | ------------------------ | --------------------- |
-| `pnpm api:wrap:check`  | Check wrapper compliance | ✅ **PASSING**        |
+| Command                 | Purpose                  | Current Status        |
+| ----------------------- | ------------------------ | --------------------- |
+| `pnpm api:wrap:check`   | Check wrapper compliance | ✅ **PASSING**        |
 | `pnpm api:security:dry` | Check security hardening | ✅ **PASSING**        |
-| `pnpm api:drift:check` | Check OpenAPI sync       | ⚠️ **DRIFT DETECTED** |
-| `pnpm api:check`       | Full compliance check    | ⚠️ **FAILS ON DRIFT** |
+| `pnpm api:drift:check`  | Check OpenAPI sync       | ⚠️ **DRIFT DETECTED** |
+| `pnpm api:check`        | Full compliance check    | ⚠️ **FAILS ON DRIFT** |
 
 ## 🎯 Best Practices
 
