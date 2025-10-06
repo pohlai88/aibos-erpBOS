@@ -1,0 +1,289 @@
+/* ===== AIBOS ERP - Premium Color Palette Override ===== */
+@layer base {
+  :root {
+    /* ===== Premium Dark Theme (Your Superior Palette) ===== */
+    --aibos-bg: #0b0c10;
+    --aibos-panel: #111217;
+    --aibos-card: #141722;
+    --aibos-chip: #1a1f2b;
+    --aibos-border: #232634;
+    --aibos-text: #e8e9ed;
+    --aibos-muted: #8a8f98;
+    --aibos-brand: #4ea1ff;
+    --aibos-ok: #2ecc71;
+    --aibos-warn: #f5a623;
+    --aibos-err: #ff4757;
+    --aibos-info: #7f8c8d;
+
+    /* ===== Override aibos-ui semantic colors ===== */
+    --aibos-semantic-background: var(--aibos-bg);
+    --aibos-semantic-foreground: var(--aibos-text);
+    --aibos-semantic-card: var(--aibos-card);
+    --aibos-semantic-card-foreground: var(--aibos-text);
+    --aibos-semantic-popover: var(--aibos-panel);
+    --aibos-semantic-popover-foreground: var(--aibos-text);
+    --aibos-semantic-border: var(--aibos-border);
+    --aibos-semantic-input: var(--aibos-chip);
+    --aibos-semantic-ring: var(--aibos-brand);
+    --aibos-semantic-primary: var(--aibos-brand);
+    --aibos-semantic-primary-foreground: #ffffff;
+    --aibos-semantic-muted: var(--aibos-chip);
+    --aibos-semantic-muted-foreground: var(--aibos-muted);
+    --aibos-semantic-accent: var(--aibos-brand);
+    --aibos-semantic-accent-foreground: #ffffff;
+    --aibos-semantic-destructive: var(--aibos-err);
+    --aibos-semantic-destructive-foreground: #ffffff;
+
+    /* ===== Premium Shadows ===== */
+    --aibos-shadow-elev-1: 0 10px 30px rgba(0,0,0,.35);
+    --aibos-shadow-elev-2: 0 16px 40px rgba(0,0,0,.45);
+    --aibos-shadow-elev-3: 0 24px 60px rgba(0,0,0,.55);
+
+    /* ===== Premium Gradients ===== */
+    --aibos-bg-gradient: linear-gradient(180deg, #0b0c10 0%, #0e1117 100%);
+    --aibos-card-gradient: linear-gradient(135deg, #141722 0%, #1a1f2b 100%);
+    --aibos-brand-gradient: linear-gradient(135deg, #4ea1ff, #8b5cf6);
+  }
+
+  /* ===== Base Styles ===== */
+  html {
+    @apply antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply min-h-dvh;
+    background: var(--aibos-bg-gradient);
+    color: var(--aibos-text);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.5;
+  }
+
+  /* ===== Premium Focus Ring ===== */
+  :where(button, a, input, textarea, select):focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 4px hsl(var(--aibos-brand) / 0.15),
+      0 0 0 2px var(--aibos-brand);
+    border-radius: 0.75rem;
+    transition: box-shadow 0.2s ease;
+  }
+
+  /* ===== Premium Scrollbar ===== */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--aibos-chip);
+    border-radius: 0.75rem;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--aibos-border);
+    border-radius: 0.75rem;
+    transition: background 0.2s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--aibos-muted);
+  }
+
+  /* Firefox scrollbar parity */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--aibos-border) var(--aibos-chip);
+  }
+}
+
+/* ===== Premium Component Styles ===== */
+@layer components {
+  /* ===== Premium Card ===== */
+  .premium-card {
+    background: var(--aibos-card-gradient);
+    border: 1px solid var(--aibos-border);
+    border-radius: 0.875rem;
+    box-shadow: var(--aibos-shadow-elev-1);
+    transition: all 0.3s ease;
+  }
+
+  .premium-card:hover {
+    box-shadow: var(--aibos-shadow-elev-2);
+    transform: translateY(-1px);
+  }
+
+  /* ===== Premium Button ===== */
+  .premium-button {
+    background: var(--aibos-brand-gradient);
+    color: #ffffff;
+    border: none;
+    border-radius: 0.625rem;
+    padding: 0.625rem 0.75rem;
+    font-weight: 600;
+    box-shadow: var(--aibos-shadow-elev-1);
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .premium-button:hover {
+    box-shadow: var(--aibos-shadow-elev-2);
+    transform: translateY(-1px);
+  }
+
+  .premium-button:active {
+    box-shadow: var(--aibos-shadow-elev-1);
+    transform: translateY(0);
+  }
+
+  /* ===== Premium Input ===== */
+  .premium-input {
+    background: var(--aibos-chip);
+    border: 1px solid var(--aibos-border);
+    color: var(--aibos-text);
+    border-radius: 0.625rem;
+    padding: 0.625rem 0.75rem;
+    transition: all 0.2s ease;
+  }
+
+  .premium-input:focus {
+    border-color: var(--aibos-brand);
+    box-shadow: var(--aibos-shadow-elev-1);
+    outline: none;
+  }
+
+  /* ===== Status Badges ===== */
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 0.75rem;
+  }
+
+  .badge-ok {
+    background: rgba(46, 204, 113, 0.15);
+    color: var(--aibos-ok);
+  }
+
+  .badge-warn {
+    background: rgba(245, 166, 35, 0.18);
+    color: var(--aibos-warn);
+  }
+
+  .badge-err {
+    background: rgba(255, 71, 87, 0.18);
+    color: var(--aibos-err);
+  }
+
+  .badge-info {
+    background: rgba(126, 140, 141, 0.18);
+    color: var(--aibos-info);
+  }
+
+  /* ===== Table Styles ===== */
+  .table-zebra tbody tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+
+  .table-hover tbody tr:hover {
+    background-color: rgba(78, 161, 255, 0.05);
+  }
+
+  /* ===== Progress Bar ===== */
+  .progress {
+    height: 0.5rem;
+    background: var(--aibos-chip);
+    border-radius: 0.375rem;
+    overflow: hidden;
+  }
+
+  .progress > div {
+    display: block;
+    height: 100%;
+    background: var(--aibos-brand-gradient);
+    transition: width 0.3s ease;
+  }
+}
+
+/* ===== Premium Utilities ===== */
+@layer utilities {
+  /* ===== Premium Text ===== */
+  .text-premium {
+    color: var(--aibos-text);
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  /* ===== Premium Gradient Text ===== */
+  .text-gradient {
+    background: var(--aibos-brand-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ===== Premium Glass Effect ===== */
+  .glass {
+    background: rgba(20, 23, 34, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(35, 38, 52, 0.2);
+  }
+
+  /* ===== Premium Animation Classes ===== */
+  .animate-premium-fade {
+    animation: premium-fade 0.4s ease;
+  }
+
+  .animate-premium-slide {
+    animation: premium-slide 0.3s ease;
+  }
+
+  .animate-premium-scale {
+    animation: premium-scale 0.2s ease;
+  }
+
+  /* ===== Premium Transition Classes ===== */
+  .transition-premium {
+    transition: all 0.3s ease;
+  }
+
+  .transition-premium-fast {
+    transition: all 0.2s ease;
+  }
+
+  .transition-premium-slow {
+    transition: all 0.4s ease;
+  }
+
+  /* ===== Reduced Motion Support ===== */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 1ms !important;
+      scroll-behavior: auto !important;
+    }
+    .animate-premium-fade,
+    .animate-premium-scale,
+    .animate-premium-slide {
+      animation: none !important;
+    }
+  }
+}
+
+/* ===== Keyframe Animations ===== */
+@keyframes premium-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes premium-slide {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes premium-scale {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}

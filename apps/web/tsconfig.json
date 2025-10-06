@@ -9,6 +9,9 @@
     "noImplicitAny": true,
     "skipLibCheck": true,
     "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
     "allowImportingTsExtensions": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
