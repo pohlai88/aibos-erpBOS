@@ -1,0 +1,258 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AIBOS ERP - Dependency Map</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 20px; background: #f5f5f5; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px; margin-bottom: 20px; }
+    .module { background: white; padding: 20px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .module.broken { border-left: 5px solid #e74c3c; }
+    .module.partial { border-left: 5px solid #f39c12; }
+    .module.complete { border-left: 5px solid #27ae60; }
+    .layer { display: inline-block; padding: 5px 10px; margin: 5px; border-radius: 5px; font-size: 0.9em; }
+    .layer.exists { background: #d5f4e6; color: #27ae60; }
+    .layer.missing { background: #fadbd8; color: #e74c3c; }
+    .blocker { background: #fadbd8; padding: 10px; margin: 10px 0; border-left: 3px solid #e74c3c; border-radius: 5px; }
+    .recommendation { background: #e8f4fd; padding: 10px; margin: 10px 0; border-left: 3px solid #3498db; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🚀 AIBOS ERP - Dependency Map</h1>
+    <p>Complete system dependency analysis</p>
+  </div>
+  
+      <div class="module partial">
+        <h3>M1: Core Ledger [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer exists">Services</span><span class="layer missing">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Either create API endpoints or remove orphaned code</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M2: Journal Entries [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M3: Trial Balance [60%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer exists">Ui</span></div>
+        
+        <div class="recommendation">📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M4: Accounts Receivable [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M5: Accounts Payable [60%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer exists">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M6: Cash Management [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module started">
+        <h3>M7: Bank Reconciliation [20%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer missing">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        
+      </div>
+    
+      <div class="module partial">
+        <h3>M8: Fixed Assets [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M9: CAPEX Planning [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M10: Intangible Assets [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M11: Inventory [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M12: Revenue Recognition [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M13: Tax Management [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M14: Budget Planning [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M15: Cash Flow Forecasting [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M16: Allocation Engine [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M17: Consolidation [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M18: Intercompany [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M19: Multi-Currency [60%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer exists">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M20: Close Management [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M21: Evidence Management [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M22: Attestation [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M23: Payment Processing [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M24: AR Collections [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M25: Customer Portal [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M26: Recurring Billing [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M27: SOX Controls [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M28: ITGC [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M29: Operations Automation [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M30: Close Insights [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M31: Lease Accounting [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M32: Sublease Management [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+      <div class="module partial">
+        <h3>M33: Sale-Leaseback [40%]</h3>
+        <div><span class="layer exists">Database</span><span class="layer missing">Services</span><span class="layer exists">Api</span><span class="layer missing">Contracts</span><span class="layer missing">Ui</span></div>
+        
+        <div class="recommendation">Add business logic layer<br>📝 TODO: Backend complete - add frontend UI<br>📝 TODO: Add type contracts for API</div>
+      </div>
+    
+</body>
+</html>

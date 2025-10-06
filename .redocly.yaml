@@ -1,0 +1,26 @@
+# Redocly configuration for OpenAPI documentation
+apiDefinitions:
+  main:
+    root: ./packages/contracts/openapi/openapi.json
+
+lint:
+  extends:
+    - recommended
+  rules:
+    operation-operationId: error
+    operation-summary: warn
+    operation-description: warn
+    no-ambiguous-paths: error
+    no-path-trailing-slash: error
+    path-not-include-query: error
+    path-parameters-defined: error
+    operation-2xx-response: warn
+    operation-4xx-response: warn
+
+theme:
+  openapi:
+    disableSearch: false
+    hideDownloadButton: false
+
+referenceDocs:
+  showConsole: true

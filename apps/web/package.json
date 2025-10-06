@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "dependencies": {
     "@aibos/api-client": "workspace:*",
+    "@tanstack/react-table": "^8.21.3",
+    "aibos-ui": "latest",
     "next": "14.2.15",
     "react": "19.1.1",
     "react-dom": "19.1.1"

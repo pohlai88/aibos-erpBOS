@@ -1,0 +1,1881 @@
+{
+  "M1": {
+    "id": "M1",
+    "name": "Core Ledger",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [],
+        "schema": "schema.ts"
+      },
+      "services": {
+        "exists": true,
+        "path": "ledger.ts",
+        "lines": 205
+      },
+      "api": {
+        "exists": false
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "🔶 ORPHANED: Backend code exists but no API - unused code!",
+      "⚠️  WARNING: Schema exists but no migrations - deployment will fail"
+    ],
+    "recommendations": [
+      "Either create API endpoints or remove orphaned code"
+    ],
+    "blockers": []
+  },
+  "M2": {
+    "id": "M2",
+    "name": "Journal Entries",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [],
+        "schema": "schema.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "journals",
+        "endpoints": 2
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services",
+      "⚠️  WARNING: Schema exists but no migrations - deployment will fail"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M3": {
+    "id": "M3",
+    "name": "Trial Balance",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [],
+        "schema": "schema.ts"
+      },
+      "services": {
+        "exists": false,
+        "notRequired": true
+      },
+      "api": {
+        "exists": true,
+        "path": "reports",
+        "endpoints": 6
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": true,
+        "path": "C:\\AI-BOS\\aibos-erpBOS\\apps\\web\\app\\reports",
+        "fileCount": 2
+      }
+    },
+    "status": "partial",
+    "completeness": 60,
+    "issues": [
+      "⚠️  WARNING: Schema exists but no migrations - deployment will fail"
+    ],
+    "recommendations": [
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M4": {
+    "id": "M4",
+    "name": "Accounts Receivable",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0100",
+            "name": "0100_bank_outbox_jobs.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0100_bank_outbox_jobs.sql"
+          },
+          {
+            "number": "0101",
+            "name": "0101_bank_ack_maps.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0101_bank_ack_maps.sql"
+          },
+          {
+            "number": "0102",
+            "name": "0102_bank_reason_norm.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0102_bank_reason_norm.sql"
+          },
+          {
+            "number": "0103",
+            "name": "0103_ap_pay_run_state_ext.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0103_ap_pay_run_state_ext.sql"
+          },
+          {
+            "number": "0104",
+            "name": "0104_bank_inbox_audit.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0104_bank_inbox_audit.sql"
+          },
+          {
+            "number": "0105",
+            "name": "0105_bank_perf_indexes.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0105_bank_perf_indexes.sql"
+          },
+          {
+            "number": "0106",
+            "name": "0106_secret_ref.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0106_secret_ref.sql"
+          },
+          {
+            "number": "0107",
+            "name": "0107_outbox_idempotency.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0107_outbox_idempotency.sql"
+          },
+          {
+            "number": "0108",
+            "name": "0108_ap_invoice.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0108_ap_invoice.sql"
+          },
+          {
+            "number": "0109",
+            "name": "0109_ap_discount_policy.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0109_ap_discount_policy.sql"
+          },
+          {
+            "number": "0110",
+            "name": "0110_ap_discount_run.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0110_ap_discount_run.sql"
+          },
+          {
+            "number": "0111",
+            "name": "0111_ap_discount_offers.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0111_ap_discount_offers.sql"
+          },
+          {
+            "number": "0112",
+            "name": "0112_ap_discount_post.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0112_ap_discount_post.sql"
+          },
+          {
+            "number": "0113",
+            "name": "0113_ap_terms_import.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0113_ap_terms_import.sql"
+          },
+          {
+            "number": "0114",
+            "name": "0114_ar_dunning_policy.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0114_ar_dunning_policy.sql"
+          },
+          {
+            "number": "0115",
+            "name": "0115_ar_templates.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0115_ar_templates.sql"
+          },
+          {
+            "number": "0116",
+            "name": "0116_ar_remit_import.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0116_ar_remit_import.sql"
+          },
+          {
+            "number": "0117",
+            "name": "0117_ar_cash_app.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0117_ar_cash_app.sql"
+          },
+          {
+            "number": "0118",
+            "name": "0118_ar_ptp_dispute.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0118_ar_ptp_dispute.sql"
+          },
+          {
+            "number": "0119",
+            "name": "0119_ar_dunning_log.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0119_ar_dunning_log.sql"
+          },
+          {
+            "number": "0120",
+            "name": "0120_ar_perf_idx.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0120_ar_perf_idx.sql"
+          },
+          {
+            "number": "0121",
+            "name": "0121_ar_age_snapshot.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0121_ar_age_snapshot.sql"
+          },
+          {
+            "number": "0122",
+            "name": "0122_cf_bridge_receipts.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0122_cf_bridge_receipts.sql"
+          },
+          {
+            "number": "0123",
+            "name": "0123_ar_rbac_caps.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0123_ar_rbac_caps.sql"
+          },
+          {
+            "number": "0124",
+            "name": "0124_ar_credit_policy.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0124_ar_credit_policy.sql"
+          },
+          {
+            "number": "0125",
+            "name": "0125_ar_customer_credit.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0125_ar_customer_credit.sql"
+          },
+          {
+            "number": "0126",
+            "name": "0126_ar_credit_hold_log.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0126_ar_credit_hold_log.sql"
+          },
+          {
+            "number": "0127",
+            "name": "0127_ar_collections_notes.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0127_ar_collections_notes.sql"
+          },
+          {
+            "number": "0128",
+            "name": "0128_ar_collections_kpi.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0128_ar_collections_kpi.sql"
+          },
+          {
+            "number": "0129",
+            "name": "0129_ar_perf_idx2.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0129_ar_perf_idx2.sql"
+          },
+          {
+            "number": "0130",
+            "name": "0130_ar_invoice.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0130_ar_invoice.sql"
+          },
+          {
+            "number": "0130",
+            "name": "0130_ar_portal_session.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0130_ar_portal_session.sql"
+          },
+          {
+            "number": "0131",
+            "name": "0131_ar_checkout_intent.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0131_ar_checkout_intent.sql"
+          },
+          {
+            "number": "0132",
+            "name": "0132_ar_checkout_txn.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0132_ar_checkout_txn.sql"
+          },
+          {
+            "number": "0133",
+            "name": "0133_ar_saved_method.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0133_ar_saved_method.sql"
+          },
+          {
+            "number": "0134",
+            "name": "0134_ar_surcharge_policy.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0134_ar_surcharge_policy.sql"
+          },
+          {
+            "number": "0135",
+            "name": "0135_ar_receipt_email.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0135_ar_receipt_email.sql"
+          },
+          {
+            "number": "0136",
+            "name": "0136_ar_webhook_dlq.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0136_ar_webhook_dlq.sql"
+          },
+          {
+            "number": "0137",
+            "name": "0137_ar_perf_idx3.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0137_ar_perf_idx3.sql"
+          },
+          {
+            "number": "0138",
+            "name": "0138_ar_invoice_portal_link.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0138_ar_invoice_portal_link.sql"
+          },
+          {
+            "number": "0139",
+            "name": "0139_ar_finance_charge_policy.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0139_ar_finance_charge_policy.sql"
+          },
+          {
+            "number": "0139",
+            "name": "0139_portal_idempotency.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0139_portal_idempotency.sql"
+          },
+          {
+            "number": "0140",
+            "name": "0140_ar_statement_run.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0140_ar_statement_run.sql"
+          },
+          {
+            "number": "0141",
+            "name": "0141_ar_statement_line.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0141_ar_statement_line.sql"
+          },
+          {
+            "number": "0142",
+            "name": "0142_ar_statement_artifact.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0142_ar_statement_artifact.sql"
+          },
+          {
+            "number": "0143",
+            "name": "0143_ar_statement_email.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0143_ar_statement_email.sql"
+          },
+          {
+            "number": "0144",
+            "name": "0144_ar_portal_ledger_token.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0144_ar_portal_ledger_token.sql"
+          },
+          {
+            "number": "0145",
+            "name": "0145_ar_perf_idx4.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0145_ar_perf_idx4.sql"
+          },
+          {
+            "number": "0146",
+            "name": "0146_ar_view_customer_ledger.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0146_ar_view_customer_ledger.sql"
+          },
+          {
+            "number": "0147",
+            "name": "0147_rb_catalog.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0147_rb_catalog.sql"
+          },
+          {
+            "number": "0148",
+            "name": "0148_rb_contracts.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0148_rb_contracts.sql"
+          },
+          {
+            "number": "0149",
+            "name": "0149_rb_usage.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0149_rb_usage.sql"
+          },
+          {
+            "number": "0150",
+            "name": "0150_rb_invoice_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0150_rb_invoice_core.sql"
+          },
+          {
+            "number": "0151",
+            "name": "0151_rb_credit_memo.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0151_rb_credit_memo.sql"
+          },
+          {
+            "number": "0152",
+            "name": "0152_rb_runs.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0152_rb_runs.sql"
+          },
+          {
+            "number": "0153",
+            "name": "0153_rb_perf_idx.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0153_rb_perf_idx.sql"
+          },
+          {
+            "number": "0154",
+            "name": "0154_rb_invoice_artifacts.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0154_rb_invoice_artifacts.sql"
+          },
+          {
+            "number": "0155",
+            "name": "0155_rb_links.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0155_rb_links.sql"
+          },
+          {
+            "number": "0156",
+            "name": "0156_rb_gl_bridge.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0156_rb_gl_bridge.sql"
+          },
+          {
+            "number": "0157",
+            "name": "0157_rb_usage_source.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0157_rb_usage_source.sql"
+          },
+          {
+            "number": "0158",
+            "name": "0158_rb_invoice_email.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0158_rb_invoice_email.sql"
+          },
+          {
+            "number": "0159",
+            "name": "0159_rb_rbac_caps.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0159_rb_rbac_caps.sql"
+          },
+          {
+            "number": "0160",
+            "name": "0160_rb_views.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0160_rb_views.sql"
+          },
+          {
+            "number": "0161",
+            "name": "0161_rev_pob_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0161_rev_pob_core.sql"
+          },
+          {
+            "number": "0162",
+            "name": "0162_rev_schedule.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0162_rev_schedule.sql"
+          },
+          {
+            "number": "0163",
+            "name": "0163_rev_events.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0163_rev_events.sql"
+          },
+          {
+            "number": "0164",
+            "name": "0164_rev_policy_map.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0164_rev_policy_map.sql"
+          },
+          {
+            "number": "0165",
+            "name": "0165_rev_rpo_snapshot.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0165_rev_rpo_snapshot.sql"
+          },
+          {
+            "number": "0166",
+            "name": "0166_rev_post_lock.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0166_rev_post_lock.sql"
+          },
+          {
+            "number": "0167",
+            "name": "0167_rev_perf_idx.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0167_rev_perf_idx.sql"
+          },
+          {
+            "number": "0168",
+            "name": "0168_rev_usage_bridge.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0168_rev_usage_bridge.sql"
+          },
+          {
+            "number": "0169",
+            "name": "0169_rev_artifacts.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0169_rev_artifacts.sql"
+          },
+          {
+            "number": "0170",
+            "name": "0170_rev_rbac_caps.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0170_rev_rbac_caps.sql"
+          },
+          {
+            "number": "0171",
+            "name": "0171_rev_views.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0171_rev_views.sql"
+          },
+          {
+            "number": "0172",
+            "name": "0172_rev_seed_policy.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0172_rev_seed_policy.sql"
+          },
+          {
+            "number": "0173",
+            "name": "0173_rev_change_order.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0173_rev_change_order.sql"
+          },
+          {
+            "number": "0174",
+            "name": "0174_rev_vc_estimate.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0174_rev_vc_estimate.sql"
+          },
+          {
+            "number": "0175",
+            "name": "0175_rev_txn_price_revision.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0175_rev_txn_price_revision.sql"
+          },
+          {
+            "number": "0176",
+            "name": "0176_rev_schedule_revision.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0176_rev_schedule_revision.sql"
+          },
+          {
+            "number": "0177",
+            "name": "0177_rev_rec_catchup.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0177_rev_rec_catchup.sql"
+          },
+          {
+            "number": "0178",
+            "name": "0178_rev_disclosures.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0178_rev_disclosures.sql"
+          },
+          {
+            "number": "0179",
+            "name": "0179_rev_perf_idx2.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0179_rev_perf_idx2.sql"
+          },
+          {
+            "number": "0180",
+            "name": "0180_rev_lock_ext.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0180_rev_lock_ext.sql"
+          },
+          {
+            "number": "0181",
+            "name": "0181_rev_rpo_remeasure.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0181_rev_rpo_remeasure.sql"
+          },
+          {
+            "number": "0182",
+            "name": "0182_rev_ssp_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0182_rev_ssp_core.sql"
+          },
+          {
+            "number": "0183",
+            "name": "0183_rev_ssp_policy.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0183_rev_ssp_policy.sql"
+          },
+          {
+            "number": "0184",
+            "name": "0184_rev_bundle.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0184_rev_bundle.sql"
+          },
+          {
+            "number": "0185",
+            "name": "0185_rev_discount_rules.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0185_rev_discount_rules.sql"
+          },
+          {
+            "number": "0186",
+            "name": "0186_rev_alloc_audit.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0186_rev_alloc_audit.sql"
+          },
+          {
+            "number": "0187",
+            "name": "0187_rev_ssp_governance.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0187_rev_ssp_governance.sql"
+          },
+          {
+            "number": "0188",
+            "name": "0188_rev_perf_idx3.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0188_rev_perf_idx3.sql"
+          },
+          {
+            "number": "0189",
+            "name": "0189_rev_fk_hardening.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0189_rev_fk_hardening.sql"
+          },
+          {
+            "number": "0190",
+            "name": "0190_close_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0190_close_core.sql"
+          },
+          {
+            "number": "0191",
+            "name": "0191_close_kpi.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0191_close_kpi.sql"
+          },
+          {
+            "number": "0192",
+            "name": "0192_flux_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0192_flux_core.sql"
+          },
+          {
+            "number": "0193",
+            "name": "0193_mdna_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0193_mdna_core.sql"
+          },
+          {
+            "number": "0194",
+            "name": "0194_perf_idx.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0194_perf_idx.sql"
+          },
+          {
+            "number": "0195",
+            "name": "0195_rbac_caps.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0195_rbac_caps.sql"
+          },
+          {
+            "number": "0196",
+            "name": "0196_close_seed.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0196_close_seed.sql"
+          },
+          {
+            "number": "0197",
+            "name": "0197_close_views.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0197_close_views.sql"
+          },
+          {
+            "number": "0198",
+            "name": "0198_close_outbox.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0198_close_outbox.sql"
+          },
+          {
+            "number": "0199",
+            "name": "0199_fk_hardening.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0199_fk_hardening.sql"
+          }
+        ],
+        "schema": "schema/ar.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "ar",
+        "endpoints": 27
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M5": {
+    "id": "M5",
+    "name": "Accounts Payable",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0084",
+            "name": "0084_ap_payment_master.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0084_ap_payment_master.sql"
+          }
+        ],
+        "schema": "schema/payments.ts"
+      },
+      "services": {
+        "exists": true,
+        "path": "posting-pi.ts",
+        "lines": 141
+      },
+      "api": {
+        "exists": true,
+        "path": "purchase-invoices",
+        "endpoints": 1
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 60,
+    "issues": [],
+    "recommendations": [
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M6": {
+    "id": "M6",
+    "name": "Cash Management",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0029",
+            "name": "0029_cash_versions.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0029_cash_versions.sql"
+          }
+        ],
+        "schema": "schema.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "cash",
+        "endpoints": 8
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M7": {
+    "id": "M7",
+    "name": "Bank Reconciliation",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0099",
+            "name": "0099_bank_conn_profile.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0099_bank_conn_profile.sql"
+          }
+        ],
+        "schema": "schema/payments.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": false
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "started",
+    "completeness": 20,
+    "issues": [],
+    "recommendations": [],
+    "blockers": []
+  },
+  "M8": {
+    "id": "M8",
+    "name": "Fixed Assets",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0031",
+            "name": "0031_asset_class_ref.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0031_asset_class_ref.sql"
+          },
+          {
+            "number": "0031",
+            "name": "0031_cash_indexes.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0031_cash_indexes.sql"
+          }
+        ],
+        "schema": "schema.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "assets",
+        "endpoints": 5
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M9": {
+    "id": "M9",
+    "name": "CAPEX Planning",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0032",
+            "name": "0032_capex_plan.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0032_capex_plan.sql"
+          },
+          {
+            "number": "0032",
+            "name": "0032_cash_alert_rules.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0032_cash_alert_rules.sql"
+          }
+        ],
+        "schema": "schema.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "capex",
+        "endpoints": 4
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M10": {
+    "id": "M10",
+    "name": "Intangible Assets",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0035",
+            "name": "0035_intangible_plan.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0035_intangible_plan.sql"
+          }
+        ],
+        "schema": "schema.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "intangibles",
+        "endpoints": 4
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M11": {
+    "id": "M11",
+    "name": "Inventory",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [],
+        "schema": "schema.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "inventory",
+        "endpoints": 3
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services",
+      "⚠️  WARNING: Schema exists but no migrations - deployment will fail"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M12": {
+    "id": "M12",
+    "name": "Revenue Recognition",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0161",
+            "name": "0161_rev_pob_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0161_rev_pob_core.sql"
+          }
+        ],
+        "schema": "schema/revenue.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "rev",
+        "endpoints": 26
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M13": {
+    "id": "M13",
+    "name": "Tax Management",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0055",
+            "name": "0055_tax_returns_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0055_tax_returns_core.sql"
+          }
+        ],
+        "schema": "schema/tax_return.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "tax",
+        "endpoints": 16
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M14": {
+    "id": "M14",
+    "name": "Budget Planning",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0015",
+            "name": "0015_budgets.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0015_budgets.sql"
+          }
+        ],
+        "schema": "schema.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "budgets",
+        "endpoints": 12
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M15": {
+    "id": "M15",
+    "name": "Cash Flow Forecasting",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0076",
+            "name": "0076_cf_map_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0076_cf_map_core.sql"
+          }
+        ],
+        "schema": "schema.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "forecast",
+        "endpoints": 3
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M16": {
+    "id": "M16",
+    "name": "Allocation Engine",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0050",
+            "name": "0050_alloc_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0050_alloc_core.sql"
+          }
+        ],
+        "schema": "schema/alloc.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "alloc",
+        "endpoints": 7
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M17": {
+    "id": "M17",
+    "name": "Consolidation",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0061",
+            "name": "0061_consol_entities.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0061_consol_entities.sql"
+          }
+        ],
+        "schema": "schema/consol.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "consol",
+        "endpoints": 10
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M18": {
+    "id": "M18",
+    "name": "Intercompany",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0062",
+            "name": "0062_ic_tagging.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0062_ic_tagging.sql"
+          }
+        ],
+        "schema": "schema/consol.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "ic",
+        "endpoints": 7
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M19": {
+    "id": "M19",
+    "name": "Multi-Currency",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0040",
+            "name": "0040_fx_snapshot.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0040_fx_snapshot.sql"
+          }
+        ],
+        "schema": "schema.ts"
+      },
+      "services": {
+        "exists": true,
+        "path": "fx.ts",
+        "lines": 51
+      },
+      "api": {
+        "exists": true,
+        "path": "fx",
+        "endpoints": 4
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 60,
+    "issues": [],
+    "recommendations": [
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M20": {
+    "id": "M20",
+    "name": "Close Management",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0190",
+            "name": "0190_close_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0190_close_core.sql"
+          }
+        ],
+        "schema": "schema/close.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "close",
+        "endpoints": 24
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M21": {
+    "id": "M21",
+    "name": "Evidence Management",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0220",
+            "name": "0220_evd_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0220_evd_core.sql"
+          }
+        ],
+        "schema": "schema/evidence.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "evidence",
+        "endpoints": 8
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M22": {
+    "id": "M22",
+    "name": "Attestation",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0250",
+            "name": "0250_attest_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0250_attest_core.sql"
+          }
+        ],
+        "schema": "schema/attest.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "attest",
+        "endpoints": 14
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M23": {
+    "id": "M23",
+    "name": "Payment Processing",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0084",
+            "name": "0084_ap_payment_master.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0084_ap_payment_master.sql"
+          }
+        ],
+        "schema": "schema/payments.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "payments",
+        "endpoints": 32
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M24": {
+    "id": "M24",
+    "name": "AR Collections",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0114",
+            "name": "0114_ar_dunning_policy.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0114_ar_dunning_policy.sql"
+          }
+        ],
+        "schema": "schema/ar.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "ar",
+        "endpoints": 27
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M25": {
+    "id": "M25",
+    "name": "Customer Portal",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0130",
+            "name": "0130_ar_invoice.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0130_ar_invoice.sql"
+          },
+          {
+            "number": "0130",
+            "name": "0130_ar_portal_session.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0130_ar_portal_session.sql"
+          }
+        ],
+        "schema": "schema/ar.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "portal",
+        "endpoints": 11
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M26": {
+    "id": "M26",
+    "name": "Recurring Billing",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0147",
+            "name": "0147_rb_catalog.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0147_rb_catalog.sql"
+          }
+        ],
+        "schema": "schema/rb.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "rb",
+        "endpoints": 13
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M27": {
+    "id": "M27",
+    "name": "SOX Controls",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0230",
+            "name": "0230_sox_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0230_sox_core.sql"
+          }
+        ],
+        "schema": "schema/sox.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "sox",
+        "endpoints": 12
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M28": {
+    "id": "M28",
+    "name": "ITGC",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0270",
+            "name": "0270_itgc_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0270_itgc_core.sql"
+          }
+        ],
+        "schema": "schema/itgc.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "itgc",
+        "endpoints": 16
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M29": {
+    "id": "M29",
+    "name": "Operations Automation",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0280",
+            "name": "0280_opscc_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0280_opscc_core.sql"
+          },
+          {
+            "number": "0280",
+            "name": "0280_ops_signal_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0280_ops_signal_core.sql"
+          }
+        ],
+        "schema": "schema/opscc.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "ops",
+        "endpoints": 18
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M30": {
+    "id": "M30",
+    "name": "Close Insights",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0210",
+            "name": "0210_close_insights_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0210_close_insights_core.sql"
+          }
+        ],
+        "schema": "schema/insights.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "insights",
+        "endpoints": 8
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M31": {
+    "id": "M31",
+    "name": "Lease Accounting",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0295",
+            "name": "0295_lease_core_m28.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0295_lease_core_m28.sql"
+          }
+        ],
+        "schema": "schema/lease.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "leases",
+        "endpoints": 46
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M32": {
+    "id": "M32",
+    "name": "Sublease Management",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0317",
+            "name": "0317_sublease_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0317_sublease_core.sql"
+          }
+        ],
+        "schema": "schema/lease.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "subleases",
+        "endpoints": 3
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  },
+  "M33": {
+    "id": "M33",
+    "name": "Sale-Leaseback",
+    "layers": {
+      "database": {
+        "exists": true,
+        "migrations": [
+          {
+            "number": "0319",
+            "name": "0319_slb_core.sql",
+            "path": "C:\\AI-BOS\\aibos-erpBOS\\packages\\adapters\\db\\migrations\\0319_slb_core.sql"
+          }
+        ],
+        "schema": "schema/lease.ts"
+      },
+      "services": {
+        "exists": false
+      },
+      "api": {
+        "exists": true,
+        "path": "slb",
+        "endpoints": 5
+      },
+      "contracts": {
+        "exists": false
+      },
+      "ui": {
+        "exists": false
+      }
+    },
+    "status": "partial",
+    "completeness": 40,
+    "issues": [
+      "⚠️  WARNING: API exists but no business logic services"
+    ],
+    "recommendations": [
+      "Add business logic layer",
+      "📝 TODO: Backend complete - add frontend UI",
+      "📝 TODO: Add type contracts for API"
+    ],
+    "blockers": []
+  }
+}
