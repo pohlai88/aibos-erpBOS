@@ -1,0 +1,48 @@
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "16px", "primaryColor": "#3b82f6", "primaryTextColor": "#fff", "primaryBorderColor": "#1d4ed8", "lineColor": "#64748b", "secondaryColor": "#06b6d4", "tertiaryColor": "#10b981"}}}%%
+flowchart TD
+    %% AIBOS ERP Architecture Diagram
+    %% This is the canonical architecture visualization
+    %% Generated diagrams go to reports/
+    
+    DB[(Database<br/>PostgreSQL)]
+    Adapters[Adapters<br/>External Systems]
+    Ports[Ports<br/>Interfaces]
+    Services[Services<br/>Business Logic]
+    Policies[Policies<br/>Business Rules]
+    PostingRules[Posting Rules<br/>Accounting Rules]
+    Contracts[Contracts<br/>API Types]
+    API[API - BFF<br/>Backend for Frontend]
+    Web[Web UI<br/>Next.js]
+    Worker[Worker<br/>Background Jobs]
+    
+    %% Dependencies (aligned with eslint-plugin-boundaries)
+    DB --> Adapters
+    DB --> Ports
+    Adapters --> Ports
+    Adapters --> Services
+    Adapters --> Contracts
+    Ports --> Services
+    Ports --> Contracts
+    Services --> Policies
+    Services --> PostingRules
+    Services --> Contracts
+    Services --> API
+    Policies --> Contracts
+    PostingRules --> Contracts
+    Contracts --> API
+    Contracts --> Web
+    API --> Web
+    Worker --> Adapters
+    Worker --> Ports
+    
+    %% Styling
+    style DB fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff
+    style Adapters fill:#8b5cf6,stroke:#6d28d9,stroke-width:2px,color:#fff
+    style Ports fill:#ec4899,stroke:#db2777,stroke-width:2px,color:#fff
+    style Services fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff
+    style Policies fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff
+    style PostingRules fill:#f97316,stroke:#ea580c,stroke-width:2px,color:#fff
+    style Contracts fill:#06b6d4,stroke:#0891b2,stroke-width:2px,color:#fff
+    style API fill:#ef4444,stroke:#dc2626,stroke-width:2px,color:#fff
+    style Web fill:#14b8a6,stroke:#0d9488,stroke-width:2px,color:#fff
+    style Worker fill:#a855f7,stroke:#9333ea,stroke-width:2px,color:#fff

@@ -9,20 +9,29 @@ We use a combination of industry-standard tools and custom dependency mapping to
 ## 📊 Quick Commands
 
 ```bash
-# Check dependency mapping (what's broken, what's missing)
-pnpm deps:map
+# ============= Architecture Validation (NEW!) =============
+pnpm arch:validate         # Validate architecture boundaries
+pnpm arch:ci               # CI validation (exits with error)
+pnpm arch:report           # Generate all architecture reports
+pnpm arch:graph            # Visual dependency graph
 
-# View HTML report in browser
-pnpm deps:html
+# ============= Dependency & Lineage Tracking =============
+pnpm deps:report           # Generate all dependency & lineage reports
+pnpm deps:view             # View unified dashboard in browser
 
-# Generate API documentation
-pnpm docs:api
+# Individual reports
+pnpm deps:map              # JSON dependency map
+pnpm deps:html             # HTML dependency visualization
+pnpm deps:lineage          # SQL lineage analysis
+pnpm deps:dashboard        # Unified dashboard
 
-# Lint OpenAPI spec
-pnpm docs:lint
+# ============= API Documentation =============
+pnpm docs:api              # Generate API documentation
+pnpm docs:lint             # Lint OpenAPI spec
+pnpm docs:preview          # Preview API docs (live server)
 
-# Preview API docs (live server)
-pnpm docs:preview
+# ============= Diagrams =============
+pnpm docs:diagrams         # Generate architecture diagrams
 ```
 
 ---
@@ -58,18 +67,24 @@ pnpm docs:preview
 
 ### What It Does
 
-The dependency mapper (`scripts/dependency-mapper.mjs`) provides a **complete view** of your system by mapping:
+The dependency mapper (`scripts/dependency-mapper.mjs`) provides a **complete view** of your system by mapping the full architecture flow:
 
 ```
 Database (migrations + schema)
     ↓
+Adapters (repositories, external systems)
+    ↓
+Ports (dependency inversion interfaces)
+    ↓
 Services (business logic)
     ↓
-API Routes (endpoints)
+Policies / Posting Rules (business rules)
     ↓
 Contracts (types/schemas)
     ↓
-UI (frontend pages)
+API Routes (BFF endpoints)
+    ↓
+UI (frontend pages) / Worker (background jobs)
 ```
 
 ### What It Identifies
@@ -93,15 +108,56 @@ UI (frontend pages)
 
 ### Output Files
 
-1. **`dependency-map.json`**
+All generated reports are stored in the `reports/` directory:
+
+#### Dependency & Lineage Reports
+
+1. **`reports/dependency-map.json`**
    - Machine-readable format for CI/CD
    - Complete dependency graph
    - Use in automated checks
 
-2. **`dependency-map.html`**
+2. **`reports/dependency-map.html`**
    - Human-readable visual report
-   - Color-coded status (broken/partial/complete)
+   - Color-coded status (violations/orphans)
    - Actionable recommendations
+
+3. **`reports/sql-lineage.json`**
+   - Database table relationships
+   - Foreign keys, JOINs, views
+   - Data flow analysis
+
+4. **`reports/dashboard.html`**
+   - **Unified dashboard** consolidating all reports
+   - Health score (0-100)
+   - Quick action links
+   - **Open this first** for system overview
+
+5. **`reports/architecture.svg`**
+   - Visual architecture diagram
+   - Generated from `docs/architecture.mmd`
+
+#### 🆕 Architecture Validation Reports
+
+6. **`reports/arch-violations.json`**
+   - Machine-readable boundary violations
+   - Error/warning level classification
+   - Use in CI/CD for strict enforcement
+
+7. **`reports/arch-violations.html`**
+   - Interactive HTML report
+   - Visual violation browser
+   - Filterable by severity
+
+8. **`reports/arch-dependency-graph.svg`**
+   - Complete dependency graph
+   - Dark theme optimized
+   - Layer-colored nodes
+
+9. **`reports/arch-layers.svg`**
+   - Focused layer visualization
+   - Contracts/Services/Adapters only
+   - Clean architecture view
 
 ---
 
@@ -161,24 +217,66 @@ Layers:
 ### GitHub Actions Example:
 
 ```yaml
-name: Implementation Check
+name: Architecture Compliance
 on: [pull_request]
 
 jobs:
-  dependency-check:
+  architecture-validation:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v2
+        with:
+          version: 10
       - run: pnpm install
-      - run: pnpm deps:map
-      - run: |
-          # Fail if any modules are broken
-          BROKEN=$(jq '[.[] | select(.status == "broken")] | length' dependency-map.json)
-          if [ "$BROKEN" -gt 0 ]; then
-            echo "❌ $BROKEN broken modules found"
+
+      # Step 1: Validate architecture boundaries (fails fast)
+      - name: Validate Architecture
+        run: pnpm arch:ci
+
+      # Step 2: Generate comprehensive reports
+      - name: Generate Reports
+        run: |
+          pnpm deps:report
+          pnpm arch:report
+
+      # Step 3: Code quality checks
+      - name: Quality Checks
+        run: |
+          pnpm lint
+          pnpm typecheck
+
+      # Upload reports as artifacts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: architecture-reports
+          path: |
+            reports/
+            reports/arch-violations.json
+            reports/arch-violations.html
+            reports/arch-dependency-graph.svg
+
+      # Fail if violations detected
+      - name: Check Violations
+        run: |
+          # Check dependency mapper
+          VIOLATIONS=$(jq '.graph.summary.violationCount' reports/dependency-map.json)
+          if [ "$VIOLATIONS" -gt 0 ]; then
+            echo "❌ $VIOLATIONS architecture violations found"
             exit 1
           fi
+
+          # Check architecture boundaries
+          if [ -f reports/arch-violations.json ]; then
+            ARCH_ERRORS=$(jq '[.violations[] | select(.rule.severity == "error")] | length' reports/arch-violations.json)
+            if [ "$ARCH_ERRORS" -gt 0 ]; then
+              echo "❌ $ARCH_ERRORS boundary violations found"
+              exit 1
+            fi
+          fi
+
+          echo "✅ No violations detected"
 ```
 
 ---
@@ -205,19 +303,21 @@ The mapper automatically detects modules based on:
 
 ### Adding a New Module
 
-1. Add to `MODULE_DEFINITIONS` in `scripts/dependency-mapper.mjs`:
+1. Follow the canonical architecture flow: DB → Adapters → Ports → Services → Policies → Contracts → API → UI
 
-```javascript
-'M34': {
-  name: 'New Module',
-  migrationPrefix: '0400',
-  schemaFile: 'schema/new-module.ts',
-  apiPath: 'new-module',
-  servicePath: 'new-module'
-}
-```
+2. Ensure proper layer boundaries (enforced by `eslint-plugin-boundaries`)
 
-2. Run `pnpm deps:map` to verify
+3. Run reports to verify:
+
+   ```bash
+   pnpm deps:report
+   pnpm deps:view
+   ```
+
+4. Check for violations:
+   ```bash
+   pnpm lint
+   ```
 
 ### Updating Module Paths
 
@@ -227,20 +327,27 @@ If you reorganize code, update the paths in `MODULE_DEFINITIONS` to match your n
 
 ## 💡 Best Practices
 
-1. **Run before every PR**: `pnpm deps:map`
-2. **Fix broken modules first**: They will crash in production
-3. **Complete partial modules**: Half-finished features create technical debt
-4. **Remove orphaned code**: If it's not used, delete it
-5. **Document as you go**: Update module docs when completing features
+1. **Validate architecture first**: `pnpm arch:validate` before every commit
+2. **Run before every PR**: `pnpm deps:report && pnpm arch:report` for comprehensive analysis
+3. **Check the dashboard**: `pnpm deps:view` for quick health overview
+4. **Fix violations immediately**: Both dependency and boundary violations fail CI
+5. **Keep health score > 95**: Monitor violations and orphans
+6. **Follow the guardrails**: See `docs/DEPENDENCY_LINEAGE_GUARDRAILS.md`
+7. **Remove orphaned code**: If it's not used, delete it
+8. **Document as you go**: Update module docs when completing features
+9. **Use CI command in automation**: `pnpm arch:ci` for fast-fail validation
 
 ---
 
 ## 🤝 Getting Help
 
-- **Broken modules**: Check the "Blockers" section in the report
-- **Missing dependencies**: Check the "Issues" section
-- **Next steps**: Check the "Recommendations" section
-- **Visual overview**: Open `dependency-map.html` in your browser
+- **Quick overview**: Open `reports/dashboard.html` (run `pnpm deps:view`)
+- **Dependency violations**: Check `reports/dependency-map.html`
+- **Boundary violations**: Check `reports/arch-violations.html`
+- **Visual dependencies**: See `reports/arch-dependency-graph.svg`
+- **SQL lineage**: Review `reports/sql-lineage.json`
+- **Compliance rules**: Read `docs/DEPENDENCY_LINEAGE_GUARDRAILS.md`
+- **Architecture diagram**: See `reports/architecture.svg`
 
 ---
 

@@ -154,6 +154,10 @@ packages/api-client/src/types.gen.ts
 # Docker
 .dockerignore.bak
 
+# Generated reports (keep README.md for documentation)
+reports/*
+!reports/README.md
+
 # =============================================================================
 # SECURITY & SENSITIVE FILES
 # =============================================================================
