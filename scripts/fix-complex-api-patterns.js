@@ -122,37 +122,37 @@ function fixKitLibFiles(content, filePath) {
   let updated = content;
   let hasChanges = false;
   
-  // Pattern 1: NextResponse.json with error structure → serverError()
-  const errorPattern = /NextResponse\.json\(\s*\{\s*ok:\s*false,\s*error:\s*['"]([^'"]+)['"],\s*message:\s*([^,}]+)(?:,\s*details:\s*([^}]+))?\s*\},\s*\{\s*status:\s*(\d+)\s*\}\)/g;
+  // Pattern 1: Simple NextResponse.json with error structure → serverError()
+  const errorPattern = /NextResponse\.json\(\s*\{\s*ok:\s*false,\s*error:\s*['"]([^'"]+)['"],\s*message:\s*([^}]+)\s*\}/gs;
   
-  updated = updated.replace(errorPattern, (match, errorType, message, details, status) => {
+  updated = updated.replace(errorPattern, (match, errorType, message) => {
     hasChanges = true;
     
     // Map error types to appropriate functions
     switch (errorType) {
       case 'BadRequest':
-        return `badRequest(${message}${details ? `, ${details}` : ''})`;
+        return `badRequest(${message.trim()})`;
       case 'UnprocessableEntity':
-        return `unprocessable(${message}${details ? `, ${details}` : ''})`;
+        return `unprocessable(${message.trim()})`;
       case 'NotFound':
-        return `notFound(${message}${details ? `, ${details}` : ''})`;
+        return `notFound(${message.trim()})`;
       case 'InternalServerError':
-        return `serverError(${message}${details ? `, ${details}` : ''})`;
+        return `serverError(${message.trim()})`;
       default:
-        return `serverError(${message}${details ? `, ${details}` : ''})`;
+        return `serverError(${message.trim()})`;
     }
   });
   
-  // Pattern 2: NextResponse.json with success structure → ok()
-  const successPattern = /NextResponse\.json\(\s*\{\s*ok:\s*true,\s*data:\s*([^}]+)\s*\}(?:,\s*([^)]+))?\)/g;
+  // Pattern 2: Simple NextResponse.json with success structure → ok()
+  const successPattern = /NextResponse\.json\(\s*\{\s*ok:\s*true,\s*data:\s*([^}]+)\s*\}/gs;
   
-  updated = updated.replace(successPattern, (match, data, init) => {
+  updated = updated.replace(successPattern, (match, data) => {
     hasChanges = true;
-    return `ok(${data}${init ? `, ${init}` : ''})`;
+    return `ok(${data.trim()})`;
   });
   
   // Pattern 3: Simple NextResponse.json → ok() (for success cases)
-  const simpleSuccessPattern = /NextResponse\.json\(\s*([^,{]+),\s*\{\s*status:\s*200\s*\}\)/g;
+  const simpleSuccessPattern = /NextResponse\.json\(\s*([^,{]+),\s*\{\s*status:\s*200\s*\}\)/gs;
   
   updated = updated.replace(simpleSuccessPattern, (match, data) => {
     hasChanges = true;
@@ -174,7 +174,7 @@ function fixRouteResponsePatterns(content, filePath) {
   let hasChanges = false;
   
   // Pattern 1: Response.json with CORS headers → ok() with headers
-  const corsPattern = /Response\.json\(\s*([^,]+),\s*\{\s*headers:\s*\{\s*['"]Access-Control-Allow-Origin['"]:\s*['"]\*['"][^}]*\}\s*\}\)/g;
+  const corsPattern = /Response\.json\(\s*([^,]+),\s*\{\s*headers:\s*\{\s*['"]Access-Control-Allow-Origin['"]:\s*['"]\*['"][^}]*\}\s*\}\)/gs;
   
   updated = updated.replace(corsPattern, (match, data) => {
     hasChanges = true;
@@ -188,7 +188,7 @@ function fixRouteResponsePatterns(content, filePath) {
   });
   
   // Pattern 2: Simple Response.json → ok()
-  const simplePattern = /Response\.json\(\s*([^,]+)(?:,\s*\{\s*status:\s*200\s*\})?\)/g;
+  const simplePattern = /Response\.json\(\s*([^,]+)(?:,\s*\{\s*status:\s*200\s*\})?\)/gs;
   
   updated = updated.replace(simplePattern, (match, data) => {
     hasChanges = true;
@@ -196,7 +196,7 @@ function fixRouteResponsePatterns(content, filePath) {
   });
 
   // Pattern 3: NextResponse.json error/success in routes too
-  const routeErrorPattern = /NextResponse\.json\(\s*\{\s*ok:\s*false,\s*error:\s*['"]([^'"]+)['"],\s*message:\s*([^,}]+)(?:,\s*details:\s*([^}]+))?\s*\},\s*\{\s*status:\s*(\d+)\s*\}\)/g;
+  const routeErrorPattern = /NextResponse\.json\(\s*\{\s*ok:\s*false,\s*error:\s*['"]([^'"]+)['"],\s*message:\s*([^,}]+)(?:,\s*details:\s*([^}]+))?\s*\},\s*\{\s*status:\s*(\d+)\s*\}\)/gs;
   updated = updated.replace(routeErrorPattern, (match, errorType, message, details, status) => {
     hasChanges = true;
     switch (errorType) {
@@ -210,12 +210,12 @@ function fixRouteResponsePatterns(content, filePath) {
         return `serverError(${message}${details ? `, ${details}` : ''})`;
     }
   });
-  const routeOkPattern = /NextResponse\.json\(\s*\{\s*ok:\s*true,\s*data:\s*([^}]+)\s*\}(?:,\s*([^)]+))?\)/g;
+  const routeOkPattern = /NextResponse\.json\(\s*\{\s*ok:\s*true,\s*data:\s*([^}]+)\s*\}(?:,\s*([^)]+))?\)/gs;
   updated = updated.replace(routeOkPattern, (m, data, init) => {
     hasChanges = true;
     return `ok(${data}${init ? `, ${init}` : ''})`;
   });
-  const routeSimpleOk = /NextResponse\.json\(\s*([^,{]+),\s*\{\s*status:\s*200\s*\}\)/g;
+  const routeSimpleOk = /NextResponse\.json\(\s*([^,{]+),\s*\{\s*status:\s*200\s*\}\)/gs;
   updated = updated.replace(routeSimpleOk, (m, data) => {
     hasChanges = true;
     return `ok(${data})`;
@@ -374,7 +374,8 @@ function ensureImports(content, filePath) {
   const needsOk = content.includes('ok(') && !hasHttpImport;
   const needsWithRouteErrors = content.includes('withRouteErrors(') && !hasKitImport;
   
-  if (needsOk || needsWithRouteErrors) {
+  // TEMPORARILY DISABLE IMPORT FIXING TO DEBUG SYNTAX ERRORS
+  if (false && (needsOk || needsWithRouteErrors)) {
     const imports = [];
     
     if (needsOk) {
@@ -386,7 +387,7 @@ function ensureImports(content, filePath) {
     }
     
     // Insert after the last import
-    const importRegex = /^(import[\s\S]*?;\s*)+/m;
+    const importRegex = /^(import\s+[^;]+;\s*)+/m;
     const m = updated.match(importRegex);
     if (m && typeof m[0] === 'string') {
       const insertPoint = m[0].length;
