@@ -97,13 +97,25 @@ function calculateHealthScore(depMap, sqlLineage) {
   let score = 100;
   const dsum = depMap?.graph?.summary;
   if (dsum) {
-    const violationPenalty = Math.min(
-      (Number(dsum.violationCount) || 0) * 2,
-      40
+    // Penalty for architecture violations (errors are more severe)
+    const errorPenalty = Math.min(
+      (Number(dsum.errorCount) || 0) * 5, // 5 points per error
+      30
     );
-    score -= violationPenalty;
-    const orphanPenalty = Math.min((Number(dsum.orphanCount) || 0) * 0.5, 20);
-    score -= orphanPenalty;
+
+    // Penalty for warnings
+    const warningPenalty = Math.min(
+      (Number(dsum.warningCount) || 0) * 1, // 1 point per warning
+      20
+    );
+
+    // Penalty for orphan files (indicates incomplete implementation)
+    const orphanPenalty = Math.min(
+      (Number(dsum.orphanCount) || 0) * 0.1, // 0.1 points per orphan
+      15
+    );
+
+    score -= errorPenalty + warningPenalty + orphanPenalty;
   }
   const ssum = sqlLineage?.summary;
   if (ssum) {
@@ -625,7 +637,9 @@ function generateDashboard(depMap, sqlLineage) {
       <h2>⚡ Quick Actions</h2>
       <div class="quick-links">
         <a href="dependency-map.html" class="btn primary">View Full Dependency Map</a>
-        <a href="dependency-map.svg" class="btn" target="_blank" rel="noopener noreferrer">View Diagram</a>
+        <a href="dependency-map-intelligent.svg" class="btn" target="_blank" rel="noopener noreferrer">🧠 View Intelligent Architecture</a>
+        <a href="dependency-map-intelligent.png" class="btn" target="_blank" rel="noopener noreferrer">📊 Download Architecture PNG</a>
+        <a href="dependency-map-intelligent.mmd" class="btn" target="_blank" rel="noopener noreferrer">📝 View Mermaid Source</a>
         <a href="sql-lineage.json" class="btn" download>Download SQL Lineage</a>
         <a href="../docs/DEPENDENCY_LINEAGE_GUARDRAILS.md" class="btn">View Guardrails</a>
       </div>

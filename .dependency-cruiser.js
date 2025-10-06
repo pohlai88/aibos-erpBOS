@@ -439,21 +439,6 @@ module.exports = {
           },
         },
       },
-
-      // Text output (CLI-friendly)
-      text: {
-        highlightFocused: true,
-      },
-
-      // Error output (for CI/CD)
-      err: {
-        summary: true,
-      },
-
-      // HTML output (interactive dashboard)
-      html: {
-        collapsePattern: 'node_modules/[^/]+',
-      },
     },
 
     // ========== Performance & Caching ==========

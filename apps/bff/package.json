@@ -2,7 +2,7 @@
   "name": "@aibos/bff",
   "version": "1.0.0",
   "dependencies": {
-    "@adyen/api-library": "^2.0.0",
+    "@adyen/api-library": "^2.2.1",
     "@aibos/contracts": "workspace:*",
     "@aibos/db-adapter": "workspace:*",
     "@aibos/policies": "workspace:*",
@@ -12,12 +12,12 @@
     "@paypal/checkout-server-sdk": "^1.0.3",
     "@types/node": "24.6.0",
     "date-fns": "^4.1.0",
-    "inngest": "^3.20.0",
+    "inngest": "^3.44.0",
     "next": "15.5.4",
     "nodemailer": "^7.0.6",
     "react": "19.1.1",
     "react-dom": "19.1.1",
-    "stripe": "^14.0.0",
+    "stripe": "^14.25.0",
     "ulid": "^3.0.1"
   },
   "devDependencies": {

@@ -165,7 +165,7 @@ export declare const BudgetImportSummary: z.ZodObject<
   'strip',
   z.ZodTypeAny,
   {
-    status: 'pending' | 'dry_run_ok' | 'committed' | 'failed';
+    status: 'failed' | 'pending' | 'committed' | 'dry_run_ok';
     importId: string;
     source_name: string;
     rows_total: number;
@@ -179,7 +179,7 @@ export declare const BudgetImportSummary: z.ZodObject<
       | undefined;
   },
   {
-    status: 'pending' | 'dry_run_ok' | 'committed' | 'failed';
+    status: 'failed' | 'pending' | 'committed' | 'dry_run_ok';
     importId: string;
     source_name: string;
     rows_total: number;
@@ -228,7 +228,7 @@ export declare const BudgetImportResponse: z.ZodObject<
       'strip',
       z.ZodTypeAny,
       {
-        status: 'pending' | 'dry_run_ok' | 'committed' | 'failed';
+        status: 'failed' | 'pending' | 'committed' | 'dry_run_ok';
         importId: string;
         source_name: string;
         rows_total: number;
@@ -242,7 +242,7 @@ export declare const BudgetImportResponse: z.ZodObject<
           | undefined;
       },
       {
-        status: 'pending' | 'dry_run_ok' | 'committed' | 'failed';
+        status: 'failed' | 'pending' | 'committed' | 'dry_run_ok';
         importId: string;
         source_name: string;
         rows_total: number;
@@ -282,7 +282,7 @@ export declare const BudgetImportResponse: z.ZodObject<
   z.ZodTypeAny,
   {
     summary: {
-      status: 'pending' | 'dry_run_ok' | 'committed' | 'failed';
+      status: 'failed' | 'pending' | 'committed' | 'dry_run_ok';
       importId: string;
       source_name: string;
       rows_total: number;
@@ -304,7 +304,7 @@ export declare const BudgetImportResponse: z.ZodObject<
   },
   {
     summary: {
-      status: 'pending' | 'dry_run_ok' | 'committed' | 'failed';
+      status: 'failed' | 'pending' | 'committed' | 'dry_run_ok';
       importId: string;
       source_name: string;
       rows_total: number;

@@ -375,28 +375,30 @@ import { CommandPalette, Card } from "aibos-ui";
 
 ```typescript
 // apps/web/hooks/useJournals.ts
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiClient } from '@aibos/api-client';
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiClient } from "@aibos/api-client";
 
 export function useJournals(filters = {}) {
   const { data, isLoading } = useQuery({
-    queryKey: ['journals', filters],
-    queryFn: () => apiClient.GET('/api/journals', { query: filters }),
+    queryKey: ["journals", filters],
+    queryFn: () => apiClient.GET("/api/journals", { query: filters }),
   });
 
   const createEntry = useMutation({
-    mutationFn: data => apiClient.POST('/api/journals/create', { body: data }),
-    onSuccess: () => queryClient.invalidateQueries(['journals']),
+    mutationFn: (data) =>
+      apiClient.POST("/api/journals/create", { body: data }),
+    onSuccess: () => queryClient.invalidateQueries(["journals"]),
   });
 
   const postEntry = useMutation({
-    mutationFn: id => apiClient.POST('/api/journals/post', { body: { id } }),
-    onSuccess: () => queryClient.invalidateQueries(['journals']),
+    mutationFn: (id) => apiClient.POST("/api/journals/post", { body: { id } }),
+    onSuccess: () => queryClient.invalidateQueries(["journals"]),
   });
 
   const reverseEntry = useMutation({
-    mutationFn: id => apiClient.POST('/api/journals/reverse', { body: { id } }),
-    onSuccess: () => queryClient.invalidateQueries(['journals']),
+    mutationFn: (id) =>
+      apiClient.POST("/api/journals/reverse", { body: { id } }),
+    onSuccess: () => queryClient.invalidateQueries(["journals"]),
   });
 
   return {
@@ -410,16 +412,16 @@ export function useJournals(filters = {}) {
 
 export function useJournalEntry(id: string) {
   return useQuery({
-    queryKey: ['journals', id],
-    queryFn: () => apiClient.GET('/api/journals/[id]', { params: { id } }),
+    queryKey: ["journals", id],
+    queryFn: () => apiClient.GET("/api/journals/[id]", { params: { id } }),
     enabled: !!id,
   });
 }
 
 export function useJournalValidation() {
   return useMutation({
-    mutationFn: entry =>
-      apiClient.POST('/api/journals/validate', { body: entry }),
+    mutationFn: (entry) =>
+      apiClient.POST("/api/journals/validate", { body: entry }),
   });
 }
 ```
@@ -529,8 +531,8 @@ Complete copy for all user-facing states. Use i18n keys from `@/i18n/messages/jo
 
 ```typescript
 // Query key structure
-['journals', 'list', { filters }][('journals', 'detail', entryId)][
-  ('journals', 'validate', entryId)
+["journals", "list", { filters }][("journals", "detail", entryId)][
+  ("journals", "validate", entryId)
 ];
 ```
 
@@ -556,9 +558,9 @@ Complete copy for all user-facing states. Use i18n keys from `@/i18n/messages/jo
 
 ```typescript
 // Server actions
-revalidateTag('journals'); // After mutations
+revalidateTag("journals"); // After mutations
 revalidateTag(`journals-${entryId}`); // Specific entry
-revalidateTag('ledger'); // After posting (affects ledger balances)
+revalidateTag("ledger"); // After posting (affects ledger balances)
 ```
 
 ---
@@ -812,16 +814,16 @@ Similar to create page but with view-only mode for posted entries.
 ### Step 6: Add Tests (2 hours)
 
 ```typescript
-describe('Journal Entries', () => {
-  it('creates balanced entry', async () => {
+describe("Journal Entries", () => {
+  it("creates balanced entry", async () => {
     // Test entry creation with balanced lines
   });
 
-  it('prevents posting unbalanced entry', async () => {
+  it("prevents posting unbalanced entry", async () => {
     // Test validation
   });
 
-  it('reverses posted entry', async () => {
+  it("reverses posted entry", async () => {
     // Test reversal functionality
   });
 });
@@ -855,16 +857,16 @@ describe('Journal Entries', () => {
 // Example fixture structure
 export const standardEntries: JournalEntryFixture[] = [
   {
-    id: 'je_001',
-    entry_id: 'JE-2025-001',
-    doc_date: '2025-10-01',
-    description: 'Monthly depreciation',
-    status: 'posted',
+    id: "je_001",
+    entry_id: "JE-2025-001",
+    doc_date: "2025-10-01",
+    description: "Monthly depreciation",
+    status: "posted",
     total_debit: 5000.0,
     total_credit: 5000.0,
     lines: [
-      { account_id: 'acc_dep_exp', debit: 5000, credit: 0 },
-      { account_id: 'acc_accum_dep', debit: 0, credit: 5000 },
+      { account_id: "acc_dep_exp", debit: 5000, credit: 0 },
+      { account_id: "acc_accum_dep", debit: 0, credit: 5000 },
     ],
   },
   // ... 49 more entries
@@ -942,9 +944,9 @@ pnpm run demo:reset:journals
 **Implementation**:
 
 ```typescript
-import { analytics } from '@/lib/analytics';
+import { analytics } from "@/lib/analytics";
 
-analytics.track('Journal.Entry.Posted', {
+analytics.track("Journal.Entry.Posted", {
   entry_id: entry.id,
   total_amount: entry.total_debit,
   posting_date: entry.doc_date,
@@ -980,10 +982,10 @@ analytics.track('Journal.Entry.Posted', {
 
 ```typescript
 useHotkeys([
-  ['/', () => searchInputRef.current?.focus()],
-  ['n', () => openCreateModal()],
-  ['e', () => editSelected()],
-  ['p', () => postSelected()],
+  ["/", () => searchInputRef.current?.focus()],
+  ["n", () => openCreateModal()],
+  ["e", () => editSelected()],
+  ["p", () => postSelected()],
 ]);
 ```
 
@@ -1030,15 +1032,15 @@ useHotkeys([
 
 ```typescript
 // Server actions
-'use server';
+"use server";
 
-import { revalidateTag } from 'next/cache';
+import { revalidateTag } from "next/cache";
 
 export async function postJournalEntry(entryId: string) {
   // ... posting logic
-  revalidateTag('journals');
-  revalidateTag('ledger'); // Affects ledger balances
-  revalidateTag('trial-balance'); // Affects reports
+  revalidateTag("journals");
+  revalidateTag("ledger"); // Affects ledger balances
+  revalidateTag("trial-balance"); // Affects reports
 }
 ```
 
@@ -1096,8 +1098,8 @@ flags: {
 2. **Invalidate cache**:
 
    ```typescript
-   revalidateTag('journals');
-   revalidateTag('ledger');
+   revalidateTag("journals");
+   revalidateTag("ledger");
    ```
 
 3. **Clear CDN cache**:
@@ -1107,6 +1109,7 @@ flags: {
    ```
 
 4. **Monitor for 15 minutes**:
+
    - Error rate drops below 0.1%
    - No new Sentry issues
    - Users see fallback message

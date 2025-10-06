@@ -192,8 +192,9 @@ export declare const PurchaseInvoice: z.ZodObject<
       };
       tax_code?: string | undefined;
     }[];
-    currency: string;
     doc_date: string;
+    currency: string;
+    supplier_id: string;
     totals: {
       total: {
         amount: string;
@@ -208,7 +209,6 @@ export declare const PurchaseInvoice: z.ZodObject<
         currency: string;
       };
     };
-    supplier_id: string;
   },
   {
     id: string;
@@ -222,8 +222,9 @@ export declare const PurchaseInvoice: z.ZodObject<
       };
       tax_code?: string | undefined;
     }[];
-    currency: string;
     doc_date: string;
+    currency: string;
+    supplier_id: string;
     totals: {
       total: {
         amount: string;
@@ -238,7 +239,6 @@ export declare const PurchaseInvoice: z.ZodObject<
         currency: string;
       };
     };
-    supplier_id: string;
   }
 >;
 export type PurchaseInvoice = z.infer<typeof PurchaseInvoice>;

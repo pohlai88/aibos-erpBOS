@@ -118,6 +118,9 @@ module.exports = [
               allow: ['contracts', 'ports', 'policies', 'posting-rules'],
             },
 
+            // contracts can only import other contracts (pure layer)
+            { from: ['contracts'], allow: ['contracts'] },
+
             // adapters (db, etc.) can import contracts, ports
             { from: ['adapter'], allow: ['contracts', 'ports'] },
 
@@ -165,6 +168,23 @@ module.exports = [
     files: ['apps/bff/app/api/**/*.{ts,tsx}'],
     ignores: ['apps/bff/app/api/_kit/**', 'apps/bff/app/api/_lib/**'],
     rules: {
+      // 🚫 Prevent API routes from importing BFF internals (main architectural violation)
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['../lib/*', '../../lib/*', '../../../lib/*'],
+              message: '🚫 API routes cannot import BFF lib files. Use Contracts layer instead.'
+            },
+            {
+              group: ['../services/*', '../../services/*', '../../../services/*'],
+              message: '🚫 API routes cannot import BFF services. Use Services layer instead.'
+            }
+          ]
+        }
+      ],
+      
       // Enforce withRouteErrors wrapper
       'no-restricted-syntax': [
         'error',

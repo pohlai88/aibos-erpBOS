@@ -328,35 +328,36 @@ import { Timeline, Card, Button } from "aibos-ui";
 
 ```typescript
 // apps/web/hooks/useAR.ts
-'use client';
+"use client";
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@aibos/api-client';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "@aibos/api-client";
 
 export function useARInvoices(filters = {}) {
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['ar', 'invoices', filters],
-    queryFn: () => apiClient.GET('/api/ar/invoices', { query: filters }),
+    queryKey: ["ar", "invoices", filters],
+    queryFn: () => apiClient.GET("/api/ar/invoices", { query: filters }),
     staleTime: 30_000, // 30s
     retry: 2,
-    select: response => response.data,
+    select: (response) => response.data,
   });
 
   const createInvoice = useMutation({
-    mutationFn: data =>
-      apiClient.POST('/api/ar/invoices/create', { body: data }),
+    mutationFn: (data) =>
+      apiClient.POST("/api/ar/invoices/create", { body: data }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ar', 'invoices'] });
-      queryClient.invalidateQueries({ queryKey: ['ar', 'aging'] });
+      queryClient.invalidateQueries({ queryKey: ["ar", "invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["ar", "aging"] });
     },
   });
 
   const postInvoice = useMutation({
-    mutationFn: id => apiClient.POST('/api/ar/invoices/post', { body: { id } }),
+    mutationFn: (id) =>
+      apiClient.POST("/api/ar/invoices/post", { body: { id } }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ar'] });
+      queryClient.invalidateQueries({ queryKey: ["ar"] });
     },
   });
 
@@ -373,32 +374,32 @@ export function usePaymentApplication() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: data =>
-      apiClient.POST('/api/ar/payments/apply', { body: data }),
+    mutationFn: (data) =>
+      apiClient.POST("/api/ar/payments/apply", { body: data }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ar', 'invoices'] });
-      queryClient.invalidateQueries({ queryKey: ['ar', 'aging'] });
-      queryClient.invalidateQueries({ queryKey: ['ar', 'payments'] });
+      queryClient.invalidateQueries({ queryKey: ["ar", "invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["ar", "aging"] });
+      queryClient.invalidateQueries({ queryKey: ["ar", "payments"] });
     },
   });
 }
 
 export function useAging(asOfDate: string) {
   return useQuery({
-    queryKey: ['ar', 'aging', asOfDate],
+    queryKey: ["ar", "aging", asOfDate],
     queryFn: () =>
-      apiClient.GET('/api/ar/aging', { query: { as_of_date: asOfDate } }),
+      apiClient.GET("/api/ar/aging", { query: { as_of_date: asOfDate } }),
     staleTime: 5 * 60_000, // 5min
-    select: response => response.data,
+    select: (response) => response.data,
   });
 }
 
 export function useCollections(filters = {}) {
   return useQuery({
-    queryKey: ['ar', 'collections', filters],
-    queryFn: () => apiClient.GET('/api/ar/collections', { query: filters }),
+    queryKey: ["ar", "collections", filters],
+    queryFn: () => apiClient.GET("/api/ar/collections", { query: filters }),
     staleTime: 60_000, // 1min
-    select: response => response.data,
+    select: (response) => response.data,
   });
 }
 ```
@@ -503,10 +504,10 @@ Complete copy for all user-facing states. Use i18n keys from `@/i18n/messages/ar
 
 ```typescript
 // Query key structure
-['ar', 'invoices', { filters }][('ar', 'invoice', invoiceId)][
-  ('ar', 'aging', asOfDate)
-][('ar', 'collections', { filters })][('ar', 'payments', { filters })][
-  ('ar', 'statements', customerId, dateRange)
+["ar", "invoices", { filters }][("ar", "invoice", invoiceId)][
+  ("ar", "aging", asOfDate)
+][("ar", "collections", { filters })][("ar", "payments", { filters })][
+  ("ar", "statements", customerId, dateRange)
 ];
 ```
 
@@ -533,9 +534,9 @@ Complete copy for all user-facing states. Use i18n keys from `@/i18n/messages/ar
 
 ```typescript
 // Server actions
-revalidateTag('ar'); // After mutations
+revalidateTag("ar"); // After mutations
 revalidateTag(`ar-invoice-${invoiceId}`); // Specific invoice
-revalidateTag('aging'); // After posting/payment
+revalidateTag("aging"); // After posting/payment
 ```
 
 ---
@@ -646,17 +647,17 @@ revalidateTag('aging'); // After posting/payment
 // Example fixture structure
 export const standardInvoices: ARInvoiceFixture[] = [
   {
-    id: 'inv_1',
-    invoice_number: 'INV-2025-001',
-    customer_id: 'cust_1',
-    customer_name: 'Acme Corp',
-    invoice_date: '2025-01-01',
-    due_date: '2025-01-31',
+    id: "inv_1",
+    invoice_number: "INV-2025-001",
+    customer_id: "cust_1",
+    customer_name: "Acme Corp",
+    invoice_date: "2025-01-01",
+    due_date: "2025-01-31",
     amount: 5000.0,
     balance: 5000.0,
-    status: 'posted',
-    currency: 'USD',
-    aging_bucket: 'current',
+    status: "posted",
+    currency: "USD",
+    aging_bucket: "current",
   },
   // ... 49 more
 ];
@@ -758,15 +759,15 @@ pnpm run demo:reset:ar
 
 ```typescript
 // Server actions
-'use server';
+"use server";
 
-import { revalidateTag } from 'next/cache';
+import { revalidateTag } from "next/cache";
 
 export async function postInvoice(id: string) {
   // ... mutation logic
-  revalidateTag('ar');
-  revalidateTag('journals');
-  revalidateTag('trial-balance');
+  revalidateTag("ar");
+  revalidateTag("journals");
+  revalidateTag("trial-balance");
 }
 ```
 
@@ -788,9 +789,9 @@ export async function postInvoice(id: string) {
 **Implementation**:
 
 ```typescript
-import { analytics } from '@/lib/analytics';
+import { analytics } from "@/lib/analytics";
 
-analytics.track('AR.Invoice.Posted', {
+analytics.track("AR.Invoice.Posted", {
   invoice_id: invoice.id,
   customer_id: invoice.customer_id,
   amount: invoice.amount,
@@ -826,10 +827,10 @@ analytics.track('AR.Invoice.Posted', {
 
 ```typescript
 useHotkeys([
-  ['/', () => searchInputRef.current?.focus()],
-  ['n', () => openCreateModal()],
-  ['p', () => postInvoice(selectedId)],
-  ['a', () => openPaymentModal()],
+  ["/", () => searchInputRef.current?.focus()],
+  ["n", () => openCreateModal()],
+  ["p", () => postInvoice(selectedId)],
+  ["a", () => openPaymentModal()],
 ]);
 ```
 
@@ -899,8 +900,8 @@ flags: {
 2. **Invalidate cache**:
 
    ```typescript
-   revalidateTag('ar');
-   revalidateTag('aging');
+   revalidateTag("ar");
+   revalidateTag("aging");
    ```
 
 3. **Clear CDN cache**:
@@ -910,6 +911,7 @@ flags: {
    ```
 
 4. **Monitor for 15 minutes**:
+
    - Error rate drops below 0.1%
    - No new Sentry issues
 

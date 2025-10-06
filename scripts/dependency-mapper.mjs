@@ -183,6 +183,53 @@ async function discoverFiles() {
 }
 
 /**
+ * Check if file is an entry point or config file (should not be considered orphan)
+ */
+function isEntryPointOrConfig(filePath) {
+  const rel = path.relative(repoRoot, filePath).replace(/\\/g, '/');
+  
+  // Entry points
+  if (rel.includes('/index.ts') || rel.includes('/index.js')) return true;
+  if (rel.includes('/main.ts') || rel.includes('/main.js')) return true;
+  if (rel.includes('/app.ts') || rel.includes('/app.js')) return true;
+  
+  // Config files
+  if (rel.includes('config.') || rel.includes('.config.')) return true;
+  if (rel.includes('drizzle.config.') || rel.includes('next.config.')) return true;
+  if (rel.includes('vitest.config.') || rel.includes('tsup.config.')) return true;
+  if (rel.includes('eslint.config.') || rel.includes('tsconfig.')) return true;
+  
+  // Test files (often have no dependencies)
+  if (rel.includes('.test.') || rel.includes('.spec.')) return true;
+  
+  // Migration files
+  if (rel.includes('/migrations/')) return true;
+  
+  // Schema files
+  if (rel.includes('/schema.')) return true;
+  
+  // Documentation files
+  if (rel.endsWith('.md') || rel.endsWith('.txt')) return true;
+  
+  // JSON files (config, package files)
+  if (rel.endsWith('.json') || rel.endsWith('.json5')) return true;
+  
+  // YAML files
+  if (rel.endsWith('.yaml') || rel.endsWith('.yml')) return true;
+  
+  // Docker files
+  if (rel.includes('Dockerfile') || rel.includes('docker-compose')) return true;
+  
+  // Scripts directory (utility scripts)
+  if (rel.startsWith('scripts/')) return true;
+  
+  // Documentation directories
+  if (rel.startsWith('docs/') || rel.startsWith('ui-runbook/')) return true;
+  
+  return false;
+}
+
+/**
  * Normalize file path to layer
  */
 function normalizeLayer(filePath) {
@@ -196,9 +243,21 @@ function normalizeLayer(filePath) {
   if (rel.startsWith('packages/policies/')) return 'Policies';
   if (rel.startsWith('packages/posting-rules/')) return 'PostingRules';
   if (rel.startsWith('packages/contracts/')) return 'Contracts';
+  if (rel.startsWith('packages/api-client/')) return 'ApiClient';
+  if (rel.startsWith('packages/sdk/')) return 'SDK';
+  if (rel.startsWith('packages/testing/')) return 'Testing';
+  if (rel.startsWith('packages/utils/')) return 'Utils';
   if (rel.startsWith('apps/bff/app/api/')) return 'API';
+  if (rel.startsWith('apps/bff/')) return 'BFF';
   if (rel.startsWith('apps/web/')) return 'UI';
   if (rel.startsWith('apps/worker/')) return 'Worker';
+  
+  // Additional patterns for better accuracy
+  if (rel.startsWith('scripts/')) return 'Scripts';
+  if (rel.startsWith('docs/')) return 'Docs';
+  if (rel.startsWith('ui-runbook/')) return 'Docs';
+  if (rel.includes('/migrations/')) return 'DB';
+  if (rel.includes('/schema.')) return 'DB';
 
   return 'Other';
 }
@@ -300,8 +359,9 @@ function buildLayerGraph(cruiseData) {
     const fromLayer = normalizeLayer(mod.source);
     fileLayers.set(mod.source, fromLayer);
 
+    // Improved orphan detection - exclude entry points and config files
     if (!mod.dependencies || mod.dependencies.length === 0) {
-      if (fromLayer !== 'Other') {
+      if (fromLayer !== 'Other' && !isEntryPointOrConfig(mod.source)) {
         orphans.add(mod.source);
       }
     }
@@ -376,6 +436,8 @@ function buildLayerGraph(cruiseData) {
       totalFiles: cruiseData.modules?.length || 0,
       totalEdges: edgeList.reduce((sum, e) => sum + e.weight, 0),
       violationCount: violations.length,
+      errorCount: violations.filter(v => v.severity === 'error').length,
+      warningCount: violations.filter(v => v.severity === 'warn').length,
       orphanCount: orphans.size,
     },
   };

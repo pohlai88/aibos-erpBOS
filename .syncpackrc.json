@@ -96,6 +96,11 @@
           "@types/node"
         ],
         "range": ""
+      },
+      {
+        "packages": ["**"],
+        "dependencies": ["ws", "esbuild", "dompurify", "tar-fs"],
+        "range": "semver"
       }
     ]
   }

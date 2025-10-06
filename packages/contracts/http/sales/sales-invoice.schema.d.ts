@@ -193,8 +193,8 @@ export declare const SalesInvoice: z.ZodObject<
       tax_code?: string | undefined;
     }[];
     customer_id: string;
-    currency: string;
     doc_date: string;
+    currency: string;
     totals: {
       total: {
         amount: string;
@@ -223,8 +223,8 @@ export declare const SalesInvoice: z.ZodObject<
       tax_code?: string | undefined;
     }[];
     customer_id: string;
-    currency: string;
     doc_date: string;
+    currency: string;
     totals: {
       total: {
         amount: string;

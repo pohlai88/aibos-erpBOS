@@ -127,6 +127,25 @@ const PATTERNS = {
 };
 
 /**
+ * Validate table name format (improve accuracy)
+ */
+function isValidTableName(name) {
+  if (!name || typeof name !== 'string') return false;
+  
+  // Must be valid identifier
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name)) return false;
+  
+  // Exclude common false positives
+  const excludePatterns = [
+    'table', 'schema', 'column', 'index', 'constraint',
+    'primary', 'foreign', 'key', 'unique', 'check',
+    'default', 'null', 'not', 'references', 'on'
+  ];
+  
+  return !excludePatterns.includes(name.toLowerCase());
+}
+
+/**
  * Strip SQL and TypeScript comments to reduce regex false positives
  */
 function stripComments(input) {
@@ -223,15 +242,18 @@ function analyzeSQLContent(content, filePath) {
   matches = [...clean.matchAll(PATTERNS.drizzlePgTableCall)];
   for (const match of matches) {
     const tableName = normalizeTableName(match[1]);
-    tables.add(tableName);
+    // Validate table name format
+    if (isValidTableName(tableName)) {
+      tables.add(tableName);
+    }
   }
 
   // Fallback: variable name form (lower confidence)
   matches = [...clean.matchAll(PATTERNS.drizzleTableVar)];
   for (const match of matches) {
     const tableName = normalizeTableName(match[1]);
-    // Only add if not already captured by pgTableCall
-    if (!tables.has(tableName)) {
+    // Only add if not already captured by pgTableCall and is valid
+    if (!tables.has(tableName) && isValidTableName(tableName)) {
       tables.add(tableName);
     }
   }

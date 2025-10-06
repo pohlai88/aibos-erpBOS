@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "src",
     "outDir": "dist",
     "declaration": true,
     "emitDeclarationOnly": true,
@@ -13,5 +12,5 @@
     "skipLibCheck": true,
     "incremental": false
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "http/**/*.ts"]
 }
