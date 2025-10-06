@@ -204,6 +204,201 @@ export function WorkflowBuilder() {
 }
 ```
 
+### Step 3: Create Hooks
+
+```typescript
+// apps/web/hooks/workflows/useWorkflowBuilder.ts
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+
+export function useWorkflowBuilder(workflowId?: string) {
+  return useQuery({
+    queryKey: ["workflows", "builder", workflowId],
+    queryFn: () => api.workflows.getWorkflow(workflowId),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+export function useCreateWorkflow() {
+  return useMutation({
+    mutationFn: (data: WorkflowData) => api.workflows.createWorkflow(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["workflows", "builder"],
+      });
+    },
+  });
+}
+```
+
+### Step 4: Create Pages
+
+```typescript
+// apps/web/app/(dashboard)/workflows/page.tsx
+import { WorkflowList } from "@/components/workflows/WorkflowList";
+import { WorkflowFilters } from "@/components/workflows/WorkflowFilters";
+
+export default function WorkflowsPage() {
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Workflow Automation</h1>
+        <CreateWorkflowButton />
+      </div>
+      <WorkflowFilters />
+      <WorkflowList />
+    </div>
+  );
+}
+```
+
+### Step 5: Add Tests
+
+```typescript
+// apps/web/app/(dashboard)/workflows/__tests__/WorkflowList.test.tsx
+import { render, screen } from "@testing-library/react";
+import { WorkflowList } from "@/components/workflows/WorkflowList";
+
+describe("WorkflowList", () => {
+  it("renders list of workflows", () => {
+    render(<WorkflowList />);
+    expect(screen.getByRole("table")).toBeInTheDocument();
+  });
+});
+```
+
+---
+
+## ♿ Accessibility
+
+### WCAG 2.2 AA Compliance
+
+- **Color Contrast**: ≥4.5:1 for normal text, ≥3:1 for large text
+- **Keyboard Navigation**: All interactive elements accessible via keyboard
+- **Screen Reader**: Proper ARIA labels and descriptions
+- **Focus Management**: Clear focus indicators, logical tab order
+
+### Keyboard Shortcuts
+
+| Shortcut       | Action              |
+| -------------- | ------------------- |
+| `Ctrl/Cmd + N` | Create new workflow |
+| `Ctrl/Cmd + F` | Focus search field  |
+| `Escape`       | Close modal/dialog  |
+| `Enter`        | Submit form         |
+
+### ARIA Implementation
+
+```typescript
+// Workflow table
+<table role="table" aria-label="Workflows list">
+  <thead role="rowgroup">
+    <tr role="row">
+      <th role="columnheader" aria-sort="none">Workflow</th>
+      <th role="columnheader" aria-sort="none">Status</th>
+      <th role="columnheader" aria-sort="none">Steps</th>
+    </tr>
+  </thead>
+</table>
+
+// Form
+<form role="form" aria-label="Create workflow">
+  <input aria-describedby="workflow-error" aria-invalid="false" />
+  <div id="workflow-error" role="alert" aria-live="polite" />
+</form>
+```
+
+---
+
+## 🧪 Testing Strategy
+
+### Unit Tests
+
+```typescript
+// Component tests
+describe("WorkflowList", () => {
+  it("renders list of workflows", () => {});
+  it("handles empty state", () => {});
+  it("handles loading state", () => {});
+  it("handles error state", () => {});
+  it("handles search functionality", () => {});
+});
+
+// Hook tests
+describe("useWorkflowBuilder", () => {
+  it("fetches workflow data", () => {});
+  it("handles pagination", () => {});
+  it("handles filters", () => {});
+  it("handles errors", () => {});
+});
+```
+
+### Integration Tests
+
+```typescript
+// API integration
+describe("Workflow Automation API Integration", () => {
+  it("creates workflow successfully", () => {});
+  it("updates workflow successfully", () => {});
+  it("executes workflow correctly", () => {});
+  it("handles API errors gracefully", () => {});
+});
+```
+
+### E2E Tests
+
+```typescript
+// User journeys
+describe("Workflow Automation E2E", () => {
+  it("complete create flow", () => {});
+  it("complete edit flow", () => {});
+  it("workflow execution flow", () => {});
+  it("search and filter functionality", () => {});
+  it("keyboard navigation", () => {});
+});
+```
+
+### Accessibility Tests
+
+```typescript
+// A11y tests
+describe("Workflow Automation Accessibility", () => {
+  it("meets WCAG 2.2 AA standards", () => {});
+  it("supports keyboard navigation", () => {});
+  it("works with screen readers", () => {});
+  it("has proper color contrast", () => {});
+});
+```
+
+---
+
+## ⚡ Performance
+
+### Bundle Size
+
+- **Target**: ≤250KB gzipped per route
+- **Current**: <CURRENT_SIZE>KB
+- **Optimization**: Code splitting, lazy loading
+
+### Loading Performance
+
+- **TTFB**: ≤70ms (Time to First Byte)
+- **TTI**: ≤200ms (Time to Interactive)
+- **LCP**: ≤2.5s (Largest Contentful Paint)
+
+### Optimization Strategies
+
+```typescript
+// Lazy loading
+const WorkflowCreatePage = lazy(() => import("./create/page"));
+
+// Code splitting
+const WorkflowBuilder = lazy(() => import("./components/WorkflowBuilder"));
+
+// Virtual scrolling for large lists
+import { FixedSizeList as List } from "react-window";
+```
+
 ---
 
 ## ✅ Quality Gates

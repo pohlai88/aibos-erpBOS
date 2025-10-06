@@ -226,13 +226,311 @@ import { useStandardCosts } from "@/hooks/inventory/useStandardCosts";
 export function StandardCostForm({ itemId }: { itemId: string }) {
   const { mutate: updateCost } = useStandardCosts();
 
+  return <Form>{/* Standard cost form implementation */}</Form>;
+}
+```
+
+### Step 3: Create Hooks
+
+```typescript
+// apps/web/hooks/inventory/useStandardCosts.ts
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+
+export function useStandardCosts(itemId?: string) {
+  return useQuery({
+    queryKey: ["inventory", "standard-costs", itemId],
+    queryFn: () => api.inventory.getStandardCosts(itemId),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+export function useUpdateStandardCost() {
+  return useMutation({
+    mutationFn: (data: StandardCostUpdate) =>
+      api.inventory.updateStandardCost(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["inventory", "standard-costs"],
+      });
+    },
+  });
+}
+```
+
+### Step 4: Create Pages
+
+```typescript
+// apps/web/app/(dashboard)/inventory/standard-costs/page.tsx
+import { StandardCostList } from "@/components/inventory/StandardCostList";
+import { StandardCostFilters } from "@/components/inventory/StandardCostFilters";
+
+export default function StandardCostsPage() {
   return (
-    <Form onSubmit={(data) => updateCost({ itemId, ...data })}>
-      {/* Standard cost form fields */}
-    </Form>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Standard Costs</h1>
+        <CreateStandardCostButton />
+      </div>
+      <StandardCostFilters />
+      <StandardCostList />
+    </div>
   );
 }
 ```
+
+### Step 5: Add Tests
+
+```typescript
+// apps/web/app/(dashboard)/inventory/standard-costs/__tests__/StandardCostList.test.tsx
+import { render, screen } from "@testing-library/react";
+import { StandardCostList } from "@/components/inventory/StandardCostList";
+
+describe("StandardCostList", () => {
+  it("renders list of standard costs", () => {
+    render(<StandardCostList />);
+    expect(screen.getByRole("table")).toBeInTheDocument();
+  });
+});
+```
+
+---
+
+## ♿ Accessibility
+
+### WCAG 2.2 AA Compliance
+
+- **Color Contrast**: ≥4.5:1 for normal text, ≥3:1 for large text
+- **Keyboard Navigation**: All interactive elements accessible via keyboard
+- **Screen Reader**: Proper ARIA labels and descriptions
+- **Focus Management**: Clear focus indicators, logical tab order
+
+### Keyboard Shortcuts
+
+| Shortcut       | Action                   |
+| -------------- | ------------------------ |
+| `Ctrl/Cmd + N` | Create new standard cost |
+| `Ctrl/Cmd + F` | Focus search field       |
+| `Escape`       | Close modal/dialog       |
+| `Enter`        | Submit form              |
+
+### ARIA Implementation
+
+```typescript
+// Standard cost table
+<table role="table" aria-label="Standard costs list">
+  <thead role="rowgroup">
+    <tr role="row">
+      <th role="columnheader" aria-sort="none">Item</th>
+      <th role="columnheader" aria-sort="none">Standard Cost</th>
+      <th role="columnheader" aria-sort="none">Variance</th>
+    </tr>
+  </thead>
+</table>
+
+// Form
+<form role="form" aria-label="Create standard cost">
+  <input aria-describedby="cost-error" aria-invalid="false" />
+  <div id="cost-error" role="alert" aria-live="polite" />
+</form>
+```
+
+---
+
+## 🧪 Testing Strategy
+
+### Unit Tests
+
+```typescript
+// Component tests
+describe("StandardCostList", () => {
+  it("renders list of standard costs", () => {});
+  it("handles empty state", () => {});
+  it("handles loading state", () => {});
+  it("handles error state", () => {});
+  it("handles search functionality", () => {});
+});
+
+// Hook tests
+describe("useStandardCosts", () => {
+  it("fetches standard costs", () => {});
+  it("handles pagination", () => {});
+  it("handles filters", () => {});
+  it("handles errors", () => {});
+});
+```
+
+### Integration Tests
+
+```typescript
+// API integration
+describe("Standard Cost API Integration", () => {
+  it("creates standard cost successfully", () => {});
+  it("updates standard cost successfully", () => {});
+  it("calculates variances correctly", () => {});
+  it("handles API errors gracefully", () => {});
+});
+```
+
+### E2E Tests
+
+```typescript
+// User journeys
+describe("Standard Cost E2E", () => {
+  it("complete create flow", () => {});
+  it("complete edit flow", () => {});
+  it("variance analysis flow", () => {});
+  it("search and filter functionality", () => {});
+  it("keyboard navigation", () => {});
+});
+```
+
+### Accessibility Tests
+
+```typescript
+// A11y tests
+describe("Standard Cost Accessibility", () => {
+  it("meets WCAG 2.2 AA standards", () => {});
+  it("supports keyboard navigation", () => {});
+  it("works with screen readers", () => {});
+  it("has proper color contrast", () => {});
+});
+```
+
+---
+
+## ⚡ Performance
+
+### Bundle Size
+
+- **Target**: ≤250KB gzipped per route
+- **Current**: <CURRENT_SIZE>KB
+- **Optimization**: Code splitting, lazy loading
+
+### Loading Performance
+
+- **TTFB**: ≤70ms (Time to First Byte)
+- **TTI**: ≤200ms (Time to Interactive)
+- **LCP**: ≤2.5s (Largest Contentful Paint)
+
+### Optimization Strategies
+
+```typescript
+// Lazy loading
+const StandardCostCreatePage = lazy(() => import("./create/page"));
+
+// Code splitting
+const StandardCostForm = lazy(() => import("./components/StandardCostForm"));
+
+// Virtual scrolling for large lists
+import { FixedSizeList as List } from "react-window";
+```
+
+---
+
+## ✅ Quality Gates
+
+### Code Quality
+
+| Gate              | Threshold | Enforcement |
+| ----------------- | --------- | ----------- |
+| TypeScript errors | 0         | CI blocks   |
+| ESLint errors     | 0         | CI blocks   |
+| Test coverage     | ≥90%      | CI blocks   |
+| Bundle size       | ≤250KB    | CI blocks   |
+
+### Performance
+
+| Gate                     | Threshold | Enforcement |
+| ------------------------ | --------- | ----------- |
+| TTFB                     | ≤70ms     | Manual      |
+| TTI                      | ≤200ms    | Manual      |
+| Lighthouse Performance   | ≥90       | CI warns    |
+| Lighthouse Accessibility | ≥95       | CI warns    |
+
+### Accessibility
+
+| Gate                | Threshold          | Enforcement |
+| ------------------- | ------------------ | ----------- |
+| WCAG 2.2 AA         | 100%               | CI blocks   |
+| Axe violations      | 0 serious/critical | CI blocks   |
+| Keyboard navigation | 100%               | Manual      |
+| Screen reader       | 100%               | Manual      |
+
+---
+
+## 🚀 Deployment
+
+### Feature Flag
+
+```typescript
+// Feature flag configuration
+const flags = {
+  m42_standard_costing: false, // Default: disabled
+};
+
+// Usage in components
+if (flags.m42_standard_costing) {
+  return <StandardCostList />;
+}
+return <ComingSoon />;
+```
+
+### Rollout Plan
+
+| Environment | Cohort           | Success Criteria  | Duration |
+| ----------- | ---------------- | ----------------- | -------- |
+| Dev         | All developers   | Manual QA passes  | 1 day    |
+| Staging     | QA team          | All tests pass    | 2 days   |
+| Production  | Beta users (5%)  | Error rate < 0.1% | 3 days   |
+| Production  | All users (100%) | Monitor for 24h   | Ongoing  |
+
+### Rollback Procedure
+
+**Immediate Rollback** (< 5 minutes):
+
+1. **Set feature flag**: `flags.m42_standard_costing = false`
+2. **Invalidate cache**: `revalidateTag('standard-costs')`
+3. **Monitor**: Error rate drops below 0.1%
+4. **Post-mortem**: Create incident report
+
+---
+
+## 📝 Definition of Done
+
+### Functional Requirements
+
+- [ ] All CRUD operations working
+- [ ] Variance calculation functional
+- [ ] Search and filtering functional
+- [ ] Pagination working correctly
+- [ ] Form validation complete
+- [ ] Error handling implemented
+- [ ] Loading states shown
+- [ ] Success messages displayed
+- [ ] Responsive design verified
+
+### Quality Requirements
+
+- [ ] All quality gates passed
+- [ ] Test coverage ≥90%
+- [ ] Accessibility compliant
+- [ ] Performance targets met
+- [ ] Code review approved
+- [ ] QA sign-off obtained
+- [ ] Design sign-off obtained
+- [ ] Feature flag deployed
+
+---
+
+**Ready to implement Inventory Standard Costing UI! 🚀**
+<Form onSubmit={(data) => updateCost({ itemId, ...data })}>
+{/_ Standard cost form fields _/}
+</Form>
+);
+}
+
+````
 
 ### Step 3: Create Hooks
 
@@ -248,7 +546,7 @@ export function useVariances(filters?: VarianceFilters) {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
-```
+````
 
 ---
 

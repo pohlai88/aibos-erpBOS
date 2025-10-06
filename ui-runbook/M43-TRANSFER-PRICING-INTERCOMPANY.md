@@ -187,8 +187,10 @@ import { useTransferPricing } from "@/hooks/intercompany/useTransferPricing";
 
 export function TransferPricingForm({
   transactionId,
+  onSuccess,
 }: {
   transactionId: string;
+  onSuccess?: () => void;
 }) {
   const { mutate: updatePricing } = useTransferPricing();
 
@@ -199,6 +201,318 @@ export function TransferPricingForm({
   );
 }
 ```
+
+### Step 3: Create Hooks
+
+```typescript
+// apps/web/hooks/intercompany/useTransferPricing.ts
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+
+export function useTransferPricing(transactionId?: string) {
+  return useQuery({
+    queryKey: ["intercompany", "transfer-pricing", transactionId],
+    queryFn: () => api.intercompany.getTransferPricing(transactionId),
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+}
+
+export function useUpdateTransferPricing() {
+  return useMutation({
+    mutationFn: (data: TransferPricingUpdate) =>
+      api.intercompany.updateTransferPricing(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["intercompany", "transfer-pricing"],
+      });
+    },
+  });
+}
+```
+
+### Step 4: Create Pages
+
+```typescript
+// apps/web/app/(dashboard)/intercompany/transfer-pricing/page.tsx
+import { TransferPricingList } from "@/components/intercompany/TransferPricingList";
+import { TransferPricingFilters } from "@/components/intercompany/TransferPricingFilters";
+
+export default function TransferPricingPage() {
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Transfer Pricing</h1>
+        <CreateTransferPricingButton />
+      </div>
+      <TransferPricingFilters />
+      <TransferPricingList />
+    </div>
+  );
+}
+```
+
+### Step 5: Add Tests
+
+```typescript
+// apps/web/app/(dashboard)/intercompany/transfer-pricing/__tests__/TransferPricingList.test.tsx
+import { render, screen } from "@testing-library/react";
+import { TransferPricingList } from "@/components/intercompany/TransferPricingList";
+
+describe("TransferPricingList", () => {
+  it("renders list of transfer pricing transactions", () => {
+    render(<TransferPricingList />);
+    expect(screen.getByRole("table")).toBeInTheDocument();
+  });
+});
+```
+
+---
+
+## ♿ Accessibility
+
+### WCAG 2.2 AA Compliance
+
+- **Color Contrast**: ≥4.5:1 for normal text, ≥3:1 for large text
+- **Keyboard Navigation**: All interactive elements accessible via keyboard
+- **Screen Reader**: Proper ARIA labels and descriptions
+- **Focus Management**: Clear focus indicators, logical tab order
+
+### Keyboard Shortcuts
+
+| Shortcut       | Action                      |
+| -------------- | --------------------------- |
+| `Ctrl/Cmd + N` | Create new transfer pricing |
+| `Ctrl/Cmd + F` | Focus search field          |
+| `Escape`       | Close modal/dialog          |
+| `Enter`        | Submit form                 |
+
+### ARIA Implementation
+
+```typescript
+// Transfer pricing table
+<table role="table" aria-label="Transfer pricing transactions">
+  <thead role="rowgroup">
+    <tr role="row">
+      <th role="columnheader" aria-sort="none">Transaction</th>
+      <th role="columnheader" aria-sort="none">Pricing Method</th>
+      <th role="columnheader" aria-sort="none">Amount</th>
+    </tr>
+  </thead>
+</table>
+
+// Form
+<form role="form" aria-label="Create transfer pricing">
+  <input aria-describedby="pricing-error" aria-invalid="false" />
+  <div id="pricing-error" role="alert" aria-live="polite" />
+</form>
+```
+
+---
+
+## 🧪 Testing Strategy
+
+### Unit Tests
+
+```typescript
+// Component tests
+describe("TransferPricingList", () => {
+  it("renders list of transfer pricing transactions", () => {});
+  it("handles empty state", () => {});
+  it("handles loading state", () => {});
+  it("handles error state", () => {});
+  it("handles search functionality", () => {});
+});
+
+// Hook tests
+describe("useTransferPricing", () => {
+  it("fetches transfer pricing data", () => {});
+  it("handles pagination", () => {});
+  it("handles filters", () => {});
+  it("handles errors", () => {});
+});
+```
+
+### Integration Tests
+
+```typescript
+// API integration
+describe("Transfer Pricing API Integration", () => {
+  it("creates transfer pricing successfully", () => {});
+  it("updates transfer pricing successfully", () => {});
+  it("calculates arm's length pricing correctly", () => {});
+  it("handles API errors gracefully", () => {});
+});
+```
+
+### E2E Tests
+
+```typescript
+// User journeys
+describe("Transfer Pricing E2E", () => {
+  it("complete create flow", () => {});
+  it("complete edit flow", () => {});
+  it("pricing calculation flow", () => {});
+  it("search and filter functionality", () => {});
+  it("keyboard navigation", () => {});
+});
+```
+
+### Accessibility Tests
+
+```typescript
+// A11y tests
+describe("Transfer Pricing Accessibility", () => {
+  it("meets WCAG 2.2 AA standards", () => {});
+  it("supports keyboard navigation", () => {});
+  it("works with screen readers", () => {});
+  it("has proper color contrast", () => {});
+});
+```
+
+---
+
+## ⚡ Performance
+
+### Bundle Size
+
+- **Target**: ≤250KB gzipped per route
+- **Current**: <CURRENT_SIZE>KB
+- **Optimization**: Code splitting, lazy loading
+
+### Loading Performance
+
+- **TTFB**: ≤70ms (Time to First Byte)
+- **TTI**: ≤200ms (Time to Interactive)
+- **LCP**: ≤2.5s (Largest Contentful Paint)
+
+### Optimization Strategies
+
+```typescript
+// Lazy loading
+const TransferPricingCreatePage = lazy(() => import("./create/page"));
+
+// Code splitting
+const TransferPricingForm = lazy(
+  () => import("./components/TransferPricingForm")
+);
+
+// Virtual scrolling for large lists
+import { FixedSizeList as List } from "react-window";
+```
+
+---
+
+## ✅ Quality Gates
+
+### Code Quality
+
+| Gate              | Threshold | Enforcement |
+| ----------------- | --------- | ----------- |
+| TypeScript errors | 0         | CI blocks   |
+| ESLint errors     | 0         | CI blocks   |
+| Test coverage     | ≥90%      | CI blocks   |
+| Bundle size       | ≤250KB    | CI blocks   |
+
+### Performance
+
+| Gate                     | Threshold | Enforcement |
+| ------------------------ | --------- | ----------- |
+| TTFB                     | ≤70ms     | Manual      |
+| TTI                      | ≤200ms    | Manual      |
+| Lighthouse Performance   | ≥90       | CI warns    |
+| Lighthouse Accessibility | ≥95       | CI warns    |
+
+### Accessibility
+
+| Gate                | Threshold          | Enforcement |
+| ------------------- | ------------------ | ----------- |
+| WCAG 2.2 AA         | 100%               | CI blocks   |
+| Axe violations      | 0 serious/critical | CI blocks   |
+| Keyboard navigation | 100%               | Manual      |
+| Screen reader       | 100%               | Manual      |
+
+---
+
+## 🚀 Deployment
+
+### Feature Flag
+
+```typescript
+// Feature flag configuration
+const flags = {
+  m43_transfer_pricing: false, // Default: disabled
+};
+
+// Usage in components
+if (flags.m43_transfer_pricing) {
+  return <TransferPricingList />;
+}
+return <ComingSoon />;
+```
+
+### Rollout Plan
+
+| Environment | Cohort           | Success Criteria  | Duration |
+| ----------- | ---------------- | ----------------- | -------- |
+| Dev         | All developers   | Manual QA passes  | 1 day    |
+| Staging     | QA team          | All tests pass    | 2 days   |
+| Production  | Beta users (5%)  | Error rate < 0.1% | 3 days   |
+| Production  | All users (100%) | Monitor for 24h   | Ongoing  |
+
+### Rollback Procedure
+
+**Immediate Rollback** (< 5 minutes):
+
+1. **Set feature flag**: `flags.m43_transfer_pricing = false`
+2. **Invalidate cache**: `revalidateTag('transfer-pricing')`
+3. **Monitor**: Error rate drops below 0.1%
+4. **Post-mortem**: Create incident report
+
+---
+
+## 📝 Definition of Done
+
+### Functional Requirements
+
+- [ ] All CRUD operations working
+- [ ] Transfer pricing calculation functional
+- [ ] Arm's length pricing compliance
+- [ ] Search and filtering functional
+- [ ] Pagination working correctly
+- [ ] Form validation complete
+- [ ] Error handling implemented
+- [ ] Loading states shown
+- [ ] Success messages displayed
+- [ ] Responsive design verified
+
+### Quality Requirements
+
+- [ ] All quality gates passed
+- [ ] Test coverage ≥90%
+- [ ] Accessibility compliant
+- [ ] Performance targets met
+- [ ] Code review approved
+- [ ] QA sign-off obtained
+- [ ] Design sign-off obtained
+- [ ] Feature flag deployed
+
+---
+
+**Ready to implement Transfer Pricing & Intercompany UI! 🚀**
+}: {
+transactionId: string;
+}) {
+const { mutate: updatePricing } = useTransferPricing();
+
+return (
+
+<Form onSubmit={(data) => updatePricing({ transactionId, ...data })}>
+{/_ Transfer pricing form fields _/}
+</Form>
+);
+}
+
+````
 
 ---
 
@@ -223,7 +537,7 @@ export function TransferPricingForm({
 const flags = {
   m43_transfer_pricing: false, // Default: disabled
 };
-```
+````
 
 ---
 

@@ -212,6 +212,321 @@ export function ComplianceDashboard() {
 }
 ```
 
+### Step 3: Create Hooks
+
+```typescript
+// apps/web/hooks/compliance/useComplianceDashboard.ts
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+
+export function useComplianceDashboard() {
+  return useQuery({
+    queryKey: ["compliance", "dashboard"],
+    queryFn: () => api.compliance.getDashboard(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+export function useGenerateReport() {
+  return useMutation({
+    mutationFn: (data: ReportData) => api.compliance.generateReport(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["compliance", "reports"],
+      });
+    },
+  });
+}
+```
+
+### Step 4: Create Pages
+
+```typescript
+// apps/web/app/(dashboard)/compliance/page.tsx
+import { ComplianceDashboard } from "@/components/compliance/ComplianceDashboard";
+import { ComplianceReports } from "@/components/compliance/ComplianceReports";
+
+export default function CompliancePage() {
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Compliance Reporting</h1>
+        <GenerateReportButton />
+      </div>
+      <ComplianceDashboard />
+      <ComplianceReports />
+    </div>
+  );
+}
+```
+
+### Step 5: Add Tests
+
+```typescript
+// apps/web/app/(dashboard)/compliance/__tests__/ComplianceDashboard.test.tsx
+import { render, screen } from "@testing-library/react";
+import { ComplianceDashboard } from "@/components/compliance/ComplianceDashboard";
+
+describe("ComplianceDashboard", () => {
+  it("renders compliance dashboard", () => {
+    render(<ComplianceDashboard />);
+    expect(screen.getByText("Compliance Rate")).toBeInTheDocument();
+  });
+});
+```
+
+---
+
+## ♿ Accessibility
+
+### WCAG 2.2 AA Compliance
+
+- **Color Contrast**: ≥4.5:1 for normal text, ≥3:1 for large text
+- **Keyboard Navigation**: All interactive elements accessible via keyboard
+- **Screen Reader**: Proper ARIA labels and descriptions
+- **Focus Management**: Clear focus indicators, logical tab order
+
+### Keyboard Shortcuts
+
+| Shortcut       | Action              |
+| -------------- | ------------------- |
+| `Ctrl/Cmd + N` | Generate new report |
+| `Ctrl/Cmd + F` | Focus search field  |
+| `Escape`       | Close modal/dialog  |
+| `Enter`        | Submit form         |
+
+### ARIA Implementation
+
+```typescript
+// Compliance dashboard
+<div role="region" aria-label="Compliance dashboard">
+  <div role="group" aria-label="Compliance metrics">
+    <h3>Compliance Rate</h3>
+    <p aria-live="polite">{data.complianceRate}%</p>
+  </div>
+</div>
+
+// Form
+<form role="form" aria-label="Generate compliance report">
+  <input aria-describedby="report-error" aria-invalid="false" />
+  <div id="report-error" role="alert" aria-live="polite" />
+</form>
+```
+
+---
+
+## 🧪 Testing Strategy
+
+### Unit Tests
+
+```typescript
+// Component tests
+describe("ComplianceDashboard", () => {
+  it("renders compliance dashboard", () => {});
+  it("handles empty state", () => {});
+  it("handles loading state", () => {});
+  it("handles error state", () => {});
+  it("displays compliance metrics", () => {});
+});
+
+// Hook tests
+describe("useComplianceDashboard", () => {
+  it("fetches compliance data", () => {});
+  it("handles pagination", () => {});
+  it("handles filters", () => {});
+  it("handles errors", () => {});
+});
+```
+
+### Integration Tests
+
+```typescript
+// API integration
+describe("Compliance Reporting API Integration", () => {
+  it("generates report successfully", () => {});
+  it("updates compliance status successfully", () => {});
+  it("tracks audit trails correctly", () => {});
+  it("handles API errors gracefully", () => {});
+});
+```
+
+### E2E Tests
+
+```typescript
+// User journeys
+describe("Compliance Reporting E2E", () => {
+  it("complete report generation flow", () => {});
+  it("complete compliance review flow", () => {});
+  it("audit trail tracking flow", () => {});
+  it("search and filter functionality", () => {});
+  it("keyboard navigation", () => {});
+});
+```
+
+### Accessibility Tests
+
+```typescript
+// A11y tests
+describe("Compliance Reporting Accessibility", () => {
+  it("meets WCAG 2.2 AA standards", () => {});
+  it("supports keyboard navigation", () => {});
+  it("works with screen readers", () => {});
+  it("has proper color contrast", () => {});
+});
+```
+
+---
+
+## ⚡ Performance
+
+### Bundle Size
+
+- **Target**: ≤250KB gzipped per route
+- **Current**: <CURRENT_SIZE>KB
+- **Optimization**: Code splitting, lazy loading
+
+### Loading Performance
+
+- **TTFB**: ≤70ms (Time to First Byte)
+- **TTI**: ≤200ms (Time to Interactive)
+- **LCP**: ≤2.5s (Largest Contentful Paint)
+
+### Optimization Strategies
+
+```typescript
+// Lazy loading
+const ReportGeneratePage = lazy(() => import("./generate/page"));
+
+// Code splitting
+const ComplianceChart = lazy(() => import("./components/ComplianceChart"));
+
+// Virtual scrolling for large lists
+import { FixedSizeList as List } from "react-window";
+```
+
+---
+
+## ✅ Quality Gates
+
+### Code Quality
+
+| Gate              | Threshold | Enforcement |
+| ----------------- | --------- | ----------- |
+| TypeScript errors | 0         | CI blocks   |
+| ESLint errors     | 0         | CI blocks   |
+| Test coverage     | ≥90%      | CI blocks   |
+| Bundle size       | ≤250KB    | CI blocks   |
+
+### Performance
+
+| Gate                     | Threshold | Enforcement |
+| ------------------------ | --------- | ----------- |
+| TTFB                     | ≤70ms     | Manual      |
+| TTI                      | ≤200ms    | Manual      |
+| Lighthouse Performance   | ≥90       | CI warns    |
+| Lighthouse Accessibility | ≥95       | CI warns    |
+
+### Accessibility
+
+| Gate                | Threshold          | Enforcement |
+| ------------------- | ------------------ | ----------- |
+| WCAG 2.2 AA         | 100%               | CI blocks   |
+| Axe violations      | 0 serious/critical | CI blocks   |
+| Keyboard navigation | 100%               | Manual      |
+| Screen reader       | 100%               | Manual      |
+
+---
+
+## 🚀 Deployment
+
+### Feature Flag
+
+```typescript
+// Feature flag configuration
+const flags = {
+  m60_compliance_reporting: false, // Default: disabled
+};
+
+// Usage in components
+if (flags.m60_compliance_reporting) {
+  return <ComplianceDashboard />;
+}
+return <ComingSoon />;
+```
+
+### Rollout Plan
+
+| Environment | Cohort           | Success Criteria  | Duration |
+| ----------- | ---------------- | ----------------- | -------- |
+| Dev         | All developers   | Manual QA passes  | 1 day    |
+| Staging     | QA team          | All tests pass    | 2 days   |
+| Production  | Beta users (5%)  | Error rate < 0.1% | 3 days   |
+| Production  | All users (100%) | Monitor for 24h   | Ongoing  |
+
+### Rollback Procedure
+
+**Immediate Rollback** (< 5 minutes):
+
+1. **Set feature flag**: `flags.m60_compliance_reporting = false`
+2. **Invalidate cache**: `revalidateTag('compliance')`
+3. **Monitor**: Error rate drops below 0.1%
+4. **Post-mortem**: Create incident report
+
+---
+
+## 📝 Definition of Done
+
+### Functional Requirements
+
+- [ ] All CRUD operations working
+- [ ] Compliance reporting functional
+- [ ] Audit trail tracking functional
+- [ ] Search and filtering functional
+- [ ] Pagination working correctly
+- [ ] Form validation complete
+- [ ] Error handling implemented
+- [ ] Loading states shown
+- [ ] Success messages displayed
+- [ ] Responsive design verified
+
+### Quality Requirements
+
+- [ ] All quality gates passed
+- [ ] Test coverage ≥90%
+- [ ] Accessibility compliant
+- [ ] Performance targets met
+- [ ] Code review approved
+- [ ] QA sign-off obtained
+- [ ] Design sign-off obtained
+- [ ] Feature flag deployed
+
+---
+
+**Ready to implement Compliance Reporting UI! 🚀**
+
+if (isLoading) return <DashboardSkeleton />;
+if (error) return <DashboardErrorState />;
+
+return (
+<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+<Card>
+<h3>Compliance Rate</h3>
+<p className="text-3xl font-bold">{data.complianceRate}%</p>
+</Card>
+<Card>
+<h3>Open Issues</h3>
+<p className="text-3xl font-bold">{data.openIssues}</p>
+</Card>
+<Card>
+<h3>Pending Reviews</h3>
+<p className="text-3xl font-bold">{data.pendingReviews}</p>
+</Card>
+</div>
+);
+}
+
+````
+
 ---
 
 ## ✅ Quality Gates
@@ -235,7 +550,7 @@ export function ComplianceDashboard() {
 const flags = {
   m60_compliance_reporting: false, // Default: disabled
 };
-```
+````
 
 ---
 
