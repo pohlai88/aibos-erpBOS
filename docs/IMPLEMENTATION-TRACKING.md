@@ -75,19 +75,16 @@ UI (frontend pages)
 ### What It Identifies
 
 1. **🚨 Broken Links**
-
    - API without database → crashes
    - UI without API → broken frontend
    - Services without API → orphaned code
 
 2. **🔄 Partial Implementations**
-
    - Backend complete but no UI → users can't access
    - API without contracts → no type safety
    - Schema without migrations → deployment fails
 
 3. **🔶 Orphaned Code**
-
    - Database + Services but no API → unused code
    - Half-finished features → technical debt
 
@@ -97,7 +94,6 @@ UI (frontend pages)
 ### Output Files
 
 1. **`dependency-map.json`**
-
    - Machine-readable format for CI/CD
    - Complete dependency graph
    - Use in automated checks

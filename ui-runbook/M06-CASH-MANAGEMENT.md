@@ -207,22 +207,22 @@ export default function CashSweepingRules() {
 // apps/web/hooks/useCash.ts
 export function useCashPositions() {
   return useQuery({
-    queryKey: ["cash", "positions"],
-    queryFn: () => apiClient.GET("/api/cash/positions"),
+    queryKey: ['cash', 'positions'],
+    queryFn: () => apiClient.GET('/api/cash/positions'),
     refetchInterval: 60000, // Refresh every minute
   });
 }
 
 export function useCashForecast(days: number) {
   return useQuery({
-    queryKey: ["cash", "forecast", days],
-    queryFn: () => apiClient.GET("/api/cash/forecast", { query: { days } }),
+    queryKey: ['cash', 'forecast', days],
+    queryFn: () => apiClient.GET('/api/cash/forecast', { query: { days } }),
   });
 }
 
 export function useCreateTransfer() {
   return useMutation({
-    mutationFn: (data) => apiClient.POST("/api/cash/transfers", { body: data }),
+    mutationFn: data => apiClient.POST('/api/cash/transfers', { body: data }),
   });
 }
 ```

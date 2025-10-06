@@ -486,8 +486,8 @@
 
 ## 📝 Reviewer Notes
 
-**Reviewer Name**: ******\_\_\_******  
-**Review Date**: ******\_\_\_******  
+**Reviewer Name**: **\*\***\_\_\_**\*\***  
+**Review Date**: **\*\***\_\_\_**\*\***  
 **Approval Status**: ⬜ APPROVED / ⬜ CHANGES REQUESTED / ⬜ REJECTED
 
 **Comments**:

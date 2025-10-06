@@ -1,8 +1,9 @@
 // @api:nonstandard (CORS headers)
+/* eslint-disable no-restricted-syntax */
 
-import { NextRequest } from "next/server";
-import { PingRequest, PingResponse } from "@aibos/contracts/http/ping.schema";
-import { pingService } from "@aibos/services/src/ping";
+import { NextRequest } from 'next/server';
+import { PingRequest, PingResponse } from '@aibos/contracts/http/ping.schema';
+import { pingService } from '@aibos/services/src/ping';
 
 export async function POST(req: NextRequest) {
   const json = await req.json();
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
-    }
+    },
   });
 }
 
@@ -25,6 +26,6 @@ export async function OPTIONS(_req: NextRequest) {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
-    }
+    },
   });
 }

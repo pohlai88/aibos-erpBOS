@@ -1,37 +1,37 @@
 {
-    "name": "@aibos/testing",
-    "version": "1.0.0",
-    "type": "module",
-    "main": "./dist/index.cjs",
-    "module": "./dist/index.mjs",
-    "types": "./dist/index.d.ts",
-    "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.mjs",
-            "require": "./dist/index.cjs",
-            "default": "./dist/index.mjs"
-        }
-    },
-    "files": [
-        "dist"
-    ],
-    "scripts": {
-        "build:types": "tsc",
-        "build:js": "tsup",
-        "build": "pnpm run build:types && pnpm run build:js",
-        "typecheck": "tsc -p tsconfig.json --noEmit",
-        "dev": "echo 'Testing - no dev server needed'",
-        "lint": "eslint src --ext .ts,.tsx",
-        "test": "echo 'No tests configured for testing'",
-        "clean": "rimraf dist"
-    },
-    "devDependencies": {
-        "@types/node": "24.6.0"
-    },
-    "turbo": {
-        "pipeline": {
-            "build": "build#lib"
-        }
+  "name": "@aibos/testing",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.mjs"
     }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:types": "tsc",
+    "build:js": "tsup",
+    "build": "pnpm run build:types && pnpm run build:js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "echo 'Testing - no dev server needed'",
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "echo 'No tests configured for testing'",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "@types/node": "24.6.0"
+  },
+  "turbo": {
+    "pipeline": {
+      "build": "build#lib"
+    }
+  }
 }

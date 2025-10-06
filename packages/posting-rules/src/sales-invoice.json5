@@ -1,15 +1,15 @@
 {
-  doctype: "SalesInvoice",
-  idempotencyKey: ["doctype", "id", "version"],
+  doctype: 'SalesInvoice',
+  idempotencyKey: ['doctype', 'id', 'version'],
   debits: [
     {
-      account: "Trade Receivables",
-      amountField: "totals.grand_total",
-      party: { type: "Customer", field: "customer_id" },
+      account: 'Trade Receivables',
+      amountField: 'totals.grand_total',
+      party: { type: 'Customer', field: 'customer_id' },
     },
   ],
   credits: [
-    { account: "Sales", amountField: "totals.total" },
-    { account: "Output Tax", amountField: "totals.tax_total" },
+    { account: 'Sales', amountField: 'totals.total' },
+    { account: 'Output Tax', amountField: 'totals.tax_total' },
   ],
 }

@@ -352,20 +352,20 @@ export default function VarianceAnalysis() {
 
 ```typescript
 // apps/web/hooks/useBudgetPlanning.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useBudgetPlanning(filters = {}) {
   return useQuery({
-    queryKey: ["m14", filters],
-    queryFn: () => apiClient.GET("/api/[path]", { query: filters }),
+    queryKey: ['m14', filters],
+    queryFn: () => apiClient.GET('/api/[path]', { query: filters }),
   });
 }
 
 export function useCreateBudgetPlanning() {
   return useMutation({
-    mutationFn: (data) => apiClient.POST("/api/[path]", { body: data }),
-    onSuccess: () => queryClient.invalidateQueries(["m14"]),
+    mutationFn: data => apiClient.POST('/api/[path]', { body: data }),
+    onSuccess: () => queryClient.invalidateQueries(['m14']),
   });
 }
 ```

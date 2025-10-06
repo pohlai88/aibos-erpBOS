@@ -18,22 +18,22 @@ This document provides comprehensive guidance for maintaining API standardizatio
 
 ```typescript
 // ✅ STANDARD PATTERN (Enhanced with hardening)
-import { NextRequest } from "next/server";
-import { ServiceName } from "@/services";
-import { RequestSchema, ResponseSchema } from "@aibos/contracts";
-import { withRouteErrors } from "@/api/_kit";
+import { NextRequest } from 'next/server';
+import { ServiceName } from '@/services';
+import { RequestSchema, ResponseSchema } from '@aibos/contracts';
+import { withRouteErrors } from '@/api/_kit';
 import {
   ok,
   badRequest,
   serverError,
   fileUploadResponse,
-} from "@/api/_lib/http";
-import { validateFileUpload } from "@/api/_lib/file-upload";
+} from '@/api/_lib/http';
+import { validateFileUpload } from '@/api/_lib/file-upload';
 
 const service = new ServiceName();
 
 // For file upload routes
-export const runtime = "nodejs"; // Meta-only export for large files
+export const runtime = 'nodejs'; // Meta-only export for large files
 
 export const POST = withRouteErrors(async (request: NextRequest) => {
   try {
@@ -41,7 +41,7 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
     const auth = await requireAuth(request);
     if (auth instanceof Response) return auth;
 
-    const cap = requireCapability(auth, "required:capability");
+    const cap = requireCapability(auth, 'required:capability');
     if (cap instanceof Response) return cap;
 
     // 2. Input Validation (Enhanced)
@@ -50,7 +50,7 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
     const validatedData = RequestSchema.parse(body);
 
     // For file upload APIs (NEW)
-    const validation = await validateFileUpload(request, ["required_field"]);
+    const validation = await validateFileUpload(request, ['required_field']);
     if (validation.error) return validation.error;
     const { file, data } = validation;
 
@@ -64,18 +64,18 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
     // 4. Success Response (Enhanced)
     // For file uploads
     return fileUploadResponse(result, {
-      headers: { "Access-Control-Allow-Origin": "*" },
+      headers: { 'Access-Control-Allow-Origin': '*' },
     });
 
     // For standard APIs
     return ok(result);
   } catch (error) {
     // 5. Error Handling
-    if (error instanceof Error && error.name === "ZodError") {
-      return badRequest("Invalid request data");
+    if (error instanceof Error && error.name === 'ZodError') {
+      return badRequest('Invalid request data');
     }
-    console.error("Error processing request:", error);
-    return serverError("Failed to process request");
+    console.error('Error processing request:', error);
+    return serverError('Failed to process request');
   }
 });
 ```
@@ -125,12 +125,12 @@ const rl = await rateLimit({
   limit: 5,
   windowMs: 60000,
 });
-if (!rl.ok) return tooManyRequests("Please retry later");
+if (!rl.ok) return tooManyRequests('Please retry later');
 
 // Audit logging
 logAuditAttempt({
-  action: "import_attempt",
-  module: "file_upload",
+  action: 'import_attempt',
+  module: 'file_upload',
   companyId: auth.company_id,
   actorId: auth.user_id,
   at: Date.now(),
@@ -212,7 +212,7 @@ const auth = await requireAuth(request);
 if (auth instanceof Response) return auth;
 
 // ✅ REQUIRED: Capability check
-const cap = requireCapability(auth, "domain:action");
+const cap = requireCapability(auth, 'domain:action');
 if (cap instanceof Response) return cap;
 
 // ✅ USE: Auth context in service calls
@@ -270,7 +270,7 @@ Consistent validation across all file upload routes:
 
 ```typescript
 // ✅ NEW: Centralized validation
-const validation = await validateFileUpload(req, ["mapping", "acct_code"]);
+const validation = await validateFileUpload(req, ['mapping', 'acct_code']);
 if (validation.error) return validation.error;
 
 const { file, data } = validation;
@@ -291,7 +291,7 @@ File upload routes now explicitly run on Node.js runtime:
 
 ```typescript
 // ✅ NEW: Meta-only export for predictable behavior
-export const runtime = "nodejs";
+export const runtime = 'nodejs';
 ```
 
 **Benefits:**
@@ -311,12 +311,12 @@ const rl = await rateLimit({
   limit: 5,
   windowMs: 60000,
 });
-if (!rl.ok) return tooManyRequests("Please retry later");
+if (!rl.ok) return tooManyRequests('Please retry later');
 
 // Audit logging
 logAuditAttempt({
-  action: "import_attempt",
-  module: "file_upload",
+  action: 'import_attempt',
+  module: 'file_upload',
   companyId: auth.company_id,
   actorId: auth.user_id,
   at: Date.now(),
@@ -351,8 +351,8 @@ export async function POST(req: NextRequest) {
   return Response.json(data, {
     status: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
     },
   });
 }
@@ -381,7 +381,7 @@ export async function POST(req: NextRequest) {
    ```typescript
    // @api:nonstandard (custom headers)
    return Response.json(data, {
-     headers: { "Access-Control-Allow-Origin": "*" },
+     headers: { 'Access-Control-Allow-Origin': '*' },
    });
    ```
 
@@ -390,7 +390,7 @@ export async function POST(req: NextRequest) {
    ```typescript
    // @api:nonstandard (custom headers)
    const formData = await req.formData();
-   const file = formData.get("file") as File;
+   const file = formData.get('file') as File;
    // Process file with custom headers
    ```
 
@@ -398,9 +398,9 @@ export async function POST(req: NextRequest) {
 
    ```typescript
    // @api:nonstandard (health check)
-   return new Response("ok", {
+   return new Response('ok', {
      status: 200,
-     headers: { "content-type": "text/plain" },
+     headers: { 'content-type': 'text/plain' },
    });
    ```
 
@@ -410,11 +410,11 @@ export async function POST(req: NextRequest) {
    return Response.json(
      {
        result,
-       message: data.dry_run ? "Dry run completed" : "Run completed",
+       message: data.dry_run ? 'Dry run completed' : 'Run completed',
      },
      {
        status: 200,
-       headers: { "Access-Control-Allow-Origin": "*" },
+       headers: { 'Access-Control-Allow-Origin': '*' },
      }
    );
    ```
@@ -425,9 +425,9 @@ Routes that only export metadata (no handlers) are automatically skipped:
 
 ```typescript
 // ✅ META-ONLY: Automatically detected and skipped
-export const runtime = "edge";
-export const preferredRegion = "iad1";
-export const dynamic = "force-dynamic";
+export const runtime = 'edge';
+export const preferredRegion = 'iad1';
+export const dynamic = 'force-dynamic';
 ```
 
 ## 🔧 Refactoring Tools
@@ -507,12 +507,12 @@ export const dynamic = "force-dynamic";
 return Response.json(
   { data: result },
   {
-    headers: { "Access-Control-Allow-Origin": "*" },
+    headers: { 'Access-Control-Allow-Origin': '*' },
   }
 );
 
 // Missing error handling
-export const POST = async (req) => {
+export const POST = async req => {
   /* no try/catch */
 };
 
@@ -521,7 +521,7 @@ const data = await req.json(); // No validation
 
 // Missing nonstandard flag
 export async function GET(req) {
-  return Response.json(data, { headers: { CORS: "*" } }); // ❌ Missing flag
+  return Response.json(data, { headers: { CORS: '*' } }); // ❌ Missing flag
 }
 ```
 
@@ -532,7 +532,7 @@ export async function GET(req) {
 return ok(result);
 
 // Wrap with error boundary
-export const POST = withRouteErrors(async (req) => {
+export const POST = withRouteErrors(async req => {
   /* ... */
 });
 
@@ -542,7 +542,7 @@ const validatedData = RequestSchema.parse(body);
 // Flag nonstandard APIs
 // @api:nonstandard (custom headers)
 export async function GET(req) {
-  return Response.json(data, { headers: { CORS: "*" } }); // ✅ Properly flagged
+  return Response.json(data, { headers: { CORS: '*' } }); // ✅ Properly flagged
 }
 ```
 

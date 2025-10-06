@@ -33,13 +33,13 @@
 
 ## 📊 Current Status
 
-| Layer         | Status  | Details                          |
-| ------------- | ------- | -------------------------------- |
-| **Database**  | ⬜/✅   | <Schema status and notes>        |
-| **Services**  | ⬜/✅   | <Service layer status>           |
-| **API**       | ⬜/✅   | <API endpoint coverage>          |
-| **Contracts** | ⬜/✅   | <Type-safe contracts status>     |
-| **UI**        | ⬜/✅   | <UI implementation status>       |
+| Layer         | Status | Details                      |
+| ------------- | ------ | ---------------------------- |
+| **Database**  | ⬜/✅  | <Schema status and notes>    |
+| **Services**  | ⬜/✅  | <Service layer status>       |
+| **API**       | ⬜/✅  | <API endpoint coverage>      |
+| **Contracts** | ⬜/✅  | <Type-safe contracts status> |
+| **UI**        | ⬜/✅  | <UI implementation status>   |
 
 ### API Coverage
 
@@ -51,9 +51,9 @@
 
 ### Risks & Blockers
 
-| Risk                    | Impact         | Mitigation                        | Owner      |
-| ----------------------- | -------------- | --------------------------------- | ---------- |
-| <Risk description>      | HIGH/MED/LOW   | <Mitigation strategy>             | @<handle>  |
+| Risk               | Impact       | Mitigation            | Owner     |
+| ------------------ | ------------ | --------------------- | --------- |
+| <Risk description> | HIGH/MED/LOW | <Mitigation strategy> | @<handle> |
 
 ---
 
@@ -147,15 +147,15 @@
 
 ### Performance Budgets
 
-| Metric                     | Target              | Measurement             |
-| -------------------------- | ------------------- | ----------------------- |
-| TTFB (staging)             | ≤ 70ms              | Server timing header    |
-| Client TTI for `/<route>`  | ≤ 200ms             | Lighthouse CI           |
-| Network requests (initial) | ≤ 4                 | Chrome DevTools         |
-| UI bundle size             | ≤ 250KB gzipped     | Webpack bundle analyzer |
-| Table virtualization       | After ≥ 200 rows    | DataTable config        |
-| Server pagination          | Default 50/page     | API query param         |
-| Search response (P95)      | < 150ms             | APM traces              |
+| Metric                     | Target           | Measurement             |
+| -------------------------- | ---------------- | ----------------------- |
+| TTFB (staging)             | ≤ 70ms           | Server timing header    |
+| Client TTI for `/<route>`  | ≤ 200ms          | Lighthouse CI           |
+| Network requests (initial) | ≤ 4              | Chrome DevTools         |
+| UI bundle size             | ≤ 250KB gzipped  | Webpack bundle analyzer |
+| Table virtualization       | After ≥ 200 rows | DataTable config        |
+| Server pagination          | Default 50/page  | API query param         |
+| Search response (P95)      | < 150ms          | APM traces              |
 
 ### Accessibility
 
@@ -168,24 +168,24 @@
 
 ### Security
 
-| Layer           | Requirement                                      |
-| --------------- | ------------------------------------------------ |
+| Layer           | Requirement                                         |
+| --------------- | --------------------------------------------------- |
 | RBAC Scopes     | `<module>.read`, `<module>.write`, `<module>.admin` |
-| Enforcement     | Server-side on all endpoints                     |
-| Client Behavior | Hide non-permitted actions (buttons/menu items)  |
-| Data Exposure   | Only show data user has permission to view       |
-| Idempotency     | All mutations use auto-generated idempotency key |
-| Rate Limiting   | Handled by BFF; UI shows appropriate toast       |
+| Enforcement     | Server-side on all endpoints                        |
+| Client Behavior | Hide non-permitted actions (buttons/menu items)     |
+| Data Exposure   | Only show data user has permission to view          |
+| Idempotency     | All mutations use auto-generated idempotency key    |
+| Rate Limiting   | Handled by BFF; UI shows appropriate toast          |
 
 **Reference**: See `security-policy.json` for full threat model and controls.
 
 #### UI Permissions Matrix
 
-| Role            | Action1 | Action2 | Action3 | Action4 | Action5 |
-| --------------- | ------- | ------- | ------- | ------- | ------- |
-| <module>.read   | <✅/❌> | <✅/❌> | <✅/❌> | <✅/❌> | <✅/❌> |
-| <module>.write  | <✅/❌> | <✅/❌> | <✅/❌> | <✅/❌> | <✅/❌> |
-| <module>.admin  | <✅/❌> | <✅/❌> | <✅/❌> | <✅/❌> | <✅/❌> |
+| Role           | Action1 | Action2 | Action3 | Action4 | Action5 |
+| -------------- | ------- | ------- | ------- | ------- | ------- |
+| <module>.read  | <✅/❌> | <✅/❌> | <✅/❌> | <✅/❌> | <✅/❌> |
+| <module>.write | <✅/❌> | <✅/❌> | <✅/❌> | <✅/❌> | <✅/❌> |
+| <module>.admin | <✅/❌> | <✅/❌> | <✅/❌> | <✅/❌> | <✅/❌> |
 
 **UI Implementation**:
 
@@ -207,11 +207,11 @@
 
 ### <Module> Business Rules
 
-| Rule                | Enforcement                                   |
-| ------------------- | --------------------------------------------- |
-| **<Rule Name>**     | <Description of how rule is enforced>         |
-| **<Rule Name>**     | <Description>                                 |
-| **<Rule Name>**     | <Description>                                 |
+| Rule            | Enforcement                           |
+| --------------- | ------------------------------------- |
+| **<Rule Name>** | <Description of how rule is enforced> |
+| **<Rule Name>** | <Description>                         |
+| **<Rule Name>** | <Description>                         |
 
 ### Currency & Rounding
 
@@ -233,14 +233,14 @@
 
 ### All Possible States
 
-| State          | UI Display                                | User Action                   |
-| -------------- | ----------------------------------------- | ----------------------------- |
-| **Empty**      | <Empty state message>                     | <Primary action>              |
-| **Loading**    | <Loading indicator>                       | N/A                           |
-| **Error**      | <Error message>                           | <Retry / support action>      |
-| **Partial**    | <Partial data display>                    | <Load more / pagination>      |
-| **No Results** | <No results message>                      | <Clear filters / adjust>      |
-| **Conflict**   | <Conflict resolution UI>                  | <Review / force save>         |
+| State          | UI Display               | User Action              |
+| -------------- | ------------------------ | ------------------------ |
+| **Empty**      | <Empty state message>    | <Primary action>         |
+| **Loading**    | <Loading indicator>      | N/A                      |
+| **Error**      | <Error message>          | <Retry / support action> |
+| **Partial**    | <Partial data display>   | <Load more / pagination> |
+| **No Results** | <No results message>     | <Clear filters / adjust> |
+| **Conflict**   | <Conflict resolution UI> | <Review / force save>    |
 
 ### Form Validation
 
@@ -250,15 +250,15 @@
 
 ### Network Errors
 
-| HTTP Status | UI Message                                | Action              |
-| ----------- | ----------------------------------------- | ------------------- |
-| 400         | "Invalid request. Check your input."      | Inline field errors |
-| 401         | "Session expired. Please log in again."   | Redirect to login   |
-| 403         | "You don't have permission."              | Hide action         |
-| 404         | "<Entity> not found."                     | Return to list      |
-| 409         | "This <entity> was changed. Review."      | Show diff modal     |
-| 422         | "Validation failed"                       | Inline errors       |
-| 500         | "Something went wrong. Try again."        | Retry button        |
+| HTTP Status | UI Message                              | Action              |
+| ----------- | --------------------------------------- | ------------------- |
+| 400         | "Invalid request. Check your input."    | Inline field errors |
+| 401         | "Session expired. Please log in again." | Redirect to login   |
+| 403         | "You don't have permission."            | Hide action         |
+| 404         | "<Entity> not found."                   | Return to list      |
+| 409         | "This <entity> was changed. Review."    | Show diff modal     |
+| 422         | "Validation failed"                     | Inline errors       |
+| 500         | "Something went wrong. Try again."      | Retry button        |
 
 ---
 
@@ -268,59 +268,59 @@ Complete copy for all user-facing states. Use i18n keys from `@/i18n/messages/<m
 
 ### Page Titles & Headers
 
-| Context     | Copy            | i18n Key                 |
-| ----------- | --------------- | ------------------------ |
-| List Page   | "<Page Title>"  | `<module>.list.title`    |
-| Detail Page | "<Page Title>"  | `<module>.detail.title`  |
-| Create Modal| "<Modal Title>" | `<module>.create.title`  |
+| Context      | Copy            | i18n Key                |
+| ------------ | --------------- | ----------------------- |
+| List Page    | "<Page Title>"  | `<module>.list.title`   |
+| Detail Page  | "<Page Title>"  | `<module>.detail.title` |
+| Create Modal | "<Modal Title>" | `<module>.create.title` |
 
 ### State Messages
 
-| State             | Title          | Message                  | Action Button | i18n Key             |
-| ----------------- | -------------- | ------------------------ | ------------- | -------------------- |
-| Empty             | "<Title>"      | "<Message>"              | "<Action>"    | `<module>.empty.*`   |
-| Error             | "<Title>"      | "<Message>"              | "<Action>"    | `<module>.error.*`   |
-| No Results        | "<Title>"      | "<Message>"              | "<Action>"    | `<module>.noResults.*` |
-| Permission Denied | "<Title>"      | "<Message>"              | "<Action>"    | `<module>.permissionDenied.*` |
-| Offline           | "<Title>"      | "<Message>"              | "<Action>"    | `<module>.offline.*` |
-| Conflict (409)    | "<Title>"      | "<Message>"              | "<Action>"    | `<module>.conflict.*` |
+| State             | Title     | Message     | Action Button | i18n Key                      |
+| ----------------- | --------- | ----------- | ------------- | ----------------------------- |
+| Empty             | "<Title>" | "<Message>" | "<Action>"    | `<module>.empty.*`            |
+| Error             | "<Title>" | "<Message>" | "<Action>"    | `<module>.error.*`            |
+| No Results        | "<Title>" | "<Message>" | "<Action>"    | `<module>.noResults.*`        |
+| Permission Denied | "<Title>" | "<Message>" | "<Action>"    | `<module>.permissionDenied.*` |
+| Offline           | "<Title>" | "<Message>" | "<Action>"    | `<module>.offline.*`          |
+| Conflict (409)    | "<Title>" | "<Message>" | "<Action>"    | `<module>.conflict.*`         |
 
 ### Action Confirmations
 
-| Action   | Title       | Message     | Confirm Button | Cancel Button | i18n Key                   |
-| -------- | ----------- | ----------- | -------------- | ------------- | -------------------------- |
-| Delete   | "<Title>"   | "<Message>" | "<Confirm>"    | "Cancel"      | `<module>.delete.confirm.*` |
-| Archive  | "<Title>"   | "<Message>" | "<Confirm>"    | "Cancel"      | `<module>.archive.confirm.*` |
+| Action  | Title     | Message     | Confirm Button | Cancel Button | i18n Key                     |
+| ------- | --------- | ----------- | -------------- | ------------- | ---------------------------- |
+| Delete  | "<Title>" | "<Message>" | "<Confirm>"    | "Cancel"      | `<module>.delete.confirm.*`  |
+| Archive | "<Title>" | "<Message>" | "<Confirm>"    | "Cancel"      | `<module>.archive.confirm.*` |
 
 ### Success Messages (Toast)
 
-| Action  | Message            | i18n Key                   |
-| ------- | ------------------ | -------------------------- |
-| Create  | "<Success message>"| `<module>.create.success`  |
-| Update  | "<Success message>"| `<module>.update.success`  |
-| Delete  | "<Success message>"| `<module>.delete.success`  |
+| Action | Message             | i18n Key                  |
+| ------ | ------------------- | ------------------------- |
+| Create | "<Success message>" | `<module>.create.success` |
+| Update | "<Success message>" | `<module>.update.success` |
+| Delete | "<Success message>" | `<module>.delete.success` |
 
 ### Error Messages (Toast)
 
-| Scenario        | Message         | i18n Key                  |
-| --------------- | --------------- | ------------------------- |
-| Create Failed   | "<Error msg>"   | `<module>.create.error`   |
-| Update Failed   | "<Error msg>"   | `<module>.update.error`   |
-| Network Error   | "<Error msg>"   | `<module>.error.network`  |
+| Scenario      | Message       | i18n Key                 |
+| ------------- | ------------- | ------------------------ |
+| Create Failed | "<Error msg>" | `<module>.create.error`  |
+| Update Failed | "<Error msg>" | `<module>.update.error`  |
+| Network Error | "<Error msg>" | `<module>.error.network` |
 
 ### Form Labels & Help Text
 
-| Field      | Label       | Placeholder  | Help Text        | i18n Key                 |
-| ---------- | ----------- | ------------ | ---------------- | ------------------------ |
-| <Field>    | "<Label>"   | "<Hint>"     | "<Help text>"    | `<module>.field.<name>.*`|
+| Field   | Label     | Placeholder | Help Text     | i18n Key                  |
+| ------- | --------- | ----------- | ------------- | ------------------------- |
+| <Field> | "<Label>" | "<Hint>"    | "<Help text>" | `<module>.field.<name>.*` |
 
 ### Keyboard Shortcuts Help
 
-| Shortcut | Description         | i18n Key                      |
-| -------- | ------------------- | ----------------------------- |
-| `/`      | "Focus search"      | `<module>.shortcuts.search`   |
-| `n`      | "Create new"        | `<module>.shortcuts.new`      |
-| `e`      | "Edit selected"     | `<module>.shortcuts.edit`     |
+| Shortcut | Description     | i18n Key                    |
+| -------- | --------------- | --------------------------- |
+| `/`      | "Focus search"  | `<module>.shortcuts.search` |
+| `n`      | "Create new"    | `<module>.shortcuts.new`    |
+| `e`      | "Edit selected" | `<module>.shortcuts.edit`   |
 
 ---
 
@@ -396,12 +396,12 @@ export function use<Entity>(id: string) {
 
 ### Error Mapping
 
-| API Error        | User Message         | UI Action            |
-| ---------------- | -------------------- | -------------------- |
-| 409 (Conflict)   | "<User message>"     | Show conflict modal  |
-| 422 (Validation) | "<Field errors>"     | Inline form errors   |
-| 403 (Forbidden)  | "<Permission msg>"   | Hide action buttons  |
-| 500 (Server)     | "<Error message>"    | Retry + support link |
+| API Error        | User Message       | UI Action            |
+| ---------------- | ------------------ | -------------------- |
+| 409 (Conflict)   | "<User message>"   | Show conflict modal  |
+| 422 (Validation) | "<Field errors>"   | Inline form errors   |
+| 403 (Forbidden)  | "<Permission msg>" | Hide action buttons  |
+| 500 (Server)     | "<Error message>"  | Retry + support link |
 
 ### Retry & Backoff
 
@@ -424,19 +424,19 @@ export function use<Entity>(id: string) {
 
 ### Invalidation Rules
 
-| Action          | Invalidates                                    |
-| --------------- | ---------------------------------------------- |
-| Create <Entity> | `["<module>"]`                                 |
-| Update <Entity> | `["<module>"]`, `["<module>", "detail", id]`   |
-| Delete <Entity> | `["<module>"]`                                 |
+| Action          | Invalidates                                  |
+| --------------- | -------------------------------------------- |
+| Create <Entity> | `["<module>"]`                               |
+| Update <Entity> | `["<module>"]`, `["<module>", "detail", id]` |
+| Delete <Entity> | `["<module>"]`                               |
 
 ### Stale Time
 
-| Query Type     | Stale Time | Reasoning                 |
-| -------------- | ---------- | ------------------------- |
-| List           | 30s        | <Reasoning>               |
-| Detail         | 1min       | <Reasoning>               |
-| <Custom>       | <Time>     | <Reasoning>               |
+| Query Type | Stale Time | Reasoning   |
+| ---------- | ---------- | ----------- |
+| List       | 30s        | <Reasoning> |
+| Detail     | 1min       | <Reasoning> |
+| <Custom>   | <Time>     | <Reasoning> |
 
 ### Cache Tags (Next.js)
 
@@ -722,13 +722,13 @@ pnpm run demo:reset:<module>
 
 ```typescript
 // Server actions
-"use server";
+'use server';
 
-import { revalidateTag } from "next/cache";
+import { revalidateTag } from 'next/cache';
 
 export async function create<Entity>(data) {
   // ... mutation logic
-  revalidateTag("<module>");
+  revalidateTag('<module>');
 }
 ```
 
@@ -736,12 +736,12 @@ export async function create<Entity>(data) {
 
 ## 📊 Analytics & Audit Events
 
-| Event                      | When            | Properties                  |
-| -------------------------- | --------------- | --------------------------- |
-| <Module>.<Entity>.Viewed   | Detail page open| `<entity>_id`               |
-| <Module>.<Entity>.Created  | After 2xx       | `<entity>_id`, <fields>     |
-| <Module>.<Entity>.Updated  | After 2xx       | `<entity>_id`, changed fields |
-| <Module>.<Entity>.Deleted  | After 2xx       | `<entity>_id`, `reason?`    |
+| Event                     | When             | Properties                    |
+| ------------------------- | ---------------- | ----------------------------- |
+| <Module>.<Entity>.Viewed  | Detail page open | `<entity>_id`                 |
+| <Module>.<Entity>.Created | After 2xx        | `<entity>_id`, <fields>       |
+| <Module>.<Entity>.Updated | After 2xx        | `<entity>_id`, changed fields |
+| <Module>.<Entity>.Deleted | After 2xx        | `<entity>_id`, `reason?`      |
 
 **Implementation**:
 
@@ -767,20 +767,20 @@ analytics.track("<Module>.<Entity>.Created", {
 
 ### Keyboard Shortcuts
 
-| Key     | Action          | Scope       |
-| ------- | --------------- | ----------- |
-| `/`     | Focus search    | List        |
-| `n`     | New <entity>    | List        |
-| `e`     | Edit selected   | Detail      |
-| `Enter` | Open selected   | Table       |
-| `Escape`| Close modal     | Modal       |
+| Key      | Action        | Scope  |
+| -------- | ------------- | ------ |
+| `/`      | Focus search  | List   |
+| `n`      | New <entity>  | List   |
+| `e`      | Edit selected | Detail |
+| `Enter`  | Open selected | Table  |
+| `Escape` | Close modal   | Modal  |
 
 **Implementation**:
 
 ```typescript
 useHotkeys([
-  ["/", () => searchInputRef.current?.focus()],
-  ["n", () => openCreateModal()],
+  ['/', () => searchInputRef.current?.focus()],
+  ['n', () => openCreateModal()],
 ]);
 ```
 
@@ -788,11 +788,11 @@ useHotkeys([
 
 ## 📅 Timeline & Milestones
 
-| Day | Tasks                      | Deliverable              | Flag Status |
-| --- | -------------------------- | ------------------------ | ----------- |
-| 1   | Setup + Hooks + List Page  | Basic listing works      | WIP         |
-| 2   | Detail Page + CRUD         | CRUD operations complete | WIP         |
-| 3   | Tests + Polish             | Production-ready module  | GA          |
+| Day | Tasks                     | Deliverable              | Flag Status |
+| --- | ------------------------- | ------------------------ | ----------- |
+| 1   | Setup + Hooks + List Page | Basic listing works      | WIP         |
+| 2   | Detail Page + CRUD        | CRUD operations complete | WIP         |
+| 3   | Tests + Polish            | Production-ready module  | GA          |
 
 **Total Effort**: <N> days (<N> hours)
 
@@ -802,12 +802,12 @@ useHotkeys([
 
 ### Rollout Plan
 
-| Environment | Cohort           | Success Criteria                       | Duration | Rollback Trigger |
-| ----------- | ---------------- | -------------------------------------- | -------- | ---------------- |
-| Dev         | All developers   | Manual QA passes                       | 1 day    | Critical bugs    |
-| Staging     | QA team + PM     | All E2E tests pass, Lighthouse ≥90     | 2 days   | Test failures    |
-| Production  | Beta users (5%)  | Error rate < 0.1%, P95 latency < 200ms | 3 days   | SLO breach       |
-| Production  | All users (100%) | Monitor for 24h, error budget maintained | Ongoing | Error rate spike |
+| Environment | Cohort           | Success Criteria                         | Duration | Rollback Trigger |
+| ----------- | ---------------- | ---------------------------------------- | -------- | ---------------- |
+| Dev         | All developers   | Manual QA passes                         | 1 day    | Critical bugs    |
+| Staging     | QA team + PM     | All E2E tests pass, Lighthouse ≥90       | 2 days   | Test failures    |
+| Production  | Beta users (5%)  | Error rate < 0.1%, P95 latency < 200ms   | 3 days   | SLO breach       |
+| Production  | All users (100%) | Monitor for 24h, error budget maintained | Ongoing  | Error rate spike |
 
 ### Feature Flag Configuration
 
@@ -846,7 +846,7 @@ flags: {
 2. **Invalidate cache**:
 
    ```typescript
-   revalidateTag("<module>");
+   revalidateTag('<module>');
    ```
 
 3. **Clear CDN cache**:
@@ -865,13 +865,13 @@ flags: {
 
 **Rollback Decision Matrix**:
 
-| Scenario                 | Action             | Approval Required |
-| ------------------------ | ------------------ | ----------------- |
-| Error rate > 5%          | Immediate rollback | No (auto-trigger) |
-| Error rate 1-5%          | Partial rollback   | On-call engineer  |
-| P95 latency > 1s         | Investigate first  | On-call engineer  |
-| A11y violation found     | Partial rollback   | QA + PM           |
-| Data corruption/loss     | Immediate rollback | No (auto-trigger) |
+| Scenario             | Action             | Approval Required |
+| -------------------- | ------------------ | ----------------- |
+| Error rate > 5%      | Immediate rollback | No (auto-trigger) |
+| Error rate 1-5%      | Partial rollback   | On-call engineer  |
+| P95 latency > 1s     | Investigate first  | On-call engineer  |
+| A11y violation found | Partial rollback   | QA + PM           |
+| Data corruption/loss | Immediate rollback | No (auto-trigger) |
 
 ---
 

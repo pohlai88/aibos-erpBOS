@@ -1,44 +1,44 @@
 {
-    "crons": [
-        {
-            "path": "/api/cash/alerts/cron/daily",
-            "schedule": "0 1 * * *"
-        },
-        {
-            "path": "/api/payments/bank/process?action=dispatch",
-            "schedule": "*/5 * * * *"
-        },
-        {
-            "path": "/api/payments/bank/process?action=fetch",
-            "schedule": "*/5 * * * *"
-        },
-        {
-            "path": "/api/insights/harvest",
-            "schedule": "5 2 * * *"
-        },
-        {
-            "path": "/api/insights/benchmarks/run",
-            "schedule": "15 2 * * *"
-        },
-        {
-            "path": "/api/insights/anomalies",
-            "schedule": "0 * * * *"
-        },
-        {
-            "path": "/api/close/cron/sla",
-            "schedule": "*/15 * * * *"
-        },
-        {
-            "path": "/api/close/ingest",
-            "schedule": "0 1 * * *"
-        },
-        {
-            "path": "/api/ops/cron/evaluate",
-            "schedule": "*/2 * * * *"
-        },
-        {
-            "path": "/api/ops/cron/backoff",
-            "schedule": "*/5 * * * *"
-        }
-    ]
+  "crons": [
+    {
+      "path": "/api/cash/alerts/cron/daily",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/payments/bank/process?action=dispatch",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/payments/bank/process?action=fetch",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/insights/harvest",
+      "schedule": "5 2 * * *"
+    },
+    {
+      "path": "/api/insights/benchmarks/run",
+      "schedule": "15 2 * * *"
+    },
+    {
+      "path": "/api/insights/anomalies",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/close/cron/sla",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/close/ingest",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/ops/cron/evaluate",
+      "schedule": "*/2 * * * *"
+    },
+    {
+      "path": "/api/ops/cron/backoff",
+      "schedule": "*/5 * * * *"
+    }
+  ]
 }

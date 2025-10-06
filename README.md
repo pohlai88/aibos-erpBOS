@@ -263,6 +263,29 @@ docker-compose up --build
 - **Prettier**: Code formatting
 - **Git Hooks**: Pre-commit validation
 
+#### API Route Standards
+
+This project enforces consistent API route patterns using ESLint rules. However, some routes are intentionally non-standard and marked with `@api:nonstandard` annotations for specific purposes like:
+
+- **Health checks** (`/api/healthz`, `/api/readyz`)
+- **CORS headers** (ping endpoints, external integrations)
+- **Special handling** requirements
+
+**⚠️ Important**: When adding new `@api:nonstandard` files, you must run the ESLint fix script to prevent false positives:
+
+```bash
+# Run this script after adding @api:nonstandard files
+node scripts/fix-nonstandard-eslint.js
+```
+
+This script automatically adds `/* eslint-disable no-restricted-syntax */` comments to files with `@api:nonstandard` annotations, preventing ESLint from flagging intentional non-standard patterns.
+
+**Script Features:**
+- Automatically finds all files with `@api:nonstandard` annotations
+- Adds ESLint disable comments only where needed
+- Skips files that already have disable comments
+- Provides detailed processing summary
+
 ### Testing Strategy
 
 - **Unit Tests**: Package-level testing
@@ -405,6 +428,13 @@ docker-compose ps
 pnpm --filter @aibos/api-client build:types
 ```
 
+#### ESLint Errors with @api:nonstandard Files
+
+```bash
+# If you see ESLint errors for files with @api:nonstandard annotations
+node scripts/fix-nonstandard-eslint.js
+```
+
 ### Getting Help
 
 - **Issues**: Create GitHub issues for bugs
@@ -439,21 +469,24 @@ pnpm --filter @aibos/api-client build:types
 This project is proprietary software. All rights reserved.
 
 <!-- IMPL_MATRIX:BEGIN -->
+
 ## 📊 Implementation Coverage Matrix
 
-| Capability | Status & Maturity | Coverage | Missing Components | Owner |
-|---|---|---|---|---|
-| COA_CORE | 🟡 Partial<br><small>L0</small> | 0% | **api**: GET /api/coa, POST /api/coa<br>**ui**: /settings/coa<br>**migrations**: account, company | Accounting Team |
-| JE_POSTING | 🟡 Partial<br><small>L0</small> | 0% | **api**: POST /api/journal, GET /api/journal/[id]<br>**tests**: journal<br>**migrations**: journal_entries, journal_lines | Accounting Team |
-| MULTICURR_CORE | 🟡 Partial<br><small>L0</small> | 0% | **tables**: fx_rates<br>**api**: GET /api/fx/latest<br>**migrations**: fx_rates | Finance Team |
+| Capability     | Status & Maturity               | Coverage | Missing Components                                                                                                        | Owner           |
+| -------------- | ------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| COA_CORE       | 🟡 Partial<br><small>L0</small> | 0%       | **api**: GET /api/coa, POST /api/coa<br>**ui**: /settings/coa<br>**migrations**: account, company                         | Accounting Team |
+| JE_POSTING     | 🟡 Partial<br><small>L0</small> | 0%       | **api**: POST /api/journal, GET /api/journal/[id]<br>**tests**: journal<br>**migrations**: journal_entries, journal_lines | Accounting Team |
+| MULTICURR_CORE | 🟡 Partial<br><small>L0</small> | 0%       | **tables**: fx_rates<br>**api**: GET /api/fx/latest<br>**migrations**: fx_rates                                           | Finance Team    |
 
 ### Maturity Levels
+
 - **L0**: Not started
-- **L1**: Tables + API implemented  
+- **L1**: Tables + API implemented
 - **L2**: L1 + UI + Tests
 - **L3**: L2 + High coverage (≥85%) + Documentation
 
-*Last updated: 2025-10-05T04:33:28.028Z*
+_Last updated: 2025-10-05T04:33:28.028Z_
+
 <!-- IMPL_MATRIX:END -->
 
 ## 👥 Team

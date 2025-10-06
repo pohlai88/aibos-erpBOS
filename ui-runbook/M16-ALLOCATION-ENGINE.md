@@ -280,20 +280,20 @@ export default function AllocationAnalysis() {
 
 ```typescript
 // apps/web/hooks/useAllocationEngine.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useAllocationEngine(filters = {}) {
   return useQuery({
-    queryKey: ["m16", filters],
-    queryFn: () => apiClient.GET("/api/[path]", { query: filters }),
+    queryKey: ['m16', filters],
+    queryFn: () => apiClient.GET('/api/[path]', { query: filters }),
   });
 }
 
 export function useCreateAllocationEngine() {
   return useMutation({
-    mutationFn: (data) => apiClient.POST("/api/[path]", { body: data }),
-    onSuccess: () => queryClient.invalidateQueries(["m16"]),
+    mutationFn: data => apiClient.POST('/api/[path]', { body: data }),
+    onSuccess: () => queryClient.invalidateQueries(['m16']),
   });
 }
 ```

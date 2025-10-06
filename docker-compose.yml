@@ -7,12 +7,12 @@ services:
       POSTGRES_PASSWORD: aibos
       POSTGRES_DB: aibos
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - dbdata:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U aibos -d aibos"]
+      test: ['CMD-SHELL', 'pg_isready -U aibos -d aibos']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -27,13 +27,13 @@ services:
       DATABASE_URL: postgresql://aibos:aibos@db:5432/aibos
       NODE_ENV: production
     ports:
-      - "3000:3000"
+      - '3000:3000'
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/healthz"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/healthz']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -47,13 +47,13 @@ services:
     environment:
       NODE_ENV: production
     ports:
-      - "3001:3001"
+      - '3001:3001'
     depends_on:
       bff:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3001']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -72,7 +72,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "pgrep", "-f", "worker"]
+      test: ['CMD', 'pgrep', '-f', 'worker']
       interval: 30s
       timeout: 10s
       retries: 3

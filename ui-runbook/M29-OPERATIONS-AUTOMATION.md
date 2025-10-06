@@ -499,35 +499,35 @@ export default function ProcessAnalyticsDashboard() {
 
 ```typescript
 // apps/web/hooks/useOperations.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useWorkflows() {
   return useQuery({
-    queryKey: ["ops-workflows"],
-    queryFn: () => apiClient.GET("/api/ops/workflows"),
+    queryKey: ['ops-workflows'],
+    queryFn: () => apiClient.GET('/api/ops/workflows'),
   });
 }
 
 export function useRPATasks() {
   return useQuery({
-    queryKey: ["ops-rpa-tasks"],
-    queryFn: () => apiClient.GET("/api/ops/rpa-tasks"),
+    queryKey: ['ops-rpa-tasks'],
+    queryFn: () => apiClient.GET('/api/ops/rpa-tasks'),
   });
 }
 
 export function useProcessAnalytics() {
   return useQuery({
-    queryKey: ["ops-analytics"],
-    queryFn: () => apiClient.GET("/api/ops/analytics"),
+    queryKey: ['ops-analytics'],
+    queryFn: () => apiClient.GET('/api/ops/analytics'),
   });
 }
 
 export function useRunBot() {
   return useMutation({
-    mutationFn: (botId) =>
-      apiClient.POST("/api/ops/rpa-tasks/run", { body: { bot_id: botId } }),
-    onSuccess: () => queryClient.invalidateQueries(["ops-rpa-tasks"]),
+    mutationFn: botId =>
+      apiClient.POST('/api/ops/rpa-tasks/run', { body: { bot_id: botId } }),
+    onSuccess: () => queryClient.invalidateQueries(['ops-rpa-tasks']),
   });
 }
 ```

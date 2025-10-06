@@ -1,7 +1,7 @@
 // M15: Working Capital & Cash Flow Contracts
 // packages/contracts/src/cash.ts
 
-import { z } from "zod";
+import { z } from 'zod';
 
 export const WcProfileCreate = z.object({
   name: z.string().min(1),
@@ -22,9 +22,9 @@ export const CashVersionCreate = z.object({
 export type CashVersionCreate = z.infer<typeof CashVersionCreate>;
 
 export const CashGenerateRequest = z.object({
-  from_scenario: z.string().min(1),  // e.g., "forecast:FY26-FC1" or "FY26-WIP"
+  from_scenario: z.string().min(1), // e.g., "forecast:FY26-FC1" or "FY26-WIP"
   profile_name: z.string().optional(),
-  present_ccy: z.string().length(3).default("MYR"),
+  present_ccy: z.string().length(3).default('MYR'),
   precision: z.number().int().min(0).max(6).default(2),
 });
 export type CashGenerateRequest = z.infer<typeof CashGenerateRequest>;

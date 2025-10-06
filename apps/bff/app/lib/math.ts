@@ -6,16 +6,21 @@
  * Use this at domain boundaries when exposing amounts to users/ledgers
  */
 export function asCents(n: number): number {
-    return Math.round(n * 100) / 100;
+  return Math.round(n * 100) / 100;
 }
 
 /**
  * Robust approximate equality matcher for financial calculations
  * Handles IEEE-754 floating point precision issues
  */
-export function approxEq(a: number, b: number, abs = 1e-8, rel = 1e-8): boolean {
-    const diff = Math.abs(a - b);
-    return diff <= Math.max(abs, rel * Math.max(Math.abs(a), Math.abs(b)));
+export function approxEq(
+  a: number,
+  b: number,
+  abs = 1e-8,
+  rel = 1e-8
+): boolean {
+  const diff = Math.abs(a - b);
+  return diff <= Math.max(abs, rel * Math.max(Math.abs(a), Math.abs(b)));
 }
 
 /**
@@ -23,19 +28,19 @@ export function approxEq(a: number, b: number, abs = 1e-8, rel = 1e-8): boolean 
  * For DDB, allows for reasonable variance due to mathematical constraints
  */
 export function validateDepreciationCalculation(
-    totalCharges: number,
-    originalCost: number,
-    salvageValue: number,
-    tolerance = 0.01
+  totalCharges: number,
+  originalCost: number,
+  salvageValue: number,
+  tolerance = 0.01
 ): boolean {
-    const expectedTotal = originalCost - salvageValue;
-    const difference = Math.abs(totalCharges - expectedTotal);
+  const expectedTotal = originalCost - salvageValue;
+  const difference = Math.abs(totalCharges - expectedTotal);
 
-    // For DDB, allow up to 15% variance due to mathematical constraints
-    // This accounts for the fact that DDB doesn't always reach exact residual values
-    const maxVariance = Math.max(expectedTotal * 0.15, tolerance);
+  // For DDB, allow up to 15% variance due to mathematical constraints
+  // This accounts for the fact that DDB doesn't always reach exact residual values
+  const maxVariance = Math.max(expectedTotal * 0.15, tolerance);
 
-    return difference <= maxVariance;
+  return difference <= maxVariance;
 }
 
 /**
@@ -43,17 +48,17 @@ export function validateDepreciationCalculation(
  * For DDB, allows for reasonable variance due to mathematical constraints
  */
 export function validateBookValue(
-    originalCost: number,
-    totalDepreciation: number,
-    salvageValue: number,
-    tolerance = 0.01
+  originalCost: number,
+  totalDepreciation: number,
+  salvageValue: number,
+  tolerance = 0.01
 ): boolean {
-    const finalBookValue = originalCost - totalDepreciation;
-    const difference = Math.abs(finalBookValue - salvageValue);
+  const finalBookValue = originalCost - totalDepreciation;
+  const difference = Math.abs(finalBookValue - salvageValue);
 
-    // For DDB, allow up to 30% variance due to mathematical constraints
-    // This accounts for the fact that DDB doesn't always reach exact residual values
-    const maxVariance = Math.max(salvageValue * 0.30, tolerance);
+  // For DDB, allow up to 30% variance due to mathematical constraints
+  // This accounts for the fact that DDB doesn't always reach exact residual values
+  const maxVariance = Math.max(salvageValue * 0.3, tolerance);
 
-    return finalBookValue >= 0 && difference <= maxVariance;
+  return finalBookValue >= 0 && difference <= maxVariance;
 }

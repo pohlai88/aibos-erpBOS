@@ -1,7 +1,7 @@
-import { pool } from "../../../lib/db";
-import { requireAuth, requireCapability } from "../../../lib/auth";
-import { withRouteErrors, isResponse } from "../../../lib/route-utils";
-import { convertToPresent } from "@aibos/policies";
+import { pool } from '../../../lib/db';
+import { requireAuth, requireCapability } from '../../../lib/auth';
+import { withRouteErrors, isResponse } from '../../../lib/route-utils';
+import { convertToPresent } from '@aibos/policies';
 
 async function getPresentQuotes(base: string, present: string, onISO: string) {
   const { rows } = await pool.query(
@@ -12,25 +12,35 @@ async function getPresentQuotes(base: string, present: string, onISO: string) {
       limit 1`,
     [base, present, onISO]
   );
-  return rows.map(r => ({ date: r.date, from: r.from, to: r.to, rate: Number(r.rate) }));
+  return rows.map(r => ({
+    date: r.date,
+    from: r.from,
+    to: r.to,
+    rate: Number(r.rate),
+  }));
 }
 
 export const GET = withRouteErrors(async (req: Request) => {
   const auth = await requireAuth(req);
   if (isResponse(auth)) return auth;
 
-  const capCheck = requireCapability(auth, "reports:read");
+  const capCheck = requireCapability(auth, 'reports:read');
   if (isResponse(capCheck)) return capCheck;
 
   const url = new URL(req.url);
 
   // Get company base currency
-  const company = await pool.query(`select base_currency from company where id=$1`, [auth.company_id]);
-  const baseCurrency = company.rows[0]?.base_currency || "MYR";
+  const company = await pool.query(
+    `select base_currency from company where id=$1`,
+    [auth.company_id]
+  );
+  const baseCurrency = company.rows[0]?.base_currency || 'MYR';
 
-  const currency = url.searchParams.get("currency") ?? baseCurrency;
-  const present = url.searchParams.get("present"); // e.g. "USD"
-  const asOf = (url.searchParams.get("as_of") ?? new Date().toISOString()).slice(0, 10);
+  const currency = url.searchParams.get('currency') ?? baseCurrency;
+  const present = url.searchParams.get('present'); // e.g. "USD"
+  const asOf = (
+    url.searchParams.get('as_of') ?? new Date().toISOString()
+  ).slice(0, 10);
 
   const sql = `
     SELECT
@@ -60,16 +70,18 @@ export const GET = withRouteErrors(async (req: Request) => {
   const { rows } = await pool.query(sql, [auth.company_id, currency]);
 
   // control totals
-  let debit = 0, credit = 0;
+  let debit = 0,
+    credit = 0;
   const mapped = rows.map(r => {
     const d = Number(r.debit ?? 0);
     const c = Number(r.credit ?? 0);
-    debit += d; credit += c;
+    debit += d;
+    credit += c;
     return {
       account_code: r.account_code as string,
       debit: d.toFixed(2),
       credit: c.toFixed(2),
-      currency: currency
+      currency: currency,
     };
   });
 
@@ -87,33 +99,51 @@ export const GET = withRouteErrors(async (req: Request) => {
       // Convert all amounts
       convertedRows = mapped.map(r => ({
         ...r,
-        debit: convertToPresent(Number(r.debit), currency, present, quotes, asOf)?.toFixed(2) ?? r.debit,
-        credit: convertToPresent(Number(r.credit), currency, present, quotes, asOf)?.toFixed(2) ?? r.credit,
-        currency: present
+        debit:
+          convertToPresent(
+            Number(r.debit),
+            currency,
+            present,
+            quotes,
+            asOf
+          )?.toFixed(2) ?? r.debit,
+        credit:
+          convertToPresent(
+            Number(r.credit),
+            currency,
+            present,
+            quotes,
+            asOf
+          )?.toFixed(2) ?? r.credit,
+        currency: present,
       }));
 
       // Convert control totals
       debit = convertToPresent(debit, currency, present, quotes, asOf) ?? debit;
-      credit = convertToPresent(credit, currency, present, quotes, asOf) ?? credit;
+      credit =
+        convertToPresent(credit, currency, present, quotes, asOf) ?? credit;
     }
   }
 
-  return Response.json({
-    company_id: auth.company_id,
-    currency: presentCurrency,
-    base_currency: baseCurrency,
-    present_currency: rate ? present : currency,
-    rate_used: rate,
-    rows: convertedRows,
-    control: { debit: debit.toFixed(2), credit: credit.toFixed(2) },
-    equationOK: Math.abs(debit - credit) < 0.01 // Allow for rounding differences
-  }, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+  return Response.json(
+    {
+      company_id: auth.company_id,
+      currency: presentCurrency,
+      base_currency: baseCurrency,
+      present_currency: rate ? present : currency,
+      rate_used: rate,
+      rows: convertedRows,
+      control: { debit: debit.toFixed(2), credit: credit.toFixed(2) },
+      equationOK: Math.abs(debit - credit) < 0.01, // Allow for rounding differences
+    },
+    {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
     }
-  });
+  );
 });
 
 export async function OPTIONS(req: Request) {
@@ -123,6 +153,6 @@ export async function OPTIONS(req: Request) {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
-    }
+    },
   });
 }

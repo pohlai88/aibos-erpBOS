@@ -3,6 +3,7 @@
 ## 🚀 **Quick Ship Checklist**
 
 ### 1. **RBAC Setup** (1 min)
+
 ```bash
 # Add cash:manage capability to roles
 # ✅ Already implemented in rbac.ts
@@ -10,6 +11,7 @@
 ```
 
 ### 2. **Feature Flags** (1 min)
+
 ```bash
 # Enable cash flow features
 # cash.versions=true
@@ -18,6 +20,7 @@
 ```
 
 ### 3. **Sample Working Capital Profile** (2 min)
+
 ```bash
 # Create standard SEA working capital profile
 curl -sX POST -H "X-API-Key: <your-api-key>" -H "content-type: application/json" \
@@ -35,6 +38,7 @@ curl -sX POST -H "X-API-Key: <your-api-key>" -H "content-type: application/json"
 ```
 
 ### 4. **Create Cash Forecast Version** (2 min)
+
 ```bash
 # Create cash forecast version for FY26
 curl -sX POST -H "X-API-Key: <your-api-key>" -H "content-type: application/json" \
@@ -50,6 +54,7 @@ curl -sX POST -H "X-API-Key: <your-api-key>" -H "content-type: application/json"
 ```
 
 ### 5. **Generate Cash Flow** (3 min)
+
 ```bash
 # Generate cash flow from existing forecast
 curl -sX POST -H "X-API-Key: <your-api-key>" -H "content-type: application/json" \
@@ -64,6 +69,7 @@ curl -sX POST -H "X-API-Key: <your-api-key>" -H "content-type: application/json"
 ```
 
 ### 6. **Cash Flow Report** (1 min)
+
 ```bash
 # Generate cash flow report with cost center pivot
 curl -sS -H "X-API-Key: <your-api-key>" \
@@ -75,10 +81,12 @@ curl -sS -H "X-API-Key: <your-api-key>" \
 ## 📊 **Performance Verification**
 
 ### SLO Targets
+
 - **Generate**: p95 < 2s for ≤20k monthly rows ✅
 - **Report**: p95 < 400ms matrix build with pivots ✅
 
 ### Smoke Tests
+
 ```bash
 # Test 1: Working capital math
 node apps/bff/app/services/cash/__tests__/generator.test.ts
@@ -96,11 +104,13 @@ curl -H "X-API-Key: <key>" \
 ## 🔍 **Observability**
 
 ### Log Fields
+
 - `company_id`, `cash_version_id`, `from_scenario`
 - `lines_processed`, `duration_ms`, `source_hash`
 - Event: `cash_flow_generated`
 
 ### Counters
+
 - `cash_generation_total`
 - `cash_report_build_ms`
 - `cash_lines_processed_total`
@@ -113,11 +123,12 @@ curl -H "X-API-Key: <key>" \
 ✅ **Reports**: Cash flow reports with pivot parity  
 ✅ **Performance**: All operations within SLA targets  
 ✅ **RBAC**: Proper capability enforcement  
-✅ **Idempotency**: Source hash prevents duplicate generations  
+✅ **Idempotency**: Source hash prevents duplicate generations
 
 ## 🚀 **M15 Ready for Production!**
 
 **Key Features Delivered:**
+
 - Working capital math (DSO, DPO, DIO)
 - Indirect cash flow calculation
 - Scenario resolution (budget/forecast)
@@ -126,6 +137,7 @@ curl -H "X-API-Key: <key>" \
 - Performance logging
 
 **Next Steps:**
+
 - Deploy migrations: 0028 → 0029 → 0030 → 0031
 - Enable feature flags
 - Run smoke tests

@@ -29,9 +29,7 @@
       "🔶 ORPHANED: Backend code exists but no API - unused code!",
       "⚠️  WARNING: Schema exists but no migrations - deployment will fail"
     ],
-    "recommendations": [
-      "Either create API endpoints or remove orphaned code"
-    ],
+    "recommendations": ["Either create API endpoints or remove orphaned code"],
     "blockers": []
   },
   "M2": {
@@ -103,9 +101,7 @@
     "issues": [
       "⚠️  WARNING: Schema exists but no migrations - deployment will fail"
     ],
-    "recommendations": [
-      "📝 TODO: Add type contracts for API"
-    ],
+    "recommendations": ["📝 TODO: Add type contracts for API"],
     "blockers": []
   },
   "M4": {
@@ -645,9 +641,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -728,9 +722,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -809,9 +801,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -856,9 +846,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -898,9 +886,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -977,9 +963,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1019,9 +1003,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1061,9 +1043,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1103,9 +1083,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1145,9 +1123,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1187,9 +1163,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1229,9 +1203,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1312,9 +1284,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1354,9 +1324,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1396,9 +1364,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1438,9 +1404,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1480,9 +1444,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1527,9 +1489,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1569,9 +1529,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1611,9 +1569,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1653,9 +1609,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1700,9 +1654,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1742,9 +1694,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1784,9 +1734,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1826,9 +1774,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",
@@ -1868,9 +1814,7 @@
     },
     "status": "partial",
     "completeness": 40,
-    "issues": [
-      "⚠️  WARNING: API exists but no business logic services"
-    ],
+    "issues": ["⚠️  WARNING: API exists but no business logic services"],
     "recommendations": [
       "Add business logic layer",
       "📝 TODO: Backend complete - add frontend UI",

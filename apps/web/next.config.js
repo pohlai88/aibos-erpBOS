@@ -1,22 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    eslint: {
-        ignoreDuringBuilds: true,
-    },
-    transpilePackages: [
-        "@aibos/api-client",
-        "@aibos/contracts",
-        "@aibos/ports",
-        "@aibos/services"
-    ],
-    async rewrites() {
-        return [
-            {
-                source: '/api/:path*',
-                destination: 'http://localhost:3000/api/:path*',
-            },
-        ];
-    },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  transpilePackages: [
+    '@aibos/api-client',
+    '@aibos/contracts',
+    '@aibos/ports',
+    '@aibos/services',
+  ],
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:3000/api/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

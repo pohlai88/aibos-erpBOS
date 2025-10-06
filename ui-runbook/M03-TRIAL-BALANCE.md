@@ -363,14 +363,14 @@ export default function TrialBalanceComparison() {
 
 ```typescript
 // apps/web/hooks/useTrialBalance.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useTrialBalance(asOfDate: string, filters = {}) {
   return useQuery({
-    queryKey: ["trial-balance", asOfDate, filters],
+    queryKey: ['trial-balance', asOfDate, filters],
     queryFn: () =>
-      apiClient.GET("/api/reports/trial-balance", {
+      apiClient.GET('/api/reports/trial-balance', {
         query: { as_of_date: asOfDate, ...filters },
       }),
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -379,8 +379,8 @@ export function useTrialBalance(asOfDate: string, filters = {}) {
 
 export function useTrialBalanceExport(asOfDate: string) {
   return useMutation({
-    mutationFn: (format: "csv" | "xlsx") =>
-      apiClient.GET("/api/reports/trial-balance/export", {
+    mutationFn: (format: 'csv' | 'xlsx') =>
+      apiClient.GET('/api/reports/trial-balance/export', {
         query: { as_of_date: asOfDate, format },
       }),
   });
@@ -388,9 +388,9 @@ export function useTrialBalanceExport(asOfDate: string) {
 
 export function useTransactionDrillDown(accountId: string, asOfDate: string) {
   return useQuery({
-    queryKey: ["drill-down", accountId, asOfDate],
+    queryKey: ['drill-down', accountId, asOfDate],
     queryFn: () =>
-      apiClient.GET("/api/reports/trial-balance/drill-down", {
+      apiClient.GET('/api/reports/trial-balance/drill-down', {
         query: { account_id: accountId, as_of_date: asOfDate },
       }),
     enabled: !!accountId,
@@ -399,11 +399,11 @@ export function useTransactionDrillDown(accountId: string, asOfDate: string) {
 
 export function useMultiPeriodTrialBalance(periods: string[]) {
   return useQuery({
-    queryKey: ["trial-balance-multi", periods],
+    queryKey: ['trial-balance-multi', periods],
     queryFn: async () => {
       const results = await Promise.all(
-        periods.map((period) =>
-          apiClient.GET("/api/reports/trial-balance", {
+        periods.map(period =>
+          apiClient.GET('/api/reports/trial-balance', {
             query: { as_of_date: period },
           })
         )
@@ -506,9 +506,9 @@ Complete copy for all user-facing states. Use i18n keys from `@/i18n/messages/tr
 
 ```typescript
 // Query key structure
-["trial-balance", asOfDate, { filters }][("trial-balance-multi", periods)][
-  ("drill-down", accountId, asOfDate)
-][("trial-balance-export", asOfDate, format)];
+['trial-balance', asOfDate, { filters }][('trial-balance-multi', periods)][
+  ('drill-down', accountId, asOfDate)
+][('trial-balance-export', asOfDate, format)];
 ```
 
 ### Invalidation Rules
@@ -532,7 +532,7 @@ Complete copy for all user-facing states. Use i18n keys from `@/i18n/messages/tr
 
 ```typescript
 // Server actions
-revalidateTag("trial-balance"); // After journal posting
+revalidateTag('trial-balance'); // After journal posting
 revalidateTag(`trial-balance-${asOfDate}`); // Specific date
 ```
 
@@ -765,13 +765,13 @@ Create comparison view with variance analysis.
 ```typescript
 // Example fixture structure
 export const standardTrialBalance: TrialBalanceFixture = {
-  as_of_date: "2025-10-06",
+  as_of_date: '2025-10-06',
   accounts: [
     {
-      account_id: "acc_1",
-      code: "1000",
-      name: "Cash and Cash Equivalents",
-      type: "asset",
+      account_id: 'acc_1',
+      code: '1000',
+      name: 'Cash and Cash Equivalents',
+      type: 'asset',
       debit: 250000.0,
       credit: 0,
       balance: 250000.0,
@@ -854,9 +854,9 @@ pnpm run demo:reset:trial-balance
 **Implementation**:
 
 ```typescript
-import { analytics } from "@/lib/analytics";
+import { analytics } from '@/lib/analytics';
 
-analytics.track("TrialBalance.Report.Generated", {
+analytics.track('TrialBalance.Report.Generated', {
   as_of_date: asOfDate,
   account_count: data.accounts.length,
   generation_time: performance.now() - startTime,
@@ -890,9 +890,9 @@ analytics.track("TrialBalance.Report.Generated", {
 
 ```typescript
 useHotkeys([
-  ["/", () => searchInputRef.current?.focus()],
-  ["r", () => refetch()],
-  ["e", () => openExportModal()],
+  ['/', () => searchInputRef.current?.focus()],
+  ['r', () => refetch()],
+  ['e', () => openExportModal()],
 ]);
 ```
 
@@ -939,13 +939,13 @@ useHotkeys([
 
 ```typescript
 // Server actions
-"use server";
+'use server';
 
-import { revalidateTag } from "next/cache";
+import { revalidateTag } from 'next/cache';
 
 export async function generateTrialBalance(asOfDate: string) {
   // ... report generation logic
-  revalidateTag("trial-balance");
+  revalidateTag('trial-balance');
   revalidateTag(`trial-balance-${asOfDate}`);
 }
 ```
@@ -1004,7 +1004,7 @@ flags: {
 2. **Invalidate cache**:
 
    ```typescript
-   revalidateTag("trial-balance");
+   revalidateTag('trial-balance');
    ```
 
 3. **Clear CDN cache**:
@@ -1014,7 +1014,6 @@ flags: {
    ```
 
 4. **Monitor for 15 minutes**:
-
    - Error rate drops below 0.1%
    - No new Sentry issues
    - Users see fallback message

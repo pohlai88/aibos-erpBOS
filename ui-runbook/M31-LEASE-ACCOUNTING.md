@@ -687,27 +687,27 @@ export default function LeaseModificationTracker() {
 
 ```typescript
 // apps/web/hooks/useLeases.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useLeaseCalculator() {
   return useMutation({
-    mutationFn: (leaseData) =>
-      apiClient.POST("/api/leases/calculations", { body: leaseData }),
+    mutationFn: leaseData =>
+      apiClient.POST('/api/leases/calculations', { body: leaseData }),
   });
 }
 
 export function useLeasePortfolio() {
   return useQuery({
-    queryKey: ["lease-portfolio"],
-    queryFn: () => apiClient.GET("/api/leases"),
+    queryKey: ['lease-portfolio'],
+    queryFn: () => apiClient.GET('/api/leases'),
   });
 }
 
 export function useLeaseModifications() {
   return useQuery({
-    queryKey: ["lease-modifications"],
-    queryFn: () => apiClient.GET("/api/leases/modifications"),
+    queryKey: ['lease-modifications'],
+    queryFn: () => apiClient.GET('/api/leases/modifications'),
   });
 }
 ```

@@ -196,9 +196,9 @@ export default function ReconWorkbench() {
 // apps/web/hooks/useBankReconciliation.ts
 export function useBankReconciliation(accountId: string) {
   return useQuery({
-    queryKey: ["bank", "reconciliation", accountId],
+    queryKey: ['bank', 'reconciliation', accountId],
     queryFn: () =>
-      apiClient.GET("/api/bank/reconciliation", {
+      apiClient.GET('/api/bank/reconciliation', {
         query: { account_id: accountId },
       }),
   });
@@ -206,15 +206,15 @@ export function useBankReconciliation(accountId: string) {
 
 export function useImportStatement() {
   return useMutation({
-    mutationFn: (file) =>
-      apiClient.POST("/api/bank/statements/import", { body: file }),
+    mutationFn: file =>
+      apiClient.POST('/api/bank/statements/import', { body: file }),
   });
 }
 
 export function useAutoMatch() {
   return useMutation({
-    mutationFn: (accountId) =>
-      apiClient.POST("/api/bank/match", { body: { account_id: accountId } }),
+    mutationFn: accountId =>
+      apiClient.POST('/api/bank/match', { body: { account_id: accountId } }),
   });
 }
 ```

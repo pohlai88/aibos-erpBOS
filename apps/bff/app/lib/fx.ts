@@ -1,49 +1,76 @@
-import { pool } from "./db";
-import { DefaultFxPolicy } from "@aibos/policies";
+import { pool } from './db';
+import { DefaultFxPolicy } from '@aibos/policies';
 
-export async function getFxQuotesForDateOrBefore(from: string, to: string, onISO: string, daysBack = 30) {
-    // fetch within window to reduce scan
-    const { rows } = await pool.query(`
+export async function getFxQuotesForDateOrBefore(
+  from: string,
+  to: string,
+  onISO: string,
+  daysBack = 30
+) {
+  // fetch within window to reduce scan
+  const { rows } = await pool.query(
+    `
     select date::text as date, from_ccy as from, to_ccy as to, rate::text
     from fx_rate
     where from_ccy = $1 and to_ccy = $2 and date <= $3 and date >= ($3::date - $4::int)
     order by date desc
     limit 30
-  `, [from, to, onISO, daysBack]);
-    return rows.map(r => ({ date: r.date, from: r.from, to: r.to, rate: Number(r.rate) }));
+  `,
+    [from, to, onISO, daysBack]
+  );
+  return rows.map(r => ({
+    date: r.date,
+    from: r.from,
+    to: r.to,
+    rate: Number(r.rate),
+  }));
 }
 
 export async function computeBaseAmounts(
-    companyId: string,
-    docDate: string,
-    lines: Array<{ amount: number; currency: string }>
+  companyId: string,
+  docDate: string,
+  lines: Array<{ amount: number; currency: string }>
 ): Promise<{ baseCurrency: string; rateUsed: number; baseAmounts: number[] }> {
-    // Get company base currency
-    const company = await pool.query(`select base_currency from company where id=$1`, [companyId]);
-    if (!company.rows.length) throw new Error("Company not found");
-    const baseCurrency = company.rows[0].base_currency;
+  // Get company base currency
+  const company = await pool.query(
+    `select base_currency from company where id=$1`,
+    [companyId]
+  );
+  if (!company.rows.length) throw new Error('Company not found');
+  const baseCurrency = company.rows[0].base_currency;
 
-    const baseAmounts: number[] = [];
-    let rateUsed = 1.0;
+  const baseAmounts: number[] = [];
+  let rateUsed = 1.0;
 
-    for (const line of lines) {
-        if (line.currency === baseCurrency) {
-            // Same currency - no conversion needed
-            baseAmounts.push(line.amount);
-        } else {
-            // Different currency - get FX rate
-            const quotes = await getFxQuotesForDateOrBefore(line.currency, baseCurrency, docDate);
-            const rate = DefaultFxPolicy.selectRate(quotes, line.currency, baseCurrency, docDate);
+  for (const line of lines) {
+    if (line.currency === baseCurrency) {
+      // Same currency - no conversion needed
+      baseAmounts.push(line.amount);
+    } else {
+      // Different currency - get FX rate
+      const quotes = await getFxQuotesForDateOrBefore(
+        line.currency,
+        baseCurrency,
+        docDate
+      );
+      const rate = DefaultFxPolicy.selectRate(
+        quotes,
+        line.currency,
+        baseCurrency,
+        docDate
+      );
 
-            if (!rate) {
-                throw new Error(`No FX rate available for ${line.currency} to ${baseCurrency} on ${docDate}`);
-            }
+      if (!rate) {
+        throw new Error(
+          `No FX rate available for ${line.currency} to ${baseCurrency} on ${docDate}`
+        );
+      }
 
-            const baseAmount = Math.round(line.amount * rate * 100) / 100; // Round to 2 decimal places
-            baseAmounts.push(baseAmount);
-            rateUsed = rate;
-        }
+      const baseAmount = Math.round(line.amount * rate * 100) / 100; // Round to 2 decimal places
+      baseAmounts.push(baseAmount);
+      rateUsed = rate;
     }
+  }
 
-    return { baseCurrency, rateUsed, baseAmounts };
+  return { baseCurrency, rateUsed, baseAmounts };
 }

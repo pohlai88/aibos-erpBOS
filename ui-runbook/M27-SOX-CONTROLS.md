@@ -429,35 +429,35 @@ export default function SOXEvidenceLibrary() {
 
 ```typescript
 // apps/web/hooks/useSOXControls.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useSOXControls(filters = {}) {
   return useQuery({
-    queryKey: ["sox-controls", filters],
-    queryFn: () => apiClient.GET("/api/sox/controls", { query: filters }),
+    queryKey: ['sox-controls', filters],
+    queryFn: () => apiClient.GET('/api/sox/controls', { query: filters }),
   });
 }
 
 export function useTestControl() {
   return useMutation({
-    mutationFn: (controlId) =>
-      apiClient.POST("/api/sox/testing", { body: { control_id: controlId } }),
-    onSuccess: () => queryClient.invalidateQueries(["sox-controls"]),
+    mutationFn: controlId =>
+      apiClient.POST('/api/sox/testing', { body: { control_id: controlId } }),
+    onSuccess: () => queryClient.invalidateQueries(['sox-controls']),
   });
 }
 
 export function useDeficiencies() {
   return useQuery({
-    queryKey: ["sox-deficiencies"],
-    queryFn: () => apiClient.GET("/api/sox/deficiencies"),
+    queryKey: ['sox-deficiencies'],
+    queryFn: () => apiClient.GET('/api/sox/deficiencies'),
   });
 }
 
 export function useEvidenceLibrary() {
   return useQuery({
-    queryKey: ["sox-evidence"],
-    queryFn: () => apiClient.GET("/api/sox/evidence"),
+    queryKey: ['sox-evidence'],
+    queryFn: () => apiClient.GET('/api/sox/evidence'),
   });
 }
 ```

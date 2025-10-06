@@ -1,21 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
-import { requireAuth, AuthCtx } from "@/lib/auth";
-import { requireCapability } from "@/lib/rbac";
-import { withRouteErrors } from "@/lib/route-utils";
-import { db } from "@/lib/db";
-import { sql } from "drizzle-orm";
-import { ok } from "@/api/_kit";
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth, AuthCtx } from '@/lib/auth';
+import { requireCapability } from '@/lib/rbac';
+import { withRouteErrors } from '@/lib/route-utils';
+import { db } from '@/lib/db';
+import { sql } from 'drizzle-orm';
+import { ok } from '@/api/_kit';
 
 // GET /api/ops/healthz - OpsCC health and metrics
 export const GET = withRouteErrors(async (request: NextRequest) => {
-    const auth = await requireAuth(request);
-    await requireCapability(auth, "ops:observability:read");
+  const auth = await requireAuth(request);
+  await requireCapability(auth, 'ops:observability:read');
 
-    const authCtx = auth as AuthCtx;
+  const authCtx = auth as AuthCtx;
 
-    try {
-        // Get rule health metrics
-        const ruleHealth = await db.execute(sql`
+  try {
+    // Get rule health metrics
+    const ruleHealth = await db.execute(sql`
             SELECT 
                 COUNT(*) as total_rules,
                 COUNT(CASE WHEN enabled = true THEN 1 END) as enabled_rules,
@@ -27,8 +27,8 @@ export const GET = withRouteErrors(async (request: NextRequest) => {
             WHERE r.company_id = ${authCtx.company_id}
         `);
 
-        // Get signal metrics
-        const signalMetrics = await db.execute(sql`
+    // Get signal metrics
+    const signalMetrics = await db.execute(sql`
             SELECT 
                 COUNT(*) as total_signals,
                 COUNT(CASE WHEN ts > NOW() - INTERVAL '1 hour' THEN 1 END) as recent_signals,
@@ -39,8 +39,8 @@ export const GET = withRouteErrors(async (request: NextRequest) => {
             WHERE company_id = ${authCtx.company_id}
         `);
 
-        // Get fire metrics
-        const fireMetrics = await db.execute(sql`
+    // Get fire metrics
+    const fireMetrics = await db.execute(sql`
             SELECT 
                 COUNT(*) as total_fires,
                 COUNT(CASE WHEN status = 'PENDING' THEN 1 END) as pending_fires,
@@ -53,8 +53,8 @@ export const GET = withRouteErrors(async (request: NextRequest) => {
             WHERE company_id = ${authCtx.company_id}
         `);
 
-        // Get action SLO metrics
-        const actionSLO = await db.execute(sql`
+    // Get action SLO metrics
+    const actionSLO = await db.execute(sql`
             SELECT 
                 action_code,
                 COUNT(*) as total_executions,
@@ -68,25 +68,28 @@ export const GET = withRouteErrors(async (request: NextRequest) => {
             LIMIT 10
         `);
 
-        const health = {
-            status: 'healthy',
-            timestamp: new Date().toISOString(),
-            company_id: authCtx.company_id,
-            metrics: {
-                rules: ruleHealth.rows[0] || {},
-                signals: signalMetrics.rows[0] || {},
-                fires: fireMetrics.rows[0] || {},
-                action_slo: actionSLO.rows || []
-            }
-        };
+    const health = {
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      company_id: authCtx.company_id,
+      metrics: {
+        rules: ruleHealth.rows[0] || {},
+        signals: signalMetrics.rows[0] || {},
+        fires: fireMetrics.rows[0] || {},
+        action_slo: actionSLO.rows || [],
+      },
+    };
 
-        return ok(health);
-    } catch (error) {
-        return ok({
-                    status: 'error',
-                    timestamp: new Date().toISOString(),
-                    company_id: authCtx.company_id,
-                    error: error instanceof Error ? error.message : String(error)
-                }, 500);
-    }
+    return ok(health);
+  } catch (error) {
+    return ok(
+      {
+        status: 'error',
+        timestamp: new Date().toISOString(),
+        company_id: authCtx.company_id,
+        error: error instanceof Error ? error.message : String(error),
+      },
+      500
+    );
+  }
 });

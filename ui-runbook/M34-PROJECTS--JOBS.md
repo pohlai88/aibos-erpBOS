@@ -402,20 +402,20 @@ export default function BudgetVsActualAnalysis() {
 
 ```typescript
 // apps/web/hooks/useProjects.ts
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useProjectCosting(projectId) {
   return useQuery({
-    queryKey: ["project-costing", projectId],
+    queryKey: ['project-costing', projectId],
     queryFn: () => apiClient.GET(`/api/projects/${projectId}/costing`),
   });
 }
 
 export function useBudgetVsActual() {
   return useQuery({
-    queryKey: ["budget-vs-actual"],
-    queryFn: () => apiClient.GET("/api/projects/budgets"),
+    queryKey: ['budget-vs-actual'],
+    queryFn: () => apiClient.GET('/api/projects/budgets'),
   });
 }
 ```

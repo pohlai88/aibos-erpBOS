@@ -43,6 +43,7 @@ The runbook system has been upgraded with **6 critical enhancements**:
 **Purpose**: Drop-in template for creating new module runbooks
 
 **Usage**:
+
 ```bash
 # Create new module runbook
 cp ui-runbook/RUNBOOK-TEMPLATE.md ui-runbook/M02-JOURNAL-ENTRIES.md
@@ -56,6 +57,7 @@ cp ui-runbook/RUNBOOK-TEMPLATE.md ui-runbook/M02-JOURNAL-ENTRIES.md
 ```
 
 **Sections** (16 required):
+
 1. Ownership & Accountability
 2. Executive Summary
 3. Current Status (with Risks & Blockers)
@@ -78,6 +80,7 @@ cp ui-runbook/RUNBOOK-TEMPLATE.md ui-runbook/M02-JOURNAL-ENTRIES.md
 **Purpose**: Gold-standard reference implementation
 
 **What Makes It Special**:
+
 - ✅ All 16 sections complete with real content
 - ✅ 100+ UX copy entries with i18n keys
 - ✅ Complete permissions matrix (3 roles × 8 actions)
@@ -88,6 +91,7 @@ cp ui-runbook/RUNBOOK-TEMPLATE.md ui-runbook/M02-JOURNAL-ENTRIES.md
 - ✅ 6 department sign-offs
 
 **Use Cases**:
+
 - Reference when filling template
 - Example of production-grade documentation
 - Standard for all 40 modules
@@ -97,6 +101,7 @@ cp ui-runbook/RUNBOOK-TEMPLATE.md ui-runbook/M02-JOURNAL-ENTRIES.md
 **Purpose**: Comprehensive PR review requirements
 
 **Usage**:
+
 ```markdown
 <!-- Copy entire checklist into PR description -->
 <!-- Check each item as you verify -->
@@ -104,6 +109,7 @@ cp ui-runbook/RUNBOOK-TEMPLATE.md ui-runbook/M02-JOURNAL-ENTRIES.md
 ```
 
 **Categories**:
+
 - 📄 Runbook Completeness (16 sections)
 - 💻 Code Quality (TypeScript, ESLint, React)
 - 🧪 Testing (7 types of tests)
@@ -115,6 +121,7 @@ cp ui-runbook/RUNBOOK-TEMPLATE.md ui-runbook/M02-JOURNAL-ENTRIES.md
 - ✅ Sign-offs (6 departments)
 
 **Blocker Criteria** (11 items that prevent merge):
+
 - TypeScript/ESLint errors
 - Test coverage < 90%
 - Axe serious/critical violations
@@ -329,43 +336,43 @@ flags.<module> = true (for everyone)
 
 ### Code Quality
 
-| Metric            | Threshold      | Enforcement |
-| ----------------- | -------------- | ----------- |
-| TypeScript errors | 0              | CI blocks   |
-| ESLint errors     | 0              | CI blocks   |
-| console.log       | 0              | Manual      |
-| Hardcoded styles  | 0              | Manual      |
+| Metric            | Threshold | Enforcement |
+| ----------------- | --------- | ----------- |
+| TypeScript errors | 0         | CI blocks   |
+| ESLint errors     | 0         | CI blocks   |
+| console.log       | 0         | Manual      |
+| Hardcoded styles  | 0         | Manual      |
 
 ### Test Coverage
 
-| Metric             | Threshold | Enforcement |
-| ------------------ | --------- | ----------- |
-| Line coverage      | ≥90%      | CI blocks   |
-| Critical paths     | ≥95%      | Manual      |
-| Integration tests  | All CRUD  | CI blocks   |
-| E2E tests          | All flows | CI blocks   |
-| A11y tests         | 0 serious | CI blocks   |
+| Metric            | Threshold | Enforcement |
+| ----------------- | --------- | ----------- |
+| Line coverage     | ≥90%      | CI blocks   |
+| Critical paths    | ≥95%      | Manual      |
+| Integration tests | All CRUD  | CI blocks   |
+| E2E tests         | All flows | CI blocks   |
+| A11y tests        | 0 serious | CI blocks   |
 
 ### Performance
 
-| Metric               | Threshold       | Enforcement |
-| -------------------- | --------------- | ----------- |
-| Bundle size          | ≤250KB gzipped  | CI blocks   |
-| TTFB                 | ≤70ms           | Manual      |
-| TTI                  | ≤200ms          | Manual      |
-| Network requests     | ≤4 initial      | Manual      |
-| Lighthouse Perf      | ≥90             | CI warns    |
+| Metric           | Threshold      | Enforcement |
+| ---------------- | -------------- | ----------- |
+| Bundle size      | ≤250KB gzipped | CI blocks   |
+| TTFB             | ≤70ms          | Manual      |
+| TTI              | ≤200ms         | Manual      |
+| Network requests | ≤4 initial     | Manual      |
+| Lighthouse Perf  | ≥90            | CI warns    |
 
 ### Accessibility
 
-| Metric                | Threshold | Enforcement |
-| --------------------- | --------- | ----------- |
-| WCAG 2.2 AA           | 100%      | CI blocks   |
-| WCAG 2.2 AAA          | ≥95%      | Manual      |
-| Axe serious/critical  | 0         | CI blocks   |
-| Keyboard navigation   | 100%      | Manual      |
-| Screen reader         | 100%      | Manual      |
-| Lighthouse A11y       | ≥95       | CI warns    |
+| Metric               | Threshold | Enforcement |
+| -------------------- | --------- | ----------- |
+| WCAG 2.2 AA          | 100%      | CI blocks   |
+| WCAG 2.2 AAA         | ≥95%      | Manual      |
+| Axe serious/critical | 0         | CI blocks   |
+| Keyboard navigation  | 100%      | Manual      |
+| Screen reader        | 100%      | Manual      |
+| Lighthouse A11y      | ≥95       | CI warns    |
 
 ---
 
@@ -457,7 +464,7 @@ flags.<module> = true (for everyone)
 - [RUNBOOK-TEMPLATE.md](./RUNBOOK-TEMPLATE.md) - Start here for new modules
 - [M01-CORE-LEDGER.md](./M01-CORE-LEDGER.md) - Gold-standard reference
 - [PR-REVIEW-CHECKLIST.md](./PR-REVIEW-CHECKLIST.md) - PR review requirements
-- [_RUNBOOK-INDEX.md](./_RUNBOOK-INDEX.md) - All 40 modules overview
+- [\_RUNBOOK-INDEX.md](./_RUNBOOK-INDEX.md) - All 40 modules overview
 
 ### SSOT References
 
@@ -521,6 +528,7 @@ cp ui-runbook/RUNBOOK-TEMPLATE.md ui-runbook/M##-<MODULE>.md
 **This is not just code—it's production-grade enterprise software.**
 
 Every module should be:
+
 - **Tested**: 90%+ coverage, 7 types of tests
 - **Accessible**: WCAG 2.2 AA compliant, keyboard-friendly
 - **Performant**: ≤250KB bundle, ≤70ms TTFB
@@ -535,4 +543,4 @@ Every module should be:
 
 **Let's build something amazing! 🚀**
 
-**Questions?** Check [_RUNBOOK-INDEX.md](./_RUNBOOK-INDEX.md) or ask in #ui-implementation Slack channel.
+**Questions?** Check [\_RUNBOOK-INDEX.md](./_RUNBOOK-INDEX.md) or ask in #ui-implementation Slack channel.

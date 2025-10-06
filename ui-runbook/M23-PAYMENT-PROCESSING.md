@@ -284,20 +284,20 @@ export default function PaymentScheduling() {
 
 ```typescript
 // apps/web/hooks/usePaymentProcessing.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function usePaymentProcessing(filters = {}) {
   return useQuery({
-    queryKey: ["m23", filters],
-    queryFn: () => apiClient.GET("/api/[path]", { query: filters }),
+    queryKey: ['m23', filters],
+    queryFn: () => apiClient.GET('/api/[path]', { query: filters }),
   });
 }
 
 export function useCreatePaymentProcessing() {
   return useMutation({
-    mutationFn: (data) => apiClient.POST("/api/[path]", { body: data }),
-    onSuccess: () => queryClient.invalidateQueries(["m23"]),
+    mutationFn: data => apiClient.POST('/api/[path]', { body: data }),
+    onSuccess: () => queryClient.invalidateQueries(['m23']),
   });
 }
 ```

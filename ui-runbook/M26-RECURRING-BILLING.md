@@ -214,20 +214,20 @@ export default function RevenueRecognition() {
 
 ```typescript
 // apps/web/hooks/useRecurringBilling.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useRecurringBilling(filters = {}) {
   return useQuery({
-    queryKey: ["m26", filters],
-    queryFn: () => apiClient.GET("/api/[path]", { query: filters }),
+    queryKey: ['m26', filters],
+    queryFn: () => apiClient.GET('/api/[path]', { query: filters }),
   });
 }
 
 export function useCreateRecurringBilling() {
   return useMutation({
-    mutationFn: (data) => apiClient.POST("/api/[path]", { body: data }),
-    onSuccess: () => queryClient.invalidateQueries(["m26"]),
+    mutationFn: data => apiClient.POST('/api/[path]', { body: data }),
+    onSuccess: () => queryClient.invalidateQueries(['m26']),
   });
 }
 ```

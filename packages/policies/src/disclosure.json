@@ -1,57 +1,44 @@
 {
-    "currency": "MYR",
-    "pl": [
-        {
-            "line": "Revenue",
-            "accounts": [
-                "Sales"
-            ],
-            "sign": -1
-        },
-        {
-            "line": "Cost of Sales",
-            "accounts": [
-                "COGS"
-            ],
-            "sign": 1
-        },
-        {
-            "line": "Gross Profit",
-            "formula": "Revenue + Cost of Sales"
-        },
-        {
-            "line": "Operating Exp.",
-            "accounts": [
-                "Expense"
-            ],
-            "sign": 1
-        },
-        {
-            "line": "Net Profit",
-            "formula": "Gross Profit + Operating Exp."
-        }
-    ],
-    "bs": [
-        {
-            "line": "Assets",
-            "accounts": [
-                "Trade Receivables",
-                "Input Tax",
-                "Inventory"
-            ],
-            "sign": 1
-        },
-        {
-            "line": "Liabilities",
-            "accounts": [
-                "Trade Payables",
-                "Output Tax"
-            ],
-            "sign": 1
-        },
-        {
-            "line": "Equity",
-            "formula": "Assets - Liabilities"
-        }
-    ]
+  "currency": "MYR",
+  "pl": [
+    {
+      "line": "Revenue",
+      "accounts": ["Sales"],
+      "sign": -1
+    },
+    {
+      "line": "Cost of Sales",
+      "accounts": ["COGS"],
+      "sign": 1
+    },
+    {
+      "line": "Gross Profit",
+      "formula": "Revenue + Cost of Sales"
+    },
+    {
+      "line": "Operating Exp.",
+      "accounts": ["Expense"],
+      "sign": 1
+    },
+    {
+      "line": "Net Profit",
+      "formula": "Gross Profit + Operating Exp."
+    }
+  ],
+  "bs": [
+    {
+      "line": "Assets",
+      "accounts": ["Trade Receivables", "Input Tax", "Inventory"],
+      "sign": 1
+    },
+    {
+      "line": "Liabilities",
+      "accounts": ["Trade Payables", "Output Tax"],
+      "sign": 1
+    },
+    {
+      "line": "Equity",
+      "formula": "Assets - Liabilities"
+    }
+  ]
 }

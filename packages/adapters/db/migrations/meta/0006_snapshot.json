@@ -71,12 +71,8 @@
           "name": "account_company_id_company_id_fk",
           "tableFrom": "account",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -134,12 +130,8 @@
           "name": "accounting_period_company_id_company_id_fk",
           "tableFrom": "accounting_period",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -286,12 +278,8 @@
           "name": "api_key_user_id_app_user_id_fk",
           "tableFrom": "api_key",
           "tableTo": "app_user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -299,12 +287,8 @@
           "name": "api_key_company_id_company_id_fk",
           "tableFrom": "api_key",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -352,9 +336,7 @@
         "app_user_email_unique": {
           "name": "app_user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -507,10 +489,7 @@
       "compositePrimaryKeys": {
         "asset_posting_map_company_id_asset_class_pk": {
           "name": "asset_posting_map_company_id_asset_class_pk",
-          "columns": [
-            "company_id",
-            "asset_class"
-          ]
+          "columns": ["company_id", "asset_class"]
         }
       },
       "uniqueConstraints": {},
@@ -716,12 +695,8 @@
           "name": "budget_company_id_company_id_fk",
           "tableFrom": "budget",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -823,12 +798,8 @@
           "name": "budget_alert_rule_company_id_company_id_fk",
           "tableFrom": "budget_alert_rule",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -893,12 +864,8 @@
           "name": "budget_approval_company_id_company_id_fk",
           "tableFrom": "budget_approval",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -906,12 +873,8 @@
           "name": "budget_approval_version_id_budget_version_id_fk",
           "tableFrom": "budget_approval",
           "tableTo": "budget_version",
-          "columnsFrom": [
-            "version_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["version_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1097,12 +1060,8 @@
           "name": "budget_line_budget_id_budget_id_fk",
           "tableFrom": "budget_line",
           "tableTo": "budget",
-          "columnsFrom": [
-            "budget_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["budget_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1110,12 +1069,8 @@
           "name": "budget_line_company_id_company_id_fk",
           "tableFrom": "budget_line",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1123,12 +1078,8 @@
           "name": "budget_line_cost_center_id_dim_cost_center_id_fk",
           "tableFrom": "budget_line",
           "tableTo": "dim_cost_center",
-          "columnsFrom": [
-            "cost_center_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["cost_center_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1136,12 +1087,8 @@
           "name": "budget_line_project_id_dim_project_id_fk",
           "tableFrom": "budget_line",
           "tableTo": "dim_project",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1233,12 +1180,8 @@
           "name": "budget_version_company_id_company_id_fk",
           "tableFrom": "budget_version",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1432,12 +1375,8 @@
           "name": "cash_alert_rule_company_id_company_id_fk",
           "tableFrom": "cash_alert_rule",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1594,12 +1533,8 @@
           "name": "cash_forecast_version_company_id_company_id_fk",
           "tableFrom": "cash_forecast_version",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1607,12 +1542,8 @@
           "name": "cash_forecast_version_profile_id_wc_profile_id_fk",
           "tableFrom": "cash_forecast_version",
           "tableTo": "wc_profile",
-          "columnsFrom": [
-            "profile_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["profile_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1722,12 +1653,8 @@
           "name": "cash_line_company_id_company_id_fk",
           "tableFrom": "cash_line",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1735,12 +1662,8 @@
           "name": "cash_line_version_id_cash_forecast_version_id_fk",
           "tableFrom": "cash_line",
           "tableTo": "cash_forecast_version",
-          "columnsFrom": [
-            "version_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["version_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1787,9 +1710,7 @@
         "company_code_unique": {
           "name": "company_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -2040,12 +1961,8 @@
           "name": "driver_profile_company_id_company_id_fk",
           "tableFrom": "driver_profile",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2128,12 +2045,8 @@
           "name": "forecast_line_company_id_company_id_fk",
           "tableFrom": "forecast_line",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2141,12 +2054,8 @@
           "name": "forecast_line_version_id_forecast_version_id_fk",
           "tableFrom": "forecast_line",
           "tableTo": "forecast_version",
-          "columnsFrom": [
-            "version_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["version_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2237,12 +2146,8 @@
           "name": "forecast_version_company_id_company_id_fk",
           "tableFrom": "forecast_version",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2250,12 +2155,8 @@
           "name": "forecast_version_driver_profile_id_driver_profile_id_fk",
           "tableFrom": "forecast_version",
           "tableTo": "driver_profile",
-          "columnsFrom": [
-            "driver_profile_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["driver_profile_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2300,10 +2201,7 @@
       "compositePrimaryKeys": {
         "fx_account_map_company_id_gl_account_pk": {
           "name": "fx_account_map_company_id_gl_account_pk",
-          "columns": [
-            "company_id",
-            "gl_account"
-          ]
+          "columns": ["company_id", "gl_account"]
         }
       },
       "uniqueConstraints": {},
@@ -2365,12 +2263,8 @@
           "name": "fx_admin_rates_company_id_company_id_fk",
           "tableFrom": "fx_admin_rates",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2378,12 +2272,7 @@
       "compositePrimaryKeys": {
         "fx_admin_rates_company_id_as_of_date_src_ccy_dst_ccy_pk": {
           "name": "fx_admin_rates_company_id_as_of_date_src_ccy_dst_ccy_pk",
-          "columns": [
-            "company_id",
-            "as_of_date",
-            "src_ccy",
-            "dst_ccy"
-          ]
+          "columns": ["company_id", "as_of_date", "src_ccy", "dst_ccy"]
         }
       },
       "uniqueConstraints": {},
@@ -2513,12 +2402,8 @@
           "name": "fx_reval_line_run_id_fx_reval_run_id_fk",
           "tableFrom": "fx_reval_line",
           "tableTo": "fx_reval_run",
-          "columnsFrom": [
-            "run_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["run_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2569,13 +2454,7 @@
       "compositePrimaryKeys": {
         "fx_reval_lock_company_id_year_month_gl_account_currency_pk": {
           "name": "fx_reval_lock_company_id_year_month_gl_account_currency_pk",
-          "columns": [
-            "company_id",
-            "year",
-            "month",
-            "gl_account",
-            "currency"
-          ]
+          "columns": ["company_id", "year", "month", "gl_account", "currency"]
         }
       },
       "uniqueConstraints": {},
@@ -2839,10 +2718,7 @@
       "compositePrimaryKeys": {
         "intangible_posting_map_company_id_class_pk": {
           "name": "intangible_posting_map_company_id_class_pk",
-          "columns": [
-            "company_id",
-            "class"
-          ]
+          "columns": ["company_id", "class"]
         }
       },
       "uniqueConstraints": {},
@@ -2886,9 +2762,7 @@
         "item_code_unique": {
           "name": "item_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -2943,12 +2817,8 @@
           "name": "item_costs_company_id_company_id_fk",
           "tableFrom": "item_costs",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2956,12 +2826,8 @@
           "name": "item_costs_item_id_item_id_fk",
           "tableFrom": "item_costs",
           "tableTo": "item",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2969,10 +2835,7 @@
       "compositePrimaryKeys": {
         "item_costs_company_id_item_id_pk": {
           "name": "item_costs_company_id_item_id_pk",
-          "columns": [
-            "company_id",
-            "item_id"
-          ]
+          "columns": ["company_id", "item_id"]
         }
       },
       "uniqueConstraints": {},
@@ -3064,12 +2927,8 @@
           "name": "journal_company_id_company_id_fk",
           "tableFrom": "journal",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3079,9 +2938,7 @@
         "journal_idempotency_key_unique": {
           "name": "journal_idempotency_key_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "idempotency_key"
-          ]
+          "columns": ["idempotency_key"]
         }
       },
       "policies": {},
@@ -3142,12 +2999,8 @@
           "name": "journal_entries_company_id_company_id_fk",
           "tableFrom": "journal_entries",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3253,12 +3106,8 @@
           "name": "journal_line_journal_id_journal_id_fk",
           "tableFrom": "journal_line",
           "tableTo": "journal",
-          "columnsFrom": [
-            "journal_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["journal_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3266,12 +3115,8 @@
           "name": "journal_line_cost_center_id_dim_cost_center_id_fk",
           "tableFrom": "journal_line",
           "tableTo": "dim_cost_center",
-          "columnsFrom": [
-            "cost_center_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["cost_center_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3279,12 +3124,8 @@
           "name": "journal_line_project_id_dim_project_id_fk",
           "tableFrom": "journal_line",
           "tableTo": "dim_project",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3344,12 +3185,8 @@
           "name": "journal_lines_journal_id_journal_entries_id_fk",
           "tableFrom": "journal_lines",
           "tableTo": "journal_entries",
-          "columnsFrom": [
-            "journal_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["journal_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3357,12 +3194,8 @@
           "name": "journal_lines_account_id_account_id_fk",
           "tableFrom": "journal_lines",
           "tableTo": "account",
-          "columnsFrom": [
-            "account_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["account_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3403,12 +3236,8 @@
           "name": "membership_user_id_app_user_id_fk",
           "tableFrom": "membership",
           "tableTo": "app_user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3416,12 +3245,8 @@
           "name": "membership_company_id_company_id_fk",
           "tableFrom": "membership",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3429,10 +3254,7 @@
       "compositePrimaryKeys": {
         "membership_user_id_company_id_pk": {
           "name": "membership_user_id_company_id_pk",
-          "columns": [
-            "user_id",
-            "company_id"
-          ]
+          "columns": ["user_id", "company_id"]
         }
       },
       "uniqueConstraints": {},
@@ -3543,12 +3365,8 @@
           "name": "payment_company_id_company_id_fk",
           "tableFrom": "payment",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3600,12 +3418,8 @@
           "name": "payment_allocation_payment_id_payment_id_fk",
           "tableFrom": "payment_allocation",
           "tableTo": "payment",
-          "columnsFrom": [
-            "payment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["payment_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3664,12 +3478,8 @@
           "name": "periods_company_id_company_id_fk",
           "tableFrom": "periods",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3677,11 +3487,7 @@
       "compositePrimaryKeys": {
         "periods_company_id_year_month_pk": {
           "name": "periods_company_id_year_month_pk",
-          "columns": [
-            "company_id",
-            "year",
-            "month"
-          ]
+          "columns": ["company_id", "year", "month"]
         }
       },
       "uniqueConstraints": {},
@@ -3755,12 +3561,8 @@
           "name": "stock_ledger_company_id_company_id_fk",
           "tableFrom": "stock_ledger",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3768,12 +3570,8 @@
           "name": "stock_ledger_item_id_item_id_fk",
           "tableFrom": "stock_ledger",
           "tableTo": "item",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3858,12 +3656,8 @@
           "name": "wc_profile_company_id_company_id_fk",
           "tableFrom": "wc_profile",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3902,10 +3696,7 @@
       "compositePrimaryKeys": {
         "alloc_account_map_company_id_src_account_pk": {
           "name": "alloc_account_map_company_id_src_account_pk",
-          "columns": [
-            "company_id",
-            "src_account"
-          ]
+          "columns": ["company_id", "src_account"]
         }
       },
       "uniqueConstraints": {},
@@ -4168,12 +3959,7 @@
       "compositePrimaryKeys": {
         "alloc_lock_company_id_year_month_rule_id_pk": {
           "name": "alloc_lock_company_id_year_month_rule_id_pk",
-          "columns": [
-            "company_id",
-            "year",
-            "month",
-            "rule_id"
-          ]
+          "columns": ["company_id", "year", "month", "rule_id"]
         }
       },
       "uniqueConstraints": {},
@@ -4321,10 +4107,7 @@
       "compositePrimaryKeys": {
         "alloc_rule_target_rule_id_target_cc_pk": {
           "name": "alloc_rule_target_rule_id_target_cc_pk",
-          "columns": [
-            "rule_id",
-            "target_cc"
-          ]
+          "columns": ["rule_id", "target_cc"]
         }
       },
       "uniqueConstraints": {},

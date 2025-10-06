@@ -1,7 +1,7 @@
-import { pool } from "../../../lib/db";
-import { requireAuth } from "../../../lib/auth";
-import { ok } from "../../../lib/http";
-import { withRouteErrors, isResponse } from "../../../lib/route-utils";
+import { pool } from '../../../lib/db';
+import { requireAuth } from '../../../lib/auth';
+import { ok } from '../../../lib/http';
+import { withRouteErrors, isResponse } from '../../../lib/route-utils';
 
 export const GET = withRouteErrors(async (req: Request) => {
   const authResult = await requireAuth(req);
@@ -13,5 +13,11 @@ export const GET = withRouteErrors(async (req: Request) => {
       where m.user_id=$1`,
     [authResult.user_id]
   );
-  return ok({ user_id: authResult.user_id, company_id: authResult.company_id, role: authResult.role, scopes: authResult.scopes, memberships: mem.rows });
+  return ok({
+    user_id: authResult.user_id,
+    company_id: authResult.company_id,
+    role: authResult.role,
+    scopes: authResult.scopes,
+    memberships: mem.rows,
+  });
 });

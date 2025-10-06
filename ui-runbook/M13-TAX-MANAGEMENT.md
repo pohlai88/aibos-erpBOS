@@ -324,20 +324,20 @@ export default function TaxRateManager() {
 
 ```typescript
 // apps/web/hooks/useTaxManagement.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useTaxManagement(filters = {}) {
   return useQuery({
-    queryKey: ["m13", filters],
-    queryFn: () => apiClient.GET("/api/[path]", { query: filters }),
+    queryKey: ['m13', filters],
+    queryFn: () => apiClient.GET('/api/[path]', { query: filters }),
   });
 }
 
 export function useCreateTaxManagement() {
   return useMutation({
-    mutationFn: (data) => apiClient.POST("/api/[path]", { body: data }),
-    onSuccess: () => queryClient.invalidateQueries(["m13"]),
+    mutationFn: data => apiClient.POST('/api/[path]', { body: data }),
+    onSuccess: () => queryClient.invalidateQueries(['m13']),
   });
 }
 ```

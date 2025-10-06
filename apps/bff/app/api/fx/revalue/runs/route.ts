@@ -1,20 +1,20 @@
-import { NextRequest } from "next/server";
-import { ok, forbidden } from "../../../../lib/http";
-import { requireAuth, requireCapability } from "../../../../lib/auth";
-import { withRouteErrors, isResponse } from "../../../../lib/route-utils";
-import { pool } from "../../../../lib/db";
+import { NextRequest } from 'next/server';
+import { ok, forbidden } from '../../../../lib/http';
+import { requireAuth, requireCapability } from '../../../../lib/auth';
+import { withRouteErrors, isResponse } from '../../../../lib/route-utils';
+import { pool } from '../../../../lib/db';
 
 export const GET = withRouteErrors(async (req: NextRequest) => {
   const auth = await requireAuth(req);
   if (isResponse(auth)) return auth;
 
-  const capCheck = requireCapability(auth, "fx:read");
+  const capCheck = requireCapability(auth, 'fx:read');
   if (isResponse(capCheck)) return capCheck;
 
   const url = new URL(req.url);
-  const year = url.searchParams.get("year");
-  const month = url.searchParams.get("month");
-  const limit = Number(url.searchParams.get("limit") ?? "50");
+  const year = url.searchParams.get('year');
+  const month = url.searchParams.get('month');
+  const limit = Number(url.searchParams.get('limit') ?? '50');
 
   let sql = `
     SELECT 
@@ -56,14 +56,16 @@ export const GET = withRouteErrors(async (req: NextRequest) => {
 
   const { rows } = await pool.query(sql, params);
 
-  return ok(rows.map(r => ({
-    id: r.id,
-    year: r.year,
-    month: r.month,
-    mode: r.mode,
-    created_at: r.created_at,
-    created_by: r.created_by,
-    line_count: Number(r.line_count || 0),
-    total_delta: Number(r.total_delta || 0)
-  })));
+  return ok(
+    rows.map(r => ({
+      id: r.id,
+      year: r.year,
+      month: r.month,
+      mode: r.mode,
+      created_at: r.created_at,
+      created_by: r.created_by,
+      line_count: Number(r.line_count || 0),
+      total_delta: Number(r.total_delta || 0),
+    }))
+  );
 });

@@ -1,4 +1,4 @@
-import { pool } from "../../lib/db";
+import { pool } from '../../lib/db';
 
 export interface TrialBalanceRow {
   account_code: string;
@@ -18,7 +18,7 @@ export async function getTrialBalances(
     currency?: string;
   }
 ): Promise<TrialBalanceRow[]> {
-  const baseCurrency = options.currency || "MYR";
+  const baseCurrency = options.currency || 'MYR';
 
   // Get month-end date
   const monthEnd = new Date(Date.UTC(options.year, options.month, 0));
@@ -73,7 +73,11 @@ export async function getTrialBalances(
     ORDER BY jl.account_code, jl.currency;
   `;
 
-  const { rows } = await pool.query(sql, [companyId, baseCurrency, monthEndStr]);
+  const { rows } = await pool.query(sql, [
+    companyId,
+    baseCurrency,
+    monthEndStr,
+  ]);
 
   return rows.map(r => {
     const debit = Number(r.debit ?? 0);
@@ -85,7 +89,7 @@ export async function getTrialBalances(
       currency: r.currency as string,
       base_currency: r.base_currency as string,
       balance_base: balance,
-      balance_src: balance // For now, assume same as base - this would need currency conversion logic
+      balance_src: balance, // For now, assume same as base - this would need currency conversion logic
     };
   });
 }

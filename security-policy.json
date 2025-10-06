@@ -1,20 +1,20 @@
 {
-    "include": [
-        "**/bank/**",
-        "**/cashflow/**",
-        "**/alloc/**",
-        "**/budgets/**",
-        "**/capex/**",
-        "**/intangibles/**",
-        "**/fx/**",
-        "**/evidence/**"
-    ],
-    "exclude": [
-        "**/admin/**",
-        "**/internal/**",
-        "**/ops/**",
-        "**/opscc/**",
-        "**/readyz/**",
-        "**/healthz/**"
-    ]
+  "include": [
+    "**/bank/**",
+    "**/cashflow/**",
+    "**/alloc/**",
+    "**/budgets/**",
+    "**/capex/**",
+    "**/intangibles/**",
+    "**/fx/**",
+    "**/evidence/**"
+  ],
+  "exclude": [
+    "**/admin/**",
+    "**/internal/**",
+    "**/ops/**",
+    "**/opscc/**",
+    "**/readyz/**",
+    "**/healthz/**"
+  ]
 }

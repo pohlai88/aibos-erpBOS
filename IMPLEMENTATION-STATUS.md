@@ -26,13 +26,11 @@
 ### Areas for Improvement ⚠️
 
 1. **Missing Frontend UI** (32 modules)
-
    - Backend is complete but users cannot access features
    - **Impact**: Features exist but are unusable
    - **Priority**: HIGH
 
 2. **Missing Type Contracts** (most modules)
-
    - APIs lack proper type definitions
    - **Impact**: No type safety, harder to maintain
    - **Priority**: MEDIUM
@@ -83,7 +81,6 @@
 ### Phase 1: Immediate (Week 1-2)
 
 1. **Validate OpenAPI Generation**
-
    - Run `pnpm contracts:gen`
    - Ensure all API endpoints are documented
    - Fix any zod-to-openapi issues
@@ -98,7 +95,6 @@
 ### Phase 2: Short-term (Week 3-4)
 
 1. **Add Type Contracts**
-
    - Generate contracts for all API endpoints
    - Ensure type safety across stack
 
@@ -109,7 +105,6 @@
 ### Phase 3: Medium-term (Month 2)
 
 1. **Complete Remaining UIs**
-
    - Build frontend for remaining 27 modules
    - Ensure consistent UX
 

@@ -530,28 +530,28 @@ export default function OpportunityPipelineDashboard() {
 
 ```typescript
 // apps/web/hooks/useCRM.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useSalesforceSync() {
   return useQuery({
-    queryKey: ["salesforce-sync"],
-    queryFn: () => apiClient.GET("/api/crm/sync"),
+    queryKey: ['salesforce-sync'],
+    queryFn: () => apiClient.GET('/api/crm/sync'),
     refetchInterval: 60000, // Refresh every minute
   });
 }
 
 export function useCustomer360(customerId) {
   return useQuery({
-    queryKey: ["customer-360", customerId],
+    queryKey: ['customer-360', customerId],
     queryFn: () => apiClient.GET(`/api/crm/customers/${customerId}`),
   });
 }
 
 export function useOpportunityPipeline() {
   return useQuery({
-    queryKey: ["opportunity-pipeline"],
-    queryFn: () => apiClient.GET("/api/crm/opportunities"),
+    queryKey: ['opportunity-pipeline'],
+    queryFn: () => apiClient.GET('/api/crm/opportunities'),
   });
 }
 ```

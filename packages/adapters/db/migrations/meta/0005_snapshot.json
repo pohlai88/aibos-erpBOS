@@ -57,12 +57,8 @@
           "name": "account_company_id_company_id_fk",
           "tableFrom": "account",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -120,12 +116,8 @@
           "name": "accounting_period_company_id_company_id_fk",
           "tableFrom": "accounting_period",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -133,9 +125,7 @@
       "compositePrimaryKeys": {
         "accounting_period_id_pk": {
           "name": "accounting_period_id_pk",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -198,12 +188,8 @@
           "name": "api_key_user_id_app_user_id_fk",
           "tableFrom": "api_key",
           "tableTo": "app_user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -211,12 +197,8 @@
           "name": "api_key_company_id_company_id_fk",
           "tableFrom": "api_key",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -264,9 +246,7 @@
         "app_user_email_unique": {
           "name": "app_user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -309,9 +289,7 @@
         "company_code_unique": {
           "name": "company_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -411,9 +389,7 @@
         "item_code_unique": {
           "name": "item_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -468,12 +444,8 @@
           "name": "item_costs_company_id_company_id_fk",
           "tableFrom": "item_costs",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -481,12 +453,8 @@
           "name": "item_costs_item_id_item_id_fk",
           "tableFrom": "item_costs",
           "tableTo": "item",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -494,10 +462,7 @@
       "compositePrimaryKeys": {
         "item_costs_company_id_item_id_pk": {
           "name": "item_costs_company_id_item_id_pk",
-          "columns": [
-            "company_id",
-            "item_id"
-          ]
+          "columns": ["company_id", "item_id"]
         }
       },
       "uniqueConstraints": {},
@@ -589,12 +554,8 @@
           "name": "journal_company_id_company_id_fk",
           "tableFrom": "journal",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -604,9 +565,7 @@
         "journal_idempotency_key_unique": {
           "name": "journal_idempotency_key_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "idempotency_key"
-          ]
+          "columns": ["idempotency_key"]
         }
       },
       "policies": {},
@@ -696,12 +655,8 @@
           "name": "journal_line_journal_id_journal_id_fk",
           "tableFrom": "journal_line",
           "tableTo": "journal",
-          "columnsFrom": [
-            "journal_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["journal_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -742,12 +697,8 @@
           "name": "membership_user_id_app_user_id_fk",
           "tableFrom": "membership",
           "tableTo": "app_user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -755,12 +706,8 @@
           "name": "membership_company_id_company_id_fk",
           "tableFrom": "membership",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -768,10 +715,7 @@
       "compositePrimaryKeys": {
         "membership_user_id_company_id_pk": {
           "name": "membership_user_id_company_id_pk",
-          "columns": [
-            "user_id",
-            "company_id"
-          ]
+          "columns": ["user_id", "company_id"]
         }
       },
       "uniqueConstraints": {},
@@ -882,12 +826,8 @@
           "name": "payment_company_id_company_id_fk",
           "tableFrom": "payment",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -939,12 +879,8 @@
           "name": "payment_allocation_payment_id_payment_id_fk",
           "tableFrom": "payment_allocation",
           "tableTo": "payment",
-          "columnsFrom": [
-            "payment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["payment_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1021,12 +957,8 @@
           "name": "stock_ledger_company_id_company_id_fk",
           "tableFrom": "stock_ledger",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1034,12 +966,8 @@
           "name": "stock_ledger_item_id_item_id_fk",
           "tableFrom": "stock_ledger",
           "tableTo": "item",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

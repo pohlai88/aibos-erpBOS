@@ -57,12 +57,8 @@
           "name": "account_company_id_company_id_fk",
           "tableFrom": "account",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -70,9 +66,7 @@
       "compositePrimaryKeys": {
         "account_id_pk": {
           "name": "account_id_pk",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -116,9 +110,7 @@
         "company_code_unique": {
           "name": "company_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {},
@@ -178,12 +170,8 @@
           "name": "journal_company_id_company_id_fk",
           "tableFrom": "journal",
           "tableTo": "company",
-          "columnsFrom": [
-            "company_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["company_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -193,9 +181,7 @@
         "journal_idempotency_key_unique": {
           "name": "journal_idempotency_key_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "idempotency_key"
-          ]
+          "columns": ["idempotency_key"]
         }
       },
       "policies": {},
@@ -261,12 +247,8 @@
           "name": "journal_line_journal_id_journal_id_fk",
           "tableFrom": "journal_line",
           "tableTo": "journal",
-          "columnsFrom": [
-            "journal_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["journal_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

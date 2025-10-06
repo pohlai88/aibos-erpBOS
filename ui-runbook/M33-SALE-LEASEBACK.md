@@ -417,28 +417,28 @@ export default function SaleLeasebackPortfolio() {
 
 ```typescript
 // apps/web/hooks/useSaleLeaseback.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useProcessTransaction() {
   return useMutation({
-    mutationFn: (transactionData) =>
-      apiClient.POST("/api/slb/transactions", { body: transactionData }),
-    onSuccess: () => queryClient.invalidateQueries(["sale-leaseback"]),
+    mutationFn: transactionData =>
+      apiClient.POST('/api/slb/transactions', { body: transactionData }),
+    onSuccess: () => queryClient.invalidateQueries(['sale-leaseback']),
   });
 }
 
 export function useDeferredGainAmortization() {
   return useQuery({
-    queryKey: ["slb-amortization"],
-    queryFn: () => apiClient.GET("/api/slb/amortization"),
+    queryKey: ['slb-amortization'],
+    queryFn: () => apiClient.GET('/api/slb/amortization'),
   });
 }
 
 export function useSaleLeasebackPortfolio() {
   return useQuery({
-    queryKey: ["slb-portfolio"],
-    queryFn: () => apiClient.GET("/api/slb/transactions"),
+    queryKey: ['slb-portfolio'],
+    queryFn: () => apiClient.GET('/api/slb/transactions'),
   });
 }
 ```

@@ -1,12 +1,12 @@
 {
-  doctype: "CustomerPayment",
-  idempotencyKey: ["doctype", "id"],
-  debits: [{ account: "Bank", amountField: "amount" }],
+  doctype: 'CustomerPayment',
+  idempotencyKey: ['doctype', 'id'],
+  debits: [{ account: 'Bank', amountField: 'amount' }],
   credits: [
     {
-      account: "Trade Receivables",
-      amountField: "amount",
-      party: { type: "Customer", field: "party_id" },
+      account: 'Trade Receivables',
+      amountField: 'amount',
+      party: { type: 'Customer', field: 'party_id' },
     },
   ],
 }

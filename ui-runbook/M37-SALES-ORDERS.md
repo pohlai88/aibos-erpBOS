@@ -493,28 +493,28 @@ export default function RevenueRecognitionIntegration() {
 
 ```typescript
 // apps/web/hooks/useSalesOrders.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useSalesOrder() {
   return useMutation({
-    mutationFn: (orderData) =>
-      apiClient.POST("/api/sales-orders", { body: orderData }),
-    onSuccess: () => queryClient.invalidateQueries(["sales-orders"]),
+    mutationFn: orderData =>
+      apiClient.POST('/api/sales-orders', { body: orderData }),
+    onSuccess: () => queryClient.invalidateQueries(['sales-orders']),
   });
 }
 
 export function useOrderFulfillment() {
   return useQuery({
-    queryKey: ["order-fulfillment"],
-    queryFn: () => apiClient.GET("/api/sales-orders/fulfillment"),
+    queryKey: ['order-fulfillment'],
+    queryFn: () => apiClient.GET('/api/sales-orders/fulfillment'),
   });
 }
 
 export function useRevenueRecognition() {
   return useQuery({
-    queryKey: ["sales-revenue-recognition"],
-    queryFn: () => apiClient.GET("/api/sales-orders/revenue"),
+    queryKey: ['sales-revenue-recognition'],
+    queryFn: () => apiClient.GET('/api/sales-orders/revenue'),
   });
 }
 ```

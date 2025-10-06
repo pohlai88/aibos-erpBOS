@@ -1,27 +1,28 @@
-import { NextRequest, NextResponse } from "next/server";
-import { requireAuth, AuthCtx } from "@/lib/auth";
-import { requireCapability } from "@/lib/rbac";
-import { withRouteErrors } from "@/lib/route-utils";
-import { db } from "@/lib/db";
-import { sql } from "drizzle-orm";
-import { ok } from "@/api/_kit";
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAuth, AuthCtx } from '@/lib/auth';
+import { requireCapability } from '@/lib/rbac';
+import { withRouteErrors } from '@/lib/route-utils';
+import { db } from '@/lib/db';
+import { sql } from 'drizzle-orm';
+import { ok } from '@/api/_kit';
 
 export const POST = withRouteErrors(async (request: NextRequest) => {
-    const auth = await requireAuth(request);
-    await requireCapability(auth, "ctrl:report");
+  const auth = await requireAuth(request);
+  await requireCapability(auth, 'ctrl:report');
 
-    // Type assertion: after requireCapability, auth is definitely AuthCtx
-    const authCtx = auth as AuthCtx;
+  // Type assertion: after requireCapability, auth is definitely AuthCtx
+  const authCtx = auth as AuthCtx;
 
-    const body = await request.json();
-    const { trigger, period } = body;
+  const body = await request.json();
+  const { trigger, period } = body;
 
-    try {
-        const periodCondition = period === "week"
-            ? "created_at >= NOW() - INTERVAL '7 days'"
-            : "created_at >= NOW() - INTERVAL '30 days'";
+  try {
+    const periodCondition =
+      period === 'week'
+        ? "created_at >= NOW() - INTERVAL '7 days'"
+        : "created_at >= NOW() - INTERVAL '30 days'";
 
-        const summary = await db.execute(sql`
+    const summary = await db.execute(sql`
             SELECT 
                 COUNT(*) as total_runs,
                 COUNT(CASE WHEN status = 'PASS' THEN 1 END) as passed_runs,
@@ -34,7 +35,7 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
             AND cr.${sql.raw(periodCondition)}
         `);
 
-        const exceptions = await db.execute(sql`
+    const exceptions = await db.execute(sql`
             SELECT 
                 COUNT(*) as total_exceptions,
                 COUNT(CASE WHEN remediation_state = 'OPEN' THEN 1 END) as open_exceptions,
@@ -48,26 +49,29 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
             AND ce.${sql.raw(periodCondition)}
         `);
 
-        const result = {
-            period,
-            summary: summary.rows[0],
-            exceptions: exceptions.rows[0],
-            generated_at: new Date().toISOString()
-        };
+    const result = {
+      period,
+      summary: summary.rows[0],
+      exceptions: exceptions.rows[0],
+      generated_at: new Date().toISOString(),
+    };
 
-        return ok({
-                    success: true,
-                    trigger,
-                    result,
-                    timestamp: new Date().toISOString()
-                });
-    } catch (error) {
-        console.error(`Summary report failed for ${trigger}:`, error);
-        return ok({
-                        success: false,
-                        trigger,
-                        error: error instanceof Error ? error.message : "Unknown error",
-                        timestamp: new Date().toISOString()
-                    }, 500);
-    }
+    return ok({
+      success: true,
+      trigger,
+      result,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error(`Summary report failed for ${trigger}:`, error);
+    return ok(
+      {
+        success: false,
+        trigger,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString(),
+      },
+      500
+    );
+  }
 });

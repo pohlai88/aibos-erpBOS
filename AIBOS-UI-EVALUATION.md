@@ -205,7 +205,7 @@ Module not found: Can't resolve './en-US/_lib/formatDistance.js'
 
 ```typescript
 // Design tokens available
-import { colors, spacing, typography, shadows } from "aibos-ui/tokens";
+import { colors, spacing, typography, shadows } from 'aibos-ui/tokens';
 ```
 
 **Features**:
@@ -415,7 +415,7 @@ While aibos-ui is comprehensive, you'll need to create a few custom wrappers:
 
 ```typescript
 // apps/web/components/FileUpload.tsx
-import { Button } from "aibos-ui";
+import { Button } from 'aibos-ui';
 
 export function FileUpload({ onUpload, accept }) {
   // Custom file upload using aibos-ui Button
@@ -442,7 +442,7 @@ export function AgingChart({ data }) {
 
 ```typescript
 // apps/web/components/ReportViewer.tsx
-import { DataTable, Button } from "aibos-ui";
+import { DataTable, Button } from 'aibos-ui';
 
 export function ReportViewer({ report }) {
   // Custom report viewer with export
@@ -464,7 +464,7 @@ pnpm add aibos-ui@0.1.1  # Wait for fixed version
 
 ```typescript
 // apps/web/app/layout.tsx
-import "aibos-ui/styles/globals.css";
+import 'aibos-ui/styles/globals.css';
 ```
 
 ### **Step 3: Configure Tailwind**
@@ -473,8 +473,8 @@ import "aibos-ui/styles/globals.css";
 // apps/web/tailwind.config.js
 module.exports = {
   content: [
-    "./app/**/*.{js,ts,jsx,tsx}",
-    "./node_modules/aibos-ui/dist/**/*.js", // Include aibos-ui
+    './app/**/*.{js,ts,jsx,tsx}',
+    './node_modules/aibos-ui/dist/**/*.js', // Include aibos-ui
   ],
   // ... rest of config
 };
@@ -483,7 +483,7 @@ module.exports = {
 ### **Step 4: Use Components**
 
 ```typescript
-import { Button, Card, DataTable } from "aibos-ui";
+import { Button, Card, DataTable } from 'aibos-ui';
 ```
 
 ---
@@ -493,13 +493,11 @@ import { Button, Card, DataTable } from "aibos-ui";
 ### **Immediate Actions**
 
 1. ✅ **Fix date-fns** (Critical)
-
    - Update to `date-fns@3.6.0`
    - Publish `aibos-ui@0.1.1`
    - **ETA**: 1 hour
 
 2. ✅ **Add FileUpload Component** (High Priority)
-
    - Many modules need file import
    - **ETA**: 2 hours
 
@@ -510,14 +508,12 @@ import { Button, Card, DataTable } from "aibos-ui";
 ### **Future Enhancements**
 
 1. **Add More Components** (Low Priority)
-
    - Gantt chart for project management
    - Kanban board for workflow
    - Calendar for scheduling
    - **ETA**: 1-2 weeks
 
 2. **Add Themes** (Low Priority)
-
    - Light/dark mode toggle
    - Custom color schemes
    - **ETA**: 1 week

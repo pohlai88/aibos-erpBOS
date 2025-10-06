@@ -221,22 +221,22 @@ export default function AssetDisposal() {
 // apps/web/hooks/useAssets.ts
 export function useAssets(filters = {}) {
   return useQuery({
-    queryKey: ["assets", filters],
-    queryFn: () => apiClient.GET("/api/assets", { query: filters }),
+    queryKey: ['assets', filters],
+    queryFn: () => apiClient.GET('/api/assets', { query: filters }),
   });
 }
 
 export function useRunDepreciation() {
   return useMutation({
-    mutationFn: (period) =>
-      apiClient.POST("/api/assets/depreciation", { body: { period } }),
+    mutationFn: period =>
+      apiClient.POST('/api/assets/depreciation', { body: { period } }),
   });
 }
 
 export function useAssetDisposal(assetId: string) {
   return useMutation({
-    mutationFn: (data) =>
-      apiClient.POST("/api/assets/dispose", {
+    mutationFn: data =>
+      apiClient.POST('/api/assets/dispose', {
         body: { asset_id: assetId, ...data },
       }),
   });

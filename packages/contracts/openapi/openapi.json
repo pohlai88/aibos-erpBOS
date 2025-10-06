@@ -68,20 +68,13 @@
                               "maxLength": 3
                             }
                           },
-                          "required": [
-                            "amount",
-                            "currency"
-                          ]
+                          "required": ["amount", "currency"]
                         },
                         "tax_code": {
                           "type": "string"
                         }
                       },
-                      "required": [
-                        "description",
-                        "qty",
-                        "unit_price"
-                      ]
+                      "required": ["description", "qty", "unit_price"]
                     },
                     "minItems": 1
                   },
@@ -101,10 +94,7 @@
                             "maxLength": 3
                           }
                         },
-                        "required": [
-                          "amount",
-                          "currency"
-                        ]
+                        "required": ["amount", "currency"]
                       },
                       "tax_total": {
                         "type": "object",
@@ -119,10 +109,7 @@
                             "maxLength": 3
                           }
                         },
-                        "required": [
-                          "amount",
-                          "currency"
-                        ]
+                        "required": ["amount", "currency"]
                       },
                       "grand_total": {
                         "type": "object",
@@ -137,17 +124,10 @@
                             "maxLength": 3
                           }
                         },
-                        "required": [
-                          "amount",
-                          "currency"
-                        ]
+                        "required": ["amount", "currency"]
                       }
                     },
-                    "required": [
-                      "total",
-                      "tax_total",
-                      "grand_total"
-                    ]
+                    "required": ["total", "tax_total", "grand_total"]
                   }
                 },
                 "required": [
@@ -175,9 +155,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "journal_id"
-                  ]
+                  "required": ["journal_id"]
                 }
               }
             }
@@ -242,20 +220,13 @@
                               "maxLength": 3
                             }
                           },
-                          "required": [
-                            "amount",
-                            "currency"
-                          ]
+                          "required": ["amount", "currency"]
                         },
                         "tax_code": {
                           "type": "string"
                         }
                       },
-                      "required": [
-                        "description",
-                        "qty",
-                        "unit_price"
-                      ]
+                      "required": ["description", "qty", "unit_price"]
                     },
                     "minItems": 1
                   },
@@ -275,10 +246,7 @@
                             "maxLength": 3
                           }
                         },
-                        "required": [
-                          "amount",
-                          "currency"
-                        ]
+                        "required": ["amount", "currency"]
                       },
                       "tax_total": {
                         "type": "object",
@@ -293,10 +261,7 @@
                             "maxLength": 3
                           }
                         },
-                        "required": [
-                          "amount",
-                          "currency"
-                        ]
+                        "required": ["amount", "currency"]
                       },
                       "grand_total": {
                         "type": "object",
@@ -311,17 +276,10 @@
                             "maxLength": 3
                           }
                         },
-                        "required": [
-                          "amount",
-                          "currency"
-                        ]
+                        "required": ["amount", "currency"]
                       }
                     },
-                    "required": [
-                      "total",
-                      "tax_total",
-                      "grand_total"
-                    ]
+                    "required": ["total", "tax_total", "grand_total"]
                   }
                 },
                 "required": [
@@ -349,9 +307,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "journal_id"
-                  ]
+                  "required": ["journal_id"]
                 }
               }
             }

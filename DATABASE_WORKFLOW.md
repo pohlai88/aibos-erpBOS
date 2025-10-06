@@ -155,8 +155,8 @@ C:\AI-BOS\aibos-erpBOS\packages\adapters\db\migrations\
 
 ```typescript
 // Edit schema files in packages/adapters/db/src/schema/
-export const newTable = pgTable("new_table", {
-  id: text("id").primaryKey(),
+export const newTable = pgTable('new_table', {
+  id: text('id').primaryKey(),
   // ... other fields
 });
 ```

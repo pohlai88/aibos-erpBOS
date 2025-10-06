@@ -529,36 +529,36 @@ export default function AutomatedReportScheduler() {
 
 ```typescript
 // apps/web/hooks/useAnalytics.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useDashboards() {
   return useQuery({
-    queryKey: ["dashboards"],
-    queryFn: () => apiClient.GET("/api/analytics/dashboards"),
+    queryKey: ['dashboards'],
+    queryFn: () => apiClient.GET('/api/analytics/dashboards'),
   });
 }
 
 export function useAIInsights() {
   return useQuery({
-    queryKey: ["ai-insights"],
-    queryFn: () => apiClient.GET("/api/analytics/insights"),
+    queryKey: ['ai-insights'],
+    queryFn: () => apiClient.GET('/api/analytics/insights'),
     refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes
   });
 }
 
 export function useReportScheduler() {
   return useQuery({
-    queryKey: ["report-schedules"],
-    queryFn: () => apiClient.GET("/api/analytics/reports"),
+    queryKey: ['report-schedules'],
+    queryFn: () => apiClient.GET('/api/analytics/reports'),
   });
 }
 
 export function useSaveDashboard() {
   return useMutation({
-    mutationFn: (dashboardData) =>
-      apiClient.POST("/api/analytics/dashboards", { body: dashboardData }),
-    onSuccess: () => queryClient.invalidateQueries(["dashboards"]),
+    mutationFn: dashboardData =>
+      apiClient.POST('/api/analytics/dashboards', { body: dashboardData }),
+    onSuccess: () => queryClient.invalidateQueries(['dashboards']),
   });
 }
 ```

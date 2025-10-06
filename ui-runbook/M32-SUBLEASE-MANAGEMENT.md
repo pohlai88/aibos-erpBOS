@@ -380,20 +380,20 @@ export default function SubleaseOpportunityIdentifier() {
 
 ```typescript
 // apps/web/hooks/useSubleases.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useSubleases() {
   return useQuery({
-    queryKey: ["subleases"],
-    queryFn: () => apiClient.GET("/api/subleases"),
+    queryKey: ['subleases'],
+    queryFn: () => apiClient.GET('/api/subleases'),
   });
 }
 
 export function useImpairmentTesting() {
   return useQuery({
-    queryKey: ["sublease-impairment"],
-    queryFn: () => apiClient.GET("/api/subleases/impairment"),
+    queryKey: ['sublease-impairment'],
+    queryFn: () => apiClient.GET('/api/subleases/impairment'),
   });
 }
 ```

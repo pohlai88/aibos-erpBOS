@@ -614,35 +614,35 @@ export default function WebhookManager() {
 
 ```typescript
 // apps/web/hooks/useAPIGateway.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useAPIKeys() {
   return useQuery({
-    queryKey: ["api-keys"],
-    queryFn: () => apiClient.GET("/api/gateway/keys"),
+    queryKey: ['api-keys'],
+    queryFn: () => apiClient.GET('/api/gateway/keys'),
   });
 }
 
 export function useCreateAPIKey() {
   return useMutation({
-    mutationFn: (keyData) =>
-      apiClient.POST("/api/gateway/keys", { body: keyData }),
-    onSuccess: () => queryClient.invalidateQueries(["api-keys"]),
+    mutationFn: keyData =>
+      apiClient.POST('/api/gateway/keys', { body: keyData }),
+    onSuccess: () => queryClient.invalidateQueries(['api-keys']),
   });
 }
 
 export function useWebhooks() {
   return useQuery({
-    queryKey: ["webhooks"],
-    queryFn: () => apiClient.GET("/api/gateway/webhooks"),
+    queryKey: ['webhooks'],
+    queryFn: () => apiClient.GET('/api/gateway/webhooks'),
   });
 }
 
 export function useRateLimiting() {
   return useQuery({
-    queryKey: ["rate-limiting"],
-    queryFn: () => apiClient.GET("/api/gateway/analytics"),
+    queryKey: ['rate-limiting'],
+    queryFn: () => apiClient.GET('/api/gateway/analytics'),
   });
 }
 ```

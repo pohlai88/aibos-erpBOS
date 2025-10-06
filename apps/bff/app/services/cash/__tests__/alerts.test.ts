@@ -3,8 +3,8 @@
 
 import { describe, it, expect } from './test-utils';
 
-describe("cash alerts evaluator", () => {
-    it("structure compiles and returns breaches array", async () => {
-        expect(true).toBe(true); // plug into your harness; focus is route wiring
-    });
+describe('cash alerts evaluator', () => {
+  it('structure compiles and returns breaches array', async () => {
+    expect(true).toBe(true); // plug into your harness; focus is route wiring
+  });
 });

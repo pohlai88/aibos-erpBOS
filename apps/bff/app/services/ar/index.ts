@@ -7,15 +7,15 @@ export { ArPtpDisputesService } from './ptp-disputes';
 
 // Export types
 export type {
-    ArInvoice,
-    RemittanceRow,
-    MatchResult,
-    DunningContext,
-    PtpRecord,
-    DisputeRecord,
-    ServiceResult,
-    CashApplicationResult,
-    DunningRunResult
+  ArInvoice,
+  RemittanceRow,
+  MatchResult,
+  DunningContext,
+  PtpRecord,
+  DisputeRecord,
+  ServiceResult,
+  CashApplicationResult,
+  DunningRunResult,
 } from './types';
 
 // Service instances (singletons)

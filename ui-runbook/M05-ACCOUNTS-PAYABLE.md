@@ -328,36 +328,36 @@ import { Calendar, Card, Button } from "aibos-ui";
 
 ```typescript
 // apps/web/hooks/useAP.ts
-"use client";
+'use client';
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function usePurchaseInvoices(filters = {}) {
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["ap", "invoices", filters],
-    queryFn: () => apiClient.GET("/api/purchase-invoices", { query: filters }),
+    queryKey: ['ap', 'invoices', filters],
+    queryFn: () => apiClient.GET('/api/purchase-invoices', { query: filters }),
     staleTime: 30_000, // 30s
     retry: 2,
-    select: (response) => response.data,
+    select: response => response.data,
   });
 
   const createInvoice = useMutation({
-    mutationFn: (data) =>
-      apiClient.POST("/api/purchase-invoices/create", { body: data }),
+    mutationFn: data =>
+      apiClient.POST('/api/purchase-invoices/create', { body: data }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ap", "invoices"] });
+      queryClient.invalidateQueries({ queryKey: ['ap', 'invoices'] });
     },
   });
 
   const postInvoice = useMutation({
-    mutationFn: (id) =>
-      apiClient.POST("/api/purchase-invoices/post", { body: { id } }),
+    mutationFn: id =>
+      apiClient.POST('/api/purchase-invoices/post', { body: { id } }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ap"] });
-      queryClient.invalidateQueries({ queryKey: ["journals"] });
+      queryClient.invalidateQueries({ queryKey: ['ap'] });
+      queryClient.invalidateQueries({ queryKey: ['journals'] });
     },
   });
 
@@ -373,8 +373,8 @@ export function usePurchaseInvoices(filters = {}) {
 export function useInvoiceOCR() {
   return useMutation({
     mutationFn: (file: File) =>
-      apiClient.POST("/api/purchase-invoices/ocr", { body: file }),
-    onSuccess: (extractedData) => {
+      apiClient.POST('/api/purchase-invoices/ocr', { body: file }),
+    onSuccess: extractedData => {
       // Auto-fill form with extracted data
     },
   });
@@ -385,34 +385,34 @@ export function useApproveInvoice() {
 
   return useMutation({
     mutationFn: (id: string) =>
-      apiClient.POST("/api/purchase-invoices/approve", { body: { id } }),
+      apiClient.POST('/api/purchase-invoices/approve', { body: { id } }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ap", "invoices"] });
-      queryClient.invalidateQueries({ queryKey: ["ap", "approvals"] });
+      queryClient.invalidateQueries({ queryKey: ['ap', 'invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['ap', 'approvals'] });
     },
   });
 }
 
 export function useThreeWayMatch(invoiceId: string) {
   return useQuery({
-    queryKey: ["ap", "three-way-match", invoiceId],
+    queryKey: ['ap', 'three-way-match', invoiceId],
     queryFn: () =>
-      apiClient.GET("/api/purchase-invoices/three-way-match", {
+      apiClient.GET('/api/purchase-invoices/three-way-match', {
         query: { invoice_id: invoiceId },
       }),
     staleTime: 60_000, // 1min
     enabled: !!invoiceId,
-    select: (response) => response.data,
+    select: response => response.data,
   });
 }
 
 export function usePaymentScheduler(filters = {}) {
   return useQuery({
-    queryKey: ["ap", "payments", "schedule", filters],
+    queryKey: ['ap', 'payments', 'schedule', filters],
     queryFn: () =>
-      apiClient.GET("/api/ap/payment-schedule", { query: filters }),
+      apiClient.GET('/api/ap/payment-schedule', { query: filters }),
     staleTime: 5 * 60_000, // 5min
-    select: (response) => response.data,
+    select: response => response.data,
   });
 }
 ```
@@ -518,11 +518,11 @@ Complete copy for all user-facing states. Use i18n keys from `@/i18n/messages/ap
 
 ```typescript
 // Query key structure
-["ap", "invoices", { filters }][("ap", "invoice", invoiceId)][
-  ("ap", "approvals", { filters })
-][("ap", "payments", "schedule", { filters })][
-  ("ap", "three-way-match", invoiceId)
-][("ap", "statements", vendorId, dateRange)];
+['ap', 'invoices', { filters }][('ap', 'invoice', invoiceId)][
+  ('ap', 'approvals', { filters })
+][('ap', 'payments', 'schedule', { filters })][
+  ('ap', 'three-way-match', invoiceId)
+][('ap', 'statements', vendorId, dateRange)];
 ```
 
 ### Invalidation Rules
@@ -549,9 +549,9 @@ Complete copy for all user-facing states. Use i18n keys from `@/i18n/messages/ap
 
 ```typescript
 // Server actions
-revalidateTag("ap"); // After mutations
+revalidateTag('ap'); // After mutations
 revalidateTag(`ap-invoice-${invoiceId}`); // Specific invoice
-revalidateTag("payments"); // After scheduling/payment
+revalidateTag('payments'); // After scheduling/payment
 ```
 
 ---
@@ -648,16 +648,16 @@ revalidateTag("payments"); // After scheduling/payment
 // Example fixture structure
 export const standardInvoices: APInvoiceFixture[] = [
   {
-    id: "inv_1",
-    invoice_number: "V-2025-001",
-    vendor_id: "vendor_1",
-    vendor_name: "Acme Supplies",
-    invoice_date: "2025-01-15",
-    due_date: "2025-02-14",
+    id: 'inv_1',
+    invoice_number: 'V-2025-001',
+    vendor_id: 'vendor_1',
+    vendor_name: 'Acme Supplies',
+    invoice_date: '2025-01-15',
+    due_date: '2025-02-14',
     amount: 2500.0,
-    status: "pending_approval",
-    currency: "USD",
-    po_number: "PO-2025-100",
+    status: 'pending_approval',
+    currency: 'USD',
+    po_number: 'PO-2025-100',
   },
   // ... 49 more
 ];
@@ -760,15 +760,15 @@ pnpm run demo:reset:ap
 
 ```typescript
 // Server actions
-"use server";
+'use server';
 
-import { revalidateTag } from "next/cache";
+import { revalidateTag } from 'next/cache';
 
 export async function postInvoice(id: string) {
   // ... mutation logic
-  revalidateTag("ap");
-  revalidateTag("journals");
-  revalidateTag("trial-balance");
+  revalidateTag('ap');
+  revalidateTag('journals');
+  revalidateTag('trial-balance');
 }
 ```
 
@@ -790,9 +790,9 @@ export async function postInvoice(id: string) {
 **Implementation**:
 
 ```typescript
-import { analytics } from "@/lib/analytics";
+import { analytics } from '@/lib/analytics';
 
-analytics.track("AP.Invoice.Posted", {
+analytics.track('AP.Invoice.Posted', {
   invoice_id: invoice.id,
   vendor_id: invoice.vendor_id,
   amount: invoice.amount,
@@ -829,11 +829,11 @@ analytics.track("AP.Invoice.Posted", {
 
 ```typescript
 useHotkeys([
-  ["/", () => searchInputRef.current?.focus()],
-  ["n", () => openCreateModal()],
-  ["u", () => openOCRUpload()],
-  ["p", () => postInvoice(selectedId)],
-  ["a", () => approveInvoice(selectedId)],
+  ['/', () => searchInputRef.current?.focus()],
+  ['n', () => openCreateModal()],
+  ['u', () => openOCRUpload()],
+  ['p', () => postInvoice(selectedId)],
+  ['a', () => approveInvoice(selectedId)],
 ]);
 ```
 
@@ -903,8 +903,8 @@ flags: {
 2. **Invalidate cache**:
 
    ```typescript
-   revalidateTag("ap");
-   revalidateTag("payments");
+   revalidateTag('ap');
+   revalidateTag('payments');
    ```
 
 3. **Clear CDN cache**:
@@ -914,7 +914,6 @@ flags: {
    ```
 
 4. **Monitor for 15 minutes**:
-
    - Error rate drops below 0.1%
    - No new Sentry issues
 

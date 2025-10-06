@@ -480,10 +480,10 @@ Complete copy for all user-facing states. Use i18n keys from `@/i18n/messages/le
 
 ```typescript
 // apps/web/hooks/useLedger.ts
-"use client";
+'use client';
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useLedger(filters = {}) {
   const queryClient = useQueryClient();
@@ -493,39 +493,39 @@ export function useLedger(filters = {}) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["ledger", "list", filters],
-    queryFn: () => apiClient.GET("/api/ledger", { query: filters }),
+    queryKey: ['ledger', 'list', filters],
+    queryFn: () => apiClient.GET('/api/ledger', { query: filters }),
     staleTime: 30_000, // 30s
     retry: 2,
-    select: (response) => response.data,
+    select: response => response.data,
   });
 
   const createAccount = useMutation({
-    mutationFn: (data) => apiClient.POST("/api/ledger/create", { body: data }),
+    mutationFn: data => apiClient.POST('/api/ledger/create', { body: data }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ledger"] });
+      queryClient.invalidateQueries({ queryKey: ['ledger'] });
     },
-    onError: (error) => {
+    onError: error => {
       // Map error to user-friendly message
       if (error.status === 409) {
-        toast.error("Account code already exists");
+        toast.error('Account code already exists');
       }
     },
   });
 
   const updateAccount = useMutation({
     mutationFn: ({ id, data }) =>
-      apiClient.PUT("/api/ledger/[id]", { params: { id }, body: data }),
+      apiClient.PUT('/api/ledger/[id]', { params: { id }, body: data }),
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["ledger"] });
-      queryClient.invalidateQueries({ queryKey: ["ledger", "account", id] });
+      queryClient.invalidateQueries({ queryKey: ['ledger'] });
+      queryClient.invalidateQueries({ queryKey: ['ledger', 'account', id] });
     },
   });
 
   const archiveAccount = useMutation({
-    mutationFn: (id) => apiClient.POST("/api/ledger/archive", { body: { id } }),
+    mutationFn: id => apiClient.POST('/api/ledger/archive', { body: { id } }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ledger"] });
+      queryClient.invalidateQueries({ queryKey: ['ledger'] });
     },
   });
 
@@ -541,20 +541,20 @@ export function useLedger(filters = {}) {
 
 export function useAccountHierarchy() {
   return useQuery({
-    queryKey: ["ledger", "hierarchy"],
-    queryFn: () => apiClient.GET("/api/ledger/hierarchy"),
+    queryKey: ['ledger', 'hierarchy'],
+    queryFn: () => apiClient.GET('/api/ledger/hierarchy'),
     staleTime: 5 * 60_000, // 5min
-    select: (response) => response.data,
+    select: response => response.data,
   });
 }
 
 export function useAccount(id: string) {
   return useQuery({
-    queryKey: ["ledger", "account", id],
-    queryFn: () => apiClient.GET("/api/ledger/[id]", { params: { id } }),
+    queryKey: ['ledger', 'account', id],
+    queryFn: () => apiClient.GET('/api/ledger/[id]', { params: { id } }),
     staleTime: 60_000, // 1min
     enabled: !!id,
-    select: (response) => response.data,
+    select: response => response.data,
   });
 }
 ```
@@ -582,8 +582,8 @@ export function useAccount(id: string) {
 
 ```typescript
 // Query key structure
-["ledger", "list", { filters }][("ledger", "account", accountId)][
-  ("ledger", "hierarchy")
+['ledger', 'list', { filters }][('ledger', 'account', accountId)][
+  ('ledger', 'hierarchy')
 ];
 ```
 
@@ -608,7 +608,7 @@ export function useAccount(id: string) {
 
 ```typescript
 // Server actions
-revalidateTag("ledger"); // After mutations
+revalidateTag('ledger'); // After mutations
 revalidateTag(`ledger-${accountId}`); // Specific account
 ```
 
@@ -941,16 +941,16 @@ describe("LedgerPage", () => {
 // Example fixture structure
 export const standardAccounts: AccountFixture[] = [
   {
-    id: "acc_1",
-    code: "1000",
-    name: "Assets",
-    type: "asset",
-    normal_balance: "debit",
+    id: 'acc_1',
+    code: '1000',
+    name: 'Assets',
+    type: 'asset',
+    normal_balance: 'debit',
     is_active: true,
     level: 1,
     parent_id: null,
     balance: 1000000.0,
-    currency: "USD",
+    currency: 'USD',
   },
   // ... 49 more accounts
 ];
@@ -1054,14 +1054,14 @@ pnpm run demo:reset:ledger
 
 ```typescript
 // Server actions
-"use server";
+'use server';
 
-import { revalidateTag } from "next/cache";
+import { revalidateTag } from 'next/cache';
 
 export async function createAccount(data) {
   // ... mutation logic
-  revalidateTag("ledger");
-  revalidateTag("ledger-list");
+  revalidateTag('ledger');
+  revalidateTag('ledger-list');
 }
 ```
 
@@ -1081,9 +1081,9 @@ export async function createAccount(data) {
 **Implementation**:
 
 ```typescript
-import { analytics } from "@/lib/analytics";
+import { analytics } from '@/lib/analytics';
 
-analytics.track("Ledger.Account.Created", {
+analytics.track('Ledger.Account.Created', {
   account_id: account.id,
   type: account.type,
   parent_id: account.parent_id,
@@ -1117,9 +1117,9 @@ analytics.track("Ledger.Account.Created", {
 
 ```typescript
 useHotkeys([
-  ["/", () => searchInputRef.current?.focus()],
-  ["n", () => openCreateModal()],
-  ["e", () => router.push(`/ledger/${selectedId}`)],
+  ['/', () => searchInputRef.current?.focus()],
+  ['n', () => openCreateModal()],
+  ['e', () => router.push(`/ledger/${selectedId}`)],
 ]);
 ```
 
@@ -1194,9 +1194,9 @@ flags: {
 2. **Invalidate cache**:
 
    ```typescript
-   revalidateTag("ledger");
-   revalidateTag("ledger-list");
-   revalidateTag("ledger-hierarchy");
+   revalidateTag('ledger');
+   revalidateTag('ledger-list');
+   revalidateTag('ledger-hierarchy');
    ```
 
 3. **Clear CDN cache**:
@@ -1207,7 +1207,6 @@ flags: {
    ```
 
 4. **Monitor for 15 minutes**:
-
    - Error rate drops below 0.1%
    - No new Sentry issues
    - Users see fallback message or previous version
@@ -1651,7 +1650,7 @@ Complete table covering:
 ### Import Router
 
 ```typescript
-import { useRouter } from "next/navigation"; // Missing in Step 3 example
+import { useRouter } from 'next/navigation'; // Missing in Step 3 example
 ```
 
 ### Server Actions Preferred
@@ -1660,13 +1659,13 @@ For mutations, prefer **server actions** where suitable (especially create/updat
 
 ```typescript
 // app/actions/ledger.ts
-"use server";
+'use server';
 
-import { revalidateTag } from "next/cache";
+import { revalidateTag } from 'next/cache';
 
 export async function createAccount(data: AccountInput) {
   const account = await ledgerService.create(data);
-  revalidateTag("ledger");
+  revalidateTag('ledger');
   return account;
 }
 ```
@@ -1676,10 +1675,10 @@ export async function createAccount(data: AccountInput) {
 Add `"use client"` at top of files using hooks, state, or event handlers:
 
 ```typescript
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useLedger } from "@/hooks/useLedger";
+import { useState } from 'react';
+import { useLedger } from '@/hooks/useLedger';
 ```
 
 ---

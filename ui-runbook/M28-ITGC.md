@@ -501,35 +501,35 @@ export default function AutomatedTestingSuite() {
 
 ```typescript
 // apps/web/hooks/useITGC.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useAccessReviews() {
   return useQuery({
-    queryKey: ["itgc-access-reviews"],
-    queryFn: () => apiClient.GET("/api/itgc/access-reviews"),
+    queryKey: ['itgc-access-reviews'],
+    queryFn: () => apiClient.GET('/api/itgc/access-reviews'),
   });
 }
 
 export function useCertifyAccess() {
   return useMutation({
-    mutationFn: (userId) =>
-      apiClient.POST("/api/itgc/certify", { body: { user_id: userId } }),
-    onSuccess: () => queryClient.invalidateQueries(["itgc-access-reviews"]),
+    mutationFn: userId =>
+      apiClient.POST('/api/itgc/certify', { body: { user_id: userId } }),
+    onSuccess: () => queryClient.invalidateQueries(['itgc-access-reviews']),
   });
 }
 
 export function useChanges() {
   return useQuery({
-    queryKey: ["itgc-changes"],
-    queryFn: () => apiClient.GET("/api/itgc/changes"),
+    queryKey: ['itgc-changes'],
+    queryFn: () => apiClient.GET('/api/itgc/changes'),
   });
 }
 
 export function useITGCTesting() {
   return useQuery({
-    queryKey: ["itgc-testing"],
-    queryFn: () => apiClient.GET("/api/itgc/testing"),
+    queryKey: ['itgc-testing'],
+    queryFn: () => apiClient.GET('/api/itgc/testing'),
   });
 }
 ```

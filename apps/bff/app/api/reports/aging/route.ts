@@ -1,7 +1,8 @@
 // @api:nonstandard (CORS headers)
+/* eslint-disable no-restricted-syntax */
 
-import { pool } from "../../../lib/db";
-import { ok } from "../../../lib/http";
+import { pool } from '../../../lib/db';
+import { ok } from '../../../lib/http';
 
 // Very simple ageing using journal lines by party + allocations; assumes
 // sales invoices credit Sales & Output Tax and debit AR with party;
@@ -9,7 +10,7 @@ import { ok } from "../../../lib/http";
 // payments post with party as well, so net balance per party is computable.
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const company_id = url.searchParams.get("company_id") ?? "COMP-1";
+  const company_id = url.searchParams.get('company_id') ?? 'COMP-1';
   const today = new Date();
 
   // We'll compute AR balances from journal lines tagged party_type='Customer'
@@ -41,17 +42,17 @@ export async function GET(req: Request) {
   function bucket(dt: string) {
     const d = new Date(dt);
     const days = Math.floor((+today - +d) / (1000 * 60 * 60 * 24));
-    if (days <= 30) return "0-30";
-    if (days <= 60) return "31-60";
-    if (days <= 90) return "61-90";
-    return "90+";
+    if (days <= 30) return '0-30';
+    if (days <= 60) return '31-60';
+    if (days <= 90) return '61-90';
+    return '90+';
   }
 
   const items = rows.map(r => ({
-    kind: r.kind as "AR" | "AP",
+    kind: r.kind as 'AR' | 'AP',
     party_id: r.party_id as string,
     balance: Number(r.balance).toFixed(2),
-    bucket: bucket(String(r.last_tx))
+    bucket: bucket(String(r.last_tx)),
   }));
 
   // rollup
@@ -61,7 +62,13 @@ export async function GET(req: Request) {
     totals[key] = (totals[key] ?? 0) + Number(i.balance);
   }
 
-  return ok({ company_id, items, totals: Object.fromEntries(Object.entries(totals).map(([k, v]) => [k, v.toFixed(2)])) });
+  return ok({
+    company_id,
+    items,
+    totals: Object.fromEntries(
+      Object.entries(totals).map(([k, v]) => [k, v.toFixed(2)])
+    ),
+  });
 }
 
 export async function OPTIONS(req: Request) {
@@ -71,6 +78,6 @@ export async function OPTIONS(req: Request) {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
-    }
+    },
   });
 }

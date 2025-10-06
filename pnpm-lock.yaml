@@ -90,6 +90,9 @@ importers:
       happy-dom:
         specifier: ^19.0.2
         version: 19.0.2
+      prettier:
+        specifier: ^3.6.2
+        version: 3.6.2
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
@@ -186,7 +189,7 @@ importers:
         version: 19.1.9(@types/react@19.1.16)
       vitest:
         specifier: ^2.1.8
-        version: 2.1.9(@types/node@24.6.0)(@vitest/ui@3.2.4)(happy-dom@19.0.2)
+        version: 2.1.9(@types/node@24.6.0)(@vitest/ui@3.2.4(vitest@3.2.4))(happy-dom@19.0.2)
 
   apps/web:
     dependencies:
@@ -5204,6 +5207,11 @@ packages:
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
+
+  prettier@3.6.2:
+    resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
+    engines: {node: '>=14'}
+    hasBin: true
 
   pretty-format@24.9.0:
     resolution: {integrity: sha512-00ZMZUiHaJrNfk33guavqgvfJS30sLYf0f8+Srklv0AMPodGGHcoHgksZ3OThYnIvOd+8yMCn0YiEOogjlgsnA==}
@@ -11484,6 +11492,8 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
+  prettier@3.6.2: {}
+
   pretty-format@24.9.0:
     dependencies:
       '@jest/types': 24.9.0
@@ -12311,7 +12321,7 @@ snapshots:
       '@types/node': 24.6.0
       fsevents: 2.3.3
 
-  vitest@2.1.9(@types/node@24.6.0)(@vitest/ui@3.2.4)(happy-dom@19.0.2):
+  vitest@2.1.9(@types/node@24.6.0)(@vitest/ui@3.2.4(vitest@3.2.4))(happy-dom@19.0.2):
     dependencies:
       '@vitest/expect': 2.1.9
       '@vitest/mocker': 2.1.9(vite@5.4.20(@types/node@24.6.0))

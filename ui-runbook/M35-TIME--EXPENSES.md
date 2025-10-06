@@ -456,28 +456,28 @@ export default function ApprovalWorkflowEngine() {
 
 ```typescript
 // apps/web/hooks/useTimeExpenses.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useTimeEntry() {
   return useMutation({
-    mutationFn: (timeData) =>
-      apiClient.POST("/api/time-expenses/timesheets", { body: timeData }),
-    onSuccess: () => queryClient.invalidateQueries(["timesheets"]),
+    mutationFn: timeData =>
+      apiClient.POST('/api/time-expenses/timesheets', { body: timeData }),
+    onSuccess: () => queryClient.invalidateQueries(['timesheets']),
   });
 }
 
 export function useOCR() {
   return useMutation({
-    mutationFn: (file) =>
-      apiClient.POST("/api/time-expenses/ocr", { body: { file } }),
+    mutationFn: file =>
+      apiClient.POST('/api/time-expenses/ocr', { body: { file } }),
   });
 }
 
 export function useApprovals() {
   return useQuery({
-    queryKey: ["approvals"],
-    queryFn: () => apiClient.GET("/api/time-expenses/approvals"),
+    queryKey: ['approvals'],
+    queryFn: () => apiClient.GET('/api/time-expenses/approvals'),
   });
 }
 ```

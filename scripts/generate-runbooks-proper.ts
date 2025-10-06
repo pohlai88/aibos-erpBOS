@@ -13,45 +13,269 @@ const outputDir = path.resolve(__dirname, '../ui-runbook');
 
 // Module definitions with specific details
 const modules = [
-    { id: 'M09', name: 'CAPEX Planning', priority: 'MEDIUM', phase: '3 - Asset Management', effort: '1.5 days', apis: 4 },
-    { id: 'M10', name: 'Intangible Assets', priority: 'LOW', phase: '3 - Asset Management', effort: '1 day', apis: 4 },
-    { id: 'M11', name: 'Inventory', priority: 'MEDIUM', phase: '3 - Asset Management', effort: '2 days', apis: 8 },
-    { id: 'M12', name: 'Revenue Recognition', priority: 'HIGH', phase: '4 - Advanced Financial', effort: '2.5 days', apis: 26 },
-    { id: 'M13', name: 'Tax Management', priority: 'HIGH', phase: '4 - Advanced Financial', effort: '2 days', apis: 16 },
-    { id: 'M14', name: 'Budget Planning', priority: 'MEDIUM', phase: '4 - Advanced Financial', effort: '1.5 days', apis: 12 },
-    { id: 'M15', name: 'Cash Flow Forecasting', priority: 'MEDIUM', phase: '4 - Advanced Financial', effort: '1 day', apis: 3 },
-    { id: 'M16', name: 'Allocation Engine', priority: 'MEDIUM', phase: '5 - Consolidation & Allocation', effort: '1.5 days', apis: 7 },
-    { id: 'M17', name: 'Consolidation', priority: 'HIGH', phase: '5 - Consolidation & Allocation', effort: '2 days', apis: 10 },
-    { id: 'M18', name: 'Intercompany', priority: 'MEDIUM', phase: '5 - Consolidation & Allocation', effort: '1.5 days', apis: 7 },
-    { id: 'M19', name: 'Multi-Currency', priority: 'MEDIUM', phase: '5 - Consolidation & Allocation', effort: '1 day', apis: 4 },
-    { id: 'M20', name: 'Close Management', priority: 'HIGH', phase: '6 - Compliance & Controls', effort: '2.5 days', apis: 24 },
-    { id: 'M21', name: 'Evidence Management', priority: 'MEDIUM', phase: '6 - Compliance & Controls', effort: '1.5 days', apis: 8 },
-    { id: 'M22', name: 'Attestation', priority: 'MEDIUM', phase: '6 - Compliance & Controls', effort: '1.5 days', apis: 14 },
-    { id: 'M23', name: 'Payment Processing', priority: 'HIGH', phase: '7 - Payments & Billing', effort: '3 days', apis: 32 },
-    { id: 'M24', name: 'AR Collections', priority: 'HIGH', phase: '7 - Payments & Billing', effort: '2.5 days', apis: 27 },
-    { id: 'M25', name: 'Customer Portal', priority: 'MEDIUM', phase: '7 - Payments & Billing', effort: '2 days', apis: 11 },
-    { id: 'M26', name: 'Recurring Billing', priority: 'MEDIUM', phase: '7 - Payments & Billing', effort: '1.5 days', apis: 13 },
-    { id: 'M27', name: 'SOX Controls', priority: 'HIGH', phase: '8 - SOX & ITGC', effort: '1.5 days', apis: 12 },
-    { id: 'M28', name: 'ITGC', priority: 'HIGH', phase: '8 - SOX & ITGC', effort: '1.5 days', apis: 16 },
-    { id: 'M29', name: 'Operations Automation', priority: 'MEDIUM', phase: '8 - SOX & ITGC', effort: '2 days', apis: 18 },
-    { id: 'M30', name: 'Close Insights', priority: 'MEDIUM', phase: '8 - SOX & ITGC', effort: '1 day', apis: 8 },
-    { id: 'M31', name: 'Lease Accounting', priority: 'HIGH', phase: '9 - Lease Accounting', effort: '4 days', apis: 46 },
-    { id: 'M32', name: 'Sublease Management', priority: 'LOW', phase: '9 - Lease Accounting', effort: '1 day', apis: 3 },
-    { id: 'M33', name: 'Sale-Leaseback', priority: 'LOW', phase: '9 - Lease Accounting', effort: '1 day', apis: 5 },
-    { id: 'M34', name: 'Projects & Jobs', priority: 'MEDIUM', phase: '10 - Extended Modules', effort: '2 days', apis: 15 },
-    { id: 'M35', name: 'Time & Expenses', priority: 'MEDIUM', phase: '10 - Extended Modules', effort: '2 days', apis: 12 },
-    { id: 'M36', name: 'Purchase Orders', priority: 'MEDIUM', phase: '10 - Extended Modules', effort: '1.5 days', apis: 10 },
-    { id: 'M37', name: 'Sales Orders', priority: 'MEDIUM', phase: '10 - Extended Modules', effort: '1.5 days', apis: 10 },
-    { id: 'M38', name: 'CRM Integration', priority: 'LOW', phase: '10 - Extended Modules', effort: '2 days', apis: 8 },
-    { id: 'M39', name: 'Analytics & BI', priority: 'MEDIUM', phase: '10 - Extended Modules', effort: '2 days', apis: 12 },
-    { id: 'M40', name: 'API Gateway', priority: 'LOW', phase: '10 - Extended Modules', effort: '1.5 days', apis: 6 },
+  {
+    id: 'M09',
+    name: 'CAPEX Planning',
+    priority: 'MEDIUM',
+    phase: '3 - Asset Management',
+    effort: '1.5 days',
+    apis: 4,
+  },
+  {
+    id: 'M10',
+    name: 'Intangible Assets',
+    priority: 'LOW',
+    phase: '3 - Asset Management',
+    effort: '1 day',
+    apis: 4,
+  },
+  {
+    id: 'M11',
+    name: 'Inventory',
+    priority: 'MEDIUM',
+    phase: '3 - Asset Management',
+    effort: '2 days',
+    apis: 8,
+  },
+  {
+    id: 'M12',
+    name: 'Revenue Recognition',
+    priority: 'HIGH',
+    phase: '4 - Advanced Financial',
+    effort: '2.5 days',
+    apis: 26,
+  },
+  {
+    id: 'M13',
+    name: 'Tax Management',
+    priority: 'HIGH',
+    phase: '4 - Advanced Financial',
+    effort: '2 days',
+    apis: 16,
+  },
+  {
+    id: 'M14',
+    name: 'Budget Planning',
+    priority: 'MEDIUM',
+    phase: '4 - Advanced Financial',
+    effort: '1.5 days',
+    apis: 12,
+  },
+  {
+    id: 'M15',
+    name: 'Cash Flow Forecasting',
+    priority: 'MEDIUM',
+    phase: '4 - Advanced Financial',
+    effort: '1 day',
+    apis: 3,
+  },
+  {
+    id: 'M16',
+    name: 'Allocation Engine',
+    priority: 'MEDIUM',
+    phase: '5 - Consolidation & Allocation',
+    effort: '1.5 days',
+    apis: 7,
+  },
+  {
+    id: 'M17',
+    name: 'Consolidation',
+    priority: 'HIGH',
+    phase: '5 - Consolidation & Allocation',
+    effort: '2 days',
+    apis: 10,
+  },
+  {
+    id: 'M18',
+    name: 'Intercompany',
+    priority: 'MEDIUM',
+    phase: '5 - Consolidation & Allocation',
+    effort: '1.5 days',
+    apis: 7,
+  },
+  {
+    id: 'M19',
+    name: 'Multi-Currency',
+    priority: 'MEDIUM',
+    phase: '5 - Consolidation & Allocation',
+    effort: '1 day',
+    apis: 4,
+  },
+  {
+    id: 'M20',
+    name: 'Close Management',
+    priority: 'HIGH',
+    phase: '6 - Compliance & Controls',
+    effort: '2.5 days',
+    apis: 24,
+  },
+  {
+    id: 'M21',
+    name: 'Evidence Management',
+    priority: 'MEDIUM',
+    phase: '6 - Compliance & Controls',
+    effort: '1.5 days',
+    apis: 8,
+  },
+  {
+    id: 'M22',
+    name: 'Attestation',
+    priority: 'MEDIUM',
+    phase: '6 - Compliance & Controls',
+    effort: '1.5 days',
+    apis: 14,
+  },
+  {
+    id: 'M23',
+    name: 'Payment Processing',
+    priority: 'HIGH',
+    phase: '7 - Payments & Billing',
+    effort: '3 days',
+    apis: 32,
+  },
+  {
+    id: 'M24',
+    name: 'AR Collections',
+    priority: 'HIGH',
+    phase: '7 - Payments & Billing',
+    effort: '2.5 days',
+    apis: 27,
+  },
+  {
+    id: 'M25',
+    name: 'Customer Portal',
+    priority: 'MEDIUM',
+    phase: '7 - Payments & Billing',
+    effort: '2 days',
+    apis: 11,
+  },
+  {
+    id: 'M26',
+    name: 'Recurring Billing',
+    priority: 'MEDIUM',
+    phase: '7 - Payments & Billing',
+    effort: '1.5 days',
+    apis: 13,
+  },
+  {
+    id: 'M27',
+    name: 'SOX Controls',
+    priority: 'HIGH',
+    phase: '8 - SOX & ITGC',
+    effort: '1.5 days',
+    apis: 12,
+  },
+  {
+    id: 'M28',
+    name: 'ITGC',
+    priority: 'HIGH',
+    phase: '8 - SOX & ITGC',
+    effort: '1.5 days',
+    apis: 16,
+  },
+  {
+    id: 'M29',
+    name: 'Operations Automation',
+    priority: 'MEDIUM',
+    phase: '8 - SOX & ITGC',
+    effort: '2 days',
+    apis: 18,
+  },
+  {
+    id: 'M30',
+    name: 'Close Insights',
+    priority: 'MEDIUM',
+    phase: '8 - SOX & ITGC',
+    effort: '1 day',
+    apis: 8,
+  },
+  {
+    id: 'M31',
+    name: 'Lease Accounting',
+    priority: 'HIGH',
+    phase: '9 - Lease Accounting',
+    effort: '4 days',
+    apis: 46,
+  },
+  {
+    id: 'M32',
+    name: 'Sublease Management',
+    priority: 'LOW',
+    phase: '9 - Lease Accounting',
+    effort: '1 day',
+    apis: 3,
+  },
+  {
+    id: 'M33',
+    name: 'Sale-Leaseback',
+    priority: 'LOW',
+    phase: '9 - Lease Accounting',
+    effort: '1 day',
+    apis: 5,
+  },
+  {
+    id: 'M34',
+    name: 'Projects & Jobs',
+    priority: 'MEDIUM',
+    phase: '10 - Extended Modules',
+    effort: '2 days',
+    apis: 15,
+  },
+  {
+    id: 'M35',
+    name: 'Time & Expenses',
+    priority: 'MEDIUM',
+    phase: '10 - Extended Modules',
+    effort: '2 days',
+    apis: 12,
+  },
+  {
+    id: 'M36',
+    name: 'Purchase Orders',
+    priority: 'MEDIUM',
+    phase: '10 - Extended Modules',
+    effort: '1.5 days',
+    apis: 10,
+  },
+  {
+    id: 'M37',
+    name: 'Sales Orders',
+    priority: 'MEDIUM',
+    phase: '10 - Extended Modules',
+    effort: '1.5 days',
+    apis: 10,
+  },
+  {
+    id: 'M38',
+    name: 'CRM Integration',
+    priority: 'LOW',
+    phase: '10 - Extended Modules',
+    effort: '2 days',
+    apis: 8,
+  },
+  {
+    id: 'M39',
+    name: 'Analytics & BI',
+    priority: 'MEDIUM',
+    phase: '10 - Extended Modules',
+    effort: '2 days',
+    apis: 12,
+  },
+  {
+    id: 'M40',
+    name: 'API Gateway',
+    priority: 'LOW',
+    phase: '10 - Extended Modules',
+    effort: '1.5 days',
+    apis: 6,
+  },
 ];
 
-function generateRunbook(module: typeof modules[0]) {
-    const hours = parseFloat(module.effort) * 8;
-    const days = parseFloat(module.effort);
+function generateRunbook(module: (typeof modules)[0]) {
+  const hours = parseFloat(module.effort) * 8;
+  const days = parseFloat(module.effort);
 
-    return `# 🚀 ${module.id}: ${module.name} - UI Implementation Runbook
+  return `# 🚀 ${module.id}: ${module.name} - UI Implementation Runbook
 
 **Module ID**: ${module.id}  
 **Module Name**: ${module.name}  
@@ -195,19 +419,24 @@ export function useCreate${module.name.replace(/\s+/g, '')}() {
 
 ## 📝 Implementation Guide
 
-${days > 1 ?
-            Array.from({ length: Math.ceil(days) }, (_, i) =>
-                `### Day ${i + 1}: [Tasks] (8 hours)
+${
+  days > 1
+    ? Array.from(
+        { length: Math.ceil(days) },
+        (_, i) =>
+          `### Day ${i + 1}: [Tasks] (8 hours)
 
 1. [Task 1] (X hours)
 2. [Task 2] (X hours)
 3. [Task 3] (X hours)
-`).join('\n') :
-            `### Day 1: [Tasks] (${hours} hours)
+`
+      ).join('\n')
+    : `### Day 1: [Tasks] (${hours} hours)
 
 1. [Task 1] (X hours)
 2. [Task 2] (X hours)
-`}
+`
+}
 
 **Total**: ${module.effort} (${hours} hours)
 
@@ -239,9 +468,14 @@ ${days > 1 ?
 
 | Day | Deliverable               |
 | --- | ------------------------- |
-${days > 1 ?
-            Array.from({ length: Math.ceil(days) }, (_, i) => `| ${i + 1}   | [Deliverable description] |`).join('\n') :
-            `| 1   | [Deliverable description] |`}
+${
+  days > 1
+    ? Array.from(
+        { length: Math.ceil(days) },
+        (_, i) => `| ${i + 1}   | [Deliverable description] |`
+      ).join('\n')
+    : `| 1   | [Deliverable description] |`
+}
 
 **Total**: ${module.effort} (${hours} hours)
 
@@ -290,12 +524,12 @@ ${days > 1 ?
 
 // Generate all runbooks
 modules.forEach(module => {
-    const fileName = `${module.id}-${module.name.toUpperCase().replace(/\s+/g, '-').replace(/&/g, '')}.md`;
-    const filePath = path.join(outputDir, fileName);
-    const content = generateRunbook(module);
+  const fileName = `${module.id}-${module.name.toUpperCase().replace(/\s+/g, '-').replace(/&/g, '')}.md`;
+  const filePath = path.join(outputDir, fileName);
+  const content = generateRunbook(module);
 
-    fs.writeFileSync(filePath, content, { encoding: 'utf8' });
-    console.log(`✅ Created: ${fileName}`);
+  fs.writeFileSync(filePath, content, { encoding: 'utf8' });
+  console.log(`✅ Created: ${fileName}`);
 });
 
 console.log(`\n🎉 All ${modules.length} runbooks generated successfully!`);

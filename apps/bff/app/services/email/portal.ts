@@ -4,148 +4,161 @@
 import { env } from '@/lib/env';
 
 export interface EmailTemplate {
-    subject: string;
-    html: string;
-    text: string;
+  subject: string;
+  html: string;
+  text: string;
 }
 
 export interface EmailRequest {
-    to: string;
-    from?: string;
-    subject: string;
-    html: string;
-    text: string;
-    templateId?: string;
-    context?: Record<string, any>;
+  to: string;
+  from?: string;
+  subject: string;
+  html: string;
+  text: string;
+  templateId?: string;
+  context?: Record<string, any>;
 }
 
 export interface EmailResponse {
-    success: boolean;
-    messageId?: string;
-    error?: string;
+  success: boolean;
+  messageId?: string;
+  error?: string;
 }
 
 export class EmailService {
-    private fromEmail: string;
+  private fromEmail: string;
 
-    constructor() {
-        this.fromEmail = env.RECEIPTS_FROM_EMAIL;
+  constructor() {
+    this.fromEmail = env.RECEIPTS_FROM_EMAIL;
+  }
+
+  /**
+   * Send magic link email for portal access
+   */
+  async sendMagicLink(
+    to: string,
+    magicLink: string,
+    customerName?: string,
+    companyName?: string
+  ): Promise<EmailResponse> {
+    const template = this.getMagicLinkTemplate(
+      magicLink,
+      customerName,
+      companyName
+    );
+
+    return this.sendEmail({
+      to,
+      from: this.fromEmail,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+      templateId: 'portal-magic-link',
+      context: { magicLink, customerName, companyName },
+    });
+  }
+
+  /**
+   * Send receipt email after successful payment
+   */
+  async sendReceipt(
+    to: string,
+    transactionId: string,
+    amount: number,
+    currency: string,
+    receiptUrl: string,
+    customerName?: string,
+    companyName?: string
+  ): Promise<EmailResponse> {
+    const template = this.getReceiptTemplate(
+      transactionId,
+      amount,
+      currency,
+      receiptUrl,
+      customerName,
+      companyName
+    );
+
+    return this.sendEmail({
+      to,
+      from: this.fromEmail,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+      templateId: 'payment-receipt',
+      context: {
+        transactionId,
+        amount,
+        currency,
+        receiptUrl,
+        customerName,
+        companyName,
+      },
+    });
+  }
+
+  /**
+   * Send email using M15.2 dispatcher
+   */
+  private async sendEmail(request: EmailRequest): Promise<EmailResponse> {
+    try {
+      // TODO: Integrate with actual M15.2 email dispatcher
+      // For now, simulate email sending
+      console.log('📧 Email Service:', {
+        to: request.to,
+        subject: request.subject,
+        templateId: request.templateId,
+        context: request.context,
+      });
+
+      // Simulate API call to M15.2 email service
+      const response = await this.callM15EmailService(request);
+
+      return {
+        success: true,
+        messageId: response.messageId || `msg_${Date.now()}`,
+      };
+    } catch (error) {
+      console.error('Email sending failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
+  }
 
-    /**
-     * Send magic link email for portal access
-     */
-    async sendMagicLink(
-        to: string,
-        magicLink: string,
-        customerName?: string,
-        companyName?: string
-    ): Promise<EmailResponse> {
-        const template = this.getMagicLinkTemplate(magicLink, customerName, companyName);
-        
-        return this.sendEmail({
-            to,
-            from: this.fromEmail,
-            subject: template.subject,
-            html: template.html,
-            text: template.text,
-            templateId: 'portal-magic-link',
-            context: { magicLink, customerName, companyName }
-        });
-    }
+  /**
+   * Call M15.2 email dispatcher service
+   */
+  private async callM15EmailService(
+    request: EmailRequest
+  ): Promise<{ messageId: string }> {
+    // TODO: Replace with actual M15.2 email service call
+    // This would typically be an HTTP call to the M15.2 email microservice
 
-    /**
-     * Send receipt email after successful payment
-     */
-    async sendReceipt(
-        to: string,
-        transactionId: string,
-        amount: number,
-        currency: string,
-        receiptUrl: string,
-        customerName?: string,
-        companyName?: string
-    ): Promise<EmailResponse> {
-        const template = this.getReceiptTemplate(
-            transactionId, 
-            amount, 
-            currency, 
-            receiptUrl, 
-            customerName, 
-            companyName
-        );
-        
-        return this.sendEmail({
-            to,
-            from: this.fromEmail,
-            subject: template.subject,
-            html: template.html,
-            text: template.text,
-            templateId: 'payment-receipt',
-            context: { transactionId, amount, currency, receiptUrl, customerName, companyName }
-        });
-    }
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 100));
 
-    /**
-     * Send email using M15.2 dispatcher
-     */
-    private async sendEmail(request: EmailRequest): Promise<EmailResponse> {
-        try {
-            // TODO: Integrate with actual M15.2 email dispatcher
-            // For now, simulate email sending
-            console.log('📧 Email Service:', {
-                to: request.to,
-                subject: request.subject,
-                templateId: request.templateId,
-                context: request.context
-            });
+    // Simulate successful response
+    return {
+      messageId: `m15_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    };
+  }
 
-            // Simulate API call to M15.2 email service
-            const response = await this.callM15EmailService(request);
-            
-            return {
-                success: true,
-                messageId: response.messageId || `msg_${Date.now()}`,
-            };
-        } catch (error) {
-            console.error('Email sending failed:', error);
-            return {
-                success: false,
-                error: error instanceof Error ? error.message : 'Unknown error'
-            };
-        }
-    }
+  /**
+   * Get magic link email template
+   */
+  private getMagicLinkTemplate(
+    magicLink: string,
+    customerName?: string,
+    companyName?: string
+  ): EmailTemplate {
+    const displayName = customerName || 'Valued Customer';
+    const company = companyName || 'AI-BOS';
 
-    /**
-     * Call M15.2 email dispatcher service
-     */
-    private async callM15EmailService(request: EmailRequest): Promise<{ messageId: string }> {
-        // TODO: Replace with actual M15.2 email service call
-        // This would typically be an HTTP call to the M15.2 email microservice
-        
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Simulate successful response
-        return {
-            messageId: `m15_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-        };
-    }
+    const subject = `Your ${company} Customer Portal Access Link`;
 
-    /**
-     * Get magic link email template
-     */
-    private getMagicLinkTemplate(
-        magicLink: string, 
-        customerName?: string, 
-        companyName?: string
-    ): EmailTemplate {
-        const displayName = customerName || 'Valued Customer';
-        const company = companyName || 'AI-BOS';
-        
-        const subject = `Your ${company} Customer Portal Access Link`;
-        
-        const html = `
+    const html = `
             <!DOCTYPE html>
             <html>
             <head>
@@ -177,8 +190,8 @@ export class EmailService {
             </body>
             </html>
         `;
-        
-        const text = `
+
+    const text = `
             Hello ${displayName}!
             
             You have been granted access to the ${company} Customer Portal.
@@ -192,27 +205,27 @@ export class EmailService {
             ---
             This email was sent by ${company} Customer Portal System.
         `;
-        
-        return { subject, html, text };
-    }
 
-    /**
-     * Get receipt email template
-     */
-    private getReceiptTemplate(
-        transactionId: string,
-        amount: number,
-        currency: string,
-        receiptUrl: string,
-        customerName?: string,
-        companyName?: string
-    ): EmailTemplate {
-        const displayName = customerName || 'Valued Customer';
-        const company = companyName || 'AI-BOS';
-        
-        const subject = `Payment Receipt - ${currency} ${amount.toFixed(2)}`;
-        
-        const html = `
+    return { subject, html, text };
+  }
+
+  /**
+   * Get receipt email template
+   */
+  private getReceiptTemplate(
+    transactionId: string,
+    amount: number,
+    currency: string,
+    receiptUrl: string,
+    customerName?: string,
+    companyName?: string
+  ): EmailTemplate {
+    const displayName = customerName || 'Valued Customer';
+    const company = companyName || 'AI-BOS';
+
+    const subject = `Payment Receipt - ${currency} ${amount.toFixed(2)}`;
+
+    const html = `
             <!DOCTYPE html>
             <html>
             <head>
@@ -252,8 +265,8 @@ export class EmailService {
             </body>
             </html>
         `;
-        
-        const text = `
+
+    const text = `
             Payment Confirmation
             
             Hello ${displayName},
@@ -273,9 +286,9 @@ export class EmailService {
             ---
             This receipt was generated by ${company} Customer Portal System.
         `;
-        
-        return { subject, html, text };
-    }
+
+    return { subject, html, text };
+  }
 }
 
 // Singleton instance

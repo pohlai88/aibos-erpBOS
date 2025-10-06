@@ -569,27 +569,27 @@ export default function PredictiveCloseCompletion() {
 
 ```typescript
 // apps/web/hooks/useCloseInsights.ts
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function useCloseInsights() {
   return useQuery({
-    queryKey: ["close-insights"],
-    queryFn: () => apiClient.GET("/api/insights/close-performance"),
+    queryKey: ['close-insights'],
+    queryFn: () => apiClient.GET('/api/insights/close-performance'),
   });
 }
 
 export function useTrendAnalysis() {
   return useQuery({
-    queryKey: ["close-trends"],
-    queryFn: () => apiClient.GET("/api/insights/trends"),
+    queryKey: ['close-trends'],
+    queryFn: () => apiClient.GET('/api/insights/trends'),
   });
 }
 
 export function usePredictiveAnalytics() {
   return useQuery({
-    queryKey: ["close-predictions"],
-    queryFn: () => apiClient.GET("/api/insights/predictions"),
+    queryKey: ['close-predictions'],
+    queryFn: () => apiClient.GET('/api/insights/predictions'),
     refetchInterval: 15 * 60 * 1000, // Refresh every 15 minutes
   });
 }

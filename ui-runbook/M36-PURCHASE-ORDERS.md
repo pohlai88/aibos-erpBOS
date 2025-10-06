@@ -442,28 +442,28 @@ export default function VendorCatalogManagement() {
 
 ```typescript
 // apps/web/hooks/usePurchaseOrders.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiClient } from "@aibos/api-client";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiClient } from '@aibos/api-client';
 
 export function usePurchaseRequisition() {
   return useMutation({
-    mutationFn: (prData) =>
-      apiClient.POST("/api/purchase-orders/requisitions", { body: prData }),
-    onSuccess: () => queryClient.invalidateQueries(["purchase-requisitions"]),
+    mutationFn: prData =>
+      apiClient.POST('/api/purchase-orders/requisitions', { body: prData }),
+    onSuccess: () => queryClient.invalidateQueries(['purchase-requisitions']),
   });
 }
 
 export function useThreeWayMatch() {
   return useQuery({
-    queryKey: ["three-way-match"],
-    queryFn: () => apiClient.GET("/api/purchase-orders/matching"),
+    queryKey: ['three-way-match'],
+    queryFn: () => apiClient.GET('/api/purchase-orders/matching'),
   });
 }
 
 export function useVendorCatalog() {
   return useQuery({
-    queryKey: ["vendor-catalog"],
-    queryFn: () => apiClient.GET("/api/purchase-orders/catalog"),
+    queryKey: ['vendor-catalog'],
+    queryFn: () => apiClient.GET('/api/purchase-orders/catalog'),
   });
 }
 ```

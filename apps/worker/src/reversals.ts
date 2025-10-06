@@ -1,6 +1,6 @@
-import "dotenv/config";
-import { pool } from "./db.js";
-import { reverseJournal } from "@aibos/services";
+import 'dotenv/config';
+import { pool } from './db.js';
+import { reverseJournal } from '@aibos/services';
 
 export async function processDueReversals() {
   const { rows } = await pool.query(
@@ -17,9 +17,9 @@ export async function processDueReversals() {
   for (const r of rows) {
     try {
       await reverseJournal(r.id, new Date().toISOString());
-      console.log("[REVERSAL] created for", r.id);
+      console.log('[REVERSAL] created for', r.id);
     } catch (e) {
-      console.error("[REVERSAL] failed for", r.id, e);
+      console.error('[REVERSAL] failed for', r.id, e);
     }
   }
 }
