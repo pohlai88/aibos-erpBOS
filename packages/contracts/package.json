@@ -1,10 +1,9 @@
 {
   "name": "@aibos/contracts",
   "version": "0.0.0",
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "devDependencies": {
+    "@types/node": "24.6.0"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -34,20 +33,21 @@
   "files": [
     "dist"
   ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "scripts": {
-    "clean": "rimraf dist",
-    "build:types": "tsc",
-    "build:js": "tsup",
     "build": "pnpm run build:types && pnpm run build:js",
-    "typecheck": "tsc --noEmit",
-    "gen:openapi": "tsx scripts/build-openapi.ts"
-  },
-  "devDependencies": {
-    "@types/node": "24.6.0"
+    "build:js": "tsup",
+    "build:types": "tsc",
+    "clean": "rimraf dist",
+    "gen:openapi": "tsx scripts/build-openapi.ts",
+    "typecheck": "tsc --noEmit"
   },
   "turbo": {
     "pipeline": {
       "build": "build#lib"
     }
-  }
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts"
 }

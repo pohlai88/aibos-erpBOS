@@ -1,10 +1,10 @@
 {
   "name": "@aibos/sdk",
   "version": "1.0.0",
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "devDependencies": {
+    "@types/node": "24.6.0",
+    "typescript": "5.9.2"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -16,23 +16,23 @@
   "files": [
     "dist"
   ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
   "scripts": {
-    "build:types": "tsc",
-    "build:js": "tsup",
     "build": "pnpm run build:types && pnpm run build:js",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build:js": "tsup",
+    "build:types": "tsc",
+    "clean": "rimraf dist",
     "dev": "echo 'SDK - no dev server needed'",
     "lint": "eslint src --ext .ts,.tsx",
     "test": "echo 'No tests configured for sdk'",
-    "clean": "rimraf dist"
-  },
-  "devDependencies": {
-    "@types/node": "24.6.0",
-    "typescript": "5.9.2"
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "turbo": {
     "pipeline": {
       "build": "build#lib"
     }
-  }
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts"
 }

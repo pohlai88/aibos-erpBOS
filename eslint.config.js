@@ -163,6 +163,7 @@ module.exports = [
   // --- API Routes - Enforce consistent patterns ---
   {
     files: ['apps/bff/app/api/**/*.{ts,tsx}'],
+    ignores: ['apps/bff/app/api/_kit/**', 'apps/bff/app/api/_lib/**'],
     rules: {
       // Enforce withRouteErrors wrapper
       'no-restricted-syntax': [

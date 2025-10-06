@@ -7,18 +7,19 @@ import { LeaseOnerousRollService } from '@/services/lease/onerous-roll-service';
 
 // Performance API polyfill for Node.js test environment
 declare global {
-  const performance: {
+  interface Performance {
     now(): number;
     mark(name: string): void;
     measure(name: string, startMark?: string, endMark?: string): void;
-  };
+  }
+  var performance: Performance;
 }
 
 if (typeof performance === 'undefined') {
   (global as any).performance = {
     now: () => Date.now(),
     mark: () => {},
-    measure: () => {}
+    measure: () => {},
   };
 }
 

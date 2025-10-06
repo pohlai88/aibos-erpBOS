@@ -25,7 +25,7 @@ export const POST = withRouteErrors(async (req: NextRequest) => {
 });
 
 // OPTIONS - CORS support
-export async function OPTIONS(_req: NextRequest) {
+export const OPTIONS = withRouteErrors(async (_req: NextRequest) => {
   return new Response(null, {
     status: 204,
     headers: {
@@ -34,4 +34,4 @@ export async function OPTIONS(_req: NextRequest) {
       'Access-Control-Allow-Headers': 'Content-Type, X-API-Key',
     },
   });
-}
+});

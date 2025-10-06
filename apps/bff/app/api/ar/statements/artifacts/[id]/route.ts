@@ -31,7 +31,7 @@ export const GET = withRouteErrors(
       }
 
       // Return file download response
-      return new NextResponse(result.content as BodyInit, {
+      return new NextResponse(result.content as any, {
         headers: {
           'Content-Type': result.contentType,
           'Content-Disposition': `attachment; filename="${result.filename}"`,

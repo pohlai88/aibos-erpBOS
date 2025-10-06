@@ -16,7 +16,7 @@ type Body = {
   currency: string;
 };
 
-export async function GET(req: Request) {
+export const GET = withRouteErrors(async (req: Request) => {
   const url = new URL(req.url);
   const company_id = url.searchParams.get('company_id')!;
   const id = url.searchParams.get('id')!;
@@ -26,7 +26,7 @@ export async function GET(req: Request) {
   );
   if (!rows.length) return new Response('Not found', { status: 404 });
   return ok({ ok: true, data: rows[0] });
-}
+});
 
 export const POST = withRouteErrors(async (req: Request) => {
   const auth = await requireAuth(req);
@@ -141,7 +141,7 @@ export const POST = withRouteErrors(async (req: Request) => {
   }
 });
 
-export async function OPTIONS(req: Request) {
+export const OPTIONS = withRouteErrors(async (req: Request) => {
   return new Response(null, {
     status: 204,
     headers: {
@@ -150,4 +150,4 @@ export async function OPTIONS(req: Request) {
       'Access-Control-Allow-Headers': 'Content-Type',
     },
   });
-}
+});

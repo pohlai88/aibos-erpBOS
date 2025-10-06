@@ -250,9 +250,7 @@ export class AuditWorkspaceService {
   /**
    * Validate download key and get file info
    */
-  async validateDownloadKey(
-    downloadKey: string
-  ): Promise<{
+  async validateDownloadKey(downloadKey: string): Promise<{
     grant_id: string;
     object_id: string;
     file_path: string;
@@ -289,7 +287,7 @@ export class AuditWorkspaceService {
       // Get file path based on scope
       let filePath: string;
       switch (key.scope) {
-        case 'ATTEST_PACK':
+        case 'ATTEST_PACK': {
           const packResult = await client.query(
             `SELECT storage_uri FROM attest_pack WHERE id = $1`,
             [key.object_id]
@@ -299,7 +297,8 @@ export class AuditWorkspaceService {
           }
           filePath = packResult.rows[0].storage_uri;
           break;
-        case 'EVIDENCE':
+        }
+        case 'EVIDENCE': {
           const evdResult = await client.query(
             `SELECT eo.storage_uri FROM evd_record er
                          JOIN evd_object eo ON eo.id = er.object_id
@@ -311,6 +310,7 @@ export class AuditWorkspaceService {
           }
           filePath = evdResult.rows[0].storage_uri;
           break;
+        }
         default:
           throw new Error(`Unsupported scope for download: ${key.scope}`);
       }

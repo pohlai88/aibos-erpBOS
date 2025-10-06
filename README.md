@@ -281,6 +281,7 @@ node scripts/fix-nonstandard-eslint.js
 This script automatically adds `/* eslint-disable no-restricted-syntax */` comments to files with `@api:nonstandard` annotations, preventing ESLint from flagging intentional non-standard patterns.
 
 **Script Features:**
+
 - Automatically finds all files with `@api:nonstandard` annotations
 - Adds ESLint disable comments only where needed
 - Skips files that already have disable comments

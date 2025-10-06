@@ -174,7 +174,7 @@ export const GET = withRouteErrors(async (req: Request) => {
   return ok({ payment: rows[0], allocations: alloc.rows });
 });
 
-export async function OPTIONS(req: Request) {
+export const OPTIONS = withRouteErrors(async (req: Request) => {
   return new Response(null, {
     status: 204,
     headers: {
@@ -183,4 +183,4 @@ export async function OPTIONS(req: Request) {
       'Access-Control-Allow-Headers': 'Content-Type',
     },
   });
-}
+});

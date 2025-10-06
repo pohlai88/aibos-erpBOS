@@ -1,10 +1,18 @@
 {
   "name": "@aibos/db-adapter",
   "version": "0.0.0",
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "@aibos/ports": "workspace:*",
+    "dotenv": "^16.6.1",
+    "drizzle-orm": "^0.44.5",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/node": "24.6.0",
+    "@types/pg": "^8.15.5",
+    "drizzle-kit": "^0.31.5",
+    "tsx": "^4.20.6"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -22,28 +30,20 @@
   "files": [
     "dist"
   ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "scripts": {
-    "clean": "rimraf dist",
-    "build:types": "tsc",
-    "build:js": "tsup",
     "build": "pnpm run build:types && pnpm run build:js",
+    "build:js": "tsup",
+    "build:types": "tsc",
+    "clean": "rimraf dist",
     "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@aibos/ports": "workspace:*",
-    "dotenv": "^16.6.1",
-    "drizzle-orm": "^0.44.5",
-    "pg": "^8.16.3"
-  },
-  "devDependencies": {
-    "@types/node": "24.6.0",
-    "@types/pg": "^8.15.5",
-    "drizzle-kit": "^0.31.5",
-    "tsx": "^4.20.6"
   },
   "turbo": {
     "pipeline": {
       "build": "build#lib"
     }
-  }
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts"
 }

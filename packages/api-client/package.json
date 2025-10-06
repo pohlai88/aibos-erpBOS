@@ -1,10 +1,10 @@
 {
   "name": "@aibos/api-client",
   "version": "0.0.0",
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "24.6.0"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -16,21 +16,21 @@
   "files": [
     "dist"
   ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "scripts": {
-    "clean": "rimraf dist",
-    "build:types": "tsc",
-    "build:js": "tsup",
     "build": "pnpm run build:types && pnpm run build:js",
-    "typecheck": "tsc --noEmit",
-    "gen:types": "openapi-typescript ../../packages/contracts/openapi/openapi.json -o src/types.gen.ts"
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "@types/node": "24.6.0"
+    "build:js": "tsup",
+    "build:types": "tsc",
+    "clean": "rimraf dist",
+    "gen:types": "openapi-typescript ../../packages/contracts/openapi/openapi.json -o src/types.gen.ts",
+    "typecheck": "tsc --noEmit"
   },
   "turbo": {
     "pipeline": {
       "build": "build#lib"
     }
-  }
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts"
 }

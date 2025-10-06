@@ -1,10 +1,5 @@
 import { db } from '@/lib/db';
-import { eq, and, sql } from 'drizzle-orm';
-import {
-  journalEntries,
-  journalLines,
-  account,
-} from '@aibos/db-adapter/schema';
+import { sql } from 'drizzle-orm';
 
 // --- M26.1: Auto-Controls Library ---
 

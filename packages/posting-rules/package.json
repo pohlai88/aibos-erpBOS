@@ -1,10 +1,12 @@
 {
   "name": "@aibos/posting-rules",
   "version": "0.0.0",
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "json5": "^2.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "24.6.0"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -16,22 +18,20 @@
   "files": [
     "dist"
   ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "scripts": {
-    "clean": "rimraf dist",
-    "build:types": "tsc",
-    "build:js": "tsup",
     "build": "pnpm run build:types && pnpm run build:js",
+    "build:js": "tsup",
+    "build:types": "tsc",
+    "clean": "rimraf dist",
     "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "json5": "^2.2.3"
-  },
-  "devDependencies": {
-    "@types/node": "24.6.0"
   },
   "turbo": {
     "pipeline": {
       "build": "build#lib"
     }
-  }
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts"
 }

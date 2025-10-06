@@ -104,8 +104,6 @@ export const GET = withRouteErrors(async (request: NextRequest) => {
     };
 
     return ok({ result });
-  } catch (error) {
-    throw error;
   } finally {
     client.release();
   }

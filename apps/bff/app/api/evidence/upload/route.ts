@@ -3,6 +3,7 @@ import { Readable } from 'stream';
 import { requireAuth, AuthCtx } from '@/lib/auth';
 import { requireCapability } from '@/lib/rbac';
 import { withRouteErrors } from '@/lib/route-utils';
+import { badRequest, ok } from '@/api/_lib/http';
 import { EnhancedEvidenceService } from '@/services/evidence/enhanced';
 import {
   EvidenceUploadReq,
@@ -23,7 +24,7 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
 
   const metaData = formData.get('meta');
   if (!metaData || typeof metaData !== 'string') {
-    return NextResponse.json({ error: 'Missing metadata' }, { status: 400 });
+    return badRequest('Missing metadata');
   }
 
   const validatedData = EvidenceUploadReq.parse(JSON.parse(metaData));
@@ -45,5 +46,5 @@ export const POST = withRouteErrors(async (request: NextRequest) => {
     fileStream
   );
 
-  return NextResponse.json({ result });
+  return ok({ result });
 });

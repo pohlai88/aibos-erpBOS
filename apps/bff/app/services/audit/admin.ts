@@ -537,7 +537,7 @@ export class AuditAdminService {
     objectId: string
   ): Promise<void> {
     switch (scope) {
-      case 'ATTEST_PACK':
+      case 'ATTEST_PACK': {
         const attestResult = await client.query(
           `SELECT id FROM attest_pack WHERE id = $1`,
           [objectId]
@@ -546,7 +546,8 @@ export class AuditAdminService {
           throw new Error(`Attestation pack ${objectId} not found`);
         }
         break;
-      case 'CTRL_RUN':
+      }
+      case 'CTRL_RUN': {
         const ctrlResult = await client.query(
           `SELECT id FROM ctrl_run WHERE id = $1`,
           [objectId]
@@ -555,7 +556,8 @@ export class AuditAdminService {
           throw new Error(`Control run ${objectId} not found`);
         }
         break;
-      case 'EVIDENCE':
+      }
+      case 'EVIDENCE': {
         const evdResult = await client.query(
           `SELECT id FROM evd_record WHERE id = $1`,
           [objectId]
@@ -564,6 +566,7 @@ export class AuditAdminService {
           throw new Error(`Evidence record ${objectId} not found`);
         }
         break;
+      }
       default:
         throw new Error(`Invalid scope: ${scope}`);
     }

@@ -37,7 +37,9 @@ export const POST = withRouteErrors(async (req: NextRequest) => {
       actorId: auth.user_id,
       at: Date.now(),
     });
-  } catch {}
+  } catch (error) {
+    console.warn('Failed to log audit attempt:', error);
+  }
 
   try {
     const validation = await validateFileUpload(req, []);

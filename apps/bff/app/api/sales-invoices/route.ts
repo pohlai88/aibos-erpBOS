@@ -8,6 +8,7 @@ import {
   requireCapability,
 } from '../../lib/auth';
 import { withRouteErrors, isResponse } from '../../lib/route-utils';
+import { ok } from '@/api/_lib/http';
 import { resolveTaxRule, mapTaxAccount } from '../../lib/tax';
 
 export const POST = withRouteErrors(async (req: Request) => {
@@ -45,18 +46,12 @@ export const POST = withRouteErrors(async (req: Request) => {
 
   const existingId = await repo.getIdByKey(key);
   if (existingId) {
-    return Response.json(
-      { journal_id: existingId },
-      {
-        status: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
-          'X-Idempotent-Replay': 'true',
-        },
-      }
-    );
+    const response = ok({ journal_id: existingId }, 200);
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+    response.headers.set('X-Idempotent-Replay', 'true');
+    return response;
   }
 
   const journal = await postSalesInvoice(
@@ -69,20 +64,14 @@ export const POST = withRouteErrors(async (req: Request) => {
       mapTaxAccount,
     }
   );
-  return Response.json(
-    { journal_id: journal.id },
-    {
-      status: 201,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
-    }
-  );
+  const response = ok({ journal_id: journal.id }, 201);
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+  return response;
 });
 
-export async function OPTIONS(req: Request) {
+export const OPTIONS = withRouteErrors(async (req: Request) => {
   return new Response(null, {
     status: 204,
     headers: {
@@ -91,4 +80,4 @@ export async function OPTIONS(req: Request) {
       'Access-Control-Allow-Headers': 'Content-Type',
     },
   });
-}
+});

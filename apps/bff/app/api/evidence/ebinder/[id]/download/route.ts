@@ -6,11 +6,8 @@ import { EvidenceVaultService } from '@/services/evidence/vault';
 import { ok } from '@/api/_kit';
 
 // GET /api/evidence/ebinder/[id]/download - Download eBinder
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  return withRouteErrors(async () => {
+export const GET = withRouteErrors(
+  async (request: NextRequest, { params }: { params: { id: string } }) => {
     const auth = await requireAuth(request);
     await requireCapability(auth, 'ctrl:evidence');
 
@@ -24,5 +21,5 @@ export async function GET(
     );
 
     return ok(download);
-  })();
-}
+  }
+);

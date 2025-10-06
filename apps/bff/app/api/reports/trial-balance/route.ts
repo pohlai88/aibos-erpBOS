@@ -1,6 +1,7 @@
 import { pool } from '../../../lib/db';
 import { requireAuth, requireCapability } from '../../../lib/auth';
 import { withRouteErrors, isResponse } from '../../../lib/route-utils';
+import { ok } from '@/api/_lib/http';
 import { convertToPresent } from '@aibos/policies';
 
 async function getPresentQuotes(base: string, present: string, onISO: string) {
@@ -125,28 +126,26 @@ export const GET = withRouteErrors(async (req: Request) => {
     }
   }
 
-  return Response.json(
-    {
-      company_id: auth.company_id,
-      currency: presentCurrency,
-      base_currency: baseCurrency,
-      present_currency: rate ? present : currency,
-      rate_used: rate,
-      rows: convertedRows,
-      control: { debit: debit.toFixed(2), credit: credit.toFixed(2) },
-      equationOK: Math.abs(debit - credit) < 0.01, // Allow for rounding differences
-    },
-    {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
-    }
-  );
+  const response = ok({
+    company_id: auth.company_id,
+    currency: presentCurrency,
+    base_currency: baseCurrency,
+    present_currency: rate ? present : currency,
+    rate_used: rate,
+    rows: convertedRows,
+    control: { debit: debit.toFixed(2), credit: credit.toFixed(2) },
+    equationOK: Math.abs(debit - credit) < 0.01, // Allow for rounding differences
+  });
+
+  // Add CORS headers
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  return response;
 });
 
-export async function OPTIONS(req: Request) {
+export const OPTIONS = withRouteErrors(async (req: Request) => {
   return new Response(null, {
     status: 204,
     headers: {
@@ -155,4 +154,4 @@ export async function OPTIONS(req: Request) {
       'Access-Control-Allow-Headers': 'Content-Type',
     },
   });
-}
+});

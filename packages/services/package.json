@@ -1,10 +1,14 @@
 {
   "name": "@aibos/services",
   "version": "0.0.0",
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "@aibos/contracts": "workspace:*",
+    "@aibos/db-adapter": "workspace:*",
+    "@aibos/policies": "workspace:*",
+    "@aibos/ports": "workspace:*",
+    "@aibos/posting-rules": "workspace:*",
+    "@aibos/utils": "workspace:*"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -40,24 +44,20 @@
   "files": [
     "dist"
   ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
   "scripts": {
-    "clean": "rimraf dist",
-    "build:types": "tsc",
-    "build:js": "tsup",
     "build": "pnpm run build:types && pnpm run build:js",
+    "build:js": "tsup",
+    "build:types": "tsc",
+    "clean": "rimraf dist",
     "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@aibos/contracts": "workspace:*",
-    "@aibos/db-adapter": "workspace:*",
-    "@aibos/policies": "workspace:*",
-    "@aibos/ports": "workspace:*",
-    "@aibos/posting-rules": "workspace:*",
-    "@aibos/utils": "workspace:*"
   },
   "turbo": {
     "pipeline": {
       "build": "build#lib"
     }
-  }
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts"
 }

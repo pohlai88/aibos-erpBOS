@@ -10,7 +10,6 @@ import {
 import type {
   CertTemplateUpsertType,
   CertTemplateQueryType,
-  CertSignReqType,
   CertSignQueryType,
   CertTemplateResponseType,
   CertSignoffResponseType,
@@ -157,7 +156,7 @@ export class CertificationsService {
       throw new Error('Close run not found');
     }
 
-    const run = runs[0];
+    const _run = runs[0];
 
     // Verify the certification statement exists
     const statements = await this.dbInstance
@@ -176,7 +175,7 @@ export class CertificationsService {
       throw new Error('Certification statement not found');
     }
 
-    const certStatementRecord = statements[0];
+    const _certStatementRecord = statements[0];
 
     // Check if this sign-off already exists
     const existingSignoffs = await this.dbInstance

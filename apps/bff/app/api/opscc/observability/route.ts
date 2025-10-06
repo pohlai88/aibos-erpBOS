@@ -16,7 +16,7 @@ export const GET = withRouteErrors(async (request: NextRequest) => {
     const endpoint = searchParams.get('endpoint');
 
     switch (endpoint) {
-      case 'metrics':
+      case 'metrics': {
         const metricsQuery = ExecutionMetricsQuery.parse({
           playbook_id: searchParams.get('playbook_id') || undefined,
           from_date: searchParams.get('from_date') || undefined,
@@ -30,8 +30,9 @@ export const GET = withRouteErrors(async (request: NextRequest) => {
           metricsQuery
         );
         return ok(metrics);
+      }
 
-      case 'blast-radius':
+      case 'blast-radius': {
         const blastQuery = BlastRadiusQuery.parse({
           fire_id: searchParams.get('fire_id') || undefined,
           playbook_id: searchParams.get('playbook_id') || undefined,
@@ -46,6 +47,7 @@ export const GET = withRouteErrors(async (request: NextRequest) => {
           blastQuery
         );
         return ok(blastRadius);
+      }
 
       default:
         return ok({ error: 'Invalid endpoint' }, 400);

@@ -154,7 +154,7 @@ export const POST = withRouteErrors(async (req: Request) => {
   }
 });
 
-export async function OPTIONS(req: Request) {
+export const OPTIONS = withRouteErrors(async (req: Request) => {
   return new Response(null, {
     status: 204,
     headers: {
@@ -163,4 +163,4 @@ export async function OPTIONS(req: Request) {
       'Access-Control-Allow-Headers': 'Content-Type',
     },
   });
-}
+});

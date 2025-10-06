@@ -2,6 +2,7 @@ import { pool } from '../../../lib/db';
 import { getDisclosure, clearCache } from '@aibos/policies';
 import { requireAuth, requireCapability } from '../../../lib/auth';
 import { withRouteErrors, isResponse } from '../../../lib/route-utils';
+import { ok } from '@/api/_lib/http';
 import { convertToPresent } from '@aibos/policies';
 import { buildPivotMatrix } from '../../../reports/pivot-matrix';
 import { parseRollup, parseRollupLevel } from '../../../reports/pivot-params';
@@ -270,48 +271,44 @@ export const GET = withRouteErrors(async (req: Request) => {
       }
     );
 
-    return Response.json(
-      {
-        meta: {
-          pivot,
-          pivot_null_label: pivotNullLabel,
-          precision: Number.isFinite(precision) ? precision : 2,
-          grand_total: includeGrandTotal,
-          rollup: rollup !== 'none' ? rollup : undefined,
-        },
-        ...matrix,
+    const response = ok({
+      meta: {
+        pivot,
+        pivot_null_label: pivotNullLabel,
+        precision: Number.isFinite(precision) ? precision : 2,
+        grand_total: includeGrandTotal,
+        rollup: rollup !== 'none' ? rollup : undefined,
       },
-      {
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
-        },
-      }
-    );
+      ...matrix,
+    });
+
+    // Add CORS headers
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+
+    return response;
   }
 
-  return Response.json(
-    {
-      company_id: auth.company_id,
-      currency: presentCurrency,
-      base_currency: baseCurrency,
-      present_currency: rate ? present : currency,
-      rate_used: rate,
-      rows,
-      equationOK,
-    },
-    {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
-    }
-  );
+  const response = ok({
+    company_id: auth.company_id,
+    currency: presentCurrency,
+    base_currency: baseCurrency,
+    present_currency: rate ? present : currency,
+    rate_used: rate,
+    rows,
+    equationOK,
+  });
+
+  // Add CORS headers
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  return response;
 });
 
-export async function OPTIONS(req: Request) {
+export const OPTIONS = withRouteErrors(async (req: Request) => {
   return new Response(null, {
     status: 204,
     headers: {
@@ -320,4 +317,4 @@ export async function OPTIONS(req: Request) {
       'Access-Control-Allow-Headers': 'Content-Type',
     },
   });
-}
+});

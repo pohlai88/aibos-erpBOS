@@ -2,18 +2,18 @@
   "name": "@aibos/bff",
   "version": "1.0.0",
   "dependencies": {
+    "@adyen/api-library": "^2.0.0",
     "@aibos/contracts": "workspace:*",
     "@aibos/db-adapter": "workspace:*",
     "@aibos/policies": "workspace:*",
     "@aibos/ports": "workspace:*",
     "@aibos/posting-rules": "workspace:*",
     "@aibos/services": "workspace:*",
-    "@adyen/api-library": "^2.0.0",
     "@paypal/checkout-server-sdk": "^1.0.3",
     "@types/node": "24.6.0",
     "date-fns": "^4.1.0",
     "inngest": "^3.20.0",
-    "next": "14.2.15",
+    "next": "15.5.4",
     "nodemailer": "^7.0.6",
     "react": "19.1.1",
     "react-dom": "19.1.1",
@@ -24,7 +24,7 @@
     "@types/nodemailer": "^7.0.2",
     "@types/react": "19.1.16",
     "@types/react-dom": "19.1.9",
-    "vitest": "^2.1.8"
+    "vitest": "^3.2.4"
   },
   "private": true,
   "scripts": {
