@@ -2,7 +2,7 @@
 
 **Module ID**: M39  
 **Module Name**: Analytics & BI  
-**Priority**: MEDIUM  
+**Priority**: HIGH  
 **Phase**: 10 - Extended Modules  
 **Estimated Effort**: 2 days  
 **Last Updated**: 2025-10-06
@@ -23,24 +23,65 @@ M39 provides powerful business intelligence and analytics capabilities with cust
 
 ---
 
+## 👥 Ownership
+
+- **Module Owner**: TBD (@handle)
+- **Code Reviewer**: TBD
+- **QA Lead**: TBD
+- **Related ADRs**: [ADR-###-dashboard-builder], [ADR-###-ai-insights], [ADR-###-report-scheduler]
+
+---
+
 ## 📊 Current Status
 
 | Layer         | Status  | Details                       |
 | ------------- | ------- | ----------------------------- |
 | **Database**  | ✅ 100% | Complete schema implemented   |
 | **Services**  | ✅ 100% | Business logic services ready |
-| **API**       | ✅ 100% | 12 endpoints implemented      |
+| **API**       | ✅ 100% | 16 endpoints implemented      |
 | **Contracts** | ✅ 100% | Type-safe schemas defined     |
 | **UI**        | ❌ 0%   | **NEEDS IMPLEMENTATION**      |
 
 ### API Coverage
 
-- ✅ `/api/analytics/dashboards` - Dashboard management
-- ✅ `/api/analytics/reports` - Report generation
-- ✅ `/api/analytics/insights` - AI insights
-- ✅ `/api/analytics/data` - Data queries
+**Dashboards** (5 endpoints):
 
-**Total Endpoints**: 12
+- ✅ `/api/analytics/dashboards` - List dashboards
+- ✅ `/api/analytics/dashboards/[id]` - Dashboard details
+- ✅ `/api/analytics/dashboards/create` - Create dashboard
+- ✅ `/api/analytics/dashboards/widgets` - Widget library
+- ✅ `/api/analytics/dashboards/templates` - Dashboard templates
+
+**AI Insights** (4 endpoints):
+
+- ✅ `/api/analytics/insights` - AI insights list
+- ✅ `/api/analytics/insights/anomalies` - Anomaly detection
+- ✅ `/api/analytics/insights/trends` - Trend analysis
+- ✅ `/api/analytics/insights/predictions` - Predictive analytics
+
+**Reports** (4 endpoints):
+
+- ✅ `/api/analytics/reports` - Report library
+- ✅ `/api/analytics/reports/schedules` - Scheduled reports
+- ✅ `/api/analytics/reports/execute` - Execute report
+- ✅ `/api/analytics/reports/export` - Export report
+
+**Data Queries** (3 endpoints):
+
+- ✅ `/api/analytics/data/query` - Custom data query
+- ✅ `/api/analytics/data/sources` - Available data sources
+- ✅ `/api/analytics/data/metrics` - Key metrics
+
+**Total Endpoints**: 16 (4 categories)
+
+### Risks & Blockers
+
+| Risk                            | Impact | Mitigation                                                       | Owner      |
+| ------------------------------- | ------ | ---------------------------------------------------------------- | ---------- |
+| AI model accuracy               | HIGH   | Regular retraining; confidence thresholds; human review; testing | @data-team |
+| Dashboard performance (widgets) | MED    | Widget virtualization; lazy loading; caching; query optimization | @backend   |
+| Report generation scalability   | MED    | Background job queue; pagination; streaming; incremental export  | @backend   |
+| Data source integration         | HIGH   | Standardized query interface; data validation; error handling    | @backend   |
 
 ---
 
@@ -525,59 +566,377 @@ export default function AutomatedReportScheduler() {
 
 ---
 
+## 📐 Non-Functional Requirements
+
+### Performance Budgets
+
+| Metric                        | Target          | Measurement          |
+| ----------------------------- | --------------- | -------------------- |
+| TTFB (staging)                | ≤ 70ms          | Server timing header |
+| Client TTI for `/analytics`   | ≤ 200ms         | Lighthouse CI        |
+| Dashboard render (10 widgets) | < 2s            | Performance profiler |
+| AI insights generation        | < 3s            | API response time    |
+| Report generation (100 pages) | < 30s           | Background job       |
+| Widget data refresh           | < 500ms         | API response time    |
+| Export to Excel (1000 rows)   | < 5s            | Export profiler      |
+| UI bundle size                | ≤ 300KB gzipped | Webpack analyzer     |
+
+### Accessibility
+
+- **Compliance**: WCAG 2.2 AA (must), AAA where practical
+- **Keyboard Navigation**: Full keyboard access for dashboard builder and reports
+- **Focus Management**: Drag-and-drop keyboard alternative
+- **ARIA**: Chart data accessible; dynamic updates announced
+- **Screen Reader**: All visualizations have data tables; insights announced
+- **Axe Target**: 0 serious/critical violations
+
+### Security
+
+| Layer          | Requirement                                                 |
+| -------------- | ----------------------------------------------------------- |
+| RBAC Scopes    | `analytics.read`, `analytics.build`, `analytics.admin`      |
+| Enforcement    | Server-side on all endpoints                                |
+| Data Exposure  | Only show data user has permission for (row-level security) |
+| Audit Trail    | Immutable logs for all dashboard/report actions             |
+| Query Safety   | SQL injection prevention; query sandboxing; timeout limits  |
+| PII Protection | Mask sensitive data in reports; encryption at rest          |
+
+#### UI Permissions Matrix
+
+| Role            | View | Build Dashboards | Schedule Reports | AI Insights | Admin |
+| --------------- | ---- | ---------------- | ---------------- | ----------- | ----- |
+| analytics.read  | ✅   | ❌               | ❌               | ✅          | ❌    |
+| analytics.build | ✅   | ✅               | ✅               | ✅          | ❌    |
+| analytics.admin | ✅   | ✅               | ✅               | ✅          | ✅    |
+
+### Reliability & Observability
+
+- **SLO**: 99.9% successful dashboard renders; <5s report generation (P95)
+- **SLA Dashboards**: Real-time metrics on query performance, widget errors
+- **Events Emitted**: `Analytics.DashboardCreated`, `Analytics.ReportScheduled`, `Analytics.InsightGenerated`
+- **Logging**: Structured logs with dashboard IDs for all operations
+- **Tracing**: Distributed tracing for data queries
+
+**Reference**: See `security-policy.json` for full threat model and controls.
+
+---
+
+## 🧬 Data & Domain Invariants
+
+### Analytics Business Rules
+
+| Rule                        | Enforcement                                    |
+| --------------------------- | ---------------------------------------------- |
+| **Data Freshness**          | Max 5min staleness; real-time option available |
+| **Widget Limits**           | Max 50 widgets per dashboard for performance   |
+| **Query Timeout**           | 30s max query execution; background for longer |
+| **Report Retention**        | Generated reports retained 90 days             |
+| **AI Confidence Threshold** | Only show insights with ≥70% confidence        |
+| **Row-Level Security**      | Users only see data they have permission for   |
+| **Export Limits**           | Max 100,000 rows per export (Excel limit)      |
+
+### Dashboard States
+
+- **Draft**: In edit mode, not published
+- **Published**: Visible to users, read-only
+- **Shared**: Published + shared with specific users/groups
+- **Archived**: No longer visible, retained for audit
+
+### Archive Semantics
+
+- **Dashboards**: Soft delete; retain 2 years
+- **Reports**: Generated reports retained 90 days
+- **Guard Rails**:
+  - ❌ Deny deletion if dashboard has active schedules
+  - ✅ Allow archiving (soft delete)
+
+---
+
+## 🚨 Error Handling & UX States
+
+### All Possible States
+
+| State                 | UI Display                    | User Action        |
+| --------------------- | ----------------------------- | ------------------ |
+| **Empty**             | "No dashboards yet"           | "Create Dashboard" |
+| **Loading**           | Skeleton widgets              | N/A                |
+| **Error**             | Error message + retry         | Retry / Support    |
+| **Building**          | Dashboard builder canvas      | Drag widgets       |
+| **Published**         | Read-only dashboard           | View / Share       |
+| **Generating**        | "Generating report..."        | Wait / Cancel      |
+| **AI Processing**     | "Analyzing data..."           | Wait               |
+| **Query Timeout**     | "Query took too long"         | Simplify query     |
+| **No Data**           | "No data for selected period" | Adjust filters     |
+| **Permission Denied** | "Access restricted"           | Back               |
+
+### Form Validation
+
+- **Dashboard Name**: Required, unique, max 100 chars
+- **Widget Config**: Valid data source, metric selection
+- **Report Schedule**: Valid cron expression, recipients
+
+### Network Errors
+
+| HTTP Status | UI Message                                | Action              |
+| ----------- | ----------------------------------------- | ------------------- |
+| 400         | "Invalid query. Check your parameters."   | Inline field errors |
+| 401         | "Session expired. Please log in again."   | Redirect to login   |
+| 403         | "You don't have permission."              | Hide action         |
+| 404         | "Dashboard not found."                    | Return to list      |
+| 409         | "Dashboard name already exists."          | Suggest alternative |
+| 422         | "Validation failed. Check configuration." | Inline errors       |
+| 500         | "Something went wrong. Try again."        | Retry button        |
+| 504         | "Query timeout. Simplify or schedule."    | Suggest schedule    |
+
+---
+
+## 📝 UX Copy Deck
+
+### Page Titles & Headers
+
+| Context           | Copy                | i18n Key                    |
+| ----------------- | ------------------- | --------------------------- |
+| Dashboard List    | "Analytics & BI"    | `analytics.list.title`      |
+| Dashboard Builder | "Dashboard Builder" | `analytics.builder.title`   |
+| AI Insights       | "AI Insights"       | `analytics.insights.title`  |
+| Report Library    | "Report Library"    | `analytics.reports.title`   |
+| Report Scheduler  | "Report Scheduler"  | `analytics.scheduler.title` |
+
+### State Messages
+
+| State        | Title               | Message                                  | Action Button   | i18n Key                |
+| ------------ | ------------------- | ---------------------------------------- | --------------- | ----------------------- |
+| Empty        | "No dashboards yet" | "Create your first dashboard"            | "Create"        | `analytics.empty.*`     |
+| No Data      | "No data available" | "Adjust filters or date range"           | "Reset Filters" | `analytics.noData.*`    |
+| AI Analyzing | "Analyzing data..." | "AI is analyzing your data for insights" | N/A             | `analytics.analyzing.*` |
+| Timeout      | "Query timeout"     | "Query took too long. Try scheduling"    | "Schedule"      | `analytics.timeout.*`   |
+
+### Success Messages (Toast)
+
+| Action            | Message                         | i18n Key                     | Shortcut |
+| ----------------- | ------------------------------- | ---------------------------- | -------- |
+| Dashboard Created | "Dashboard '{name}' created"    | `analytics.create.success`   | `d`      |
+| Report Scheduled  | "Report scheduled successfully" | `analytics.schedule.success` | `r`      |
+| Insight Dismissed | "Insight dismissed"             | `analytics.dismiss.success`  | `x`      |
+
+---
+
 ## 🔌 API Integration
+
+### Hooks Required
 
 ```typescript
 // apps/web/hooks/useAnalytics.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
+"use client";
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@aibos/api-client";
 
-export function useDashboards() {
-  return useQuery({
-    queryKey: ["dashboards"],
-    queryFn: () => apiClient.GET("/api/analytics/dashboards"),
-  });
-}
+export function useDashboards(filters = {}) {
+  const queryClient = useQueryClient();
 
-export function useAIInsights() {
-  return useQuery({
-    queryKey: ["ai-insights"],
-    queryFn: () => apiClient.GET("/api/analytics/insights"),
-    refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes
+  const { data: dashboards, isLoading } = useQuery({
+    queryKey: ["analytics-dashboards", filters],
+    queryFn: () =>
+      apiClient.GET("/api/analytics/dashboards", { query: filters }),
+    staleTime: 5 * 60_000, // 5min
+    retry: 2,
+    select: (response) => response.data,
   });
-}
 
-export function useReportScheduler() {
-  return useQuery({
-    queryKey: ["report-schedules"],
-    queryFn: () => apiClient.GET("/api/analytics/reports"),
-  });
-}
-
-export function useSaveDashboard() {
-  return useMutation({
+  const createDashboard = useMutation({
     mutationFn: (dashboardData) =>
-      apiClient.POST("/api/analytics/dashboards", { body: dashboardData }),
-    onSuccess: () => queryClient.invalidateQueries(["dashboards"]),
+      apiClient.POST("/api/analytics/dashboards/create", {
+        body: dashboardData,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["analytics-dashboards"] });
+    },
+  });
+
+  const updateDashboard = useMutation({
+    mutationFn: ({ id, data }) =>
+      apiClient.PUT("/api/analytics/dashboards/[id]", {
+        params: { id },
+        body: data,
+      }),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["analytics-dashboards"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics-dashboard", id] });
+    },
+  });
+
+  return {
+    dashboards: dashboards || [],
+    isLoading,
+    createDashboard: createDashboard.mutate,
+    updateDashboard: updateDashboard.mutate,
+  };
+}
+
+export function useAIInsights(filters = {}) {
+  return useQuery({
+    queryKey: ["analytics-insights", filters],
+    queryFn: () => apiClient.GET("/api/analytics/insights", { query: filters }),
+    staleTime: 5 * 60_000, // 5min
+    refetchInterval: 5 * 60_000, // Refresh every 5 minutes
+    retry: 2,
+    select: (response) => response.data,
   });
 }
+
+export function useReportScheduler(filters = {}) {
+  const queryClient = useQueryClient();
+
+  const { data: schedules, isLoading } = useQuery({
+    queryKey: ["analytics-schedules", filters],
+    queryFn: () =>
+      apiClient.GET("/api/analytics/reports/schedules", { query: filters }),
+    staleTime: 2 * 60_000, // 2min
+    retry: 2,
+    select: (response) => response.data,
+  });
+
+  const createSchedule = useMutation({
+    mutationFn: (scheduleData) =>
+      apiClient.POST("/api/analytics/reports/schedules", {
+        body: scheduleData,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["analytics-schedules"] });
+    },
+  });
+
+  const executeReport = useMutation({
+    mutationFn: (reportId: string) =>
+      apiClient.POST("/api/analytics/reports/execute", { body: { reportId } }),
+    onError: (error) => {
+      if (error.status === 504) {
+        toast.error("Report generation timeout. Consider scheduling.");
+      }
+    },
+  });
+
+  return {
+    schedules: schedules || [],
+    isLoading,
+    createSchedule: createSchedule.mutate,
+    executeReport: executeReport.mutate,
+  };
+}
+
+export function useWidgetLibrary() {
+  return useQuery({
+    queryKey: ["analytics-widgets"],
+    queryFn: () => apiClient.GET("/api/analytics/dashboards/widgets"),
+    staleTime: 30 * 60_000, // 30min
+    select: (response) => response.data,
+  });
+}
+```
+
+### Error Mapping
+
+| API Error         | User Message                              | UI Action            |
+| ----------------- | ----------------------------------------- | -------------------- |
+| 400 (Bad Request) | "Invalid query. Check your parameters."   | Inline field errors  |
+| 409 (Conflict)    | "Dashboard name already exists."          | Suggest alternative  |
+| 422 (Validation)  | "Validation failed. Check configuration." | Inline errors        |
+| 403 (Forbidden)   | "You don't have permission."              | Hide action          |
+| 504 (Timeout)     | "Query timeout. Try scheduling report."   | Show schedule option |
+| 500 (Server)      | "Something went wrong. Try again."        | Retry + support link |
+
+### Retry & Backoff
+
+- **Queries**: 2 retries with exponential backoff (1s, 2s)
+- **Mutations**: No auto-retry for dashboard/report operations; user-initiated retry only
+- **Query Timeouts**: 30s for data queries; background jobs for longer
+
+---
+
+## 🗂️ State, Caching, and Invalidation
+
+### React Query Keys
+
+```typescript
+// Query key structure
+["analytics-dashboards", { filters }][("analytics-dashboard", dashboardId)][
+  ("analytics-insights", { filters })
+][("analytics-schedules", { filters })]["analytics-widgets"][
+  "analytics-reports"
+];
+```
+
+### Invalidation Rules
+
+| Action           | Invalidates                                               |
+| ---------------- | --------------------------------------------------------- |
+| Create Dashboard | `["analytics-dashboards"]`                                |
+| Update Dashboard | `["analytics-dashboards"]`, `["analytics-dashboard", id]` |
+| Create Schedule  | `["analytics-schedules"]`                                 |
+| Execute Report   | `["analytics-reports"]`                                   |
+| Dismiss Insight  | `["analytics-insights"]`                                  |
+
+### Stale Time
+
+| Query Type       | Stale Time | Reasoning                   |
+| ---------------- | ---------- | --------------------------- |
+| Dashboards       | 5min       | Moderate update frequency   |
+| AI Insights      | 5min       | AI regenerates periodically |
+| Report Schedules | 2min       | Moderate update frequency   |
+| Widgets Library  | 30min      | Rarely changes              |
+| Reports          | 10min      | Moderate update frequency   |
+
+### Cache Tags (Next.js)
+
+```typescript
+// Server actions
+revalidateTag("analytics-dashboards"); // After dashboard mutations
+revalidateTag(`analytics-dashboard-${dashboardId}`); // Specific dashboard
 ```
 
 ---
 
 ## 📝 Implementation Guide
 
-### Day 1: Dashboard Builder (8 hours)
+### Step 0: Foundation Setup (1 hour)
 
-1. Build drag-and-drop canvas (4 hours)
-2. Implement widget library (2 hours)
-3. Create dashboard templates (2 hours)
+- Enable feature flags: `flags.m39_analytics = false`
+- Configure AI insights service
+- Wire analytics provider for event tracking
 
-### Day 2: AI Insights & Reports (8 hours)
+### Step 1: Build Dashboard Builder (4 hours)
 
-1. Build AI insights dashboard (3 hours)
-2. Implement report scheduler (3 hours)
-3. Create report library (2 hours)
+- Drag-and-drop canvas component
+- Widget library sidebar
+- Dashboard save/publish functionality
+- Template loader
+
+### Step 2: Build AI Insights Dashboard (3 hours)
+
+- Insights list with severity badges
+- Anomaly detection visualization
+- Trend prediction charts
+- Dismiss/investigate actions
+
+### Step 3: Build Report Scheduler (3 hours)
+
+- Report library grid
+- Schedule creation form
+- Scheduled reports table
+- Execute/pause controls
+
+### Step 4: Add Widget Types (3 hours)
+
+- KPI cards, charts (line, bar, pie, gauge)
+- Data tables with drill-down
+- Heatmaps, waterfall charts
+
+### Step 5: Add Tests (2 hours)
+
+- Unit tests for widget configuration, AI confidence
+- Integration tests for data queries, report generation
+- E2E tests for complete user flows
 
 **Total**: 2 days (16 hours)
 
@@ -587,71 +946,504 @@ export function useSaveDashboard() {
 
 ### Unit Tests
 
-- [ ] Dashboard layout persistence
-- [ ] Insight confidence calculation
-- [ ] Report schedule generation
+- [ ] Dashboard layout persistence and serialization
+- [ ] Widget configuration validation
+- [ ] AI insight confidence calculation (≥70% threshold)
+- [ ] Report schedule cron expression parsing
+- [ ] Query builder validation
+- [ ] Export format conversion (PDF, Excel, CSV)
+- [ ] Row-level security filter application
 
 ### Integration Tests
 
-- [ ] Real-time data refresh
-- [ ] Report generation and delivery
-- [ ] AI model predictions
+- [ ] Real-time data refresh (5min interval)
+- [ ] Report generation and delivery (email)
+- [ ] AI model predictions and anomaly detection
+- [ ] Dashboard template loading
+- [ ] Widget data queries across modules
+- [ ] Scheduled report execution
 
 ### E2E Tests
 
-- [ ] User can build custom dashboard
+- [ ] User can build custom dashboard (drag-and-drop)
+- [ ] User can add/configure widgets
+- [ ] User can publish and share dashboard
 - [ ] AI insights surface automatically
-- [ ] Scheduled reports deliver via email
+- [ ] User can dismiss/investigate insights
+- [ ] User can schedule report with recipients
+- [ ] Scheduled report delivers via email
+- [ ] User can export report (PDF/Excel/CSV)
+
+### Accessibility Tests
+
+- [ ] Keyboard navigation works (drag-and-drop alternative)
+- [ ] Screen reader announces chart data
+- [ ] Focus management correct
+- [ ] Color contrast meets WCAG 2.2 AA
+- [ ] Axe: 0 serious/critical violations
+
+### Contract Tests
+
+- [ ] API calls match OpenAPI spec
+
+### Visual Regression Tests
+
+- [ ] Storybook/Ladle snapshots for all widget types
+
+### Performance Tests
+
+- [ ] Bundle size < 300KB gzipped
+- [ ] Dashboard render (10 widgets) < 2s
+- [ ] Report generation (100 pages) < 30s
 
 ---
 
-## 📅 Timeline
+## 🧪 Test Data & Fixtures
 
-| Day | Deliverable                      |
-| --- | -------------------------------- |
-| 1   | Dashboard builder with templates |
-| 2   | AI insights and report scheduler |
+### Storybook Fixtures
 
-**Total**: 2 days (16 hours)
+**Location**: `apps/web/fixtures/analytics.fixtures.ts`
+
+**Datasets**:
+
+- `minimalDashboard`: 3 widgets (KPI, line chart, table)
+- `standardDashboard`: 10 widgets across all types
+- `largeDataset`: 50 widgets (for performance testing)
+- `edgeCases`: Special scenarios
+
+**Edge Cases Covered**:
+
+- Dashboard with max widgets (50)
+- Query timeout scenarios
+- AI insights with varying confidence levels
+- Report with 100,000 rows (Excel limit)
+- Scheduled report with multiple recipients
+- Widget with no data
+
+### E2E Seed Data
+
+**Location**: `tests/seeds/analytics.seed.ts`
+
+**Seed Command**:
+
+```powershell
+pnpm run seed:analytics
+```
+
+**Dataset**:
+
+- 20 sample dashboards (various templates)
+- 50 AI insights across all modules
+- 10 scheduled reports
+- Historical data for trend analysis
+
+**Cleanup Command**:
+
+```powershell
+pnpm run seed:analytics:clean
+```
+
+### Demo Dataset (Staging/Sandbox)
+
+**Purpose**: Customer demos, UAT, training
+
+**Characteristics**:
+
+- Executive dashboard (C-suite KPIs)
+- Finance dashboard (P&L, balance sheet, cash flow)
+- Operations dashboard (orders, inventory, projects)
+- AI insights with realistic anomalies and trends
+
+**Regeneration**:
+
+```powershell
+pnpm run demo:reset:analytics
+```
+
+### Test Data Validation
+
+**Automated Checks** (run in CI):
+
+- [ ] All fixtures pass Zod schema validation
+- [ ] No orphaned widget references
+- [ ] Dashboard layouts are valid grid configurations
+
+---
+
+## 🔗 API Contract Sync (CI Enforcement)
+
+### Prevent Drift
+
+**CI Step**: Fail build if `packages/contracts/openapi/openapi.json` changes without regenerating `types.gen.ts`.
+
+```yaml
+# .github/workflows/ci.yml
+- name: Check API types sync
+  run: |
+    pnpm run generate:api-types
+    git diff --exit-code packages/api-client/src/types.gen.ts
+```
+
+### Hook Layer Contract
+
+- **Rule**: Hooks **only** use generated types from `@aibos/api-client`
+- **No ad-hoc shapes**: All API calls must match OpenAPI spec
+- **Validation**: TypeScript enforces at compile time
+
+---
+
+## 🖥️ RSC/SSR & App Router Compatibility
+
+### Server/Client Boundaries
+
+- **Pages**: Server components by default
+- **Interactive Parts**: Mark with `"use client"` (dashboard builder, widgets)
+
+### Data Fetching Strategy
+
+| Scenario          | Strategy                   | Benefit             |
+| ----------------- | -------------------------- | ------------------- |
+| Dashboard List    | Server-side fetch + stream | Faster TTFB         |
+| Dashboard Builder | Client-side React Query    | Interactive updates |
+| AI Insights       | Client-side with polling   | Real-time updates   |
+| Report Generation | Background job             | No UI blocking      |
+
+---
+
+## 📊 Analytics & Audit Events
+
+| Event                      | When               | Properties                                     |
+| -------------------------- | ------------------ | ---------------------------------------------- |
+| Analytics.DashboardCreated | Dashboard saved    | `dashboard_id`, `widget_count`, `data_sources` |
+| Analytics.DashboardShared  | Dashboard shared   | `dashboard_id`, `shared_with`                  |
+| Analytics.ReportScheduled  | Schedule created   | `report_id`, `frequency`, `recipients_count`   |
+| Analytics.ReportGenerated  | Report executed    | `report_id`, `format`, `rows`, `duration_ms`   |
+| Analytics.InsightGenerated | AI insight created | `insight_id`, `type`, `confidence`, `severity` |
+| Analytics.InsightDismissed | Insight dismissed  | `insight_id`, `reason`                         |
+
+---
+
+## 🌐 i18n/L10n & Keyboard Shortcuts
+
+### Internationalization
+
+- **i18n Keys**: All labels, errors, toasts from `@/i18n/messages/analytics.json`
+- **Date/Number Formatting**: Use `Intl` APIs with tenant locale
+- **RTL Support**: CSS logical properties
+
+### Keyboard Shortcuts
+
+| Key      | Action              | Scope          |
+| -------- | ------------------- | -------------- |
+| `/`      | Focus search        | Any page       |
+| `d`      | New dashboard       | Dashboard list |
+| `r`      | Schedule report     | Report library |
+| `x`      | Dismiss insight     | Insights       |
+| `Enter`  | Open/edit dashboard | Dashboard list |
+| `Escape` | Close modal         | Modal          |
+
+---
+
+## 📅 Timeline & Milestones
+
+| Day | Tasks                                                  | Deliverable              | Flag Status |
+| --- | ------------------------------------------------------ | ------------------------ | ----------- |
+| 1   | Setup + Dashboard Builder + Widget Library + Templates | Basic dashboard creation | WIP         |
+| 2   | AI Insights + Report Scheduler + Export + Tests        | Production-ready module  | GA          |
+
+**Total Effort**: 2 days (16 hours)
+
+**Feature Flags**:
+
+- Day 1: `flags.m39_analytics = false` (testing only)
+- Day 2: `flags.m39_analytics = true` after all tests pass
+
+---
+
+## 🔄 UI Rollout & Rollback
+
+### Rollout Plan
+
+| Environment | Cohort           | Success Criteria                          | Duration | Rollback Trigger |
+| ----------- | ---------------- | ----------------------------------------- | -------- | ---------------- |
+| Dev         | All developers   | Manual QA passes                          | 1 day    | Critical bugs    |
+| Staging     | QA team + PM     | All E2E tests pass, dashboard render < 2s | 2 days   | Test failures    |
+| Production  | Beta users (10%) | Error rate < 0.5%, AI accuracy ≥80%       | 3 days   | SLO breach       |
+| Production  | All users (100%) | Monitor for 1 week, no performance issues | Ongoing  | Error rate spike |
+
+### Feature Flags
+
+```typescript
+flags: {
+  m39_analytics: false,              // Master toggle
+  m39_analytics_ai_insights: false,  // AI insights
+  m39_analytics_report_scheduler: false, // Report scheduling
+  m39_analytics_exports: false,      // Export functionality
+}
+```
+
+### Monitoring Dashboard
+
+**Key Metrics** (real-time):
+
+- Dashboard render time (target: <2s)
+- AI insight accuracy (target: ≥80%)
+- Report generation success rate (target: ≥99%)
+- Query timeout rate (target: <2%)
+
+**Alert Thresholds**:
+
+- Dashboard render > 5s for 10min → investigate
+- AI accuracy < 70% → retrain model
+- Report generation failures > 2% → page on-call
+
+### UI Rollback Procedure
+
+**Immediate Rollback** (< 5 minutes):
+
+1. **Set feature flag**: `flags.m39_analytics = false`
+
+   ```powershell
+   pnpm run flags:set m39_analytics=false
+   ```
+
+2. **Stop scheduled reports**:
+
+   ```powershell
+   pnpm run analytics:scheduler:pause
+   ```
+
+3. **Monitor for 15 minutes**:
+
+   - No new dashboard renders
+   - Users see fallback message
+
+4. **Post-mortem**: Create incident report, add regression test
+
+**Rollback Decision Matrix**:
+
+| Scenario                       | Action             | Approval Required |
+| ------------------------------ | ------------------ | ----------------- |
+| Dashboard render > 10s         | Immediate rollback | No (auto-trigger) |
+| AI accuracy < 60%              | Disable AI only    | Data team lead    |
+| Report generation failures >5% | Immediate rollback | No (auto-trigger) |
+| Query timeout rate > 10%       | Investigate first  | Backend lead      |
 
 ---
 
 ## 🔗 Dependencies
 
-### Must Complete First
+### Must Complete Before Starting
 
 - ✅ M1: Core Ledger (data source)
-- ✅ All other modules (data sources)
+- ✅ All other modules M2-M38 (data sources)
+- 🆕 Feature flag service
+- 🆕 Analytics provider
+- 🆕 AI insights service
+- 🆕 Report generation service
 
-### Enables These Modules
+### Blocks These Modules
 
-- Enhanced all modules with analytics capabilities
+- Enhanced all modules with embedded analytics
 
 ---
 
 ## 🎯 Success Criteria
 
-### Must Have
+### Must Have (Measurable)
 
-- [ ] Drag-and-drop dashboard builder
-- [ ] AI-powered insights engine
+- [ ] Drag-and-drop dashboard builder works
+- [ ] AI-powered insights engine (≥80% accuracy)
 - [ ] Automated report scheduler
+- [ ] Dashboard render < 2s (10 widgets)
+- [ ] AI insights generation < 3s
+- [ ] Report generation < 30s (100 pages)
+- [ ] Axe: 0 serious/critical violations
 
 ### Should Have
 
-- [ ] 50+ widget types
+- [ ] 50+ widget types available
 - [ ] 100+ pre-built reports
-- [ ] Real-time data refresh
+- [ ] Real-time data refresh (5min)
+- [ ] Export to PDF/Excel/CSV
+- [ ] Dashboard sharing and permissions
 
 ### Nice to Have
 
-- [ ] Natural language query ("Show me top customers")
+- [ ] Natural language query interface
 - [ ] Mobile dashboard app
 - [ ] Embedded analytics in other modules
+- [ ] Predictive analytics (ML forecasting)
 
 ---
 
-**Ready to build? Start with Day 1! 🚀**
+## 📚 References
 
-**Previous**: M38 - CRM Integration  
-**Next**: M40 - API Gateway (FINAL MODULE!)
+### API Documentation
+
+- OpenAPI spec: `packages/contracts/openapi/openapi.json`
+- Type definitions: `packages/api-client/src/types.gen.ts`
+
+### Design System
+
+- Component library: `aibos-ui` package
+- Design tokens: Import from `aibos-ui/tokens`
+- Style guide: Follow dark-first theme
+
+### Best Practices
+
+- Tableau/Power BI UX patterns
+- Looker dashboard design
+- D3.js visualization patterns
+- AI/ML best practices for business insights
+
+### SSOT References
+
+- **Security**: `security-policy.json`
+- **Compliance**: `COMPLIANCE.md`
+- **Migrations**: `DATABASE_WORKFLOW.md`
+- **Architecture**: `ARCHITECTURE.md`
+- **Cost/Scaling**: `PERFORMANCE-BUDGETS.md`
+
+---
+
+## 🚨 Risk Mitigation
+
+### Risk #1: AI Model Accuracy
+
+**Mitigation**: Regular retraining on production data; confidence thresholds (≥70%); human review for high-impact insights; A/B testing of models; feedback loop for dismissed insights
+
+### Risk #2: Dashboard Performance with Many Widgets
+
+**Mitigation**: Widget virtualization; lazy loading (load on scroll); query caching; widget data pagination; real-time vs scheduled refresh options; query optimization
+
+### Risk #3: Report Generation Scalability
+
+**Mitigation**: Background job queue (Bull/BullMQ); pagination for large datasets; streaming export; incremental report generation; timeout limits (30s) with automatic scheduling suggestion
+
+### Risk #4: Data Source Integration Complexity
+
+**Mitigation**: Standardized query interface across all modules; data validation; error handling; query timeout limits; row-level security enforcement; SQL injection prevention
+
+---
+
+## 🎉 Definition of Done
+
+### Functional Requirements ✅
+
+- [ ] All UI pages created and functional
+- [ ] Dashboard builder with drag-and-drop works
+- [ ] 50+ widget types available
+- [ ] AI insights engine generates insights
+- [ ] Report scheduler with email delivery
+- [ ] 100+ pre-built reports
+- [ ] Export to PDF/Excel/CSV
+- [ ] Dashboard sharing and permissions
+- [ ] All error states handled
+- [ ] Copy deck implemented
+
+### Quality Gates 🎯
+
+**Enforced in CI** - Build fails if any gate not met
+
+#### Code Quality
+
+- [ ] TypeScript: 0 errors, 0 warnings
+- [ ] ESLint: 0 errors, 0 warnings
+- [ ] Prettier: All files formatted
+- [ ] No console.log or debugger statements
+
+#### Test Coverage
+
+- [ ] Unit tests: ≥90% line coverage, ≥95% for AI logic
+- [ ] Integration tests: All query scenarios covered
+- [ ] E2E tests: All user flows covered
+- [ ] Contract tests: API calls match OpenAPI spec
+- [ ] A11y tests: Axe 0 serious, 0 critical violations
+- [ ] Visual regression: 0 unintended changes
+
+#### AI Model Accuracy
+
+- [ ] **CRITICAL**: AI insight accuracy ≥80% (validated on test dataset)
+- [ ] Confidence calibration accurate (≥70% threshold)
+- [ ] Anomaly detection precision ≥75%, recall ≥70%
+- [ ] Trend prediction MAPE (Mean Absolute Percentage Error) < 15%
+
+#### Performance Budgets
+
+- [ ] Bundle size: ≤300KB gzipped
+- [ ] TTFB: ≤70ms on staging
+- [ ] Dashboard render (10 widgets): <2s
+- [ ] AI insights generation: <3s
+- [ ] Report generation (100 pages): <30s
+
+#### Accessibility
+
+- [ ] WCAG 2.2 AA: 100% compliance (required)
+- [ ] WCAG 2.2 AAA: Best effort (target 95%)
+- [ ] Keyboard navigation: All features operable (drag-and-drop alternative)
+- [ ] Screen reader: All visualizations accessible with data tables
+- [ ] Axe DevTools: 0 serious, 0 critical, ≤5 minor issues
+
+#### Lighthouse Scores
+
+- [ ] Performance: ≥90
+- [ ] Accessibility: ≥95
+- [ ] Best Practices: ≥90
+- [ ] SEO: ≥90
+
+### Observability 📊
+
+- [ ] SLO dashboards created and populated
+- [ ] All analytics events firing correctly
+- [ ] Error tracking integrated
+- [ ] Performance monitoring active
+- [ ] AI model monitoring dashboards
+- [ ] Alerts configured (render time, AI accuracy, report failures)
+
+### Security & Compliance 🔒
+
+- [ ] Permissions matrix implemented
+- [ ] RBAC enforced (server + client)
+- [ ] Row-level security for all queries
+- [ ] Query sandboxing (SQL injection prevention)
+- [ ] Timeout limits enforced (30s)
+- [ ] PII masking in reports
+- [ ] Security review completed
+
+### Documentation 📚
+
+- [ ] Code reviewed and approved (2 approvers)
+- [ ] PR description complete
+- [ ] Storybook stories for all widget types
+- [ ] API contracts synchronized
+- [ ] i18n keys documented
+- [ ] AI model documentation (training, accuracy)
+- [ ] UAT passed (PM/QA sign-off)
+
+### Deployment 🚀
+
+- [ ] Deployed to dev environment
+- [ ] Deployed to staging environment
+- [ ] Feature flags configured
+- [ ] Smoke tests passed on staging
+- [ ] AI model deployed and validated (≥80% accuracy)
+- [ ] Deployed to production (flags off)
+- [ ] Rollback procedure tested
+- [ ] Gradual rollout plan ready
+
+### Sign-offs 📝
+
+- [ ] **Engineering**: Code review approved
+- [ ] **QA**: All test plans executed and passed
+- [ ] **Design**: UI matches specs, brand compliance
+- [ ] **PM**: Feature complete, acceptance criteria met
+- [ ] **Security**: Security review passed
+- [ ] **Accessibility**: A11y audit passed
+- [ ] **Data Team**: AI model accuracy validated (≥80%)
+
+---
+
+**Ready to build? Start with Step 0! 🚀**
+
+**Next Module**: M40 - API Gateway (FINAL MODULE!)

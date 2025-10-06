@@ -2,9 +2,9 @@
 
 **Module ID**: M40  
 **Module Name**: API Gateway  
-**Priority**: LOW  
+**Priority**: CRITICAL  
 **Phase**: 10 - Extended Modules  
-**Estimated Effort**: 1.5 days  
+**Estimated Effort**: 2 days  
 **Last Updated**: 2025-10-06
 
 ---
@@ -23,24 +23,63 @@ M40 provides enterprise API management with developer portal, API key management
 
 ---
 
+## 👥 Ownership
+
+- **Module Owner**: TBD (@handle)
+- **Code Reviewer**: TBD
+- **QA Lead**: TBD
+- **Related ADRs**: [ADR-###-api-key-management], [ADR-###-rate-limiting], [ADR-###-webhook-delivery]
+
+---
+
 ## 📊 Current Status
 
 | Layer         | Status  | Details                       |
 | ------------- | ------- | ----------------------------- |
 | **Database**  | ✅ 100% | Complete schema implemented   |
 | **Services**  | ✅ 100% | Business logic services ready |
-| **API**       | ✅ 100% | 6 endpoints implemented       |
+| **API**       | ✅ 100% | 14 endpoints implemented      |
 | **Contracts** | ✅ 100% | Type-safe schemas defined     |
 | **UI**        | ❌ 0%   | **NEEDS IMPLEMENTATION**      |
 
 ### API Coverage
 
-- ✅ `/api/gateway/keys` - API key management
-- ✅ `/api/gateway/webhooks` - Webhook configuration
+**API Keys** (5 endpoints):
+
+- ✅ `/api/gateway/keys` - List API keys
+- ✅ `/api/gateway/keys/create` - Create API key
+- ✅ `/api/gateway/keys/[id]` - Key details
+- ✅ `/api/gateway/keys/rotate` - Rotate key
+- ✅ `/api/gateway/keys/revoke` - Revoke key
+
+**Webhooks** (4 endpoints):
+
+- ✅ `/api/gateway/webhooks` - List webhooks
+- ✅ `/api/gateway/webhooks/create` - Create webhook
+- ✅ `/api/gateway/webhooks/test` - Test webhook
+- ✅ `/api/gateway/webhooks/logs` - Webhook delivery logs
+
+**Analytics & Monitoring** (3 endpoints):
+
 - ✅ `/api/gateway/analytics` - API usage analytics
+- ✅ `/api/gateway/rate-limits` - Rate limiting stats
 - ✅ `/api/gateway/logs` - API request logs
 
-**Total Endpoints**: 6
+**Documentation** (2 endpoints):
+
+- ✅ `/api/gateway/docs` - API documentation
+- ✅ `/api/gateway/openapi` - OpenAPI spec
+
+**Total Endpoints**: 14 (4 categories)
+
+### Risks & Blockers
+
+| Risk                         | Impact   | Mitigation                                                      | Owner     |
+| ---------------------------- | -------- | --------------------------------------------------------------- | --------- |
+| Rate limiting accuracy       | HIGH     | Distributed rate limiter (Redis); sliding window algorithm      | @backend  |
+| Webhook delivery reliability | HIGH     | Retry queue; exponential backoff; dead letter queue; monitoring | @backend  |
+| API key security             | CRITICAL | Encrypted storage; key rotation; IP whitelisting; audit logs    | @security |
+| Performance overhead         | MED      | Caching; CDN; query optimization; monitoring                    | @backend  |
 
 ---
 
@@ -610,60 +649,379 @@ export default function WebhookManager() {
 
 ---
 
+## 📐 Non-Functional Requirements
+
+### Performance Budgets
+
+| Metric                        | Target          | Measurement          |
+| ----------------------------- | --------------- | -------------------- |
+| TTFB (staging)                | ≤ 70ms          | Server timing header |
+| Client TTI for `/api-gateway` | ≤ 200ms         | Lighthouse CI        |
+| API key generation            | < 500ms         | API response time    |
+| Webhook delivery              | < 2s            | Webhook monitoring   |
+| Rate limit check              | < 50ms          | Redis latency        |
+| Analytics query               | < 1s            | Query profiler       |
+| UI bundle size                | ≤ 250KB gzipped | Webpack analyzer     |
+
+### Accessibility
+
+- **Compliance**: WCAG 2.2 AA (must), AAA where practical
+- **Keyboard Navigation**: Full keyboard access for all features
+- **Focus Management**: Logical tab order; focus indicators
+- **ARIA**: Dynamic updates announced (key created, webhook tested)
+- **Screen Reader**: All data tables accessible; status changes announced
+- **Axe Target**: 0 serious/critical violations
+
+### Security
+
+| Layer            | Requirement                                                 |
+| ---------------- | ----------------------------------------------------------- |
+| RBAC Scopes      | `api.read`, `api.keys`, `api.admin`                         |
+| Enforcement      | Server-side on all endpoints                                |
+| API Key Storage  | Encrypted at rest (AES-256); hashed for comparison          |
+| Key Rotation     | Automated rotation every 90 days; manual rotation available |
+| IP Whitelisting  | CIDR block support; validation before API calls             |
+| Audit Trail      | Immutable logs for all key/webhook actions                  |
+| Webhook Security | HMAC signature verification (SHA-256)                       |
+
+#### UI Permissions Matrix
+
+| Role      | View | Create Keys | Revoke Keys | Configure Webhooks | Admin |
+| --------- | ---- | ----------- | ----------- | ------------------ | ----- |
+| api.read  | ✅   | ❌          | ❌          | ❌                 | ❌    |
+| api.keys  | ✅   | ✅          | ✅          | ✅                 | ❌    |
+| api.admin | ✅   | ✅          | ✅          | ✅                 | ✅    |
+
+### Reliability & Observability
+
+- **SLO**: 99.9% successful webhook deliveries; <50ms rate limit checks
+- **SLA Dashboards**: Real-time metrics on API usage, rate limiting, webhook success
+- **Events Emitted**: `API.KeyCreated`, `API.KeyRevoked`, `Webhook.Delivered`, `API.RateLimited`
+- **Logging**: Structured logs with API key IDs for all operations
+- **Tracing**: Distributed tracing for webhook deliveries
+
+**Reference**: See `security-policy.json` for full threat model and controls.
+
+---
+
+## 🧬 Data & Domain Invariants
+
+### API Gateway Business Rules
+
+| Rule                        | Enforcement                                               |
+| --------------------------- | --------------------------------------------------------- |
+| **Key Uniqueness**          | Each key must be unique; collision detection              |
+| **Rate Limiting**           | Sliding window algorithm; distributed (Redis)             |
+| **Webhook Retry**           | Exponential backoff (1s, 2s, 4s, 8s, 16s); max 5 attempts |
+| **Key Expiration**          | Automatic expiration; 30-day warning                      |
+| **IP Whitelist Validation** | CIDR block validation; IPv4/IPv6 support                  |
+| **Webhook Signature**       | HMAC SHA-256 signature in X-Signature header              |
+| **Request Logging**         | All API requests logged; 90-day retention                 |
+
+### API Key States
+
+- **Active**: Key is valid and can make API calls
+- **Expired**: Key exceeded expiration date
+- **Revoked**: Key manually revoked by user
+- **Suspended**: Key temporarily disabled (e.g., rate limit abuse)
+
+### Archive Semantics
+
+- **API Keys**: Revoked keys retained 2 years for audit
+- **Webhooks**: Deleted webhooks retained 90 days
+- **Logs**: API request logs retained 90 days
+- **Guard Rails**:
+  - ❌ Deny key deletion (revoke only for audit trail)
+  - ✅ Allow webhook deletion
+
+---
+
+## 🚨 Error Handling & UX States
+
+### All Possible States
+
+| State                 | UI Display                        | User Action       |
+| --------------------- | --------------------------------- | ----------------- |
+| **Empty**             | "No API keys yet"                 | "Create API Key"  |
+| **Loading**           | Skeleton tables                   | N/A               |
+| **Error**             | Error message + retry             | Retry / Support   |
+| **Key Generated**     | Show key once (copy to clipboard) | Copy key          |
+| **Rate Limited**      | Red alert "Rate limit exceeded"   | Wait / Increase   |
+| **Webhook Testing**   | "Testing webhook..."              | Wait              |
+| **Webhook Success**   | Green checkmark "Success"         | View logs         |
+| **Webhook Failed**    | Red X "Failed" + error message    | View logs / Retry |
+| **Permission Denied** | "Access restricted"               | Back              |
+
+### Form Validation
+
+- **API Key Name**: Required, unique, max 100 chars
+- **Webhook URL**: Valid HTTPS URL required
+- **Rate Limit**: Min 10, max 100,000 requests/hour
+- **IP Whitelist**: Valid CIDR notation
+
+### Network Errors
+
+| HTTP Status | UI Message                                  | Action              |
+| ----------- | ------------------------------------------- | ------------------- |
+| 400         | "Invalid configuration. Check your inputs." | Inline field errors |
+| 401         | "Session expired. Please log in again."     | Redirect to login   |
+| 403         | "You don't have permission."                | Hide action         |
+| 404         | "API key not found."                        | Return to list      |
+| 409         | "API key name already exists."              | Suggest alternative |
+| 422         | "Validation failed. Check configuration."   | Inline errors       |
+| 429         | "Rate limit exceeded. Try again later."     | Show wait time      |
+| 500         | "Something went wrong. Try again."          | Retry button        |
+
+---
+
+## 📝 UX Copy Deck
+
+### Page Titles & Headers
+
+| Context       | Copy            | i18n Key                   |
+| ------------- | --------------- | -------------------------- |
+| API Console   | "API Gateway"   | `gateway.console.title`    |
+| API Keys      | "API Keys"      | `gateway.keys.title`       |
+| Rate Limiting | "Rate Limiting" | `gateway.rateLimits.title` |
+| Webhooks      | "Webhooks"      | `gateway.webhooks.title`   |
+| Analytics     | "API Analytics" | `gateway.analytics.title`  |
+
+### State Messages
+
+| State          | Title                     | Message                               | Action Button | i18n Key              |
+| -------------- | ------------------------- | ------------------------------------- | ------------- | --------------------- |
+| Empty          | "No API keys yet"         | "Create your first API key"           | "Create Key"  | `gateway.empty.*`     |
+| Key Generated  | "API Key Created"         | "Copy your key now - shown once only" | "Copy Key"    | `gateway.generated.*` |
+| Rate Limited   | "Rate limit exceeded"     | "Too many requests. Try again later"  | "View Limits" | `gateway.limited.*`   |
+| Webhook Failed | "Webhook delivery failed" | "Check endpoint and retry"            | "Retry"       | `gateway.failed.*`    |
+
+### Success Messages (Toast)
+
+| Action          | Message                        | i18n Key                  | Shortcut |
+| --------------- | ------------------------------ | ------------------------- | -------- |
+| Key Created     | "API key '{name}' created"     | `gateway.create.success`  | `k`      |
+| Key Revoked     | "API key revoked"              | `gateway.revoke.success`  | `r`      |
+| Webhook Created | "Webhook created successfully" | `gateway.webhook.success` | `w`      |
+
+---
+
 ## 🔌 API Integration
+
+### Hooks Required
 
 ```typescript
 // apps/web/hooks/useAPIGateway.ts
-import { useQuery, useMutation } from "@tanstack/react-query";
+"use client";
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@aibos/api-client";
 
-export function useAPIKeys() {
-  return useQuery({
-    queryKey: ["api-keys"],
-    queryFn: () => apiClient.GET("/api/gateway/keys"),
-  });
-}
+export function useAPIKeys(filters = {}) {
+  const queryClient = useQueryClient();
 
-export function useCreateAPIKey() {
-  return useMutation({
+  const { data: apiKeys, isLoading } = useQuery({
+    queryKey: ["gateway-keys", filters],
+    queryFn: () => apiClient.GET("/api/gateway/keys", { query: filters }),
+    staleTime: 2 * 60_000, // 2min
+    retry: 2,
+    select: (response) => response.data,
+  });
+
+  const createKey = useMutation({
     mutationFn: (keyData) =>
-      apiClient.POST("/api/gateway/keys", { body: keyData }),
-    onSuccess: () => queryClient.invalidateQueries(["api-keys"]),
+      apiClient.POST("/api/gateway/keys/create", { body: keyData }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gateway-keys"] });
+    },
   });
+
+  const revokeKey = useMutation({
+    mutationFn: (keyId: string) =>
+      apiClient.POST("/api/gateway/keys/revoke", { body: { keyId } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gateway-keys"] });
+    },
+  });
+
+  const rotateKey = useMutation({
+    mutationFn: (keyId: string) =>
+      apiClient.POST("/api/gateway/keys/rotate", { body: { keyId } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gateway-keys"] });
+    },
+  });
+
+  return {
+    apiKeys: apiKeys || [],
+    isLoading,
+    createKey: createKey.mutate,
+    revokeKey: revokeKey.mutate,
+    rotateKey: rotateKey.mutate,
+  };
 }
 
-export function useWebhooks() {
-  return useQuery({
-    queryKey: ["webhooks"],
-    queryFn: () => apiClient.GET("/api/gateway/webhooks"),
+export function useWebhooks(filters = {}) {
+  const queryClient = useQueryClient();
+
+  const { data: webhooks, isLoading } = useQuery({
+    queryKey: ["gateway-webhooks", filters],
+    queryFn: () => apiClient.GET("/api/gateway/webhooks", { query: filters }),
+    staleTime: 2 * 60_000, // 2min
+    retry: 2,
+    select: (response) => response.data,
   });
+
+  const createWebhook = useMutation({
+    mutationFn: (webhookData) =>
+      apiClient.POST("/api/gateway/webhooks/create", { body: webhookData }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gateway-webhooks"] });
+    },
+  });
+
+  const testWebhook = useMutation({
+    mutationFn: (webhookId: string) =>
+      apiClient.POST("/api/gateway/webhooks/test", { body: { webhookId } }),
+    onError: (error) => {
+      if (error.status === 504) {
+        toast.error("Webhook endpoint timeout");
+      }
+    },
+  });
+
+  return {
+    webhooks: webhooks || [],
+    isLoading,
+    createWebhook: createWebhook.mutate,
+    testWebhook: testWebhook.mutate,
+  };
 }
 
 export function useRateLimiting() {
   return useQuery({
-    queryKey: ["rate-limiting"],
-    queryFn: () => apiClient.GET("/api/gateway/analytics"),
+    queryKey: ["gateway-rate-limits"],
+    queryFn: () => apiClient.GET("/api/gateway/rate-limits"),
+    staleTime: 30_000, // 30s
+    refetchInterval: 60_000, // Refresh every minute
+    retry: 2,
+    select: (response) => response.data,
   });
 }
+
+export function useAPIAnalytics(filters = {}) {
+  return useQuery({
+    queryKey: ["gateway-analytics", filters],
+    queryFn: () => apiClient.GET("/api/gateway/analytics", { query: filters }),
+    staleTime: 5 * 60_000, // 5min
+    retry: 2,
+    select: (response) => response.data,
+  });
+}
+```
+
+### Error Mapping
+
+| API Error         | User Message                                | UI Action            |
+| ----------------- | ------------------------------------------- | -------------------- |
+| 400 (Bad Request) | "Invalid configuration. Check your inputs." | Inline field errors  |
+| 409 (Conflict)    | "API key name already exists."              | Suggest alternative  |
+| 422 (Validation)  | "Validation failed. Check configuration."   | Inline errors        |
+| 403 (Forbidden)   | "You don't have permission."                | Hide action          |
+| 429 (Rate Limit)  | "Rate limit exceeded. Try again later."     | Show wait time       |
+| 500 (Server)      | "Something went wrong. Try again."          | Retry + support link |
+| 504 (Timeout)     | "Webhook endpoint timeout."                 | Check endpoint       |
+
+### Retry & Backoff
+
+- **Queries**: 2 retries with exponential backoff (1s, 2s)
+- **Mutations**: No auto-retry; user-initiated retry only
+- **Webhooks**: Exponential backoff (1s, 2s, 4s, 8s, 16s); max 5 attempts
+
+---
+
+## 🗂️ State, Caching, and Invalidation
+
+### React Query Keys
+
+```typescript
+// Query key structure
+["gateway-keys", { filters }][("gateway-key", keyId)][
+  ("gateway-webhooks", { filters })
+]["gateway-rate-limits"][("gateway-analytics", { filters })];
+```
+
+### Invalidation Rules
+
+| Action         | Invalidates                                  |
+| -------------- | -------------------------------------------- |
+| Create Key     | `["gateway-keys"]`                           |
+| Revoke Key     | `["gateway-keys"]`, `["gateway-key", keyId]` |
+| Rotate Key     | `["gateway-keys"]`, `["gateway-key", keyId]` |
+| Create Webhook | `["gateway-webhooks"]`                       |
+| Test Webhook   | `["gateway-webhooks"]`                       |
+
+### Stale Time
+
+| Query Type  | Stale Time | Reasoning                      |
+| ----------- | ---------- | ------------------------------ |
+| API Keys    | 2min       | Moderate update frequency      |
+| Webhooks    | 2min       | Moderate update frequency      |
+| Rate Limits | 30s        | Real-time monitoring needed    |
+| Analytics   | 5min       | Historical data; less volatile |
+
+### Cache Tags (Next.js)
+
+```typescript
+// Server actions
+revalidateTag("gateway-keys"); // After key mutations
+revalidateTag(`gateway-key-${keyId}`); // Specific key
 ```
 
 ---
 
 ## 📝 Implementation Guide
 
-### Day 1: API Management & Rate Limiting (8 hours)
+### Step 0: Foundation Setup (1 hour)
 
-1. Build API key management console (4 hours)
-2. Implement rate limiting dashboard (2 hours)
-3. Create API analytics (2 hours)
+- Enable feature flags: `flags.m40_gateway = false`
+- Configure Redis for rate limiting
+- Wire analytics provider for event tracking
 
-### Day 2: Webhook Manager (4 hours)
+### Step 1: Build API Key Management (4 hours)
 
-1. Build webhook configuration UI (2 hours)
-2. Implement webhook testing (1 hour)
-3. Create delivery tracking (1 hour)
+- API key creation form
+- API keys table with actions
+- Key rotation functionality
+- Key revocation with confirmation
 
-**Total**: 1.5 days (12 hours)
+### Step 2: Build Rate Limiting Dashboard (3 hours)
+
+- Rate limit statistics cards
+- Rate limit violations table
+- Request rate chart
+- Alert system for violations
+
+### Step 3: Build Webhook Manager (4 hours)
+
+- Webhook creation form
+- Webhooks table with status
+- Webhook testing functionality
+- Delivery logs and retry tracking
+
+### Step 4: Build Analytics Dashboard (2 hours)
+
+- API usage metrics
+- Top endpoints chart
+- API consumers list
+- Request logs table
+
+### Step 5: Add Tests (2 hours)
+
+- Unit tests for key generation, HMAC verification
+- Integration tests for rate limiting, webhook delivery
+- E2E tests for complete user flows
+
+**Total**: 2 days (16 hours)
 
 ---
 
@@ -671,71 +1029,503 @@ export function useRateLimiting() {
 
 ### Unit Tests
 
-- [ ] API key generation and validation
-- [ ] Rate limit calculation
-- [ ] Webhook signature verification
+- [ ] API key generation and uniqueness validation
+- [ ] API key encryption and hashing
+- [ ] Rate limit calculation (sliding window)
+- [ ] Webhook signature verification (HMAC SHA-256)
+- [ ] IP whitelist CIDR validation
+- [ ] Key expiration checking
+- [ ] Webhook retry logic (exponential backoff)
 
 ### Integration Tests
 
 - [ ] API key authentication flow
-- [ ] Rate limiting enforcement
+- [ ] Rate limiting enforcement (Redis)
 - [ ] Webhook delivery and retry
+- [ ] Key rotation process
+- [ ] IP whitelist enforcement
+- [ ] Webhook event subscriptions
 
 ### E2E Tests
 
-- [ ] User can create API key
-- [ ] System enforces rate limits
+- [ ] User can create API key with permissions
+- [ ] User can revoke API key
+- [ ] User can rotate API key
+- [ ] System enforces rate limits correctly
+- [ ] User can configure webhook
+- [ ] User can test webhook endpoint
 - [ ] Webhooks deliver successfully
+- [ ] Webhook retry works on failure
+
+### Accessibility Tests
+
+- [ ] Keyboard navigation works
+- [ ] Screen reader announces key creation/revocation
+- [ ] Focus management correct
+- [ ] Color contrast meets WCAG 2.2 AA
+- [ ] Axe: 0 serious/critical violations
+
+### Contract Tests
+
+- [ ] API calls match OpenAPI spec
+
+### Visual Regression Tests
+
+- [ ] Storybook/Ladle snapshots for all components
+
+### Performance Tests
+
+- [ ] Bundle size < 250KB gzipped
+- [ ] API key generation < 500ms
+- [ ] Rate limit check < 50ms (Redis)
 
 ---
 
-## 📅 Timeline
+## 🧪 Test Data & Fixtures
 
-| Day | Deliverable                      |
-| --- | -------------------------------- |
-| 1   | API management and rate limiting |
-| 2   | Webhook manager                  |
+### Storybook Fixtures
 
-**Total**: 1.5 days (12 hours)
+**Location**: `apps/web/fixtures/gateway.fixtures.ts`
+
+**Datasets**:
+
+- `minimalKeys`: 3 API keys (production, sandbox, development)
+- `standardKeys`: 10 API keys with various permissions
+- `largeDataset`: 100 API keys (for performance testing)
+- `edgeCases`: Special scenarios
+
+**Edge Cases Covered**:
+
+- Expired API keys
+- Revoked API keys
+- Rate-limited keys
+- Webhook delivery failures
+- IP whitelist violations
+
+### E2E Seed Data
+
+**Location**: `tests/seeds/gateway.seed.ts`
+
+**Seed Command**:
+
+```powershell
+pnpm run seed:gateway
+```
+
+**Dataset**:
+
+- 20 API keys across all types
+- 10 webhooks with various event subscriptions
+- Rate limiting data (last 24 hours)
+- Webhook delivery logs
+
+**Cleanup Command**:
+
+```powershell
+pnpm run seed:gateway:clean
+```
+
+### Demo Dataset (Staging/Sandbox)
+
+**Purpose**: Customer demos, UAT, training
+
+**Characteristics**:
+
+- Sample API keys for demo integrations
+- Webhook configurations for common events
+- Realistic rate limiting data
+- API usage analytics
+
+**Regeneration**:
+
+```powershell
+pnpm run demo:reset:gateway
+```
+
+### Test Data Validation
+
+**Automated Checks** (run in CI):
+
+- [ ] All fixtures pass Zod schema validation
+- [ ] No duplicate API key names
+- [ ] Webhook URLs are valid HTTPS
+
+---
+
+## 🔗 API Contract Sync (CI Enforcement)
+
+### Prevent Drift
+
+**CI Step**: Fail build if `packages/contracts/openapi/openapi.json` changes without regenerating `types.gen.ts`.
+
+```yaml
+# .github/workflows/ci.yml
+- name: Check API types sync
+  run: |
+    pnpm run generate:api-types
+    git diff --exit-code packages/api-client/src/types.gen.ts
+```
+
+### Hook Layer Contract
+
+- **Rule**: Hooks **only** use generated types from `@aibos/api-client`
+- **No ad-hoc shapes**: All API calls must match OpenAPI spec
+- **Validation**: TypeScript enforces at compile time
+
+---
+
+## 🖥️ RSC/SSR & App Router Compatibility
+
+### Server/Client Boundaries
+
+- **Pages**: Server components by default
+- **Interactive Parts**: Mark with `"use client"` (forms, tables)
+
+### Data Fetching Strategy
+
+| Scenario        | Strategy                   | Benefit              |
+| --------------- | -------------------------- | -------------------- |
+| API Keys List   | Server-side fetch + stream | Faster TTFB          |
+| Key Creation    | Client-side React Query    | Immediate feedback   |
+| Rate Limiting   | Client-side with polling   | Real-time monitoring |
+| Webhook Testing | Client-side mutation       | Interactive testing  |
+
+---
+
+## 📊 Analytics & Audit Events
+
+| Event             | When                | Properties                                        |
+| ----------------- | ------------------- | ------------------------------------------------- |
+| API.KeyCreated    | Key generated       | `key_id`, `key_name`, `permissions`, `rate_limit` |
+| API.KeyRevoked    | Key revoked         | `key_id`, `reason`, `revoked_by`                  |
+| API.KeyRotated    | Key rotated         | `key_id`, `old_key_prefix`, `new_key_prefix`      |
+| Webhook.Created   | Webhook configured  | `webhook_id`, `url`, `events`                     |
+| Webhook.Delivered | Webhook sent        | `webhook_id`, `event_type`, `status`, `attempts`  |
+| API.RateLimited   | Rate limit exceeded | `key_id`, `endpoint`, `requests_made`, `limit`    |
+
+---
+
+## 🌐 i18n/L10n & Keyboard Shortcuts
+
+### Internationalization
+
+- **i18n Keys**: All labels, errors, toasts from `@/i18n/messages/gateway.json`
+- **Date/Number Formatting**: Use `Intl` APIs with tenant locale
+- **RTL Support**: CSS logical properties
+
+### Keyboard Shortcuts
+
+| Key      | Action       | Scope         |
+| -------- | ------------ | ------------- |
+| `/`      | Focus search | Any page      |
+| `k`      | New API key  | API keys list |
+| `w`      | New webhook  | Webhooks list |
+| `r`      | Revoke key   | Key selected  |
+| `Enter`  | Submit form  | Forms         |
+| `Escape` | Close modal  | Modal         |
+
+---
+
+## 📅 Timeline & Milestones
+
+| Day | Tasks                                                | Deliverable             | Flag Status |
+| --- | ---------------------------------------------------- | ----------------------- | ----------- |
+| 1   | Setup + API Key Management + Rate Limiting Dashboard | Basic API management    | WIP         |
+| 2   | Webhook Manager + Analytics + Tests                  | Production-ready module | GA          |
+
+**Total Effort**: 2 days (16 hours)
+
+**Feature Flags**:
+
+- Day 1: `flags.m40_gateway = false` (testing only)
+- Day 2: `flags.m40_gateway = true` after all tests pass
+
+---
+
+## 🔄 UI Rollout & Rollback
+
+### Rollout Plan
+
+| Environment | Cohort           | Success Criteria                           | Duration | Rollback Trigger |
+| ----------- | ---------------- | ------------------------------------------ | -------- | ---------------- |
+| Dev         | All developers   | Manual QA passes                           | 1 day    | Critical bugs    |
+| Staging     | QA team + PM     | All E2E tests pass, key generation < 500ms | 2 days   | Test failures    |
+| Production  | Beta users (10%) | Error rate < 0.5%, webhook success ≥99%    | 3 days   | SLO breach       |
+| Production  | All users (100%) | Monitor for 1 week, rate limit accuracy    | Ongoing  | Error rate spike |
+
+### Feature Flags
+
+```typescript
+flags: {
+  m40_gateway: false,                // Master toggle
+  m40_gateway_webhooks: false,       // Webhook functionality
+  m40_gateway_rate_limits: false,    // Rate limiting UI
+  m40_gateway_analytics: false,      // Analytics dashboard
+}
+```
+
+### Monitoring Dashboard
+
+**Key Metrics** (real-time):
+
+- API key creation success rate (target: ≥99%)
+- Webhook delivery success rate (target: ≥99%)
+- Rate limit check latency (target: <50ms)
+- API usage trends
+
+**Alert Thresholds**:
+
+- Webhook success rate < 95% for 15min → page on-call
+- Rate limit check latency > 100ms → investigate
+- API key generation failures > 2% → alert
+
+### UI Rollback Procedure
+
+**Immediate Rollback** (< 5 minutes):
+
+1. **Set feature flag**: `flags.m40_gateway = false`
+
+   ```powershell
+   pnpm run flags:set m40_gateway=false
+   ```
+
+2. **Monitor for 15 minutes**:
+
+   - No new API key operations
+   - Users see fallback message
+
+3. **Post-mortem**: Create incident report, add regression test
+
+**Rollback Decision Matrix**:
+
+| Scenario                     | Action             | Approval Required |
+| ---------------------------- | ------------------ | ----------------- |
+| API key encryption failure   | Immediate rollback | No (auto-trigger) |
+| Webhook delivery < 90%       | Investigate first  | Backend lead      |
+| Rate limit check > 200ms     | Immediate rollback | No (auto-trigger) |
+| Key generation failures > 5% | Immediate rollback | No (auto-trigger) |
 
 ---
 
 ## 🔗 Dependencies
 
-### Must Complete First
+### Must Complete Before Starting
 
-- ✅ M1: Core Ledger (API endpoints)
-- ✅ All other modules (API endpoints to expose)
+- ✅ M1: Core Ledger (API endpoints to expose)
+- ✅ All other modules M2-M39 (API endpoints to expose)
+- 🆕 Feature flag service
+- 🆕 Redis (for rate limiting)
+- 🆕 Analytics provider
+- 🆕 Webhook delivery service
 
-### Enables These Modules
+### Blocks These Modules
 
 - Third-party integrations across all modules
+- Partner ecosystem development
 
 ---
 
 ## 🎯 Success Criteria
 
-### Must Have
+### Must Have (Measurable)
 
 - [ ] API key management with granular permissions
-- [ ] Rate limiting with configurable limits
+- [ ] Rate limiting with configurable limits (<50ms checks)
 - [ ] Webhook management with event subscriptions
+- [ ] API key generation < 500ms
+- [ ] Webhook delivery success ≥99%
+- [ ] Axe: 0 serious/critical violations
 
 ### Should Have
 
-- [ ] API usage analytics
-- [ ] Webhook retry logic
+- [ ] API usage analytics dashboard
+- [ ] Webhook retry logic (5 attempts)
 - [ ] Developer documentation
+- [ ] IP whitelisting (CIDR support)
+- [ ] Key rotation functionality
 
 ### Nice to Have
 
 - [ ] GraphQL gateway
 - [ ] API versioning management
-- [ ] Developer portal with interactive docs
+- [ ] Interactive developer portal
+- [ ] Webhook signature verification testing tool
+
+---
+
+## 📚 References
+
+### API Documentation
+
+- OpenAPI spec: `packages/contracts/openapi/openapi.json`
+- Type definitions: `packages/api-client/src/types.gen.ts`
+
+### Design System
+
+- Component library: `aibos-ui` package
+- Design tokens: Import from `aibos-ui/tokens`
+- Style guide: Follow dark-first theme
+
+### Best Practices
+
+- AWS API Gateway patterns
+- Stripe API key management
+- Twilio webhook delivery
+- Redis rate limiting patterns
+
+### SSOT References
+
+- **Security**: `security-policy.json`
+- **Compliance**: `COMPLIANCE.md`
+- **Migrations**: `DATABASE_WORKFLOW.md`
+- **Architecture**: `ARCHITECTURE.md`
+- **Cost/Scaling**: `PERFORMANCE-BUDGETS.md`
+
+---
+
+## 🚨 Risk Mitigation
+
+### Risk #1: API Key Security
+
+**Mitigation**: Encrypted storage (AES-256); hashed for comparison; automated rotation every 90 days; IP whitelisting (CIDR); audit trail; revocation capability; no deletion (revoke only)
+
+### Risk #2: Rate Limiting Accuracy
+
+**Mitigation**: Distributed rate limiter (Redis); sliding window algorithm; cluster-aware; monitoring; graceful degradation; configurable limits; burst allowance
+
+### Risk #3: Webhook Delivery Reliability
+
+**Mitigation**: Retry queue with exponential backoff (1s, 2s, 4s, 8s, 16s); max 5 attempts; dead letter queue; delivery monitoring; HMAC signature verification; timeout limits (2s)
+
+### Risk #4: Performance Overhead
+
+**Mitigation**: Caching (API key metadata); Redis for rate limiting; async webhook delivery; query optimization; CDN for static assets; monitoring dashboards
+
+---
+
+## 🎉 Definition of Done
+
+### Functional Requirements ✅
+
+- [ ] All UI pages created and functional
+- [ ] API key management with granular permissions works
+- [ ] Rate limiting with configurable limits
+- [ ] Webhook management with event subscriptions
+- [ ] API usage analytics dashboard
+- [ ] Key rotation and revocation
+- [ ] IP whitelisting (CIDR support)
+- [ ] Webhook testing functionality
+- [ ] All error states handled
+- [ ] Copy deck implemented
+
+### Quality Gates 🎯
+
+**Enforced in CI** - Build fails if any gate not met
+
+#### Code Quality
+
+- [ ] TypeScript: 0 errors, 0 warnings
+- [ ] ESLint: 0 errors, 0 warnings
+- [ ] Prettier: All files formatted
+- [ ] No console.log or debugger statements
+
+#### Test Coverage
+
+- [ ] Unit tests: ≥90% line coverage, ≥95% for security logic
+- [ ] Integration tests: All scenarios covered (auth, rate limiting, webhooks)
+- [ ] E2E tests: All user flows covered
+- [ ] Contract tests: API calls match OpenAPI spec
+- [ ] A11y tests: Axe 0 serious, 0 critical violations
+- [ ] Visual regression: 0 unintended changes
+
+#### Security
+
+- [ ] **CRITICAL**: API keys encrypted at rest (AES-256)
+- [ ] **CRITICAL**: HMAC signature verification (SHA-256) for webhooks
+- [ ] **CRITICAL**: Rate limiting accuracy ≥99.9% (validated with Redis)
+- [ ] IP whitelist CIDR validation working
+- [ ] Audit trail complete for all operations
+- [ ] No API keys in logs or errors
+
+#### Performance Budgets
+
+- [ ] Bundle size: ≤250KB gzipped
+- [ ] TTFB: ≤70ms on staging
+- [ ] API key generation: <500ms
+- [ ] Rate limit check: <50ms (Redis)
+- [ ] Webhook delivery: <2s
+
+#### Accessibility
+
+- [ ] WCAG 2.2 AA: 100% compliance (required)
+- [ ] WCAG 2.2 AAA: Best effort (target 95%)
+- [ ] Keyboard navigation: All features operable
+- [ ] Screen reader: All content announced correctly
+- [ ] Axe DevTools: 0 serious, 0 critical, ≤5 minor issues
+
+#### Lighthouse Scores
+
+- [ ] Performance: ≥90
+- [ ] Accessibility: ≥95
+- [ ] Best Practices: ≥90
+- [ ] SEO: ≥90
+
+### Observability 📊
+
+- [ ] SLO dashboards created and populated
+- [ ] All analytics events firing correctly
+- [ ] Error tracking integrated
+- [ ] Performance monitoring active
+- [ ] Rate limiting monitoring dashboards
+- [ ] Webhook delivery monitoring
+- [ ] Alerts configured (key failures, webhook failures, rate limit breaches)
+
+### Security & Compliance 🔒
+
+- [ ] Permissions matrix implemented
+- [ ] RBAC enforced (server + client)
+- [ ] API keys encrypted at rest
+- [ ] Key rotation automated (90 days)
+- [ ] IP whitelisting enforced
+- [ ] Audit trail immutable
+- [ ] Security review completed
+
+### Documentation 📚
+
+- [ ] Code reviewed and approved (2 approvers)
+- [ ] PR description complete
+- [ ] Storybook stories created
+- [ ] API contracts synchronized
+- [ ] i18n keys documented
+- [ ] Developer documentation (API key usage, webhook setup)
+- [ ] UAT passed (PM/QA sign-off)
+
+### Deployment 🚀
+
+- [ ] Deployed to dev environment
+- [ ] Deployed to staging environment
+- [ ] Feature flags configured
+- [ ] Smoke tests passed on staging
+- [ ] Rate limiting tested (≥99.9% accuracy)
+- [ ] Webhook delivery tested (≥99% success)
+- [ ] Deployed to production (flags off)
+- [ ] Rollback procedure tested
+- [ ] Gradual rollout plan ready
+
+### Sign-offs 📝
+
+- [ ] **Engineering**: Code review approved
+- [ ] **QA**: All test plans executed and passed
+- [ ] **Design**: UI matches specs, brand compliance
+- [ ] **PM**: Feature complete, acceptance criteria met
+- [ ] **Security**: Security review passed (API key encryption, HMAC verification)
+- [ ] **Accessibility**: A11y audit passed
+- [ ] **Operations**: Redis configured, monitoring dashboards ready
 
 ---
 
 **🎉 CONGRATULATIONS! You've completed ALL 40 modules! 🎉**
 
-**Previous**: M39 - Analytics & BI  
+**This is the FINAL MODULE - M40 Complete!**
+
 **Next**: Implementation Complete - Start Building! 🚀
