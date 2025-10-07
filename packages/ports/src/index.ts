@@ -59,5 +59,8 @@ export interface LedgerRepo {
   >;
 }
 
+// Export Accounts Port (M01: Core Ledger)
+export * from './accounts-port.js';
+
 // Make sure they're exported as types for consumers:
 export type { LedgerRepo as LedgerRepoType, TxManager as TxManagerType };

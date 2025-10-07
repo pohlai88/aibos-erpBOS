@@ -1,6 +1,7 @@
 // packages/contracts/src/index.ts
 export * from './reports/cash';
 export * from './common/result'; // ok/err
+export * from './accounts'; // M01: Core Ledger - Chart of Accounts
 export * from './alloc';
 export * from './tax_return';
 export * from './ar';

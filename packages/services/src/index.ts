@@ -1,4 +1,5 @@
 // Services with port-based architecture
+export { AccountsServiceImpl } from './accounts-service'; // M01: Core Ledger
 export {
   LedgerService,
   genId,

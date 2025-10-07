@@ -25,6 +25,9 @@ export function clearCache(): void {
   cache = null;
 }
 
+// Export Accounts policy (M01: Core Ledger)
+export * from './accounts-policies';
+
 // Export FX policy
 export * from './fx.js';
 
