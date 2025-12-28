@@ -465,7 +465,7 @@ STRIPE_SECRET_KEY=sk_test_xxx
 EOF
 
 # Run workflow locally
-act -s-file .secrets
+act --secret-file .secrets
 ```
 
 ---
