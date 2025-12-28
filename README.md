@@ -132,6 +132,14 @@ The system uses the following environment variables:
 - `DATABASE_URL`: PostgreSQL connection string
 - `NODE_ENV`: Environment mode (development/production)
 
+**📘 For complete GitHub Secrets setup and management guide, see [GITHUB_SECRETS_SETUP.md](./GITHUB_SECRETS_SETUP.md)**
+
+This includes:
+- Complete list of required secrets
+- Step-by-step setup instructions
+- GitHub Actions integration
+- Best practices and security guidelines
+
 ## 📋 Package Details
 
 ### Apps
@@ -398,6 +406,9 @@ NODE_ENV=production pnpm build
 - **Type Definitions**: Full TypeScript coverage
 - **Code Comments**: Inline documentation
 - **Architecture Decisions**: Documented in `/docs`
+- **[GitHub Secrets Setup Guide](./GITHUB_SECRETS_SETUP.md)**: Complete guide for managing secrets and environment variables
+- **[Database Workflow Guide](./DATABASE_WORKFLOW.md)**: Database setup and management
+- **[Database Commands Reference](./DATABASE_COMMANDS.md)**: Quick reference for database operations
 
 ## 🆘 Troubleshooting
 
