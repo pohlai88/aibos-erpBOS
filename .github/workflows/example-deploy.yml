@@ -14,6 +14,8 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
@@ -74,6 +76,8 @@ jobs:
     needs: build-and-test
     if: github.ref == 'refs/heads/staging'
     environment: staging # Use staging environment secrets
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
@@ -100,6 +104,8 @@ jobs:
     needs: build-and-test
     if: github.ref == 'refs/heads/main'
     environment: production # Use production environment secrets (requires approval)
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
@@ -152,6 +158,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-and-test
     if: github.event_name == 'workflow_dispatch' # Only run on manual trigger
+    permissions:
+      contents: read
+      packages: write # Needed for pushing Docker images
     
     steps:
       - name: Checkout code
